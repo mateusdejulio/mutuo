@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mútuo | Contato</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../imagens/mutuoLogo.png">
+
+    <style>
+        :root {
+            --verde-escuro: #3a5a40;
+            --verde-medio: #588157;
+            --verde-claro: #b7ce8f;
+            --bege: #E1DCD0;
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Remove a rolagem */
+            font-family: 'Quicksand', sans-serif;
+            background-color: #fff;
+        }
+
+      nav {
+          position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+          background-color: #588157;
+          height: 72px;
+          display: flex; align-items: center;
+          padding: 0 2rem;
+          box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+          font-family: 'Quicksand', sans-serif;
+        }
+
+        .nav-brand {
+          display: flex; align-items: center; gap: 10px;
+          text-decoration: none;
+          font-family: 'Quicksand', sans-serif;
+          font-size: 1.55rem;
+          color: #E1DCD0;
+          letter-spacing: 0.4px;
+          margin-right: 2rem;
+          flex-shrink: 0;
+        }
+        .nav-brand img { width: 38px; height: 38px; border-radius: 8px; }
+
+        .nav-links {
+          display: flex; align-items: center; gap: 2px;
+          list-style: none; flex: 1;
+          margin: 0; padding: 0;
+        }
+        .nav-links a {
+          text-decoration: none;
+          color: rgba(225,220,208,0.82);
+          font-size: 0.875rem; font-weight: 500;
+          padding: 0.45rem 0.9rem;
+          border-radius: 8px;
+          transition: color 0.18s, background 0.18s;
+          white-space: nowrap;
+        }
+        .nav-links a:hover, .nav-links a.active {
+          color: #E1DCD0;
+          background: rgba(255,255,255,0.12);
+        }
+
+        .nav-dropdown { position: relative; }
+        .nav-dropdown > a { display: flex; align-items: center; gap: 5px; }
+        .dropdown-panel {
+          display: none;
+          position: absolute; top: 100%; left: 0;
+          padding-top: 10px;
+          min-width: 215px;
+        }
+        .dropdown-panel-inner {
+          background: #3a5a40;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+          border: 1px solid rgba(225,220,208,0.1);
+        }
+        .nav-dropdown:hover .dropdown-panel { display: block; }
+        .dropdown-panel a {
+          display: flex; align-items: center; gap: 9px;
+          color: rgba(225,220,208,0.8);
+          padding: 0.65rem 1.1rem;
+          font-size: 0.84rem;
+          text-decoration: none;
+          transition: background 0.15s, color 0.15s;
+        }
+        .dropdown-panel a:hover { background: rgba(255,255,255,0.08); color: #E1DCD0; }
+        .dropdown-panel a.danger { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
+        .nav-right { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
+        .nav-bell {
+          position: relative; cursor: pointer;
+          color: #E1DCD0; font-size: 1.25rem;
+          opacity: 0.8; transition: opacity 0.2s;
+          text-decoration: none;
+        }
+        .nav-bell:hover { opacity: 1; }
+        .bell-badge {
+          position: absolute; top: -5px; right: -6px;
+          background: #E1DCD0; color: #3a5a40;
+          font-size: 0.6rem; font-weight: 700;
+          width: 16px; height: 16px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          border: 2px solid #588157;
+        }
+
+        .nav-profile {
+          display: flex; align-items: center; gap: 9px;
+          text-decoration: none;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(225,220,208,0.18);
+          border-radius: 40px;
+          padding: 5px 14px 5px 5px;
+          transition: background 0.2s;
+        }
+        .nav-profile:hover { background: rgba(255,255,255,0.16); }
+        .nav-profile img {
+          width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+          border: 2px solid rgba(225,220,208,0.4);
+        }
+        .nav-profile span {
+          color: #E1DCD0; font-size: 0.84rem; font-weight: 500;
+          white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        @media (max-width: 768px) {
+          .nav-links { display: none; }
+          .nav-profile span { display: none; }
+        }
+        /* ESTRUTURA SEM ROLAGEM */
+        .main-wrapper {
+            height: calc(100vh - 72px); /* Altura total menos a navbar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin-top: 60px;
+        }
+
+        .content-box {
+            width: 100%;
+            max-width: 1000px;
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        /* Coluna Contatos */
+        .info-side {
+            background-color: var(--verde-medio);
+            color: white;
+            padding: 40px;
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .info-side h2 { font-weight: 700; margin-bottom: 15px; font-size: 1.8rem; }
+        .contato-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.15);
+            padding: 12px 18px;
+            border-radius: 15px;
+        }
+        .contato-item i { font-size: 1.4rem; color: var(--verde-claro); }
+
+        /* Coluna Formulário */
+        .form-side {
+            padding: 40px;
+            width: 60%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .form-side h4 { color: var(--verde-escuro); font-weight: 700; margin-bottom: 20px; }
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #f0f0f0;
+            padding: 10px 15px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        .form-control:focus { border-color: var(--verde-claro); box-shadow: none; }
+        .btn-enviar {
+            background-color: var(--verde-medio);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            width: 100%;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-enviar:hover { background-color: var(--verde-escuro); transform: translateY(-2px); }
+
+        /* Responsividade básica */
+        @media (max-width: 850px) {
+            body { overflow-y: auto; }
+            .content-box { flex-direction: column; }
+            .info-side, .form-side { width: 100%; padding: 25px; }
+            .main-wrapper { height: auto; margin-top: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a class="nav-brand" href="#">
+      <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+      Mútuo
+    </a>
+    <ul class="nav-links">
+      <li><a href="homeMutuo.html">Início</a></li>
+      <li><a href="serviçosMutuo.html">Serviços</a></li>
+      <li><a href="OngsMutuo.html">ONGs</a></li>
+      <li><a href="chatMutuo.html" >Chat</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+        <div class="dropdown-panel">
+          <div class="dropdown-panel-inner">
+            <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+            <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+            <a href="contatoMutuo.html" ><i class="bi bi-envelope"></i> Contato</a>
+            <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+            <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+            <a href="../login.html" class="danger"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-right">
+      <a href="notificacoesMutuo.html" class="nav-bell">
+        <i class="bi bi-bell-fill"></i>
+        <span class="bell-badge">3</span>
+      </a>
+      <a href="perfilMutuo.html" class="nav-profile">
+        <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
+        <span>Isabela Monteiro</span>
+      </a>
+    </div>
+  </nav>
+<div class="main-wrapper">
+    <div class="content-box">
+        <div class="info-side">
+            <h2>Contato</h2>
+            <p class="small opacity-75 mb-4">Estamos aqui para tirar suas dúvidas e ouvir sugestões.</p>
+            
+            <div class="contato-item">
+                <i class="bi bi-envelope-at-fill"></i>
+                <span>mutuo@gmail.com</span>
+            </div>
+
+            <div class="contato-item">
+                <i class="bi bi-whatsapp"></i>
+                <span>(19) 99999-9999</span>
+            </div>
+
+            <div class="mt-4 pt-3 border-top border-secondary">
+                <p class="mb-1 small fw-bold"><i class="bi bi-clock me-2"></i>Horário de atendimento:</p>
+                <p class="small mb-0">Segunda a Sexta: 08h às 17h</p>
+            </div>
+        </div>
+
+        <div class="form-side">
+            <h4>Envie sua mensagem</h4>
+            <form>
+                <div class="mb-1">
+                    <label class="form-label small fw-bold">Nome completo</label>
+                    <input type="text" class="form-control" placeholder="Digite seu nome">
+                </div>
+                <div class="mb-1">
+                    <label class="form-label small fw-bold">E-mail corporativo</label>
+                    <input type="email" class="form-control" placeholder="exemplo@gmail.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Mensagem</label>
+                    <textarea class="form-control" rows="3" placeholder="Como podemos ajudar?"></textarea>
+                </div>
+                <button type="submit" class="btn-enviar shadow-sm">
+                    <i class="bi bi-send-fill me-2"></i> Enviar Agora
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mútuo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="imagens/mutuoLogo.png">
+<style>
+     body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #fff;
+      
+    }
+    .navbar {
+      background-color: #588157;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 0.6rem 1rem;
+    }
+    .navbar-brand {
+      color: #3a5a40;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+    .navbar-brand:hover {
+    color: #3a5a40;  
+    text-decoration: none;
+}
+
+    .navbar-nav .nav-link {
+      color: #E1DCD0;
+      font-weight: 500;
+      margin-right: 15px;
+      transition: 0.2s;
+    }
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+      color: #3A5A40;
+    }
+    .icon-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .icon-group i {
+      font-size: 1.5rem;
+      color: #E1DCD0;
+      position: relative;
+      cursor: pointer;
+    }
+    .icon-group .badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background-color: #3a5a40;
+      color: #E1DCD0;
+      font-size: 0.7rem;
+      border-radius: 50%;
+      padding: 2px 5px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #E1DCD0;
+      font-weight: 600;
+    }
+    .btn-profile {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.btn-profile img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.btn-profile:hover img {
+  transform: scale(1.05);
+}
+
+ .container-perfil {
+            max-width: 5000px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+
+     
+        .capa-perfil {
+            height: 350px;
+            overflow: hidden;
+            position: relative;
+            margin-top:68px
+        }
+
+        .capa-imagem {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+  
+        .info-header {
+            
+            padding: 20px 15px 0 15px;
+            position: relative;
+        }
+
+        .avatar-ong {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            top: -40px; 
+            left: 15px;
+            border: 4px solid #E1DCD0;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .nome-ong {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--cor-texto-principal);
+            margin-top: 45px; /* Espaço para o avatar */
+            margin-bottom: 5px;
+        }
+        
+        .slogan-ong {
+            font-size: 1.1em;
+            color: var(--cor-texto-principal);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        /* Tags de Categorias */
+        .tag-categoria {
+            background-color: #B7CE8F;
+            color: #3A5A40;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        /* Lista de Contatos */
+        .lista-contato {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .lista-contato li {
+            font-size: 0.9em;
+            color: var(--cor-texto-principal);
+            margin-bottom: 8px;
+        }
+
+        .lista-contato i {
+            color: var(--cor-verde-escura);
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+
+        
+        .barra-abas {
+            display: flex;
+            border-bottom: 1px solid #ccc;
+            padding: 0 15px;
+            background-color: white;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .btn-aba {
+            background-color: transparent;
+            color: var(--cor-texto-secundario);
+            border: none;
+            padding: 10px 15px;
+            font-weight: 700;
+            font-size: 1.05em;
+            border-bottom: 3px solid transparent;
+            margin-right: 20px;
+            transition: border-bottom 0.3s, color 0.3s;
+        }
+
+        .btn-aba.active {
+            color: var(--cor-verde-escura);
+            border-bottom-color: var(--cor-verde-escura);
+        }
+
+ 
+        .conteudo-aba {
+            padding: 20px 15px;
+            background-color: white;
+        }
+
+        .conteudo-aba h4 {
+            font-weight: 700;
+            
+            margin-bottom: 15px;
+        }
+
+        
+        .conteudo-aba p {
+            font-size: 0.95em;
+            color: var(--cor-texto-principal);
+            line-height: 1.6;
+        }
+
+        
+        .card-atividade {
+    width: 600px;
+    background: #E1DCD0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    margin: 20px auto;
+    font-family: Arial;
+}
+
+.card-img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 15px;
+}
+
+.card-content h3 {
+    margin: 5px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.descricao {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.ong-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.ong-img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.ong-nome {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.rating {
+    font-size: 13px;
+    color: #555;
+}
+
+.info-extra {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.btn-saiba-mais {
+    width: 100%;
+    background: #588157;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-saiba-mais:hover {
+    background: #476a46;
+}
+
+
+
+        
+</style>
+
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container-fluid">
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="imagens/mutuoLogo.png" alt="Logo" width="40" height="40" class="me-2">
+      Mútuo
+    </a>
+
+    <!-- Botão hamburger para mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Menu e links -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="homeMutuo.html">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="serviçosMutuo.html">Serviços</a></li>
+        <li class="nav-item"><a class="nav-link" href="OngsMutuo.html">ONGs</a></li>
+        <li class="nav-item"><a class="nav-link" href="chatMutuo.html">Chat</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Mais funcionalidades
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="planosMutuo.html">Conheça nossos planos</a></li>
+            <li><a class="dropdown-item" href="certificadosMutuo.html">Certificados</a></li>
+            <li><a class="dropdown-item" href="contatoMutuo.html">Contato</a></li>
+            <li><a class="dropdown-item" href="comoUsarMutuo.html">Como usar a plataforma</a></li>
+            <li><a class="dropdown-item" href="quemSomosMutuo.html">Quem somos</a></li>
+            <li><a class="dropdown-item" href="login.html">Sair da conta <i class="bi bi-box-arrow-right" style="font-size: 18px;"></i></a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Ícones e perfil à direita -->
+      <div class="d-flex align-items-center">
+        <div class="icon-group me-3">
+          <a href="notificacoesMutuo.html"><i class="bi bi-bell">
+            <span class="badge">3</span>
+          </i></a>
+        </div>
+       <div class="profile">
+   <a href="perfilMutuo.html" class="btn-profile">
+    <img src="imagens/perfil3.png" alt="perfil">
+  </a>
+  <span>Isabela Monteiro</span>
+</div>
+      </div>
+    </div>
+  </div>
+</nav>
+ <div class="container-perfil">
+    
+    <div class="capa-perfil">
+        <img src="imagens/fotoOng.png" class="capa-imagem" alt="Cães resgatados em abrigo">
+    </div>
+
+    <div class="info-header">
+        <img src="imagens/ongPerfil1.png" class="avatar-ong" alt="Logo Instituto Cães Amigos">
+        
+        <h2 class="nome-ong">Instituto cães amigos</h2>
+        <p class="slogan-ong">Transformando vidas através do cuidado e ação social</p>
+
+        <span class="tag-categoria">Animais</span>
+        <span class="tag-categoria">Ambiental</span>
+
+        <ul class="lista-contato">
+            <li><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</li>
+            <li><i class="bi bi-link"></i> institutocaesamigos@org.br</li>
+            <li><i class="bi bi-envelope-fill"></i> contato@caesamigos.com</li>
+            <li><i class="bi bi-telephone-fill"></i> +55 19 99999999</li>
+            <li><i class="bi bi-currency-dollar"></i>Pix: 1234567890</li>
+        </ul>
+    </div>
+
+    <div class="barra-abas">
+        <button class="btn-aba active" data-target="sobre">Sobre</button>
+        <button class="btn-aba" data-target="servicos">Serviços</button>
+    </div>
+
+    <div id="sobre" class="conteudo-aba conteudo-perfil">
+        <h4>Nossa história</h4>
+        <p>
+            Fundado em 2017 por um grupo de protetores e voluntários apaixonados pelos animais, o Instituto Cães Amigos nasceu do desejo de garantir uma vida mais digna, segura e amorosa para cães em situação de abandono ou maus-tratos. Começamos com poucos resgates em um abrigo improvisado, oferecendo cuidados básicos, alimentação e muito carinho.
+        </p>
+        <p>
+            Hoje, acolhemos e reabilitamos centenas de cães todos os anos, promovendo adoções responsáveis, campanhas de conscientização e ações de castração e educação animal. Nossa caminhada é guiada pela compaixão, pela responsabilidade e pela certeza de que cada vida importa e merece uma segunda chance.
+        </p>
+    </div>
+
+    <div id="servicos" class="conteudo-aba conteudo-perfil" style="display: none;">
+        <h4>Serviços disponíveis</h4>
+        
+       <div class="card-atividade">
+    <img src="imagens/passeioCachorro.png" class="card-img" alt="Foto da atividade">
+
+    <div class="card-content">
+        <h3>Passeie com os cachorros</h3>
+        <p class="descricao">Ande com os nossos cachorros...</p>
+
+        <div class="ong-info">
+            <img src="imagens/ongPerfil1.png" class="ong-img">
+            <div>
+                <span class="ong-nome">Instituto cães amigos</span>
+                <div class="rating">
+                     <span>5.0 (1.024)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-extra">
+            <div class="info-item">
+                <i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ
+            </div>
+            <div class="info-item">
+                <i class="bi bi-clock-history"></i> 1h
+            </div>
+        </div>
+
+        <button class="btn-saiba-mais">Saiba mais</button>
+    </div>
+</div>
+
+      <div class="card-atividade">
+    <img src="imagens/passeioCachorro.png" class="card-img" alt="Foto da atividade">
+
+    <div class="card-content">
+        <h3>Passeie com os cachorros</h3>
+        <p class="descricao">Ande com os nossos cachorros...</p>
+
+        <div class="ong-info">
+            <img src="imagens/ongPerfil1.png" class="ong-img">
+            <div>
+                <span class="ong-nome">Instituto cães amigos</span>
+                <div class="rating">
+                     <span>5.0 (1.024)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-extra">
+            <div class="info-item">
+                <i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ
+            </div>
+            <div class="info-item">
+                <i class="bi bi-clock-history"></i> 1h
+            </div>
+        </div>
+
+        <button class="btn-saiba-mais">Saiba mais</button>
+    </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+<script>
+    // Lógica JavaScript para mudar o conteúdo entre as abas
+    document.addEventListener('DOMContentLoaded', () => {
+        const buttons = document.querySelectorAll('.btn-aba');
+        const contents = document.querySelectorAll('.conteudo-perfil');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+
+                // 1. Remove a classe 'active' de todos os botões
+                buttons.forEach(btn => btn.classList.remove('active'));
+                
+                // 2. Adiciona a classe 'active' ao botão clicado
+                button.classList.add('active');
+
+                // 3. Esconde todo o conteúdo
+                contents.forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                // 4. Mostra apenas o conteúdo alvo
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) {
+                    targetContent.style.display = 'block';
+                }
+            });
+        });
+    });
+</script> 
+</body>
+</html>

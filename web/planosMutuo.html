@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mútuo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="imagens/mutuoLogo.png">
+<style>
+     body {
+    font-family: 'Quicksand', sans-serif;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+      
+    }
+    .navbar {
+      background-color: #588157;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 0.6rem 1rem;
+       margin-bottom: 50px;
+    }
+    .navbar-brand {
+      color: #3a5a40;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+    .navbar-brand:hover {
+    color: #3a5a40;  
+    text-decoration: none;
+}
+
+    .navbar-nav .nav-link {
+      color: #E1DCD0;
+      font-weight: 500;
+      margin-right: 15px;
+      transition: 0.2s;
+    }
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+      color: #3A5A40;
+    }
+    .icon-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .icon-group i {
+      font-size: 1.5rem;
+      color: #E1DCD0;
+      position: relative;
+      cursor: pointer;
+    }
+    .icon-group .badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background-color: #3a5a40;
+      color: #E1DCD0;
+      font-size: 0.7rem;
+      border-radius: 50%;
+      padding: 2px 5px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #E1DCD0;
+      font-weight: 600;
+    }
+    .btn-profile {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.btn-profile img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.btn-profile:hover img {
+  transform: scale(1.05);
+}
+.dropdown-item.active {
+  background-color: #3a5a40;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.dropdown-item.active:hover {
+  background-color: #2e4a34;
+  
+}
+.card{
+    margin-top: 100px;
+    border-color: #B7CE8F;
+    background-color: #E1DCD0;
+    border-radius: 30px;
+    height: 600px;
+    justify-items: auto;
+    margin-left:30px;
+    margin-right: 30px;
+     transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+ .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+.card-icon{
+   color: #3A5A40;
+   font-size: 80px;
+}
+.card-title{
+    font-size: 35px;
+    font-weight: 100;
+}
+.card-text i.bi-check-circle-fill {
+    color: #B7CE8F;
+    margin-right: 8px;
+  }
+.card-text {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; 
+  gap: 8px; 
+  text-align: left;
+  margin-top: 20px;
+  margin-left: 10px;
+}
+
+.card-text i {
+  color: #3a5a40; /* cor verde do ícone */
+  font-size: 1.2rem;
+}
+.btn-inscrever {
+    background-color: #3a5a40;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 500;
+    margin-top: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .btn-inscrever:hover {
+    background-color: #3a5a40;
+    transform: translateY(-3px);
+  }
+
+  .btn-inscrever:active {
+    transform: scale(0.98);
+  }
+
+</style>
+</head>
+<body>
+     <nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container-fluid">
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="imagens/mutuoLogo.png" alt="Logo" width="40" height="40" class="me-2">
+      Mútuo
+    </a>
+
+    <!-- Botão hamburger para mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Menu e links -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="homeMutuo.html">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="serviçosMutuo.html">Serviços</a></li>
+        <li class="nav-item"><a class="nav-link" href="OngsMutuo.html">ONGs</a></li>
+        <li class="nav-item"><a class="nav-link" href="chatMutuo.html">Chat</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Mais funcionalidades
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item active" href="#">Conheça nossos planos</a></li>
+            <li><a class="dropdown-item" href="certificadosMutuo.html">Certificados</a></li>
+            <li><a class="dropdown-item" href="contatoMutuo.html">Contato</a></li>
+            <li><a class="dropdown-item" href="comoUsarMutuo.html">Como usar a plataforma</a></li>
+            <li><a class="dropdown-item" href="quemSomosMutuo.html">Quem somos</a></li>
+            <li><a class="dropdown-item" href="login.html">Sair da conta <i class="bi bi-box-arrow-right" style="font-size: 18px;"></i></a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Ícones e perfil à direita -->
+      <div class="d-flex align-items-center">
+        <div class="icon-group me-3">
+         <a href="notificacoesMutuo.html"><i class="bi bi-bell">
+            <span class="badge">3</span>
+          </i></a>
+        </div>
+        <div class="profile">
+  <a href="perfilMutuo.html" class="btn-profile">
+    <img src="imagens/perfil3.png" alt="perfil">
+  </a>
+  <span>Isabela Monteiro</span>
+</div>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="container text-center d-flex justify-content-center gap-5">
+  <div class="row">
+    <div class="col">
+      <div class="card" style="width: 25rem;">
+  <div class="card-body">
+    <p class="card-icon"><i class="bi bi-stars"></i></p>
+    <h5 class="card-title">Plano gratuito</h5>
+    <h6 class="card-subtitle mb-2 text-body-secondary">Para começar sua jornada</h6>
+    <p class="card-text"><i class="bi bi-check-circle-fill"></i>  Até 3 serviços</p>
+     <p class="card-text"><i class="bi bi-check-circle-fill"></i>  Suporte básico</p>
+      <p class="card-text"><i class="bi bi-check-circle-fill"></i>  Visualização limitada dos serviços oferecidos</p>
+    
+  </div>
+</div>
+    </div>
+    <div class="col">
+      <div class="card" style="width: 25rem;">
+  <div class="card-body">
+    <p class="card-icon"><i class="bi bi-lightning-charge-fill"></i></p>
+    <h5 class="card-title">Plano premium</h5>
+    <h6 class="card-subtitle mb-2 text-body-secondary">Melhore seus resultados</h6>
+    <p class="card-text"><i class="bi bi-check-circle-fill"></i>  Serviços ilimitados</p>
+    <p class="card-text"><i class="bi bi-check-circle-fill"></i>  Maior visibilidade nos resultados</p>
+    <p class="card-text"><i class="bi bi-check-circle-fill"></i>   Prioridade nas solicitações de serviços de ONGs</p>
+    <p class="card-text"><i class="bi bi-check-circle-fill"></i>   Certificados personalizados com selo Premium</p>
+    <p class="card-text"><i class="bi bi-check-circle-fill"></i>   Suporte prioritário</p>
+    <button class="btn-inscrever">Assinar agora</button>
+  </div>
+</div>
+    </div>
+    
+  </div>
+</div>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>   
+</body>
+</html>
