@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Isabela Monteiro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --green-main:   #588157;
+      --green-dark:   #3a5a40;
+      --green-hover:  #4a6e48;
+      --cream:        #E1DCD0;
+      --cream-light:  #f0ede6;
+      --white:        #ffffff;
+      --text-dark:    #1e2e1f;
+      --text-mid:     #3a5a40;
+      --text-muted:   #7a8c78;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: var(--white);
+      color: var(--text-dark);
+      padding-top: 72px;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background-color: var(--green-main);
+      height: 72px;
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1.55rem;
+      color: var(--cream);
+      letter-spacing: 0.4px;
+      margin-right: 2rem;
+      flex-shrink: 0;
+    }
+    .nav-brand img { width: 38px; height: 38px; border-radius: 8px; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      transition: color 0.18s, background 0.18s;
+      white-space: nowrap;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--cream);
+      background: rgba(255,255,255,0.12);
+    }
+
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a { display: flex; align-items: center; gap: 5px; }
+    .dropdown-panel {
+      display: none;
+      position: absolute; top: 100%; left: 0;
+      padding-top: 10px;
+      min-width: 215px;
+    }
+    .dropdown-panel-inner {
+      background: var(--green-dark);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+      border: 1px solid rgba(225,220,208,0.1);
+    }
+    .nav-dropdown:hover .dropdown-panel { display: block; }
+    .dropdown-panel a {
+      display: flex; align-items: center; gap: 9px;
+      color: rgba(225,220,208,0.8);
+      padding: 0.65rem 1.1rem;
+      font-size: 0.84rem; border-radius: 0;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dropdown-panel a:hover { background: rgba(255,255,255,0.08); color: var(--cream); }
+    .dropdown-panel a.danger { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
+    .nav-bell {
+      position: relative; cursor: pointer;
+      color: var(--cream); font-size: 1.25rem;
+      opacity: 0.8; transition: opacity 0.2s;
+      text-decoration: none;
+    }
+    .nav-bell:hover { opacity: 1; }
+    .bell-badge {
+      position: absolute; top: -5px; right: -6px;
+      background: var(--cream);
+      color: var(--green-dark);
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--green-main);
+    }
+
+    .nav-profile {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      border-radius: 40px;
+      padding: 5px 14px 5px 5px;
+      transition: background 0.2s;
+    }
+    .nav-profile:hover { background: rgba(255,255,255,0.16); }
+    .nav-profile img {
+      width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.4);
+    }
+    .nav-profile span {
+      color: var(--cream); font-size: 0.84rem; font-weight: 500;
+      white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── WELCOME BANNER ── */
+    .welcome-banner {
+      margin: 1.5rem 2rem 1.25rem;
+      background-color: var(--cream);
+      border-radius: 16px;
+      padding: 1rem 1.4rem;
+      display: flex; align-items: center; justify-content: space-between;
+      text-decoration: none;
+      box-shadow: 0 2px 10px rgba(88,129,87,0.12);
+      transition: box-shadow 0.2s, transform 0.2s;
+      animation: fadeDown 0.45s ease both;
+    }
+    .welcome-banner:hover {
+      box-shadow: 0 6px 20px rgba(88,129,87,0.18);
+      transform: translateY(-1px);
+    }
+    .welcome-left { display: flex; align-items: center; gap: 12px; }
+    .welcome-icon {
+      width: 40px; height: 40px;
+      background: var(--green-main);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--cream); font-size: 1.1rem; flex-shrink: 0;
+    }
+    .welcome-text strong {
+      display: block; color: var(--green-dark);
+      font-size: 0.95rem; font-weight: 600;
+    }
+    .welcome-text small { color: var(--text-muted); font-size: 0.78rem; }
+    .welcome-arrow { color: var(--green-main); font-size: 1rem; }
+
+    /* ── STATS GRID ── */
+    .stats-wrap {
+      margin: 0 2rem 1.75rem;
+      animation: fadeUp 0.5s ease 0.05s both;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1.5px solid var(--cream);
+      border-radius: 18px;
+      padding: 1.2rem 1.3rem;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(88,129,87,0.12);
+      border-color: var(--green-main);
+    }
+    .stat-icon-box {
+      width: 44px; height: 44px;
+      background: var(--cream);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.85rem;
+      font-size: 1.2rem; color: var(--green-main);
+      transition: background 0.2s, color 0.2s;
+    }
+    .stat-card:hover .stat-icon-box { background: var(--green-main); color: var(--cream); }
+    .stat-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.2rem; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--green-dark); }
+    .stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+    /* ── QUOTES ── */
+    .quotes-wrap {
+      margin: 0 2rem 1.75rem;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+    .quote-box {
+      background: var(--cream);
+      border-radius: 18px; padding: 1.8rem 2.5rem;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .quote-deco {
+      position: absolute; top: 8px; left: 20px;
+      font-size: 5rem; line-height: 1;
+      color: var(--green-main); opacity: 0.18;
+      pointer-events: none;
+    }
+    .quote-text {
+      font-size: 1.35rem; font-style: italic;
+      color: var(--green-dark); line-height: 1.55;
+      transition: opacity 0.35s ease;
+      position: relative; z-index: 1;
+    }
+    .quote-dots { display: flex; justify-content: center; gap: 7px; margin-top: 1.1rem; }
+    .qdot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(88,129,87,0.3); cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .qdot.on { background: var(--green-main); transform: scale(1.35); }
+
+    /* ── SECTION COMMON ── */
+    .section-wrap {
+      margin: 0 2rem 2rem;
+      animation: fadeUp 0.5s ease 0.15s both;
+    }
+    .section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+    .section-title {
+      font-size: 1.3rem; color: var(--green-dark);
+    }
+    .section-link {
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--green-main); text-decoration: none;
+      display: flex; align-items: center; gap: 3px;
+      transition: gap 0.2s;
+    }
+    .section-link:hover { gap: 7px; }
+
+    /* ── QUICK ACTIONS ── */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .action-tile {
+      background: var(--white);
+      border: 1.5px solid var(--cream);
+      border-radius: 15px; padding: 1rem 0.75rem;
+      text-align: center; text-decoration: none;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+    .action-tile:hover {
+      border-color: var(--green-main);
+      box-shadow: 0 4px 16px rgba(88,129,87,0.13);
+      transform: translateY(-2px);
+    }
+    .action-ico {
+      width: 42px; height: 42px;
+      background: var(--cream);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.55rem;
+      font-size: 1.15rem; color: var(--green-main);
+      transition: background 0.2s, color 0.2s;
+    }
+    .action-tile:hover .action-ico { background: var(--green-main); color: var(--cream); }
+    .action-lbl { font-size: 0.77rem; font-weight: 600; color: var(--green-dark); line-height: 1.3; }
+
+    /* ── CARDS CAROUSEL ── */
+    .carousel-outer { position: relative; }
+    .cards-track-wrap { overflow: hidden; }
+    .cards-track {
+      display: flex;
+      gap: 16px;
+      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .act-card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1.5px solid var(--cream);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(88,129,87,0.07);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      flex: 0 0 calc(33.333% - 12px);
+      min-width: 270px;
+    }
+    .act-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(88,129,87,0.15);
+    }
+
+    .act-img-wrap { position: relative; height: 155px; overflow: hidden; }
+    .act-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .act-card:hover .act-img-wrap img { transform: scale(1.04); }
+    .act-tag {
+      position: absolute; top: 11px; left: 12px;
+      background: var(--green-main);
+      color: var(--cream); font-size: 0.7rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    .act-body { padding: 1.1rem 1.2rem 1.2rem; }
+    .act-body h3 { font-size: 1.05rem; color: var(--green-dark); margin-bottom: 0.3rem; }
+    .act-desc { font-size: 0.81rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.9rem; }
+
+    .act-ong {
+      display: flex; align-items: center; gap: 9px;
+      padding-bottom: 0.85rem;
+      border-bottom: 1.5px solid var(--cream);
+      margin-bottom: 0.85rem;
+    }
+    .act-ong img { width: 31px; height: 31px; border-radius: 50%; object-fit: cover; }
+    .act-ong-name { font-size: 0.8rem; font-weight: 600; color: var(--green-dark); }
+    .act-stars { color: var(--green-main); font-size: 0.7rem; }
+    .act-stars span { color: var(--text-muted); font-size: 0.73rem; }
+
+    .act-meta { display: flex; gap: 1rem; margin-bottom: 0.95rem; flex-wrap: wrap; }
+    .act-meta-i { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--text-muted); }
+    .act-meta-i i { color: var(--green-main); }
+
+    .btn-saiba {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--green-main); color: var(--cream);
+      border-radius: 10px; padding: 10px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.87rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
+    }
+    .btn-saiba:hover { background: var(--green-dark); color: var(--cream); }
+    .btn-saiba:active { transform: scale(0.98); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--green-main);
+      color: var(--green-main);
+    }
+    .btn-outline:hover { background: var(--green-main); color: var(--cream); }
+
+    /* Carousel nav arrows */
+    .carousel-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 38px; height: 38px;
+      background: var(--white);
+      border: 1.5px solid var(--cream);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 10;
+      color: var(--green-dark); font-size: 0.9rem;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 10px rgba(88,129,87,0.1);
+    }
+    .carousel-arrow:hover {
+      background: var(--green-main); color: var(--cream);
+      border-color: var(--green-main);
+      box-shadow: 0 4px 16px rgba(88,129,87,0.2);
+    }
+    .carousel-arrow.left { left: -18px; }
+    .carousel-arrow.right { right: -18px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(30,46,31,0.55);
+      backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-sheet {
+      background: var(--white);
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 620px;
+      max-height: 92vh;
+      overflow-y: auto;
+      animation: slideUp 0.35s ease;
+      position: relative;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-img {
+      width: 100%; height: 260px; object-fit: cover;
+      border-radius: 24px 24px 0 0;
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 14px;
+      width: 36px; height: 36px;
+      background: rgba(30,46,31,0.55);
+      border: none; border-radius: 50%; cursor: pointer;
+      color: var(--cream); font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .modal-close:hover { background: rgba(30,46,31,0.8); }
+
+    .modal-body {
+      padding: 1.5rem 1.5rem 0;
+      margin-top: -18px;
+      background: var(--white);
+      border-radius: 20px 20px 0 0;
+      position: relative; z-index: 2;
+    }
+    .modal-body h3 { font-size: 1.35rem; color: var(--green-dark); margin-bottom: 0.4rem; }
+    .modal-body p.desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.2rem; }
+
+    .modal-ong-row {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      padding-bottom: 1.1rem;
+      border-bottom: 1.5px solid var(--cream);
+      margin-bottom: 1.2rem;
+    }
+    .modal-ong-left { display: flex; align-items: center; gap: 10px; }
+    .modal-ong-left img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .modal-ong-name { font-size: 0.88rem; font-weight: 600; color: var(--green-dark); }
+    .modal-ong-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .modal-pts {
+      font-size: 0.8rem; font-weight: 600; color: var(--green-dark);
+      background: var(--cream); border-radius: 8px; padding: 4px 10px;
+    }
+
+    .btn-chat {
+      margin-top: 6px;
+      background: var(--green-main); color: var(--cream);
+      border: none; border-radius: 10px; padding: 8px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: background 0.2s;
+    }
+    .btn-chat:hover { background: var(--green-dark); }
+
+    .modal-reviews h5 { font-size: 1rem; color: var(--green-dark); margin-bottom: 0.85rem; }
+    .review-box {
+      background: var(--cream-light);
+      border-radius: 14px; padding: 0.9rem 1rem; margin-bottom: 10px;
+    }
+    .review-box h6 { font-size: 0.85rem; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
+    .review-box .reviewer { font-size: 0.77rem; color: var(--text-muted); margin-bottom: 6px; }
+    .review-stars { color: var(--green-main); font-size: 0.78rem; margin-bottom: 5px; }
+    .review-text { font-size: 0.82rem; color: var(--text-dark); font-style: italic; margin-bottom: 4px; }
+    .review-date { font-size: 0.73rem; color: var(--text-muted); }
+
+    .modal-cta {
+      padding: 1.2rem 1.5rem 1.8rem;
+    }
+    .btn-inscribe {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--green-main); color: var(--cream);
+      border-radius: 14px; padding: 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-inscribe:hover { background: var(--green-dark); }
+    .btn-inscribe:active { transform: scale(0.98); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-profile span { display: none; }
+      .welcome-banner, .stats-wrap, .quotes-wrap, .section-wrap {
+        margin-left: 1rem; margin-right: 1rem;
+      }
+      .act-card { flex: 0 0 85vw; }
+      .carousel-arrow { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-brand" href="#">
+    <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+    Mútuo
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="homeMutuo.html" class="active">Início</a></li>
+    <li><a href="serviçosMutuo.html">Serviços</a></li>
+    <li><a href="OngsMutuo.html">ONGs</a></li>
+    <li><a href="chatMutuo.html">Chat</a></li>
+    <li class="nav-dropdown">
+      <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+      <div class="dropdown-panel">
+        <div class="dropdown-panel-inner">
+          <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+          <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+          <a href="contatoMutuo.html"><i class="bi bi-envelope"></i> Contato</a>
+          <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+          <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+          <a href="../login.html" class="danger"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="nav-right">
+    <a href="notificacoesMutuo.html" class="nav-bell">
+      <i class="bi bi-bell-fill"></i>
+      <span class="bell-badge">3</span>
+    </a>
+    <a href="perfilMutuo.html" class="nav-profile">
+      <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
+      <span>Isabela Monteiro</span>
+    </a>
+  </div>
+</nav>
+
+<!-- WELCOME BANNER -->
+<a href="perfilMutuo.html" class="welcome-banner">
+  <div class="welcome-left">
+    <div class="welcome-icon"><i class="bi bi-sun-fill"></i></div>
+    <div class="welcome-text">
+      <strong>Bem-vindo(a), Isabela!</strong>
+      <small>Confira as novidades do seu painel hoje</small>
+    </div>
+  </div>
+  <i class="bi bi-chevron-right welcome-arrow"></i>
+</a>
+
+<!-- STATS -->
+<div class="stats-wrap">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon-box"><i class="bi bi-clock-fill"></i></div>
+      <div class="stat-title">Horas de serviço</div>
+      <div class="stat-value">24h</div>
+      <div class="stat-sub">+8h este mês</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-box"><i class="bi bi-award-fill"></i></div>
+      <div class="stat-title">Trabalhos concluídos</div>
+      <div class="stat-value">5</div>
+      <div class="stat-sub">&nbsp;</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-box"><i class="bi bi-heart-fill"></i></div>
+      <div class="stat-title">Pontos</div>
+      <div class="stat-value">+150</div>
+      <div class="stat-sub">+50 este mês</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-box"><i class="bi bi-gem"></i></div>
+      <div class="stat-title">Plano atual</div>
+      <div class="stat-value">Gratuito</div>
+      <div class="stat-sub">melhore seu plano</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTES -->
+<div class="quotes-wrap">
+  <div class="quote-box">
+    <span class="quote-deco">"</span>
+    <p class="quote-text" id="quoteText">Solidariedade é transformar empatia em ação.</p>
+    <div class="quote-dots">
+      <span class="qdot on" data-i="0"></span>
+      <span class="qdot" data-i="1"></span>
+      <span class="qdot" data-i="2"></span>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="section-wrap">
+  <div class="section-head">
+    <h2 class="section-title">Acesso rápido</h2>
+  </div>
+  <div class="actions-grid">
+    <a href="serviçosMutuo.html" class="action-tile">
+      <div class="action-ico"><i class="bi bi-search"></i></div>
+      <span class="action-lbl">Buscar Vagas</span>
+    </a>
+    <a href="OngsMutuo.html" class="action-tile">
+      <div class="action-ico"><i class="bi bi-clipboard-heart"></i></div>
+      <span class="action-lbl">ONGs</span>
+    </a>
+    <a href="chatMutuo.html" class="action-tile">
+      <div class="action-ico"><i class="bi bi-chat-dots-fill"></i></div>
+      <span class="action-lbl">Chat</span>
+    </a>
+    <a href="certificadosMutuo.html" class="action-tile">
+      <div class="action-ico"><i class="bi bi-award-fill"></i></div>
+      <span class="action-lbl">Certificados</span>
+    </a>
+    <a href="notificacoesMutuo.html" class="action-tile">
+      <div class="action-ico"><i class="bi bi-bell-fill"></i></div>
+      <span class="action-lbl">Notificações <span style="color:var(--green-main);font-weight:700">3</span></span>
+    </a>
+    <a href="planosMutuo.html" class="action-tile">
+      <div class="action-ico"><i class="bi bi-graph-up-arrow"></i></div>
+      <span class="action-lbl">Meu Plano</span>
+    </a>
+  </div>
+</div>
+
+<!-- VAGAS EM DESTAQUE -->
+<div class="section-wrap">
+  <div class="section-head">
+    <h2 class="section-title">Vagas em destaque</h2>
+    <a href="serviçosMutuo.html" class="section-link">Ver todas <i class="bi bi-arrow-right"></i></a>
+  </div>
+  <div class="carousel-outer">
+    <button class="carousel-arrow left" id="prev1"><i class="bi bi-chevron-left"></i></button>
+    <div class="cards-track-wrap">
+      <div class="cards-track" id="track1">
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/aula.png" alt="Aulas de culinária">
+            <span class="act-tag">Culinária</span>
+          </div>
+          <div class="act-body">
+            <h3>Aulas de culinária</h3>
+            <p class="act-desc">Aprenda e ensine pratos deliciosos. Aulas práticas e divertidas para todos os níveis.</p>
+            <div class="act-ong">
+              <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Mariana Lopes</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.024)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalAula')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorro">
+            <span class="act-tag">Animais</span>
+          </div>
+          <div class="act-body">
+            <h3>Passeio com cachorro</h3>
+            <p class="act-desc">Ofereça carinho e exercício para animais resgatados que aguardam um novo lar.</p>
+            <div class="act-ong">
+              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Instituto Animais Amigos</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.024)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/aulaCiencia.png" alt="Aula de ciência">
+            <span class="act-tag">Educação</span>
+          </div>
+          <div class="act-body">
+            <h3>Aula de ciências</h3>
+            <p class="act-desc">Inspire mentes curiosas! Aulas de ciências para crianças de 6 a 12 anos.</p>
+            <div class="act-ong">
+              <img src="../imagens/perfilOngI.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Instituto Infância Viva</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.000)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 2h por semana</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalCiencia')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorro">
+            <span class="act-tag">Animais</span>
+          </div>
+          <div class="act-body">
+            <h3>Passeio com cachorro 2</h3>
+            <p class="act-desc">Mais uma oportunidade de ajudar animais resgatados com passeios e carinho.</p>
+            <div class="act-ong">
+              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Instituto Animais Amigos</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.024)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <button class="carousel-arrow right" id="next1"><i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- PERTO DE VOCÊ -->
+<div class="section-wrap">
+  <div class="section-head">
+    <h2 class="section-title">Perto de você</h2>
+    <a href="serviçosMutuo.html" class="section-link">Ver todas <i class="bi bi-arrow-right"></i></a>
+  </div>
+  <div class="carousel-outer">
+    <button class="carousel-arrow left" id="prev2"><i class="bi bi-chevron-left"></i></button>
+    <div class="cards-track-wrap">
+      <div class="cards-track" id="track2">
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/aula.png" alt="Aulas de culinária">
+            <span class="act-tag">Culinária</span>
+          </div>
+          <div class="act-body">
+            <h3>Aulas de culinária</h3>
+            <p class="act-desc">Aprenda e ensine pratos deliciosos. Aulas práticas e divertidas para todos os níveis.</p>
+            <div class="act-ong">
+              <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Mariana Lopes</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.024)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalAula')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/passeioCachorro.png" alt="Passeio">
+            <span class="act-tag">Animais</span>
+          </div>
+          <div class="act-body">
+            <h3>Passeio com cachorro 2</h3>
+            <p class="act-desc">Ofereça carinho e exercício para animais resgatados que aguardam um novo lar.</p>
+            <div class="act-ong">
+              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Instituto Animais Amigos</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.024)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/aulaCiencia.png" alt="Ciência">
+            <span class="act-tag">Educação</span>
+          </div>
+          <div class="act-body">
+            <h3>Aula de ciências</h3>
+            <p class="act-desc">Inspire mentes curiosas! Aulas de ciências para crianças de 6 a 12 anos.</p>
+            <div class="act-ong">
+              <img src="../imagens/perfilOngI.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Instituto Infância Viva</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.000)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 2h por semana</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalCiencia')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-card">
+          <div class="act-img-wrap">
+            <img src="../imagens/passeioCachorro.png" alt="Passeio">
+            <span class="act-tag">Animais</span>
+          </div>
+          <div class="act-body">
+            <h3>Passeio com cachorro 2</h3>
+            <p class="act-desc">Mais uma oportunidade de ajudar animais resgatados com passeios e carinho.</p>
+            <div class="act-ong">
+              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+              <div>
+                <div class="act-ong-name">Instituto Animais Amigos</div>
+                <div class="act-stars">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <span> 5.0 (1.024)</span>
+                </div>
+              </div>
+            </div>
+            <div class="act-meta">
+              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
+              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <button class="carousel-arrow right" id="next2"><i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+
+<!-- Modal Aula -->
+<div class="modal-overlay" id="modalAula">
+  <div class="modal-sheet">
+    <img src="../imagens/aula.png" alt="Aula de culinária" class="modal-img" onerror="this.style.display='none'">
+    <button class="modal-close" onclick="closeModal('modalAula')"><i class="bi bi-x-lg"></i></button>
+    <div class="modal-body">
+      <h3>Aula de culinária</h3>
+      <p class="desc">Aprenda a fazer pratos deliciosos e saudáveis. Aulas práticas e divertidas que ensinam desde o preparo de receitas simples até pratos especiais.</p>
+      <div class="modal-ong-row">
+        <div class="modal-ong-left">
+          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="modal-ong-name">Mariana Lopes</div>
+            <div class="modal-ong-meta">
+              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 5.0 (1.024) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> São Paulo, SP &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h 30min
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="modal-pts">230 pontos necessários</span>
+          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="modal-reviews">
+        <h5>Avaliações</h5>
+        <div class="review-box">
+          <h6>Aula de culinária</h6>
+          <div class="reviewer">Voluntário: João Silva</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Excelente professora! Muito atenciosa e paciente."</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="review-box">
+          <h6>Aula de culinária</h6>
+          <div class="reviewer">Voluntário: Ana Paula</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Muito divertido!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-cta">
+      <button class="btn-inscribe">Inscrever-me</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Passeio -->
+<div class="modal-overlay" id="modalPasseio">
+  <div class="modal-sheet">
+    <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorro" class="modal-img" onerror="this.style.display='none'">
+    <button class="modal-close" onclick="closeModal('modalPasseio')"><i class="bi bi-x-lg"></i></button>
+    <div class="modal-body">
+      <h3>Passeie com os cachorros</h3>
+      <p class="desc">Ande com nossos cachorros e leve alegria a quem mais precisa! Com apenas um passeio, você oferece carinho e companhia para animais resgatados.</p>
+      <div class="modal-ong-row">
+        <div class="modal-ong-left">
+          <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="modal-ong-name">Instituto Animais Amigos</div>
+            <div class="modal-ong-meta">
+              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 5.0 (1.024) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> São Paulo, SP &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 30min
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="modal-pts">150 pontos recebidos</span>
+          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="modal-reviews">
+        <h5>Avaliações</h5>
+        <div class="review-box">
+          <h6>Passeio com os cachorros</h6>
+          <div class="reviewer">Voluntário: Felipe Souza</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Experiência incrível!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="review-box">
+          <h6>Passeio com os cachorros</h6>
+          <div class="reviewer">Voluntário: João Silva</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Passeio muito divertido!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-cta">
+      <button class="btn-inscribe">Inscrever-me</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ciência -->
+<div class="modal-overlay" id="modalCiencia">
+  <div class="modal-sheet">
+    <img src="../imagens/aulaCiencia.png" alt="Aula de ciência" class="modal-img" onerror="this.style.display='none'">
+    <button class="modal-close" onclick="closeModal('modalCiencia')"><i class="bi bi-x-lg"></i></button>
+    <div class="modal-body">
+      <h3>Aula de ciências</h3>
+      <p class="desc">O Instituto Infância Viva busca voluntários para aulas de ciências a crianças curiosas! Se você gosta de ensinar e acredita no poder da educação, essa é sua chance.</p>
+      <div class="modal-ong-row">
+        <div class="modal-ong-left">
+          <img src="../imagens/perfilOngI.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="modal-ong-name">Instituto Infância Viva</div>
+            <div class="modal-ong-meta">
+              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 5.0 (1.024) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> São Paulo, SP &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 2h
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="modal-pts">240 pontos recebidos</span>
+          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="modal-reviews">
+        <h5>Avaliações</h5>
+        <div class="review-box">
+          <h6>Aula de ciências</h6>
+          <div class="reviewer">Voluntário: Felipe Souza</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Experiência incrível!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="review-box">
+          <h6>Aula de ciências</h6>
+          <div class="reviewer">Voluntário: João Silva</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Muito divertido, instituto está fazendo um trabalho maravilhoso!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-cta">
+      <button class="btn-inscribe">Inscrever-me</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* QUOTES */
+  const quotes = [
+    "Solidariedade é transformar empatia em ação.",
+    "Pequenos gestos criam grandes mudanças.",
+    "Juntos, podemos construir um futuro mais humano."
+  ];
+  let cur = 0;
+  const txt = document.getElementById('quoteText');
+  const dots = document.querySelectorAll('.qdot');
+  function goQ(i) {
+    txt.style.opacity = 0;
+    setTimeout(() => { txt.textContent = quotes[i]; txt.style.opacity = 1; }, 320);
+    dots.forEach(d => d.classList.remove('on'));
+    dots[i].classList.add('on');
+    cur = i;
+  }
+  dots.forEach(d => d.addEventListener('click', () => goQ(+d.dataset.i)));
+  setInterval(() => goQ((cur + 1) % quotes.length), 4000);
+
+  /* CAROUSEL */
+  function makeCarousel(trackId, prevId, nextId) {
+    const track = document.getElementById(trackId);
+    const prev = document.getElementById(prevId);
+    const next = document.getElementById(nextId);
+    let idx = 0;
+    function getCardW() {
+      const card = track.children[0];
+      return card ? card.offsetWidth + 16 : 300;
+    }
+    function update() {
+      track.style.transform = `translateX(-${getCardW() * idx}px)`;
+    }
+    next.addEventListener('click', () => {
+      const visible = Math.floor(track.parentElement.offsetWidth / getCardW());
+      if (idx < track.children.length - visible) { idx++; update(); }
+    });
+    prev.addEventListener('click', () => {
+      if (idx > 0) { idx--; update(); }
+    });
+  }
+  makeCarousel('track1', 'prev1', 'next1');
+  makeCarousel('track2', 'prev2', 'next2');
+
+  /* MODALS */
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+  });
+</script>
+</body>
+</html>

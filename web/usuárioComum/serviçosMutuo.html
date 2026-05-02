@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Serviços</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --green-main:  #588157;
+      --green-dark:  #3a5a40;
+      --cream:       #E1DCD0;
+      --cream-light: #f0ede6;
+      --white:       #ffffff;
+      --text-dark:   #1e2e1f;
+      --text-muted:  #7a8c78;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: var(--white);
+      color: var(--text-dark);
+      padding-top: 72px;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background-color: var(--green-main);
+      height: 72px;
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem; color: var(--cream);
+      letter-spacing: 0.4px; margin-right: 2rem; flex-shrink: 0;
+    }
+    .nav-brand img { width: 38px; height: 38px; border-radius: 8px; }
+    .nav-links {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1;
+    }
+    .nav-links a {
+      text-decoration: none; color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem; border-radius: 8px;
+      transition: color 0.18s, background 0.18s; white-space: nowrap;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--cream); background: rgba(255,255,255,0.12);
+    }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a { display: flex; align-items: center; gap: 5px; }
+    .dropdown-panel {
+      display: none; position: absolute; top: 100%; left: 0;
+      padding-top: 10px; min-width: 215px;
+    }
+    .dropdown-panel-inner {
+      background: var(--green-dark); border-radius: 12px; overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+      border: 1px solid rgba(225,220,208,0.1);
+    }
+    .nav-dropdown:hover .dropdown-panel { display: block; }
+    .dropdown-panel a {
+      display: flex; align-items: center; gap: 9px;
+      color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem;
+      font-size: 0.84rem; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dropdown-panel a:hover { background: rgba(255,255,255,0.08); color: var(--cream); }
+    .dropdown-panel a.danger { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .nav-bell {
+      position: relative; cursor: pointer;
+      color: var(--cream); font-size: 1.25rem; opacity: 0.8;
+      transition: opacity 0.2s; text-decoration: none;
+    }
+    .nav-bell:hover { opacity: 1; }
+    .bell-badge {
+      position: absolute; top: -5px; right: -6px;
+      background: var(--cream); color: var(--green-dark);
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--green-main);
+    }
+    .nav-profile {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      border-radius: 40px; padding: 5px 14px 5px 5px;
+      transition: background 0.2s;
+    }
+    .nav-profile:hover { background: rgba(255,255,255,0.16); }
+    .nav-profile img {
+      width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.4);
+    }
+    .nav-profile span {
+      color: var(--cream); font-size: 0.84rem; font-weight: 500;
+      white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── HERO SEARCH ── */
+    .hero-search {
+      background: var(--green-main);
+      padding: 3rem 2rem 3.5rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+      animation: fadeDown 0.45s ease both;
+    }
+    .hero-search::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      background: rgba(58,90,64,0.3); border-radius: 50%;
+    }
+    .hero-search::after {
+      content: ''; position: absolute; bottom: -80px; left: 30%;
+      width: 300px; height: 300px;
+      background: rgba(58,90,64,0.15); border-radius: 50%;
+    }
+    .hero-search-inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+    .hero-search h2 {
+      font-size: 1.9rem; color: var(--cream); margin-bottom: 0.5rem;
+    }
+    .hero-search p { font-size: 0.92rem; color: rgba(225,220,208,0.75); margin-bottom: 1.75rem; }
+
+    .search-bar {
+      display: flex; align-items: center;
+      background: var(--white); border-radius: 50px;
+      padding: 6px 6px 6px 18px;
+      box-shadow: 0 4px 20px rgba(58,90,64,0.25);
+    }
+    .search-bar i { color: var(--text-muted); font-size: 1rem; margin-right: 8px; flex-shrink: 0; }
+    .search-bar input {
+      flex: 1; border: none; outline: none;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.9rem; color: var(--text-dark);
+      background: transparent;
+    }
+    .search-bar input::placeholder { color: var(--text-muted); }
+    .btn-search {
+      background: var(--green-main); color: var(--cream);
+      border: none; border-radius: 40px;
+      padding: 10px 22px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.87rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-search:hover { background: var(--green-dark); }
+
+    /* ── FILTERS SECTION ── */
+    .filters-wrap {
+      margin: 1.5rem 2rem;
+      animation: fadeUp 0.45s ease 0.05s both;
+    }
+    .filters-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;
+    }
+    .results-count {
+      font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
+    }
+    .results-count strong { color: var(--green-dark); }
+    .filter-btns { display: flex; gap: 8px; }
+    .btn-filter {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--white); color: var(--green-dark);
+      border: 1.5px solid var(--cream); border-radius: 10px;
+      padding: 7px 14px; font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-filter:hover { border-color: var(--green-main); background: var(--cream-light); }
+
+    /* Category pills */
+    .cats {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .cat-pill {
+      background: var(--white);
+      border: 1.5px solid var(--cream);
+      color: var(--green-dark); border-radius: 30px;
+      padding: 6px 16px; font-family: 'Quicksand', sans-serif;
+      font-size: 0.81rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-pill:hover { border-color: var(--green-main); background: var(--cream-light); }
+    .cat-pill.active {
+      background: var(--green-main); color: var(--cream);
+      border-color: var(--green-main);
+    }
+
+    /* ── CARDS GRID ── */
+    .cards-wrap {
+      margin: 0 2rem 3rem;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .svc-card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1.5px solid var(--cream);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(88,129,87,0.07);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .svc-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(88,129,87,0.15);
+    }
+
+    .svc-img-wrap { position: relative; height: 160px; overflow: hidden; flex-shrink: 0; }
+    .svc-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .svc-card:hover .svc-img-wrap img { transform: scale(1.05); }
+    .svc-tag {
+      position: absolute; top: 11px; left: 12px;
+      background: var(--green-main); color: var(--cream);
+      font-size: 0.7rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    .svc-body {
+      padding: 1.1rem 1.2rem 1.2rem;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .svc-body h3 { font-size: 1.05rem; color: var(--green-dark); margin-bottom: 0.3rem; }
+    .svc-desc { font-size: 0.81rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.9rem; }
+
+    .svc-person {
+      display: flex; align-items: center; gap: 9px;
+      padding-bottom: 0.8rem;
+      border-bottom: 1.5px solid var(--cream);
+      margin-bottom: 0.8rem;
+    }
+    .svc-person img {
+      width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--cream);
+    }
+    .svc-person-name { font-size: 0.82rem; font-weight: 600; color: var(--green-dark); }
+    .svc-stars { color: var(--green-main); font-size: 0.7rem; }
+    .svc-stars span { color: var(--text-muted); font-size: 0.72rem; }
+
+    .svc-meta { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .svc-meta-i {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.78rem; color: var(--text-muted);
+    }
+    .svc-meta-i i { color: var(--green-main); }
+
+    .btn-saiba {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--green-main); color: var(--cream);
+      border-radius: 10px; padding: 10px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.87rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: auto;
+    }
+    .btn-saiba:hover { background: var(--green-dark); }
+    .btn-saiba:active { transform: scale(0.98); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(30,46,31,0.55); backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-sheet {
+      background: var(--white); border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto;
+      animation: slideUp 0.35s ease; position: relative;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    .modal-img {
+      width: 100%; height: 260px; object-fit: cover;
+      border-radius: 24px 24px 0 0;
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 14px;
+      width: 36px; height: 36px;
+      background: rgba(30,46,31,0.55);
+      border: none; border-radius: 50%; cursor: pointer;
+      color: var(--cream); font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .modal-close:hover { background: rgba(30,46,31,0.8); }
+    .modal-body {
+      padding: 1.5rem 1.5rem 0;
+      margin-top: -18px;
+      background: var(--white);
+      border-radius: 20px 20px 0 0;
+      position: relative; z-index: 2;
+    }
+    .modal-body h3 { font-size: 1.35rem; color: var(--green-dark); margin-bottom: 0.4rem; }
+    .modal-body p.desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.2rem; }
+    .modal-person-row {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      padding-bottom: 1.1rem;
+      border-bottom: 1.5px solid var(--cream); margin-bottom: 1.2rem;
+    }
+    .modal-person-left { display: flex; align-items: center; gap: 10px; }
+    .modal-person-left img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+    .modal-person-name { font-size: 0.9rem; font-weight: 600; color: var(--green-dark); }
+    .modal-person-meta { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+    .modal-pts {
+      font-size: 0.8rem; font-weight: 600; color: var(--green-dark);
+      background: var(--cream); border-radius: 8px; padding: 4px 10px;
+    }
+    .btn-chat {
+      margin-top: 6px;
+      background: var(--green-main); color: var(--cream);
+      border: none; border-radius: 10px; padding: 8px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: background 0.2s;
+    }
+    .btn-chat:hover { background: var(--green-dark); }
+    .modal-reviews h5 { font-size: 1rem; color: var(--green-dark); margin-bottom: 0.85rem; }
+    .review-box {
+      background: var(--cream-light); border-radius: 14px;
+      padding: 0.9rem 1rem; margin-bottom: 10px;
+    }
+    .review-box h6 { font-size: 0.85rem; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
+    .reviewer { font-size: 0.77rem; color: var(--text-muted); margin-bottom: 6px; }
+    .review-stars { color: var(--green-main); font-size: 0.78rem; margin-bottom: 5px; }
+    .review-text { font-size: 0.82rem; color: var(--text-dark); font-style: italic; margin-bottom: 4px; }
+    .review-date { font-size: 0.73rem; color: var(--text-muted); }
+    .modal-cta { padding: 1.2rem 1.5rem 1.8rem; }
+    .btn-inscribe {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--green-main); color: var(--cream);
+      border-radius: 14px; padding: 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-inscribe:hover { background: var(--green-dark); }
+    .btn-inscribe:active { transform: scale(0.98); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-profile span { display: none; }
+      .filters-wrap, .cards-wrap { margin-left: 1rem; margin-right: 1rem; }
+      .hero-search { padding: 2rem 1rem 2.5rem; }
+      .hero-search h2 { font-size: 1.45rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-brand" href="#">
+    <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+    Mútuo
+  </a>
+  <ul class="nav-links">
+    <li><a href="homeMutuo.html">Início</a></li>
+    <li><a href="serviçosMutuo.html" class="active">Serviços</a></li>
+    <li><a href="OngsMutuo.html">ONGs</a></li>
+    <li><a href="chatMutuo.html">Chat</a></li>
+    <li class="nav-dropdown">
+      <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+      <div class="dropdown-panel">
+        <div class="dropdown-panel-inner">
+          <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+          <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+          <a href="contatoMutuo.html"><i class="bi bi-envelope"></i> Contato</a>
+          <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+          <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+          <a href="../login.html" class="danger"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <a href="notificacoesMutuo.html" class="nav-bell">
+      <i class="bi bi-bell-fill"></i>
+      <span class="bell-badge">3</span>
+    </a>
+    <a href="perfilMutuo.html" class="nav-profile">
+      <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
+      <span>Isabela Monteiro</span>
+    </a>
+  </div>
+</nav>
+
+<!-- HERO SEARCH -->
+<section class="hero-search">
+  <div class="hero-search-inner">
+    <h2>Encontre Serviços na Sua Comunidade</h2>
+    <p>Troque serviços com pessoas próximas e faça parte de uma economia colaborativa.</p>
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="text" id="searchInput" placeholder="Buscar serviços..." oninput="filterCards()">
+      <button class="btn-search">Buscar</button>
+    </div>
+  </div>
+</section>
+
+<!-- FILTERS -->
+<div class="filters-wrap">
+  <div class="filters-top">
+    <span class="results-count"><strong id="countLabel">7</strong> serviços encontrados</span>
+    <div class="filter-btns">
+      <button class="btn-filter"><i class="bi bi-funnel"></i> Filtros</button>
+      <button class="btn-filter"><i class="bi bi-arrow-down-up"></i> Ordenar</button>
+    </div>
+  </div>
+  <div class="cats">
+    <button class="cat-pill active" data-cat="todos" onclick="filterCat(this)">Todos</button>
+    <button class="cat-pill" data-cat="jardinagem" onclick="filterCat(this)">Jardinagem</button>
+    <button class="cat-pill" data-cat="culinaria" onclick="filterCat(this)">Culinária</button>
+    <button class="cat-pill" data-cat="manutencao" onclick="filterCat(this)">Manutenção</button>
+    <button class="cat-pill" data-cat="educacao" onclick="filterCat(this)">Educação</button>
+    <button class="cat-pill" data-cat="tecnologia" onclick="filterCat(this)">Tecnologia</button>
+    <button class="cat-pill" data-cat="beleza" onclick="filterCat(this)">Beleza</button>
+    <button class="cat-pill" data-cat="bem-estar" onclick="filterCat(this)">Bem-estar</button>
+    <button class="cat-pill" data-cat="musica" onclick="filterCat(this)">Música</button>
+  </div>
+</div>
+
+<!-- CARDS -->
+<div class="cards-wrap">
+  <div class="cards-grid" id="cardsGrid">
+
+    <div class="svc-card" data-cat="culinaria" data-name="aula de culinária">
+      <div class="svc-img-wrap">
+        <img src="../imagens/aula.png" alt="Aula de culinária">
+        <span class="svc-tag">Culinária</span>
+      </div>
+      <div class="svc-body">
+        <h3>Aula de culinária</h3>
+        <p class="svc-desc">Aprenda a fazer pratos deliciosos e saudáveis. Aulas práticas e divertidas para todos os níveis.</p>
+        <div class="svc-person">
+          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="svc-person-name">Mariana Lopes</div>
+            <div class="svc-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span> 5.0 (1.024)</span>
+            </div>
+          </div>
+        </div>
+        <div class="svc-meta">
+          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
+        </div>
+        <button class="btn-saiba" onclick="openModal('modalAula')"><i class="bi bi-info-circle"></i> Saiba mais</button>
+      </div>
+    </div>
+
+    <div class="svc-card" data-cat="manutencao" data-name="conserto de geladeira">
+      <div class="svc-img-wrap">
+        <img src="../imagens/manutencao.png" alt="Conserto de geladeira">
+        <span class="svc-tag">Manutenção</span>
+      </div>
+      <div class="svc-body">
+        <h3>Conserto de geladeira</h3>
+        <p class="svc-desc">Sua geladeira parou? Atendimento ágil com serviço de qualidade garantida para todas as marcas.</p>
+        <div class="svc-person">
+          <img src="../imagens/perfil2.png" alt="Lucas" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="svc-person-name">Lucas Oliveira</div>
+            <div class="svc-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span> 4.8 (300)</span>
+            </div>
+          </div>
+        </div>
+        <div class="svc-meta">
+          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
+        </div>
+        <button class="btn-saiba" onclick="openModal('modalManutencao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
+      </div>
+    </div>
+
+    <div class="svc-card" data-cat="bem-estar" data-name="aula de yoga">
+      <div class="svc-img-wrap">
+        <img src="../imagens/yoga.png" alt="Aula de yoga">
+        <span class="svc-tag">Bem-estar</span>
+      </div>
+      <div class="svc-body">
+        <h3>Aula de yoga</h3>
+        <p class="svc-desc">Encontre equilíbrio e bem-estar! Aulas para todos os níveis, do iniciante ao avançado.</p>
+        <div class="svc-person">
+          <img src="../imagens/perfil3.png" alt="Isadora" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="svc-person-name">Isadora Moraes</div>
+            <div class="svc-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span> 5.0 (800)</span>
+            </div>
+          </div>
+        </div>
+        <div class="svc-meta">
+          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
+        </div>
+        <button class="btn-saiba" onclick="openModal('modalYoga')"><i class="bi bi-info-circle"></i> Saiba mais</button>
+      </div>
+    </div>
+
+    <div class="svc-card" data-cat="musica" data-name="aula de violão">
+      <div class="svc-img-wrap">
+        <img src="../imagens/violao.png" alt="Aula de violão">
+        <span class="svc-tag">Música</span>
+      </div>
+      <div class="svc-body">
+        <h3>Aula de violão</h3>
+        <p class="svc-desc">Aprenda violão do zero ou aperfeiçoe seu som. Aulas leves com foco no ritmo de cada aluno.</p>
+        <div class="svc-person">
+          <img src="../imagens/perfil4.png" alt="Marcos" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="svc-person-name">Marcos Lima</div>
+            <div class="svc-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span> 4.3 (40)</span>
+            </div>
+          </div>
+        </div>
+        <div class="svc-meta">
+          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
+        </div>
+        <button class="btn-saiba" onclick="openModal('modalViolao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
+      </div>
+    </div>
+
+    <div class="svc-card" data-cat="manutencao" data-name="conserto de geladeira">
+      <div class="svc-img-wrap">
+        <img src="../imagens/manutencao.png" alt="Conserto de geladeira">
+        <span class="svc-tag">Manutenção</span>
+      </div>
+      <div class="svc-body">
+        <h3>Conserto de geladeira</h3>
+        <p class="svc-desc">Sua geladeira parou? Atendimento ágil com serviço de qualidade garantida para todas as marcas.</p>
+        <div class="svc-person">
+          <img src="../imagens/perfil2.png" alt="Lucas" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="svc-person-name">Lucas Oliveira</div>
+            <div class="svc-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span> 4.8 (300)</span>
+            </div>
+          </div>
+        </div>
+        <div class="svc-meta">
+          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
+        </div>
+        <button class="btn-saiba" onclick="openModal('modalManutencao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
+      </div>
+    </div>
+
+    <div class="svc-card" data-cat="musica" data-name="aula de violão">
+      <div class="svc-img-wrap">
+        <img src="../imagens/violao.png" alt="Aula de violão">
+        <span class="svc-tag">Música</span>
+      </div>
+      <div class="svc-body">
+        <h3>Aula de violão</h3>
+        <p class="svc-desc">Aprenda violão do zero ou aperfeiçoe seu som. Aulas leves com foco no ritmo de cada aluno.</p>
+        <div class="svc-person">
+          <img src="../imagens/perfil4.png" alt="Marcos" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="svc-person-name">Marcos Lima</div>
+            <div class="svc-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span> 4.3 (40)</span>
+            </div>
+          </div>
+        </div>
+        <div class="svc-meta">
+          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
+        </div>
+        <button class="btn-saiba" onclick="openModal('modalViolao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
+      </div>
+    </div>
+
+    <div class="svc-card" data-cat="culinaria" data-name="aula de culinária">
+      <div class="svc-img-wrap">
+        <img src="../imagens/aula.png" alt="Aula de culinária">
+        <span class="svc-tag">Culinária</span>
+      </div>
+      <div class="svc-body">
+        <h3>Aula de culinária</h3>
+        <p class="svc-desc">Aprenda a fazer pratos deliciosos e saudáveis. Aulas práticas e divertidas para todos os níveis.</p>
+        <div class="svc-person">
+          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="svc-person-name">Mariana Lopes</div>
+            <div class="svc-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span> 5.0 (1.024)</span>
+            </div>
+          </div>
+        </div>
+        <div class="svc-meta">
+          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
+        </div>
+        <button class="btn-saiba" onclick="openModal('modalAula')"><i class="bi bi-info-circle"></i> Saiba mais</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+
+<!-- Modal Culinária -->
+<div class="modal-overlay" id="modalAula">
+  <div class="modal-sheet">
+    <img src="../imagens/aula.png" alt="Aula de culinária" class="modal-img" onerror="this.style.display='none'">
+    <button class="modal-close" onclick="closeModal('modalAula')"><i class="bi bi-x-lg"></i></button>
+    <div class="modal-body">
+      <h3>Aula de culinária</h3>
+      <p class="desc">Aprenda a fazer pratos deliciosos e saudáveis. Aulas práticas e divertidas que ensinam desde receitas simples do dia a dia até pratos especiais para surpreender a família.</p>
+      <div class="modal-person-row">
+        <div class="modal-person-left">
+          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="modal-person-name">Mariana Lopes</div>
+            <div class="modal-person-meta">
+              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 5.0 (1.024) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h 30min
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="modal-pts">230 pontos necessários</span>
+          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="modal-reviews">
+        <h5>Avaliações</h5>
+        <div class="review-box">
+          <h6>Aula de culinária</h6>
+          <div class="reviewer">Cliente: João Silva</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Excelente professora! Muito atenciosa e paciente."</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="review-box">
+          <h6>Aula de culinária</h6>
+          <div class="reviewer">Cliente: Ana Paula</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Muito divertido!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
+  </div>
+</div>
+
+<!-- Modal Manutenção -->
+<div class="modal-overlay" id="modalManutencao">
+  <div class="modal-sheet">
+    <img src="../imagens/manutencao.png" alt="Conserto de geladeira" class="modal-img" onerror="this.style.display='none'">
+    <button class="modal-close" onclick="closeModal('modalManutencao')"><i class="bi bi-x-lg"></i></button>
+    <div class="modal-body">
+      <h3>Conserto de geladeira</h3>
+      <p class="desc">Sua geladeira parou? Atendimento ágil e serviço de qualidade garantida. Trabalhamos com conserto, manutenção e higienização de todas as marcas.</p>
+      <div class="modal-person-row">
+        <div class="modal-person-left">
+          <img src="../imagens/perfil2.png" alt="Lucas" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="modal-person-name">Lucas Oliveira</div>
+            <div class="modal-person-meta">
+              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 4.8 (300) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> São Paulo, SP &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="modal-pts">260 pontos necessários</span>
+          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="modal-reviews">
+        <h5>Avaliações</h5>
+        <div class="review-box">
+          <h6>Conserto de geladeira</h6>
+          <div class="reviewer">Cliente: João Silva</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Muito rápido e eficiente!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
+  </div>
+</div>
+
+<!-- Modal Yoga -->
+<div class="modal-overlay" id="modalYoga">
+  <div class="modal-sheet">
+    <img src="../imagens/yoga.png" alt="Aula de yoga" class="modal-img" onerror="this.style.display='none'">
+    <button class="modal-close" onclick="closeModal('modalYoga')"><i class="bi bi-x-lg"></i></button>
+    <div class="modal-body">
+      <h3>Aula de yoga</h3>
+      <p class="desc">Venha relaxar em uma aula de yoga transformadora, onde corpo e mente se conectam em harmonia. Aberto para todos os níveis.</p>
+      <div class="modal-person-row">
+        <div class="modal-person-left">
+          <img src="../imagens/perfil3.png" alt="Isadora" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="modal-person-name">Isadora Moraes</div>
+            <div class="modal-person-meta">
+              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 5.0 (800) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="modal-pts">180 pontos necessários</span>
+          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="modal-reviews">
+        <h5>Avaliações</h5>
+        <div class="review-box">
+          <h6>Aula de yoga</h6>
+          <div class="reviewer">Cliente: Mariana Lopes</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Excelente professora! Muito atenciosa e paciente."</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="review-box">
+          <h6>Aula de yoga</h6>
+          <div class="reviewer">Cliente: João Silva</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Muito divertido e relaxante!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
+  </div>
+</div>
+
+<!-- Modal Violão -->
+<div class="modal-overlay" id="modalViolao">
+  <div class="modal-sheet">
+    <img src="../imagens/violao.png" alt="Aula de violão" class="modal-img" onerror="this.style.display='none'">
+    <button class="modal-close" onclick="closeModal('modalViolao')"><i class="bi bi-x-lg"></i></button>
+    <div class="modal-body">
+      <h3>Aula de violão</h3>
+      <p class="desc">Aulas leves e divertidas com foco na prática e no ritmo de cada aluno. Descubra o prazer de tocar suas músicas favoritas!</p>
+      <div class="modal-person-row">
+        <div class="modal-person-left">
+          <img src="../imagens/perfil4.png" alt="Marcos" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="modal-person-name">Marcos Lima</div>
+            <div class="modal-person-meta">
+              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 4.3 (40) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="modal-pts">110 pontos necessários</span>
+          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="modal-reviews">
+        <h5>Avaliações</h5>
+        <div class="review-box">
+          <h6>Aula de violão</h6>
+          <div class="reviewer">Cliente: João Silva</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="review-text">"Excelente professor! Muito atencioso e paciente."</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Out 2025</div>
+        </div>
+        <div class="review-box">
+          <h6>Aula de violão</h6>
+          <div class="reviewer">Cliente: Ana Lima</div>
+          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
+          <div class="review-text">"Muito divertido, aprendi bastante!"</div>
+          <div class="review-date"><i class="bi bi-calendar-fill"></i> 16 Mar 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
+  </div>
+</div>
+
+<script>
+  /* CATEGORY FILTER */
+  function filterCat(btn) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const cat = btn.dataset.cat;
+    const cards = document.querySelectorAll('.svc-card');
+    let visible = 0;
+    cards.forEach(c => {
+      const show = cat === 'todos' || c.dataset.cat === cat;
+      c.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('countLabel').textContent = visible;
+  }
+
+  /* SEARCH FILTER */
+  function filterCards() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.svc-card');
+    const activeCat = document.querySelector('.cat-pill.active')?.dataset.cat || 'todos';
+    let visible = 0;
+    cards.forEach(c => {
+      const matchCat = activeCat === 'todos' || c.dataset.cat === activeCat;
+      const matchQ = c.dataset.name.includes(q);
+      const show = matchCat && matchQ;
+      c.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('countLabel').textContent = visible;
+  }
+
+  /* MODALS */
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+  });
+</script>
+</body>
+</html>

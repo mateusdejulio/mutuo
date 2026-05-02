@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | ONGs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-principal: #588157;
+      --verde-escuro:    #3a5a40;
+      --creme:           #E1DCD0;
+      --creme-claro:     #f0ede6;
+      --branco:          #ffffff;
+      --texto-escuro:    #1e2e1f;
+      --texto-suave:     #7a8c78;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: var(--branco);
+      color: var(--texto-escuro);
+      padding-top: 72px;
+    }
+
+    /* ── BARRA DE NAVEGAÇÃO ── */
+    .barra-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background-color: var(--verde-principal);
+      height: 72px;
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+    .nav-marca {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem; color: var(--creme);
+      letter-spacing: 0.4px; margin-right: 2rem; flex-shrink: 0;
+    }
+    .nav-marca img { width: 38px; height: 38px; border-radius: 8px; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1;
+    }
+    .nav-links a {
+      text-decoration: none; color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem; border-radius: 8px;
+      transition: color 0.18s, background 0.18s; white-space: nowrap;
+    }
+    .nav-links a:hover, .nav-links a.ativo {
+      color: var(--creme); background: rgba(255,255,255,0.12);
+    }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a { display: flex; align-items: center; gap: 5px; }
+    .painel-dropdown {
+      display: none; position: absolute; top: 100%; left: 0;
+      padding-top: 10px; min-width: 215px;
+    }
+    .painel-dropdown-interno {
+      background: var(--verde-escuro); border-radius: 12px; overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+      border: 1px solid rgba(225,220,208,0.1);
+    }
+    .nav-dropdown:hover .painel-dropdown { display: block; }
+    .painel-dropdown a {
+      display: flex; align-items: center; gap: 9px;
+      color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem;
+      font-size: 0.84rem; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .painel-dropdown a:hover { background: rgba(255,255,255,0.08); color: var(--creme); }
+    .painel-dropdown a.perigo { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
+    .nav-direita { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .nav-sino {
+      position: relative; cursor: pointer;
+      color: var(--creme); font-size: 1.25rem; opacity: 0.8;
+      transition: opacity 0.2s; text-decoration: none;
+    }
+    .nav-sino:hover { opacity: 1; }
+    .sino-badge {
+      position: absolute; top: -5px; right: -6px;
+      background: var(--creme); color: var(--verde-escuro);
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--verde-principal);
+    }
+    .nav-perfil {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      border-radius: 40px; padding: 5px 14px 5px 5px;
+      transition: background 0.2s;
+    }
+    .nav-perfil:hover { background: rgba(255,255,255,0.16); }
+    .nav-perfil img {
+      width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.4);
+    }
+    .nav-perfil span {
+      color: var(--creme); font-size: 0.84rem; font-weight: 500;
+      white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── HERÓI DE BUSCA ── */
+    .heroi-busca {
+      background: var(--verde-principal);
+      padding: 3rem 2rem 3.5rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+      animation: descerFade 0.45s ease both;
+    }
+    .heroi-busca::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      background: rgba(58,90,64,0.3); border-radius: 50%;
+    }
+    .heroi-busca::after {
+      content: ''; position: absolute; bottom: -80px; left: 30%;
+      width: 300px; height: 300px;
+      background: rgba(58,90,64,0.15); border-radius: 50%;
+    }
+    .heroi-busca-interno {
+      position: relative; z-index: 1; max-width: 600px; margin: 0 auto;
+    }
+    .heroi-busca h2 { font-size: 1.9rem; color: var(--creme); margin-bottom: 0.5rem; }
+    .heroi-busca p { font-size: 0.92rem; color: rgba(225,220,208,0.75); margin-bottom: 1.75rem; }
+
+    .barra-busca {
+      display: flex; align-items: center;
+      background: var(--branco); border-radius: 50px;
+      padding: 6px 6px 6px 18px;
+      box-shadow: 0 4px 20px rgba(58,90,64,0.25);
+    }
+    .barra-busca i { color: var(--texto-suave); font-size: 1rem; margin-right: 8px; flex-shrink: 0; }
+    .barra-busca input {
+      flex: 1; border: none; outline: none;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.9rem; color: var(--texto-escuro);
+      background: transparent;
+    }
+    .barra-busca input::placeholder { color: var(--texto-suave); }
+    .botao-buscar {
+      background: var(--verde-principal); color: var(--creme);
+      border: none; border-radius: 40px;
+      padding: 10px 22px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.87rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .botao-buscar:hover { background: var(--verde-escuro); }
+
+    /* ── FILTROS ── */
+    .area-filtros {
+      margin: 1.5rem 2rem;
+      animation: subirFade 0.45s ease 0.05s both;
+    }
+    .topo-filtros {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;
+    }
+    .contador-resultados {
+      font-size: 0.9rem; font-weight: 600; color: var(--texto-suave);
+    }
+    .contador-resultados strong { color: var(--verde-escuro); }
+    .grupo-botoes-filtro { display: flex; gap: 8px; }
+    .botao-filtro {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--branco); color: var(--verde-escuro);
+      border: 1.5px solid var(--creme); border-radius: 10px;
+      padding: 7px 14px; font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .botao-filtro:hover { border-color: var(--verde-principal); background: var(--creme-claro); }
+
+    .categorias { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pilula-categoria {
+      background: var(--branco);
+      border: 1.5px solid var(--creme);
+      color: var(--verde-escuro); border-radius: 30px;
+      padding: 6px 16px; font-family: 'Quicksand', sans-serif;
+      font-size: 0.81rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pilula-categoria:hover { border-color: var(--verde-principal); background: var(--creme-claro); }
+    .pilula-categoria.ativa {
+      background: var(--verde-principal); color: var(--creme);
+      border-color: var(--verde-principal);
+    }
+
+    /* ── GRADE DE CARTÕES ── */
+    .area-cartoes {
+      margin: 0 2rem 3rem;
+      animation: subirFade 0.5s ease 0.1s both;
+    }
+    .grade-cartoes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .cartao-servico {
+      background: var(--branco);
+      border-radius: 20px;
+      border: 1.5px solid var(--creme);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(88,129,87,0.07);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .cartao-servico:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(88,129,87,0.15);
+    }
+
+    .envoltorio-imagem { position: relative; height: 160px; overflow: hidden; flex-shrink: 0; }
+    .envoltorio-imagem img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .cartao-servico:hover .envoltorio-imagem img { transform: scale(1.05); }
+    .etiqueta-categoria {
+      position: absolute; top: 11px; left: 12px;
+      background: var(--verde-principal); color: var(--creme);
+      font-size: 0.7rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    .corpo-cartao {
+      padding: 1.1rem 1.2rem 1.2rem;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .corpo-cartao h3 { font-size: 1.05rem; color: var(--verde-escuro); margin-bottom: 0.3rem; }
+    .descricao-cartao { font-size: 0.81rem; color: var(--texto-suave); line-height: 1.5; margin-bottom: 0.9rem; }
+
+    .linha-ong {
+      display: flex; align-items: center; gap: 9px;
+      padding-bottom: 0.8rem;
+      border-bottom: 1.5px solid var(--creme);
+      margin-bottom: 0.8rem;
+    }
+    .linha-ong img {
+      width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--creme);
+    }
+    .nome-ong { font-size: 0.82rem; font-weight: 600; color: var(--verde-escuro); }
+    .estrelas-ong { color: var(--verde-principal); font-size: 0.7rem; }
+    .estrelas-ong span { color: var(--texto-suave); font-size: 0.72rem; }
+
+    .metadados { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .item-metadado {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.78rem; color: var(--texto-suave);
+    }
+    .item-metadado i { color: var(--verde-principal); }
+
+    .botao-saiba-mais {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--verde-principal); color: var(--creme);
+      border-radius: 10px; padding: 10px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.87rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: auto;
+    }
+    .botao-saiba-mais:hover { background: var(--verde-escuro); }
+    .botao-saiba-mais:active { transform: scale(0.98); }
+
+    /* ── MODAL ── */
+    .sobreposicao-modal {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(30,46,31,0.55); backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    .sobreposicao-modal.aberto { display: flex; }
+
+    .folha-modal {
+      background: var(--branco); border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto;
+      animation: deslizarCima 0.35s ease; position: relative;
+    }
+    @keyframes deslizarCima {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    .imagem-modal {
+      width: 100%; height: 260px; object-fit: cover;
+      border-radius: 24px 24px 0 0;
+    }
+    .botao-fechar-modal {
+      position: absolute; top: 14px; right: 14px;
+      width: 36px; height: 36px;
+      background: rgba(30,46,31,0.55);
+      border: none; border-radius: 50%; cursor: pointer;
+      color: var(--creme); font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .botao-fechar-modal:hover { background: rgba(30,46,31,0.8); }
+
+    .corpo-modal {
+      padding: 1.5rem 1.5rem 0;
+      margin-top: -18px;
+      background: var(--branco);
+      border-radius: 20px 20px 0 0;
+      position: relative; z-index: 2;
+    }
+    .corpo-modal h3 { font-size: 1.35rem; color: var(--verde-escuro); margin-bottom: 0.4rem; }
+    .corpo-modal p.descricao { font-size: 0.88rem; color: var(--texto-suave); line-height: 1.6; margin-bottom: 1.2rem; }
+
+    .linha-ong-modal {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      padding-bottom: 1.1rem;
+      border-bottom: 1.5px solid var(--creme); margin-bottom: 1.2rem;
+    }
+    .esquerda-ong-modal { display: flex; align-items: center; gap: 10px; }
+    .esquerda-ong-modal img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+    .nome-ong-modal { font-size: 0.9rem; font-weight: 600; color: var(--verde-escuro); }
+    .meta-ong-modal { font-size: 0.76rem; color: var(--texto-suave); margin-top: 2px; }
+
+    .etiqueta-pontos {
+      font-size: 0.8rem; font-weight: 600; color: var(--verde-escuro);
+      background: var(--creme); border-radius: 8px; padding: 4px 10px;
+    }
+    .botao-conversa {
+      margin-top: 6px;
+      background: var(--verde-principal); color: var(--creme);
+      border: none; border-radius: 10px; padding: 8px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: background 0.2s;
+    }
+    .botao-conversa:hover { background: var(--verde-escuro); }
+
+    .avaliacoes-modal h5 { font-size: 1rem; color: var(--verde-escuro); margin-bottom: 0.85rem; }
+    .caixa-avaliacao {
+      background: var(--creme-claro); border-radius: 14px;
+      padding: 0.9rem 1rem; margin-bottom: 10px;
+    }
+    .caixa-avaliacao h6 { font-size: 0.85rem; font-weight: 600; color: var(--verde-escuro); margin-bottom: 2px; }
+    .nome-avaliador { font-size: 0.77rem; color: var(--texto-suave); margin-bottom: 6px; }
+    .estrelas-avaliacao { color: var(--verde-principal); font-size: 0.78rem; margin-bottom: 5px; }
+    .texto-avaliacao { font-size: 0.82rem; color: var(--texto-escuro); font-style: italic; margin-bottom: 4px; }
+    .data-avaliacao { font-size: 0.73rem; color: var(--texto-suave); }
+
+    .rodape-modal { padding: 1.2rem 1.5rem 1.8rem; }
+    .botao-inscrever {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--verde-principal); color: var(--creme);
+      border-radius: 14px; padding: 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .botao-inscrever:hover { background: var(--verde-escuro); }
+    .botao-inscrever:active { transform: scale(0.98); }
+
+    /* ── ANIMAÇÕES ── */
+    @keyframes descerFade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subirFade {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVO ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-perfil span { display: none; }
+      .area-filtros, .area-cartoes { margin-left: 1rem; margin-right: 1rem; }
+      .heroi-busca { padding: 2rem 1rem 2.5rem; }
+      .heroi-busca h2 { font-size: 1.45rem; }
+      .grade-cartoes { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- BARRA DE NAVEGAÇÃO -->
+<nav class="barra-nav">
+  <a class="nav-marca" href="#">
+    <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+    Mútuo
+  </a>
+  <ul class="nav-links">
+    <li><a href="homeMutuo.html">Início</a></li>
+    <li><a href="serviçosMutuo.html">Serviços</a></li>
+    <li><a href="OngsMutuo.html" class="ativo">ONGs</a></li>
+    <li><a href="chatMutuo.html">Chat</a></li>
+    <li class="nav-dropdown">
+      <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+      <div class="painel-dropdown">
+        <div class="painel-dropdown-interno">
+          <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+          <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+          <a href="contatoMutuo.html"><i class="bi bi-envelope"></i> Contato</a>
+          <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+          <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+          <a href="../login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-direita">
+    <a href="notificacoesMutuo.html" class="nav-sino">
+      <i class="bi bi-bell-fill"></i>
+      <span class="sino-badge">3</span>
+    </a>
+    <a href="perfilMutuo.html" class="nav-perfil">
+      <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
+      <span>Isabela Monteiro</span>
+    </a>
+  </div>
+</nav>
+
+<!-- HERÓI DE BUSCA -->
+<section class="heroi-busca">
+  <div class="heroi-busca-interno">
+    <h2>Encontre serviços solidários e apoie ONGs</h2>
+    <p>Troque serviços com ONGs e contribua para uma rede solidária que transforma ações voluntárias em impacto social real.</p>
+    <div class="barra-busca">
+      <i class="bi bi-search"></i>
+      <input type="text" id="campoBusca" placeholder="Buscar serviços..." oninput="filtrarCartoes()">
+      <button class="botao-buscar">Buscar</button>
+    </div>
+  </div>
+</section>
+
+<!-- FILTROS -->
+<div class="area-filtros">
+  <div class="topo-filtros">
+    <span class="contador-resultados"><strong id="labelContador">5</strong> serviços encontrados</span>
+    <div class="grupo-botoes-filtro">
+      <button class="botao-filtro"><i class="bi bi-funnel"></i> Filtros</button>
+      <button class="botao-filtro"><i class="bi bi-arrow-down-up"></i> Ordenar</button>
+    </div>
+  </div>
+  <div class="categorias">
+    <button class="pilula-categoria" data-categoria="todos" onclick="filtrarCategoria(this)">Todos</button>
+    <button class="pilula-categoria ativa" data-categoria="animais" onclick="filtrarCategoria(this)">Animais</button>
+    <button class="pilula-categoria" data-categoria="criancas" onclick="filtrarCategoria(this)">Crianças e adolescentes</button>
+    <button class="pilula-categoria" data-categoria="idosos" onclick="filtrarCategoria(this)">Idosos</button>
+    <button class="pilula-categoria" data-categoria="ambiental" onclick="filtrarCategoria(this)">Ambientais</button>
+    <button class="pilula-categoria" data-categoria="educacao" onclick="filtrarCategoria(this)">Educação</button>
+  </div>
+</div>
+
+<!-- CARTÕES -->
+<div class="area-cartoes">
+  <div class="grade-cartoes" id="gradeCartoes">
+
+    <div class="cartao-servico" data-categoria="animais" data-nome="passeie com os cachorros">
+      <div class="envoltorio-imagem">
+        <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorros">
+        <span class="etiqueta-categoria">Animais</span>
+      </div>
+      <div class="corpo-cartao">
+        <h3>Passeie com os cachorros</h3>
+        <p class="descricao-cartao">Ande com os nossos cachorros e leve alegria a quem mais precisa!</p>
+        <div class="linha-ong">
+          <img src="../imagens/ongPerfil1.png" alt="Instituto cães amigos" onerror="this.style.background='var(--creme)'">
+          <div>
+            <a href="perfilOngMutuo.html"  style="text-decoration:none;" class="nome-ong">Instituto cães amigos</a>
+            
+            <div class="estrelas-ong">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span> 5.0 (1.024)</span>
+            </div>
+          </div>
+        </div>
+        <div class="metadados">
+          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 30min</span>
+        </div>
+        <button class="botao-saiba-mais" onclick="abrirModal('modalPasseio')">
+          <i class="bi bi-info-circle"></i> Saiba mais
+        </button>
+      </div>
+    </div>
+
+    <div class="cartao-servico" data-categoria="animais" data-nome="limpeza e higienização dos animais">
+      <div class="envoltorio-imagem">
+        <img src="../imagens/banho.png" alt="Higienização dos animais">
+        <span class="etiqueta-categoria">Animais</span>
+      </div>
+      <div class="corpo-cartao">
+        <h3>Limpeza e higienização dos animais</h3>
+        <p class="descricao-cartao">Faça a diferença com suas mãos! Ajude na limpeza e higiene dos nossos peludos.</p>
+        <div class="linha-ong">
+          <img src="../imagens/ongPerfil2.png" alt="Instituto patas" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong">Instituto patas</div>
+            <div class="estrelas-ong">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span> 4.8 (800)</span>
+            </div>
+          </div>
+        </div>
+        <div class="metadados">
+          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 2h</span>
+        </div>
+        <button class="botao-saiba-mais" onclick="abrirModal('modalLimpeza')">
+          <i class="bi bi-info-circle"></i> Saiba mais
+        </button>
+      </div>
+    </div>
+
+    <div class="cartao-servico" data-categoria="animais" data-nome="ajuda para feira de adoções">
+      <div class="envoltorio-imagem">
+        <img src="../imagens/feira.png" alt="Feira de adoções">
+        <span class="etiqueta-categoria">Animais</span>
+      </div>
+      <div class="corpo-cartao">
+        <h3>Ajuda para feira de adoções</h3>
+        <p class="descricao-cartao">Seja voluntário na feirinha de adoções e acompanhe novas histórias de perto!</p>
+        <div class="linha-ong">
+          <img src="../imagens/ongPerfil3.png" alt="Instituto rabo de gato" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong">Instituto rabo de gato</div>
+            <div class="estrelas-ong">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span> 5.0 (500)</span>
+            </div>
+          </div>
+        </div>
+        <div class="metadados">
+          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 3h</span>
+        </div>
+        <button class="botao-saiba-mais" onclick="abrirModal('modalFeira')">
+          <i class="bi bi-info-circle"></i> Saiba mais
+        </button>
+      </div>
+    </div>
+
+    <div class="cartao-servico" data-categoria="animais" data-nome="transporte de animais">
+      <div class="envoltorio-imagem">
+        <img src="../imagens/transporte.png" alt="Transporte de animais">
+        <span class="etiqueta-categoria">Animais</span>
+      </div>
+      <div class="corpo-cartao">
+        <h3>Transporte de animais</h3>
+        <p class="descricao-cartao">Ajude nossos amigos de quatro patas a chegarem em segurança ao seu destino.</p>
+        <div class="linha-ong">
+          <img src="../imagens/ongPerfil3.png" alt="Instituto rabo de gato" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong">Instituto rabo de gato</div>
+            <div class="estrelas-ong">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span> 4.3 (40)</span>
+            </div>
+          </div>
+        </div>
+        <div class="metadados">
+          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 1h</span>
+        </div>
+        <button class="botao-saiba-mais" onclick="abrirModal('modalTransporte')">
+          <i class="bi bi-info-circle"></i> Saiba mais
+        </button>
+      </div>
+    </div>
+
+    <div class="cartao-servico" data-categoria="animais" data-nome="acolhimento temporário">
+      <div class="envoltorio-imagem">
+        <img src="../imagens/lar.png" alt="Acolhimento temporário">
+        <span class="etiqueta-categoria">Animais</span>
+      </div>
+      <div class="corpo-cartao">
+        <h3>Acolhimento temporário</h3>
+        <p class="descricao-cartao">Abra seu lar e seu coração! Ofereça abrigo e amor até que o animal encontre sua família.</p>
+        <div class="linha-ong">
+          <img src="../imagens/ongPerfil4.png" alt="Instituto patinha solidária" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong">Instituto patinha solidária</div>
+            <div class="estrelas-ong">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span> 4.5 (300)</span>
+            </div>
+          </div>
+        </div>
+        <div class="metadados">
+          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
+          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 1 semana</span>
+        </div>
+        <button class="botao-saiba-mais" onclick="abrirModal('modalLar')">
+          <i class="bi bi-info-circle"></i> Saiba mais
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODAIS ── -->
+
+<!-- Modal Passeio -->
+<div class="sobreposicao-modal" id="modalPasseio">
+  <div class="folha-modal">
+    <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorros" class="imagem-modal" onerror="this.style.display='none'">
+    <button class="botao-fechar-modal" onclick="fecharModal('modalPasseio')"><i class="bi bi-x-lg"></i></button>
+    <div class="corpo-modal">
+      <h3>Passeie com os cachorros</h3>
+      <p class="descricao">Ande com os nossos cachorros e leve alegria a quem mais precisa! Com apenas um passeio, você oferece carinho, exercício e companhia para animais resgatados que aguardam um novo lar.</p>
+      <div class="linha-ong-modal">
+        <div class="esquerda-ong-modal">
+          <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
+          <div>
+            <a href="perfilOngMutuo.html"  style="text-decoration:none;" class="nome-ong">Instituto cães amigos</a>
+            <div class="meta-ong-modal">
+              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 5.0 (1.024) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 30min
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="etiqueta-pontos">150 pontos recebidos</span>
+          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="avaliacoes-modal">
+        <h5>Avaliações</h5>
+        <div class="caixa-avaliacao">
+          <h6>Passeio com os cachorros</h6>
+          <div class="nome-avaliador">Voluntário: Felipe Souza</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Experiência incrível!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="caixa-avaliacao">
+          <h6>Passeio com os cachorros</h6>
+          <div class="nome-avaliador">Voluntário: João Silva</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Passeio muito divertido!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
+  </div>
+</div>
+
+<!-- Modal Limpeza -->
+<div class="sobreposicao-modal" id="modalLimpeza">
+  <div class="folha-modal">
+    <img src="../imagens/banho.png" alt="Limpeza dos animais" class="imagem-modal" onerror="this.style.display='none'">
+    <button class="botao-fechar-modal" onclick="fecharModal('modalLimpeza')"><i class="bi bi-x-lg"></i></button>
+    <div class="corpo-modal">
+      <h3>Limpeza e higienização dos animais</h3>
+      <p class="descricao">O instituto patas convida você a viver um momento especial com nossos peludos! Participando das atividades de banho e higiene, você ajuda a garantir bem-estar, saúde e conforto para animais resgatados.</p>
+      <div class="linha-ong-modal">
+        <div class="esquerda-ong-modal">
+          <img src="../imagens/ongPerfil2.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong-modal">Instituto patas</div>
+            <div class="meta-ong-modal">
+              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 4.8 (800) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> São Paulo, SP &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 2h
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="etiqueta-pontos">200 pontos recebidos</span>
+          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="avaliacoes-modal">
+        <h5>Avaliações</h5>
+        <div class="caixa-avaliacao">
+          <h6>Limpeza e higienização dos animais</h6>
+          <div class="nome-avaliador">Voluntário: João Silva</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Muito organizado!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+        <div class="caixa-avaliacao">
+          <h6>Limpeza e higienização dos animais</h6>
+          <div class="nome-avaliador">Voluntário: Ana Lima</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Muito divertido!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
+  </div>
+</div>
+
+<!-- Modal Feira -->
+<div class="sobreposicao-modal" id="modalFeira">
+  <div class="folha-modal">
+    <img src="../imagens/feira.png" alt="Feira de adoções" class="imagem-modal" onerror="this.style.display='none'">
+    <button class="botao-fechar-modal" onclick="fecharModal('modalFeira')"><i class="bi bi-x-lg"></i></button>
+    <div class="corpo-modal">
+      <h3>Ajuda para feira de adoção</h3>
+      <p class="descricao">O Instituto rabo de gato precisa de corações solidários para ajudar nas nossas feiras de adoção! Com sua ajuda, podemos acolher visitantes, apresentar nossos animais e criar um ambiente cheio de carinho e esperança.</p>
+      <div class="linha-ong-modal">
+        <div class="esquerda-ong-modal">
+          <img src="../imagens/ongPerfil3.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong-modal">Instituto rabo de gato</div>
+            <div class="meta-ong-modal">
+              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 5.0 (500) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 3h
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="etiqueta-pontos">250 pontos recebidos</span>
+          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="avaliacoes-modal">
+        <h5>Avaliações</h5>
+        <div class="caixa-avaliacao">
+          <h6>Ajuda para feira de adoção</h6>
+          <div class="nome-avaliador">Voluntário: Bia Fernandes</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Foi muito legal ver tantos animais ganhando um lar!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="caixa-avaliacao">
+          <h6>Ajuda para feira de adoção</h6>
+          <div class="nome-avaliador">Voluntário: João Silva</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Muito feliz em ajudar!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
+  </div>
+</div>
+
+<!-- Modal Transporte -->
+<div class="sobreposicao-modal" id="modalTransporte">
+  <div class="folha-modal">
+    <img src="../imagens/transporte.png" alt="Transporte de animais" class="imagem-modal" onerror="this.style.display='none'">
+    <button class="botao-fechar-modal" onclick="fecharModal('modalTransporte')"><i class="bi bi-x-lg"></i></button>
+    <div class="corpo-modal">
+      <h3>Transporte de animais</h3>
+      <p class="descricao">Buscamos voluntários para ajudar no transporte de animais. Com sua ajuda, cães e gatos podem ir para consultas, feiras de adoção ou reencontrar uma família. Cada viagem é uma chance de mudar um destino!</p>
+      <div class="linha-ong-modal">
+        <div class="esquerda-ong-modal">
+          <img src="../imagens/ongPerfil3.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong-modal">Instituto rabo de gato</div>
+            <div class="meta-ong-modal">
+              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 4.3 (40) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 1h
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="etiqueta-pontos">250 pontos recebidos</span>
+          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="avaliacoes-modal">
+        <h5>Avaliações</h5>
+        <div class="caixa-avaliacao">
+          <h6>Transporte de animais</h6>
+          <div class="nome-avaliador">Voluntário: Bia Fernandes</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Foi muito legal ver tantos animais ganhando um lar!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="caixa-avaliacao">
+          <h6>Transporte de animais</h6>
+          <div class="nome-avaliador">Voluntário: João Silva</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Muito feliz em ajudar!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
+  </div>
+</div>
+
+<!-- Modal Lar Temporário -->
+<div class="sobreposicao-modal" id="modalLar">
+  <div class="folha-modal">
+    <img src="../imagens/lar.png" alt="Acolhimento temporário" class="imagem-modal" onerror="this.style.display='none'">
+    <button class="botao-fechar-modal" onclick="fecharModal('modalLar')"><i class="bi bi-x-lg"></i></button>
+    <div class="corpo-modal">
+      <h3>Acolhimento temporário</h3>
+      <p class="descricao">Seja um lar temporário e ofereça abrigo e carinho a animais resgatados. Cada acolhimento é uma chance de recomeço. Transforme amor em abrigo e mude uma vida!</p>
+      <div class="linha-ong-modal">
+        <div class="esquerda-ong-modal">
+          <img src="../imagens/ongPerfil4.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
+          <div>
+            <div class="nome-ong-modal">Instituto patinha solidária</div>
+            <div class="meta-ong-modal">
+              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 4.5 (300) &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> São Paulo, SP &nbsp;·&nbsp;
+              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 1 semana
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="etiqueta-pontos">700 pontos recebidos</span>
+          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
+        </div>
+      </div>
+      <div class="avaliacoes-modal">
+        <h5>Avaliações</h5>
+        <div class="caixa-avaliacao">
+          <h6>Acolhimento temporário</h6>
+          <div class="nome-avaliador">Voluntário: Bia Fernandes</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Já quero fazer mais vezes!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
+        </div>
+        <div class="caixa-avaliacao">
+          <h6>Acolhimento temporário</h6>
+          <div class="nome-avaliador">Voluntário: João Silva</div>
+          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <div class="texto-avaliacao">"Muito divertido!"</div>
+          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
+  </div>
+</div>
+
+<script>
+  /* FILTRO DE CATEGORIA */
+  function filtrarCategoria(botao) {
+    document.querySelectorAll('.pilula-categoria').forEach(p => p.classList.remove('ativa'));
+    botao.classList.add('ativa');
+    const cat = botao.dataset.categoria;
+    const cartoes = document.querySelectorAll('.cartao-servico');
+    let visiveis = 0;
+    cartoes.forEach(c => {
+      const mostrar = cat === 'todos' || c.dataset.categoria === cat;
+      c.style.display = mostrar ? '' : 'none';
+      if (mostrar) visiveis++;
+    });
+    document.getElementById('labelContador').textContent = visiveis;
+  }
+
+  /* FILTRO DE BUSCA */
+  function filtrarCartoes() {
+    const termo = document.getElementById('campoBusca').value.toLowerCase();
+    const catAtiva = document.querySelector('.pilula-categoria.ativa')?.dataset.categoria || 'todos';
+    const cartoes = document.querySelectorAll('.cartao-servico');
+    let visiveis = 0;
+    cartoes.forEach(c => {
+      const bateCat = catAtiva === 'todos' || c.dataset.categoria === catAtiva;
+      const bateTermo = c.dataset.nome.includes(termo);
+      const mostrar = bateCat && bateTermo;
+      c.style.display = mostrar ? '' : 'none';
+      if (mostrar) visiveis++;
+    });
+    document.getElementById('labelContador').textContent = visiveis;
+  }
+
+  /* MODAIS */
+  function abrirModal(id) {
+    document.getElementById(id).classList.add('aberto');
+    document.body.style.overflow = 'hidden';
+  }
+  function fecharModal(id) {
+    document.getElementById(id).classList.remove('aberto');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.sobreposicao-modal').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
+  });
+
+  /* Inicializar com categoria "animais" ativa */
+  window.addEventListener('load', () => {
+    filtrarCategoria(document.querySelector('.pilula-categoria.ativa'));
+  });
+</script>
+</body>
+</html>

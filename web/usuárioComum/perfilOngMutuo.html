@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo — Perfil da ONG</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-principal: #588157;
+      --verde-escuro: #3a5a40;
+      --verde-palido: #eaf2e6;
+      --verde-badge: #b7ce8f;
+      --creme: #E1DCD0;
+      --altura-nav: 72px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #f2f5f1;
+      color: #1a2e1b;
+      min-height: 100vh;
+      padding-top: var(--altura-nav);
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background-color: var(--verde-principal);
+      height: var(--altura-nav);
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+    .marca-nav { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 1.55rem; color: var(--creme); letter-spacing: 0.4px; margin-right: 2rem; flex-shrink: 0; }
+    .marca-nav img { width: 38px; height: 38px; border-radius: 8px; }
+    .links-nav { display: flex; align-items: center; gap: 2px; list-style: none; flex: 1; margin: 0; padding: 0; }
+    .links-nav a { text-decoration: none; color: rgba(225,220,208,0.82); font-size: 0.875rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 8px; transition: color 0.18s, background 0.18s; white-space: nowrap; }
+    .links-nav a:hover, .links-nav a.ativo { color: var(--creme); background: rgba(255,255,255,0.12); }
+    .dropdown-nav { position: relative; }
+    .dropdown-nav > a { display: flex; align-items: center; gap: 5px; }
+    .painel-dropdown { display: none; position: absolute; top: 100%; left: 0; padding-top: 10px; min-width: 215px; }
+    .painel-dropdown-interno { background: var(--verde-escuro); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,0.22); border: 1px solid rgba(225,220,208,0.1); }
+    .dropdown-nav:hover .painel-dropdown { display: block; }
+    .painel-dropdown a { display: flex; align-items: center; gap: 9px; color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem; font-size: 0.84rem; text-decoration: none; }
+    .painel-dropdown a:hover { background: rgba(255,255,255,0.08); color: var(--creme); }
+    .painel-dropdown a.perigo { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+    .nav-direita { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .sino-nav { position: relative; cursor: pointer; color: var(--creme); font-size: 1.25rem; opacity: 0.8; transition: opacity 0.2s; text-decoration: none; }
+    .sino-nav:hover { opacity: 1; }
+    .badge-sino { position: absolute; top: -5px; right: -6px; background: var(--creme); color: var(--verde-escuro); font-size: 0.6rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--verde-principal); }
+    .perfil-nav { display: flex; align-items: center; gap: 9px; text-decoration: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(225,220,208,0.18); border-radius: 40px; padding: 5px 14px 5px 5px; }
+    .perfil-nav img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
+    .perfil-nav span { color: var(--creme); font-size: 0.84rem; font-weight: 500; }
+
+    /* ── CAPA ── */
+    .capa-perfil {
+      width: 100%;
+      height: 260px;
+      overflow: hidden;
+      position: relative;
+    }
+    .capa-imagem {
+      width: 100%; height: 100%;
+      object-fit: cover;
+     
+    }
+    .capa-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(26,46,27,0.55));
+    }
+
+    /* ── CONTAINER PRINCIPAL ── */
+    .container-perfil {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px 60px;
+    }
+
+    /* ── BLOCO DE IDENTIDADE ── */
+    .bloco-identidade {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 20px 24px 24px;
+      margin-top: -40px;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 16px;
+      animation: subirSuave 0.4s ease both;
+    }
+
+    .cabecalho-identidade {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .avatar-ong {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      margin-top: -50px;
+      flex-shrink: 0;
+    }
+
+    .identidade-texto { flex: 1; min-width: 0; }
+    .nome-ong {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a2e1b;
+      margin-bottom: 4px;
+    }
+    .slogan-ong {
+      font-size: 0.85rem;
+      color: #7a8c76;
+      font-weight: 500;
+    }
+
+    .btn-solicitar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--verde-principal);
+      color: #fff;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 9px 18px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.18s;
+      flex-shrink: 0;
+      align-self: flex-start;
+      margin-top: 8px;
+    }
+    .btn-solicitar:hover { background: var(--verde-escuro); color: #fff; }
+
+    /* Tags */
+    .linha-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .etiqueta-categoria {
+      background: var(--verde-palido);
+      color: var(--verde-escuro);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* Contatos */
+    .grade-contatos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+    }
+    .item-contato {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: #4a6a4e;
+      font-weight: 500;
+    }
+    .item-contato i {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--verde-palido);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      color: var(--verde-principal);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 560px) {
+      .grade-contatos { grid-template-columns: 1fr; }
+      .cabecalho-identidade { flex-wrap: wrap; }
+    }
+
+    /* ── ABAS ── */
+    .barra-abas {
+      display: flex;
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 16px;
+      padding: 6px;
+      gap: 4px;
+      margin-bottom: 16px;
+      animation: subirSuave 0.4s ease 0.05s both;
+    }
+
+    .btn-aba {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #9aab96;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-aba:hover { color: var(--verde-escuro); background: var(--verde-palido); }
+    .btn-aba.ativo {
+      background: var(--verde-principal);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(88,129,87,0.3);
+    }
+
+    /* ── CONTEÚDO DAS ABAS ── */
+    .conteudo-aba {
+      animation: subirSuave 0.3s ease both;
+    }
+
+    /* ── ABA SOBRE ── */
+    .bloco-sobre {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .titulo-secao {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #9aab96;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .texto-sobre {
+      font-size: 0.88rem;
+      color: #4a6a4e;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .texto-sobre:last-child { margin-bottom: 0; }
+
+    /* ── ABA SERVIÇOS ── */
+    .grade-servicos {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-servico-ong {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: box-shadow 0.18s, transform 0.18s;
+    }
+    .card-servico-ong:hover { box-shadow: 0 6px 22px rgba(58,90,64,0.12); transform: translateY(-2px); }
+
+    .imagem-servico {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .corpo-servico {
+      padding: 18px;
+    }
+
+    .titulo-servico {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a2e1b;
+      margin-bottom: 6px;
+    }
+
+    .descricao-servico {
+      font-size: 0.82rem;
+      color: #7a8c76;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .info-ong-servico {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .foto-ong-mini {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e4ebe2;
+    }
+    .nome-ong-mini {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1a2e1b;
+    }
+    .avaliacao-servico {
+      font-size: 0.75rem;
+      color: #f5a623;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .avaliacao-servico span { color: #9aab96; }
+
+    .detalhes-servico {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .detalhe-item-servico {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #7a8c76;
+    }
+    .detalhe-item-servico i { font-size: 0.8rem; color: var(--verde-principal); }
+
+    .btn-saiba-mais {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      background: var(--verde-principal);
+      color: #fff;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.15s;
+    }
+    .btn-saiba-mais:hover { background: var(--verde-escuro); }
+    .btn-saiba-mais:active { transform: scale(0.98); }
+
+    /* ── MODAL ── */
+    .sobreposicao-modal {
+      display: none; position: fixed; inset: 0; z-index: 2000;
+      background: rgba(26,46,27,0.55);
+      backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    .sobreposicao-modal.aberto { display: flex; }
+
+    .folha-modal {
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 640px;
+      max-height: 92vh; overflow-y: auto;
+      animation: deslizarCima 0.35s ease;
+      position: relative;
+    }
+    .folha-modal::-webkit-scrollbar { width: 4px; }
+    .folha-modal::-webkit-scrollbar-thumb { background: #cdd5c9; border-radius: 4px; }
+
+    @keyframes deslizarCima {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .imagem-modal {
+      width: 100%; height: 240px;
+      object-fit: cover;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .btn-fechar-modal {
+      position: absolute; top: 14px; right: 14px;
+      width: 36px; height: 36px;
+      background: rgba(26,46,27,0.6);
+      border: none; border-radius: 50%; cursor: pointer;
+      color: #fff; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+      z-index: 10;
+    }
+    .btn-fechar-modal:hover { background: rgba(26,46,27,0.9); }
+
+    .corpo-modal {
+      padding: 20px 22px 0;
+      margin-top: -18px;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      position: relative; z-index: 2;
+    }
+    .corpo-modal h3 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--verde-escuro); margin-bottom: 8px;
+    }
+    .corpo-modal .descricao-modal {
+      font-size: 0.86rem; color: #7a8c76;
+      line-height: 1.6; margin-bottom: 16px;
+    }
+
+    .linha-ong-modal {
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e4ebe2;
+      margin-bottom: 16px;
+    }
+    .esquerda-ong-modal { display: flex; align-items: center; gap: 10px; }
+    .esquerda-ong-modal img {
+      width: 42px; height: 42px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid #e4ebe2;
+    }
+    .nome-ong-modal { font-size: 0.9rem; font-weight: 700; color: var(--verde-escuro); }
+    .meta-ong-modal {
+      font-size: 0.75rem; color: #9aab96;
+      margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .meta-ong-modal span { display: flex; align-items: center; gap: 3px; }
+    .meta-ong-modal i { color: var(--verde-principal); }
+
+    .coluna-direita-modal {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 8px;
+    }
+    .etiqueta-pontos-modal {
+      background: var(--verde-palido);
+      color: var(--verde-escuro);
+      font-size: 0.78rem; font-weight: 700;
+      padding: 5px 12px; border-radius: 20px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .btn-conversa-modal {
+      display: flex; align-items: center; gap: 5px;
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 7px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--verde-escuro); cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      text-decoration: none;
+    }
+    .btn-conversa-modal:hover { background: var(--verde-palido); border-color: var(--verde-principal); }
+
+    /* Avaliações */
+    .avaliacoes-modal h5 {
+      font-size: 0.95rem; font-weight: 700;
+      color: var(--verde-escuro); margin-bottom: 12px;
+    }
+    .caixa-avaliacao {
+      background: #f8faf7;
+      border: 1px solid #e4ebe2;
+      border-radius: 14px;
+      padding: 14px 16px; margin-bottom: 10px;
+    }
+    .nome-avaliador { font-size: 0.8rem; font-weight: 700; color: #1a2e1b; margin-bottom: 4px; }
+    .estrelas-avaliacao { color: #f5a623; font-size: 0.75rem; margin-bottom: 6px; }
+    .texto-avaliacao { font-size: 0.82rem; color: #4a6a4e; font-style: italic; margin-bottom: 6px; }
+    .data-avaliacao { font-size: 0.72rem; color: #b0bfac; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+    .rodape-modal {
+      padding: 16px 22px 24px;
+    }
+    .btn-inscrever {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--verde-principal); color: #fff;
+      border-radius: 14px; padding: 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-inscrever:hover { background: var(--verde-escuro); }
+    .btn-inscrever:active { transform: scale(0.98); }
+
+    /* ── ANIMAÇÕES ── */
+    @keyframes subirSuave {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="marca-nav" href="#">
+      <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+      Mútuo
+    </a>
+    <ul class="links-nav">
+      <li><a href="homeMutuo.html">Início</a></li>
+      <li><a href="serviçosMutuo.html">Serviços</a></li>
+      <li><a href="OngsMutuo.html">ONGs</a></li>
+      <li><a href="chatMutuo.html">Chat</a></li>
+      <li class="dropdown-nav">
+        <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+        <div class="painel-dropdown">
+          <div class="painel-dropdown-interno">
+            <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+            <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+            <a href="contatoMutuo.html"><i class="bi bi-envelope"></i> Contato</a>
+            <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+            <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+            <a href="login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-direita">
+      <a href="notificacoesMutuo.html" class="sino-nav">
+        <i class="bi bi-bell-fill"></i>
+        <span class="badge-sino">3</span>
+      </a>
+      <a href="perfilMutuo.html" class="perfil-nav">
+        <img src="imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
+        <span>Isabela Monteiro</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- CAPA -->
+  <div class="capa-perfil">
+    <img src="../imagens/passeioCachorro.png" class="capa-imagem" alt="Capa da ONG"
+      onerror="this.style.background='linear-gradient(135deg,#588157,#3a5a40)';this.style.display='block'">
+    <div class="capa-overlay"></div>
+  </div>
+
+  <div class="container-perfil">
+
+    <!-- ── IDENTIDADE ── -->
+    <div class="bloco-identidade">
+      <div class="cabecalho-identidade">
+        <img src="../imagens/ongPerfil1.png" class="avatar-ong" alt="Logo Instituto Cães Amigos"
+          onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
+        <div class="identidade-texto">
+          <h2 class="nome-ong">Instituto Cães Amigos</h2>
+          <p class="slogan-ong">Transformando vidas através do cuidado e ação social</p>
+        </div>
+      </div>
+
+      <div class="linha-tags">
+        <span class="etiqueta-categoria"><i class="bi bi-paw-fill"></i> Animais</span>
+        <span class="etiqueta-categoria"><i class="bi bi-tree-fill"></i> Ambiental</span>
+      </div>
+
+      <div class="grade-contatos">
+        <div class="item-contato">
+          <i class="bi bi-geo-alt-fill"></i>
+          Rio de Janeiro, RJ
+        </div>
+        <div class="item-contato">
+          <i class="bi bi-globe"></i>
+          institutocaesamigos.org.br
+        </div>
+        <div class="item-contato">
+          <i class="bi bi-envelope-fill"></i>
+          contato@caesamigos.com
+        </div>
+        <div class="item-contato">
+          <i class="bi bi-telephone-fill"></i>
+          +55 19 99999-9999
+        </div>
+        <div class="item-contato">
+          <i class="bi bi-qr-code"></i>
+          Pix: 1234567890
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ABAS ── -->
+    <div class="barra-abas">
+      <button class="btn-aba ativo" data-alvo="sobre">
+        <i class="bi bi-info-circle"></i> Sobre
+      </button>
+      <button class="btn-aba" data-alvo="servicos">
+        <i class="bi bi-briefcase"></i> Serviços
+      </button>
+    </div>
+
+    <!-- ABA SOBRE -->
+    <div id="sobre" class="conteudo-aba">
+      <div class="bloco-sobre">
+        <p class="titulo-secao">Nossa história</p>
+        <p class="texto-sobre">
+          Fundado em 2017 por um grupo de protetores e voluntários apaixonados pelos animais, o Instituto Cães Amigos nasceu do desejo de garantir uma vida mais digna, segura e amorosa para cães em situação de abandono ou maus-tratos. Começamos com poucos resgates em um abrigo improvisado, oferecendo cuidados básicos, alimentação e muito carinho.
+        </p>
+        <p class="texto-sobre">
+          Hoje, acolhemos e reabilitamos centenas de cães todos os anos, promovendo adoções responsáveis, campanhas de conscientização e ações de castração e educação animal. Nossa caminhada é guiada pela compaixão, pela responsabilidade e pela certeza de que cada vida importa e merece uma segunda chance.
+        </p>
+      </div>
+    </div>
+
+    <!-- ABA SERVIÇOS -->
+    <div id="servicos" class="conteudo-aba" style="display:none;">
+      <div class="grade-servicos">
+
+        <div class="card-servico-ong">
+          <img src="../imagens/passeioCachorro.png" class="imagem-servico" alt="Passeio com cachorros"
+            onerror="this.style.background='#eaf2e6';this.style.height='180px';this.style.display='block'">
+          <div class="corpo-servico">
+            <h3 class="titulo-servico">Passeie com os cachorros</h3>
+            <p class="descricao-servico">Ande com os nossos cachorros e proporcione momentos de alegria e exercício para eles. Uma experiência enriquecedora para você e para os animais!</p>
+
+            <div class="info-ong-servico">
+              <img src="../imagens/ongPerfil1.png" class="foto-ong-mini" alt="ONG"
+                onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
+              <div>
+                <p class="nome-ong-mini">Instituto Cães Amigos</p>
+                <div class="avaliacao-servico">
+                  <i class="bi bi-star-fill"></i> 5.0 <span>(1.024 avaliações)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detalhes-servico">
+              <div class="detalhe-item-servico">
+                <i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ
+              </div>
+              <div class="detalhe-item-servico">
+                <i class="bi bi-clock-history"></i> 1 hora
+              </div>
+              <div class="detalhe-item-servico">
+                <i class="bi bi-lightning-charge-fill"></i> 80 pts
+              </div>
+            </div>
+
+            <button class="btn-saiba-mais" onclick="abrirModal('modalPasseio')">
+              <i class="bi bi-arrow-right-circle-fill"></i> Saiba mais
+            </button>
+          </div>
+        </div>
+
+        <div class="card-servico-ong">
+          <img src="../imagens/banho.png" class="imagem-servico" alt="Banho e tosa"
+            onerror="this.style.background='#eaf2e6';this.style.height='180px';this.style.display='block'">
+          <div class="corpo-servico">
+            <h3 class="titulo-servico">Banho e tosa solidária</h3>
+            <p class="descricao-servico">Ajude a cuidar da higiene e bem-estar dos nossos animais. Aprenda técnicas de banho e tosa enquanto contribui para a saúde dos cães do abrigo.</p>
+
+            <div class="info-ong-servico">
+              <img src="../imagens/ongPerfil1.png" class="foto-ong-mini" alt="ONG"
+                onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
+              <div>
+                <p class="nome-ong-mini">Instituto Cães Amigos</p>
+                <div class="avaliacao-servico">
+                  <i class="bi bi-star-fill"></i> 4.8 <span>(342 avaliações)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detalhes-servico">
+              <div class="detalhe-item-servico">
+                <i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ
+              </div>
+              <div class="detalhe-item-servico">
+                <i class="bi bi-clock-history"></i> 2 horas
+              </div>
+              <div class="detalhe-item-servico">
+                <i class="bi bi-lightning-charge-fill"></i> 120 pts
+              </div>
+            </div>
+
+            <button class="btn-saiba-mais" onclick="abrirModal('modalBanho')">
+              <i class="bi bi-arrow-right-circle-fill"></i> Saiba mais
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: Passeio com os cachorros -->
+  <div class="sobreposicao-modal" id="modalPasseio">
+    <div class="folha-modal">
+      <img src="../imagens/passeioCachorro.png" class="imagem-modal" alt="Passeio com cachorros"
+        onerror="this.style.display='none'">
+      <button class="btn-fechar-modal" onclick="fecharModal('modalPasseio')"><i class="bi bi-x-lg"></i></button>
+      <div class="corpo-modal">
+        <h3>Passeie com os cachorros</h3>
+        <p class="descricao-modal">Ande com os nossos cachorros e proporcione momentos de alegria e exercício para eles. Com apenas um passeio, você oferece carinho, movimento e companhia para animais resgatados que aguardam um novo lar.</p>
+        <div class="linha-ong-modal">
+          <div class="esquerda-ong-modal">
+            <img src="../imagens/ongPerfil1.png" alt="ONG"
+              onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
+            <div>
+              <p class="nome-ong-modal">Instituto Cães Amigos</p>
+              <div class="meta-ong-modal">
+                <span><i class="bi bi-star-fill"></i> 5.0 (1.024)</span>
+                <span><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+                <span><i class="bi bi-clock-fill"></i> 1 hora</span>
+              </div>
+            </div>
+          </div>
+          <div class="coluna-direita-modal">
+            <span class="etiqueta-pontos-modal"><i class="bi bi-lightning-charge-fill"></i> 80 pontos recebidos</span>
+            <a href="chatMutuo.html" class="btn-conversa-modal"><i class="bi bi-chat-dots-fill"></i> Converse conosco</a>
+          </div>
+        </div>
+        <div class="avaliacoes-modal">
+          <h5>Avaliações</h5>
+          <div class="caixa-avaliacao">
+            <p class="nome-avaliador">Felipe Souza</p>
+            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+            <p class="texto-avaliacao">"Experiência incrível! Os cachorros são super animados."</p>
+            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 10 mar 2025</p>
+          </div>
+          <div class="caixa-avaliacao">
+            <p class="nome-avaliador">João Silva</p>
+            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+            <p class="texto-avaliacao">"Passeio muito divertido, recomendo demais!"</p>
+            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 09 fev 2025</p>
+          </div>
+        </div>
+      </div>
+      <div class="rodape-modal">
+        <button class="btn-inscrever"><i class="bi bi-heart-fill"></i> Inscrever-me como voluntário</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Banho e tosa solidária -->
+  <div class="sobreposicao-modal" id="modalBanho">
+    <div class="folha-modal">
+      <img src="../imagens/banho.png" class="imagem-modal" alt="Banho e tosa"
+        onerror="this.style.display='none'">
+      <button class="btn-fechar-modal" onclick="fecharModal('modalBanho')"><i class="bi bi-x-lg"></i></button>
+      <div class="corpo-modal">
+        <h3>Banho e tosa solidária</h3>
+        <p class="descricao-modal">Ajude a cuidar da higiene e bem-estar dos nossos animais. Aprenda técnicas de banho e tosa enquanto contribui diretamente para a saúde e o conforto dos cães do abrigo.</p>
+        <div class="linha-ong-modal">
+          <div class="esquerda-ong-modal">
+            <img src="../imagens/ongPerfil1.png" alt="ONG"
+              onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
+            <div>
+              <p class="nome-ong-modal">Instituto Cães Amigos</p>
+              <div class="meta-ong-modal">
+                <span><i class="bi bi-star-fill"></i> 4.8 (342)</span>
+                <span><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
+                <span><i class="bi bi-clock-fill"></i> 2 horas</span>
+              </div>
+            </div>
+          </div>
+          <div class="coluna-direita-modal">
+            <span class="etiqueta-pontos-modal"><i class="bi bi-lightning-charge-fill"></i> 120 pontos recebidos</span>
+            <a href="chatMutuo.html" class="btn-conversa-modal"><i class="bi bi-chat-dots-fill"></i> Converse conosco</a>
+          </div>
+        </div>
+        <div class="avaliacoes-modal">
+          <h5>Avaliações</h5>
+          <div class="caixa-avaliacao">
+            <p class="nome-avaliador">Ana Lima</p>
+            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+            <p class="texto-avaliacao">"Muito organizado e divertido! Aprendi bastante."</p>
+            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 09 fev 2025</p>
+          </div>
+          <div class="caixa-avaliacao">
+            <p class="nome-avaliador">Marcos Ribeiro</p>
+            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
+            <p class="texto-avaliacao">"Ótima experiência, os cães ficaram lindos e felizes!"</p>
+            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 15 jan 2025</p>
+          </div>
+        </div>
+      </div>
+      <div class="rodape-modal">
+        <button class="btn-inscrever"><i class="bi bi-heart-fill"></i> Inscrever-me como voluntário</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Abas
+    document.querySelectorAll('.btn-aba').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-aba').forEach(b => b.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        document.querySelectorAll('.conteudo-aba').forEach(c => c.style.display = 'none');
+        document.getElementById(btn.dataset.alvo).style.display = 'block';
+      });
+    });
+
+    // Modais
+    function abrirModal(id) {
+      document.getElementById(id).classList.add('aberto');
+      document.body.style.overflow = 'hidden';
+    }
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove('aberto');
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('.sobreposicao-modal').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.sobreposicao-modal.aberto').forEach(m => fecharModal(m.id));
+      }
+    });
+  </script>
+
+</body>
+</html>

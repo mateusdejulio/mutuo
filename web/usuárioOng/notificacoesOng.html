@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo — Notificações</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-principal: #588157;
+      --verde-escuro: #3a5a40;
+      --verde-claro: #6b9e4a;
+      --verde-palido: #eaf2e6;
+      --verde-badge: #b7ce8f;
+      --creme: #E1DCD0;
+      --altura-nav: 72px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #f2f5f1;
+      color: #1a2e1b;
+      min-height: 100vh;
+      padding-top: var(--altura-nav);
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background-color: var(--verde-principal);
+      height: var(--altura-nav);
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+
+    .marca-nav {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem;
+      color: var(--creme);
+      letter-spacing: 0.4px;
+      margin-right: 2rem;
+      flex-shrink: 0;
+    }
+    .marca-nav img { width: 38px; height: 38px; border-radius: 8px; }
+
+    .links-nav {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1; margin: 0; padding: 0;
+    }
+    .links-nav a {
+      text-decoration: none;
+      color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      transition: color 0.18s, background 0.18s;
+      white-space: nowrap;
+    }
+    .links-nav a:hover, .links-nav a.ativo { color: var(--creme); background: rgba(255,255,255,0.12); }
+
+    .dropdown-nav { position: relative; }
+    .dropdown-nav > a { display: flex; align-items: center; gap: 5px; }
+    .painel-dropdown { display: none; position: absolute; top: 100%; left: 0; padding-top: 10px; min-width: 215px; }
+    .painel-dropdown-interno { background: var(--verde-escuro); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,0.22); border: 1px solid rgba(225,220,208,0.1); }
+    .dropdown-nav:hover .painel-dropdown { display: block; }
+    .painel-dropdown a { display: flex; align-items: center; gap: 9px; color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem; font-size: 0.84rem; text-decoration: none; }
+    .painel-dropdown a:hover { background: rgba(255,255,255,0.08); color: var(--creme); }
+    .painel-dropdown a.perigo { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
+    .nav-direita { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
+    .sino-nav {
+      position: relative; cursor: pointer;
+      color: var(--creme); font-size: 1.25rem;
+      opacity: 0.8; transition: opacity 0.2s;
+      text-decoration: none;
+    }
+    .sino-nav:hover { opacity: 1; }
+    .badge-sino {
+      position: absolute; top: -5px; right: -6px;
+      background: var(--creme); color: var(--verde-escuro);
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--verde-principal);
+    }
+
+    .perfil-nav {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      border-radius: 40px;
+      padding: 5px 14px 5px 5px;
+    }
+    .perfil-nav img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
+    .perfil-nav span { color: var(--creme); font-size: 0.84rem; font-weight: 500; }
+
+    /* ── CONTEÚDO ── */
+    .pagina {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 16px 60px;
+    }
+
+    /* ── CABEÇALHO DA PÁGINA ── */
+    .cabecalho-pagina {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      animation: descerSuave 0.4s ease both;
+    }
+
+    .cabecalho-pagina h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--verde-escuro);
+    }
+
+    .grupo-titulo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-contador {
+      background: var(--verde-badge);
+      color: var(--verde-escuro);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .btn-marcar-todas {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--verde-principal);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background 0.15s;
+      font-family: 'Quicksand', sans-serif;
+    }
+    .btn-marcar-todas:hover { background: var(--verde-palido); }
+
+    /* ── FILTROS ── */
+    .barra-filtros {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      animation: descerSuave 0.4s ease 0.05s both;
+    }
+    .barra-filtros::-webkit-scrollbar { display: none; }
+
+    .btn-filtro {
+      background: #fff;
+      border: 1px solid #dde8da;
+      color: #7a8c76;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s;
+      flex-shrink: 0;
+    }
+    .btn-filtro:hover { border-color: var(--verde-principal); color: var(--verde-principal); }
+    .btn-filtro.ativo {
+      background: var(--verde-principal);
+      border-color: var(--verde-principal);
+      color: #fff;
+    }
+
+    /* ── LISTA ── */
+    .lista-notificacoes {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: subirSuave 0.4s ease 0.1s both;
+    }
+
+    /* ── CARD ── */
+    .card-notificacao {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 16px;
+      padding: 16px;
+      transition: box-shadow 0.18s, transform 0.18s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .card-notificacao:hover { box-shadow: 0 4px 18px rgba(58,90,64,0.1); transform: translateY(-1px); }
+
+    .card-notificacao.nao-lida {
+      background: var(--verde-palido);
+      border-color: #c6dfc0;
+    }
+    .card-notificacao.nao-lida::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--verde-principal);
+      border-radius: 16px 0 0 16px;
+    }
+
+    /* Avatar */
+    .avatar-notificacao {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .avatar-notificacao img {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e4ebe2;
+    }
+    .icone-tipo {
+      position: absolute;
+      bottom: -2px; right: -2px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem;
+      border: 2px solid #fff;
+      color: #fff;
+    }
+    .icone-tipo.mensagem   { background: var(--verde-principal); }
+    .icone-tipo.solicitacao { background: #e08c2c; }
+
+    /* Corpo */
+    .corpo-notificacao { flex: 1; min-width: 0; }
+
+    .topo-notificacao {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+      flex-wrap: wrap;
+    }
+
+    .tipo-notificacao {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #9aab96;
+    }
+
+    .etiqueta-status {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 10px;
+    }
+    .etiqueta-status.pendente { background: #fff3e0; color: #b36c00; }
+    .etiqueta-status.aceito   { background: #e6f4ea; color: #2d6a4f; }
+    .etiqueta-status.recusado { background: #fde8e8; color: #b00020; }
+
+    .nome-notificacao {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1a2e1b;
+      margin-bottom: 2px;
+    }
+
+    .servico-notificacao {
+      font-size: 0.8rem;
+      color: #7a8c76;
+      margin-bottom: 10px;
+    }
+    .servico-notificacao i { margin-right: 4px; font-size: 0.75rem; }
+
+    /* Ações */
+    .acoes-notificacao {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-acao {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.18s;
+    }
+    .btn-acao.aceitar {
+      background: var(--verde-principal);
+      color: #fff;
+    }
+    .btn-acao.aceitar:hover { background: var(--verde-escuro); }
+    .btn-acao.recusar {
+      background: #f0f4ef;
+      color: #7a8c76;
+    }
+    .btn-acao.recusar:hover { background: #e4ebe2; color: var(--verde-escuro); }
+    .btn-acao.mensagem {
+      background: #f0f4ef;
+      color: var(--verde-escuro);
+    }
+    .btn-acao.mensagem:hover { background: var(--verde-palido); }
+
+    /* Horário */
+    .horario-notificacao {
+      font-size: 0.72rem;
+      color: #b0bfac;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Estado vazio */
+    .estado-vazio {
+      text-align: center;
+      padding: 48px 20px;
+      color: #b0bfac;
+    }
+    .estado-vazio i { font-size: 2.5rem; margin-bottom: 12px; display: block; opacity: 0.4; }
+    .estado-vazio p { font-size: 0.9rem; font-weight: 600; }
+
+    /* Animações */
+    @keyframes descerSuave {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subirSuave {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="marca-nav" href="#">
+      <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+      Mútuo
+    </a>
+    <ul class="links-nav">
+      <li><a href="homeOngMutuo.html">Início</a></li>
+      <li><a href="chatOng.html">Chat</a></li>
+      <li class="dropdown-nav">
+        <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+        <div class="painel-dropdown">
+          <div class="painel-dropdown-interno">
+            <a href="planosOng.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+            <a href="certificadosOng.html"><i class="bi bi-award"></i> Certificados</a>
+            <a href="contatoOng.html"><i class="bi bi-envelope"></i> Contato</a>
+            <a href="comoUsarOng.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+            <a href="quemSomosOng.html"><i class="bi bi-people"></i> Quem somos</a>
+            <a href="../login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-direita">
+      <a href="notificacoesOng.html" class="sino-nav">
+        <i class="bi bi-bell-fill"></i>
+        <span class="badge-sino" id="badge-sino">2</span>
+      </a>
+      <a href="perfilOngGMutuo.html" class="perfil-nav">
+        <img src="../imagens/perfilOngI.png" alt="perfil" onerror="this.style.display='none'">
+        <span>Instituto Infância Viva</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- PÁGINA -->
+  <div class="pagina">
+
+    <div class="cabecalho-pagina">
+      <div class="grupo-titulo">
+        <h1>Notificações</h1>
+        <span class="badge-contador" id="badge-contador">2 novas</span>
+      </div>
+      <button class="btn-marcar-todas" onclick="marcarTodasLidas()">
+        <i class="bi bi-check2-all"></i> Marcar todas como lidas
+      </button>
+    </div>
+
+    <div class="barra-filtros">
+      <button class="btn-filtro ativo" data-alvo="todas">Todas</button>
+      <button class="btn-filtro" data-alvo="recebidas">Recebidas</button>
+      <button class="btn-filtro" data-alvo="mensagens">Mensagens</button>
+    </div>
+
+    <!-- TODAS -->
+    <div class="lista-notificacoes" id="todas">
+
+      <div class="card-notificacao nao-lida">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil4.png" alt="Mateus" onerror="this.src='https://ui-avatars.com/api/?name=MD&background=588157&color=fff'">
+          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Nova mensagem</span>
+          </div>
+          <p class="nome-notificacao">Mateus De Julio</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de matemática</p>
+          <div class="acoes-notificacao">
+            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 5 min</span>
+      </div>
+
+      <div class="card-notificacao nao-lida">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil1.png" alt="Luisa" onerror="this.src='https://ui-avatars.com/api/?name=LA&background=e08c2c&color=fff'">
+          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Solicitação recebida</span>
+            <span class="etiqueta-status pendente">Pendente</span>
+          </div>
+          <p class="nome-notificacao">Luisa Andrade</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Atividades de recreação</p>
+          <div class="acoes-notificacao">
+            <button class="btn-acao aceitar" onclick="realizarAcao(this,'aceito')"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
+            <button class="btn-acao recusar" onclick="realizarAcao(this,'recusado')"><i class="bi bi-x-circle-fill"></i> Recusar</button>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 30 min</span>
+      </div>
+
+      <div class="card-notificacao">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil2.png" alt="Marcelo" onerror="this.src='https://ui-avatars.com/api/?name=MF&background=588157&color=fff'">
+          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Nova mensagem</span>
+          </div>
+          <p class="nome-notificacao">Marcelo Fernandes</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de pintura</p>
+          <div class="acoes-notificacao">
+            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 2 h</span>
+      </div>
+
+      <div class="card-notificacao">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.src='https://ui-avatars.com/api/?name=ML&background=e08c2c&color=fff'">
+          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Solicitação recebida</span>
+            <span class="etiqueta-status aceito">Aceito</span>
+          </div>
+          <p class="nome-notificacao">Mariana Lacerda</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Atividades de recreação</p>
+          <div class="acoes-notificacao">
+            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 5 h</span>
+      </div>
+
+    </div>
+
+    <!-- RECEBIDAS -->
+    <div class="lista-notificacoes" id="recebidas" style="display:none;">
+
+      <div class="card-notificacao nao-lida">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil1.png" alt="Luisa" onerror="this.src='https://ui-avatars.com/api/?name=LA&background=e08c2c&color=fff'">
+          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Solicitação recebida</span>
+            <span class="etiqueta-status pendente">Pendente</span>
+          </div>
+          <p class="nome-notificacao">Luisa Andrade</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Atividades de recreação</p>
+          <div class="acoes-notificacao">
+            <button class="btn-acao aceitar" onclick="realizarAcao(this,'aceito')"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
+            <button class="btn-acao recusar" onclick="realizarAcao(this,'recusado')"><i class="bi bi-x-circle-fill"></i> Recusar</button>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 30 min</span>
+      </div>
+
+      <div class="card-notificacao">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.src='https://ui-avatars.com/api/?name=ML&background=e08c2c&color=fff'">
+          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Solicitação recebida</span>
+            <span class="etiqueta-status aceito">Aceito</span>
+          </div>
+          <p class="nome-notificacao">Mariana Lacerda</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i>Atividades de recreação</p>
+          <div class="acoes-notificacao">
+            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 5 h</span>
+      </div>
+
+    </div>
+
+    <!-- MENSAGENS -->
+    <div class="lista-notificacoes" id="mensagens" style="display:none;">
+
+      <div class="card-notificacao nao-lida">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil4.png" alt="Mateus" onerror="this.src='https://ui-avatars.com/api/?name=MD&background=588157&color=fff'">
+          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Nova mensagem</span>
+          </div>
+          <p class="nome-notificacao">Mateus De Julio</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de matemática</p>
+          <div class="acoes-notificacao">
+            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 5 min</span>
+      </div>
+
+      <div class="card-notificacao">
+        <div class="avatar-notificacao">
+          <img src="../imagens/perfil2.png" alt="Marcelo" onerror="this.src='https://ui-avatars.com/api/?name=MF&background=588157&color=fff'">
+          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
+        </div>
+        <div class="corpo-notificacao">
+          <div class="topo-notificacao">
+            <span class="tipo-notificacao">Nova mensagem</span>
+          </div>
+          <p class="nome-notificacao">Marcelo Fernandes</p>
+          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de pintura</p>
+          <div class="acoes-notificacao">
+            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
+          </div>
+        </div>
+        <span class="horario-notificacao">Há 2 h</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Filtros
+    document.querySelectorAll('.btn-filtro').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        document.querySelectorAll('.lista-notificacoes').forEach(l => l.style.display = 'none');
+        document.getElementById(btn.dataset.alvo).style.display = 'flex';
+      });
+    });
+
+    // Marcar como lida ao clicar no card
+    document.querySelectorAll('.card-notificacao').forEach(card => {
+      card.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-acao')) return;
+        if (this.classList.contains('nao-lida')) {
+          this.classList.remove('nao-lida');
+          atualizarContador();
+        }
+      });
+    });
+
+    // Aceitar / Recusar
+    function realizarAcao(btn, status) {
+      const card = btn.closest('.card-notificacao');
+      const etiqueta = card.querySelector('.etiqueta-status');
+      if (etiqueta) {
+        etiqueta.className = 'etiqueta-status ' + status;
+        etiqueta.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      }
+      const acoes = card.querySelector('.acoes-notificacao');
+      if (acoes) {
+        acoes.innerHTML = `<a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>`;
+      }
+      if (card.classList.contains('nao-lida')) {
+        card.classList.remove('nao-lida');
+        atualizarContador();
+      }
+    }
+
+    // Marcar todas como lidas
+    function marcarTodasLidas() {
+      document.querySelectorAll('.card-notificacao.nao-lida').forEach(c => c.classList.remove('nao-lida'));
+      atualizarContador();
+    }
+
+    // Atualizar contador
+    function atualizarContador() {
+      const total = document.querySelectorAll('.card-notificacao.nao-lida').length;
+      const badgeContador = document.getElementById('badge-contador');
+      const badgeSino = document.getElementById('badge-sino');
+
+      if (total === 0) {
+        badgeContador.style.display = 'none';
+        if (badgeSino) badgeSino.style.display = 'none';
+      } else {
+        badgeContador.style.display = '';
+        badgeContador.textContent = total + (total === 1 ? ' nova' : ' novas');
+        if (badgeSino) { badgeSino.style.display = ''; badgeSino.textContent = total; }
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "electron",
+  "version": "1.0.0",
+  "description": "PI",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elismeneghin/electron.git"
+  },
+  "author": "elis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elismeneghin/electron/issues"
+  },
+  "homepage": "https://github.com/elismeneghin/electron#readme",
+  "devDependencies": {
+    "electron": "^38.3.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "mysql2": "^3.15.3",
+    "sweetalert2": "^11.26.3"
+  }
+}
