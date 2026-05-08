@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
+import 'package:mutuo/ongs.dart';
+import 'package:mutuo/servicos.dart'; // ← IMPORT DA NOVA TELA
 
 // ─── MODEL ────────────────────────────────────────────────
 class Vaga {
@@ -135,8 +137,14 @@ class _AcessoData {
   final IconData icone;
   final String label;
   final int? badge;
+  final VoidCallback? onTap;
 
-  _AcessoData({required this.icone, required this.label, this.badge});
+  _AcessoData({
+    required this.icone,
+    required this.label,
+    this.badge,
+    this.onTap,
+  });
 }
 
 // ─── TELA PRINCIPAL ───────────────────────────────────────
@@ -151,8 +159,6 @@ class InicialUsuario extends StatefulWidget {
 
 class _InicialUsuarioState extends State<InicialUsuario> {
   int _fraseIndex = 0;
-
-  // ALTERAÇÃO 3 — índice do item selecionado na BottomNavigationBar
   int _bottomNavIndex = 0;
 
   final List<String> _frases = [
@@ -176,7 +182,8 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     ),
     Vaga(
       titulo: "Passeio com cachorro",
-      descricao: "Ajude a passear com cães resgatados e faça a diferença na vida deles.",
+      descricao:
+          "Ajude a passear com cães resgatados e faça a diferença na vida deles.",
       local: "Campinas, SP",
       tempo: "1h",
       imagem: "assets/images/logo.png",
@@ -205,12 +212,39 @@ class _InicialUsuarioState extends State<InicialUsuario> {
   static const _fundo = Color(0xFFEDEAE5);
   static const _branco = Colors.white;
 
+  // ─── NAVEGAR PARA SERVIÇOS ────────────────────────────────
+  void _irParaServicos() {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (_, __, ___) =>
+            Servicos(nome: widget.nome, initialNavIndex: 1),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    ).then((_) => setState(() => _bottomNavIndex = 0));
+  }
+
+  void _irParaOngs() {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (_, __, ___) =>
+            Ongs(nome: widget.nome, initialNavIndex: 2),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    ).then((_) => setState(() => _bottomNavIndex = 0));
+  }
+
   @override
   Widget build(BuildContext context) {
-    // ALTERAÇÃO 4 — Scaffold com body + bottomNavigationBar
     return Scaffold(
       backgroundColor: _fundo,
-      // ALTERAÇÃO 3 — BottomNavigationBar moderna
       bottomNavigationBar: _buildBottomNav(),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -251,15 +285,16 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                 ),
               ),
 
-              // 6. VAGAS EM DESTAQUE (full width para o carrossel)
+              // 6. VAGAS EM DESTAQUE
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _sectionTitle("Vagas em destaque"),
+                    // ← "Ver todas" agora navega para Serviços
                     GestureDetector(
-                      onTap: () {},
+                      onTap: _irParaServicos,
                       child: Text(
                         "Ver todas →",
                         style: GoogleFonts.quicksand(
@@ -282,13 +317,29 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     );
   }
 
-  // ─── BOTTOM NAVIGATION BAR (ALTERAÇÃO 3) ─────────────────
+  // ─── BOTTOM NAVIGATION BAR ────────────────────────────────
   Widget _buildBottomNav() {
     final List<_NavItem> navItems = [
-      _NavItem(icon: Icons.home_rounded, outlinedIcon: Icons.home_outlined, label: "Início"),
-      _NavItem(icon: Icons.work_rounded, outlinedIcon: Icons.work_outline_rounded, label: "Serviços"),
-      _NavItem(icon: Icons.favorite_rounded, outlinedIcon: Icons.favorite_border_rounded, label: "ONGs"),
-      _NavItem(icon: Icons.chat_bubble_rounded, outlinedIcon: Icons.chat_bubble_outline_rounded, label: "Chat"),
+      _NavItem(
+        icon: Icons.home_rounded,
+        outlinedIcon: Icons.home_outlined,
+        label: "Início",
+      ),
+      _NavItem(
+        icon: Icons.work_rounded,
+        outlinedIcon: Icons.work_outline_rounded,
+        label: "Serviços",
+      ),
+      _NavItem(
+        icon: Icons.favorite_rounded,
+        outlinedIcon: Icons.favorite_border_rounded,
+        label: "ONGs",
+      ),
+      _NavItem(
+        icon: Icons.chat_bubble_rounded,
+        outlinedIcon: Icons.chat_bubble_outline_rounded,
+        label: "Chat",
+      ),
     ];
 
     return Container(
@@ -313,7 +364,16 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         ),
         child: BottomNavigationBar(
           currentIndex: _bottomNavIndex,
-          onTap: (index) => setState(() => _bottomNavIndex = index),
+          onTap: (index) {
+            if (index == 1) {
+              // ← Tab "Serviços" navega para a tela nova
+              _irParaServicos();
+            } else if (index == 2) {
+              _irParaOngs();
+            } else {
+              setState(() => _bottomNavIndex = index);
+            }
+          },
           backgroundColor: _branco,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
@@ -333,9 +393,14 @@ class _InicialUsuarioState extends State<InicialUsuario> {
             return BottomNavigationBarItem(
               icon: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected ? _verde.withOpacity(0.10) : Colors.transparent,
+                  color: isSelected
+                      ? _verde.withOpacity(0.10)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -509,12 +574,11 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     );
   }
 
-  // ─── GRID ESTATÍSTICAS (ALTERAÇÃO 1 + 2) ─────────────────
+  // ─── GRID ESTATÍSTICAS ────────────────────────────────────
   Widget _gridEstatisticas() {
     final stats = [
       _StatData(
         icone: Icons.access_time_rounded,
-        // ALTERAÇÃO 2 — verde suave
         iconeBg: const Color(0xFFD8F3DC),
         iconeColor: const Color(0xFF2D6A4F),
         titulo: "Horas de serviço",
@@ -524,7 +588,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       ),
       _StatData(
         icone: Icons.check_circle_rounded,
-        // ALTERAÇÃO 2 — azul suave
         iconeBg: const Color(0xFFD0E8FF),
         iconeColor: const Color(0xFF1A73E8),
         titulo: "Trabalhos concluídos",
@@ -534,7 +597,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       ),
       _StatData(
         icone: Icons.star_rounded,
-        // ALTERAÇÃO 2 — amarelo suave
         iconeBg: const Color(0xFFFFF3B0),
         iconeColor: const Color(0xFFF4A261),
         titulo: "Pontos",
@@ -544,7 +606,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       ),
       _StatData(
         icone: Icons.workspace_premium_rounded,
-        // ALTERAÇÃO 2 — roxo suave
         iconeBg: const Color(0xFFEDE7F6),
         iconeColor: const Color(0xFF7B52AB),
         titulo: "Plano atual",
@@ -566,7 +627,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     );
   }
 
-  // ALTERAÇÃO 1 — _statCard visual moderno, igual acesso rápido
   Widget _statCard(_StatData s) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -586,7 +646,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // ALTERAÇÃO 1+2 — ícone em container arredondado com fundo colorido
           Container(
             width: 44,
             height: 44,
@@ -596,8 +655,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
             ),
             child: Icon(s.icone, color: s.iconeColor, size: 22),
           ),
-
-          // Valor em destaque
           Text(
             s.valor,
             style: GoogleFonts.quicksand(
@@ -606,8 +663,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               color: const Color(0xFF2D3319),
             ),
           ),
-
-          // Título + subtexto
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -630,8 +685,8 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                     color: s.subLink
                         ? _verdeMedio
                         : s.subPositivo
-                            ? const Color(0xFF52B788)
-                            : const Color(0xFF9E9E9E),
+                        ? const Color(0xFF52B788)
+                        : const Color(0xFF9E9E9E),
                   ),
                 ),
             ],
@@ -713,10 +768,18 @@ class _InicialUsuarioState extends State<InicialUsuario> {
   // ─── ACESSO RÁPIDO ────────────────────────────────────────
   Widget _gridAcessoRapido() {
     final itens = [
-      _AcessoData(icone: Icons.search_rounded, label: "Buscar Vagas"),
+      // ← "Buscar Vagas" também vai para Serviços
+      _AcessoData(
+        icone: Icons.search_rounded,
+        label: "Buscar Vagas",
+        onTap: _irParaServicos,
+      ),
       _AcessoData(icone: Icons.favorite_border_rounded, label: "ONGs"),
       _AcessoData(icone: Icons.chat_bubble_outline_rounded, label: "Chat"),
-      _AcessoData(icone: Icons.workspace_premium_outlined, label: "Certificados"),
+      _AcessoData(
+        icone: Icons.workspace_premium_outlined,
+        label: "Certificados",
+      ),
       _AcessoData(
         icone: Icons.notifications_none_rounded,
         label: "Notificações",
@@ -737,70 +800,73 @@ class _InicialUsuarioState extends State<InicialUsuario> {
   }
 
   Widget _acessoCard(_AcessoData item) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _branco,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0DDD8), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEEF2EE),
-                  borderRadius: BorderRadius.circular(14),
+    return GestureDetector(
+      onTap: item.onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _branco,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE0DDD8), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEEF2EE),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(item.icone, color: _verde, size: 22),
                 ),
-                child: Icon(item.icone, color: _verde, size: 22),
-              ),
-              if (item.badge != null)
-                Positioned(
-                  top: -6,
-                  right: -6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE63946),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      "${item.badge}",
-                      style: GoogleFonts.quicksand(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: _branco,
+                if (item.badge != null)
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE63946),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        "${item.badge}",
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: _branco,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            item.label,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.quicksand(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF344E41),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              item.label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.quicksand(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF344E41),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -870,7 +936,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                       ),
                     ),
                   ),
-                  // Tag categoria
                   Positioned(
                     top: 12,
                     left: 12,
@@ -906,7 +971,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Título + Descrição
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
