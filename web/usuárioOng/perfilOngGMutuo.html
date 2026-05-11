@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mútuo — Perfil ONG</title>
+  <title>Mútuo | Perfil ONG</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="../imagens/mutuoLogo.png">
@@ -37,30 +37,204 @@
       padding: 0 2rem;
       box-shadow: 0 2px 16px rgba(58,90,64,0.25);
     }
-    .marca-nav { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 1.55rem; color: var(--creme); letter-spacing: 0.4px; margin-right: 2rem; flex-shrink: 0; }
+
+    .marca-nav {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem; color: var(--creme);
+      letter-spacing: 0.4px;
+      margin-right: 2rem; flex-shrink: 0;
+    }
     .marca-nav img { width: 38px; height: 38px; border-radius: 8px; }
-    .links-nav { display: flex; align-items: center; gap: 2px; list-style: none; flex: 1; margin: 0; padding: 0; }
-    .links-nav a { text-decoration: none; color: rgba(225,220,208,0.82); font-size: 0.875rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 8px; transition: color 0.18s, background 0.18s; white-space: nowrap; }
-    .links-nav a:hover, .links-nav a.ativo { color: var(--creme); background: rgba(255,255,255,0.12); }
+
+    .links-nav {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1; margin: 0; padding: 0;
+    }
+    .links-nav a {
+      text-decoration: none;
+      color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem; border-radius: 8px;
+      transition: color 0.18s, background 0.18s; white-space: nowrap;
+    }
+    .links-nav a:hover, .links-nav a.ativo {
+      color: var(--creme); background: rgba(255,255,255,0.12);
+    }
+
     .dropdown-nav { position: relative; }
     .dropdown-nav > a { display: flex; align-items: center; gap: 5px; }
-    .painel-dropdown { display: none; position: absolute; top: 100%; left: 0; padding-top: 10px; min-width: 215px; }
-    .painel-dropdown-interno { background: var(--verde-escuro); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,0.22); border: 1px solid rgba(225,220,208,0.1); }
+    .painel-dropdown {
+      display: none; position: absolute; top: 100%; left: 0;
+      padding-top: 10px; min-width: 215px;
+    }
+    .painel-dropdown-interno {
+      background: var(--verde-escuro); border-radius: 12px;
+      overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+      border: 1px solid rgba(225,220,208,0.1);
+    }
     .dropdown-nav:hover .painel-dropdown { display: block; }
-    .painel-dropdown a { display: flex; align-items: center; gap: 9px; color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem; font-size: 0.84rem; text-decoration: none; }
+    .painel-dropdown a {
+      display: flex; align-items: center; gap: 9px;
+      color: rgba(225,220,208,0.8);
+      padding: 0.65rem 1.1rem; font-size: 0.84rem; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
     .painel-dropdown a:hover { background: rgba(255,255,255,0.08); color: var(--creme); }
     .painel-dropdown a.perigo { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
     .nav-direita { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
-    .sino-nav { position: relative; cursor: pointer; color: var(--creme); font-size: 1.25rem; opacity: 0.8; transition: opacity 0.2s; text-decoration: none; }
+
+    .sino-nav {
+      position: relative; cursor: pointer;
+      color: var(--creme); font-size: 1.25rem;
+      opacity: 0.8; transition: opacity 0.2s; text-decoration: none;
+    }
     .sino-nav:hover { opacity: 1; }
-    .badge-sino { position: absolute; top: -5px; right: -6px; background: var(--creme); color: var(--verde-escuro); font-size: 0.6rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--verde-principal); }
-    .perfil-nav { display: flex; align-items: center; gap: 9px; text-decoration: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(225,220,208,0.18); border-radius: 40px; padding: 5px 14px 5px 5px; }
-    .perfil-nav img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
+    .badge-sino {
+      position: absolute; top: -5px; right: -6px;
+      background: var(--creme); color: var(--verde-escuro);
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--verde-principal);
+    }
+
+    .perfil-nav {
+      display: flex; align-items: center; gap: 9px; text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      border-radius: 40px; padding: 5px 14px 5px 5px;
+      transition: background 0.2s;
+    }
+    .perfil-nav:hover { background: rgba(255,255,255,0.16); }
+    .perfil-nav img {
+      width: 36px; height: 36px; border-radius: 50%;
+      object-fit: cover; border: 2px solid rgba(225,220,208,0.4);
+    }
     .perfil-nav span { color: var(--creme); font-size: 0.84rem; font-weight: 500; }
 
+    /* ── HAMBURGER ── */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      transition: background 0.2s;
+      margin-left: auto;
+    }
+    .nav-hamburger:hover { background: rgba(255,255,255,0.16); }
+    .nav-hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--creme);
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── MOBILE DRAWER ── */
+    .mobile-drawer {
+      display: none;
+      position: fixed;
+      top: var(--altura-nav); left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: var(--verde-escuro);
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 1rem 0 2rem;
+    }
+    .mobile-drawer.open { transform: translateX(0); }
+
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      top: var(--altura-nav); left: 0; right: 0; bottom: 0;
+      z-index: 98;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .drawer-overlay.open { opacity: 1; }
+
+    .drawer-profile {
+      display: flex; align-items: center; gap: 12px;
+      padding: 1.1rem 1.4rem 1.4rem;
+      border-bottom: 1px solid rgba(225,220,208,0.12);
+      margin-bottom: 0.5rem;
+    }
+    .drawer-profile img {
+      width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.35);
+    }
+    .drawer-profile-info strong {
+      display: block; color: var(--creme);
+      font-size: 0.92rem; font-weight: 600;
+    }
+    .drawer-profile-info small {
+      color: rgba(225,220,208,0.55); font-size: 0.75rem;
+    }
+
+    .drawer-nav-link {
+      display: flex; align-items: center; gap: 11px;
+      padding: 0.78rem 1.4rem;
+      color: rgba(225,220,208,0.8);
+      text-decoration: none;
+      font-size: 0.92rem; font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .drawer-nav-link:hover, .drawer-nav-link.active {
+      background: rgba(255,255,255,0.07); color: var(--creme);
+    }
+    .drawer-nav-link i {
+      font-size: 1rem; width: 20px; text-align: center;
+      color: rgba(225,220,208,0.55);
+    }
+    .drawer-nav-link.active i, .drawer-nav-link:hover i { color: var(--creme); }
+
+    .drawer-section-label {
+      padding: 1rem 1.4rem 0.35rem;
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: rgba(225,220,208,0.35);
+      display: block;
+    }
+
+    .drawer-divider {
+      height: 1px;
+      background: rgba(225,220,208,0.1);
+      margin: 0.5rem 1.4rem;
+    }
+
+    .drawer-nav-link.danger { color: rgba(255,140,140,0.7); }
+    .drawer-nav-link.danger:hover { color: rgba(255,140,140,0.95); background: rgba(255,100,100,0.06); }
+    .drawer-nav-link.danger i { color: rgba(255,140,140,0.5); }
+
+    .drawer-bell-badge {
+      margin-left: auto;
+      background: var(--creme); color: var(--verde-escuro);
+      font-size: 0.6rem; font-weight: 700;
+      min-width: 18px; height: 18px;
+      border-radius: 30px; padding: 0 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── RESPONSIVE NAVBAR ── */
     @media (max-width: 768px) {
-      .links-nav { display: none; }
-      .perfil-nav span { display: none; }
+      .links-nav   { display: none !important; }
+      .nav-direita { display: none !important; }
+      .nav-hamburger { display: flex; }
+      .mobile-drawer { display: block; }
+      .drawer-overlay { display: block; }
+      .marca-nav { margin-right: 0; font-size: 1.35rem; }
     }
 
     /* ── LAYOUT ── */
@@ -84,340 +258,332 @@
 
     /* ── CARD DE PERFIL ONG ── */
     .cabecalho-perfil {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 18px; margin-bottom: 16px;
     }
-
     .foto-perfil-wrap { position: relative; flex-shrink: 0; }
     .foto-perfil {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--verde-badge);
+      width: 72px; height: 72px; border-radius: 50%;
+      object-fit: cover; border: 3px solid var(--verde-badge);
     }
     .badge-online {
       position: absolute; bottom: 2px; right: 2px;
       width: 14px; height: 14px;
-      background: #4caf50;
-      border-radius: 50%;
-      border: 2px solid #fff;
+      background: #4caf50; border-radius: 50%; border: 2px solid #fff;
     }
-
-    .info-perfil h2 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #1a2e1b;
-      margin-bottom: 2px;
-    }
-    .info-perfil span {
-      font-size: 0.82rem;
-      color: #9aab96;
-      font-weight: 600;
-    }
+    .info-perfil h2 { font-size: 1.15rem; font-weight: 700; color: #1a2e1b; margin-bottom: 2px; }
+    .info-perfil span { font-size: 0.82rem; color: #9aab96; font-weight: 600; }
 
     .bio-perfil {
-      font-size: 0.88rem;
-      color: #4a6a4e;
-      line-height: 1.55;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #f0f4ef;
-      margin-bottom: 16px;
+      font-size: 0.88rem; color: #4a6a4e; line-height: 1.55;
+      padding-bottom: 16px; border-bottom: 1px solid #f0f4ef; margin-bottom: 16px;
     }
 
-    .estatisticas-perfil {
-      display: flex;
-      gap: 0;
-    }
+    .estatisticas-perfil { display: flex; gap: 0; }
     .stat-item {
-      flex: 1;
-      text-align: center;
-      padding: 8px 4px;
+      flex: 1; text-align: center; padding: 8px 4px;
       border-right: 1px solid #f0f4ef;
     }
     .stat-item:last-child { border-right: none; }
-    .stat-numero {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--verde-escuro);
-      display: block;
-    }
-    .stat-texto {
-      font-size: 0.72rem;
-      color: #9aab96;
-      font-weight: 600;
-    }
+    .stat-numero { font-size: 1.2rem; font-weight: 700; color: var(--verde-escuro); display: block; }
+    .stat-texto { font-size: 0.72rem; color: #9aab96; font-weight: 600; }
 
     /* ── DADOS DO USUÁRIO ── */
+       .bloco {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 24px;
+      animation: subirSuave 0.4s ease both;
+    }
+    .campo-nome-edit {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+#exibNome{
+  color: var(--verde-escuro);
+}
+#exibUser{
+  color: var(--verde-escuro);
+}
+
+.editando-perfil .campo-nome-edit {
+  display: flex;
+}
+
+.editando-perfil .cabecalho-perfil-nome {
+  display: none;
+}
+
+.readonly .label-readonly {
+  color: #666;
+  font-size: 14px;
+}
+
+.badge-readonly {
+  font-size: 11px;
+  background: #f4f4f0;
+  color: #999;
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-left: 6px;
+  border: 1px solid #ddd;
+}
+
+.campo-edit {
+  flex: 1;
+}
+
+.campo-edit input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 14px;
+}
+
+.campo-edit input:focus {
+  outline: none;
+  border-color: var(--verde-principal);
+}
+
+.prefixo-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.prefixo {
+  padding: 8px 10px;
+  background: #f4f4f0;
+  border-right: 1px solid #ddd;
+  color: #666;
+  font-size: 14px;
+}
+
+.prefixo-wrap input {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.habilidades-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.tag-habilidade {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-habilidade .remover {
+  display: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #888;
+}
+
+.editando .tag-habilidade .remover {
+  display: flex;
+}
+
+.add-habilidade {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.editando .add-habilidade {
+  display: flex;
+}
+
+.add-habilidade input {
+  border: 1px dashed #bbb;
+  border-radius: 20px;
+  padding: 6px 12px;
+  background: transparent;
+}
+
+.add-habilidade button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--verde-principal);
+}
+
+.acoes-edit {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-salvar {
+  border: none;
+  background: var(--verde-escuro);
+  color: white;
+  padding: 9px 18px;
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancelar {
+  border: 1px solid #ccc;
+  background: white;
+  padding: 9px 18px;
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
     .cabecalho-bloco {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 18px;
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 18px;
     }
-    .cabecalho-bloco h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--verde-escuro);
-      margin-bottom: 2px;
-    }
-    .cabecalho-bloco p {
-      font-size: 0.78rem;
-      color: #9aab96;
-      font-weight: 500;
-    }
+    .cabecalho-bloco h3 { font-size: 1rem; font-weight: 700; color: var(--verde-escuro); margin-bottom: 2px; }
+    .cabecalho-bloco p { font-size: 0.78rem; color: #9aab96; font-weight: 500; }
 
     .btn-editar {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--verde-palido);
-      color: var(--verde-escuro);
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--verde-palido); color: var(--verde-escuro);
       font-family: 'Quicksand', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.18s;
-      flex-shrink: 0;
+      font-size: 0.8rem; font-weight: 700;
+      padding: 8px 16px; border-radius: 20px;
+      border: none; cursor: pointer; transition: background 0.18s; flex-shrink: 0;
     }
     .btn-editar:hover { background: var(--verde-badge); }
 
     .lista-info { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
     .item-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.88rem;
-      color: #3a4a3b;
-      font-weight: 500;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.88rem; color: #3a4a3b; font-weight: 500;
     }
     .item-info i {
-      width: 36px; height: 36px;
-      border-radius: 10px;
+      width: 36px; height: 36px; border-radius: 10px;
       background: var(--verde-palido);
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem;
-      color: var(--verde-principal);
-      flex-shrink: 0;
+      font-size: 0.9rem; color: var(--verde-principal); flex-shrink: 0;
     }
 
     .divisor { height: 1px; background: #f0f4ef; margin: 16px 0; }
 
     .titulo-secao {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #9aab96;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
+      font-size: 0.82rem; font-weight: 700; color: #9aab96;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
     }
 
     .habilidades { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag-habilidade {
-      background: var(--verde-palido);
-      color: var(--verde-escuro);
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 20px;
+      background: var(--verde-palido); color: var(--verde-escuro);
+      font-size: 0.8rem; font-weight: 600;
+      padding: 6px 14px; border-radius: 20px;
     }
 
     /* ── PONTOS ── */
     .card-pontos {
       background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
-      border-radius: 20px;
-      padding: 24px;
-      color: #fff;
+      border-radius: 20px; padding: 24px; color: #fff;
       animation: subirSuave 0.4s ease 0.05s both;
     }
-
     .topo-pontos {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 8px;
     }
-    .topo-pontos h3 {
-      font-size: 0.9rem;
-      font-weight: 600;
-      opacity: 0.85;
-    }
+    .topo-pontos h3 { font-size: 0.9rem; font-weight: 600; opacity: 0.85; }
     .icone-pontos {
       width: 44px; height: 44px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem;
+      background: rgba(255,255,255,0.15); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
     }
-
-    .valor-pontos {
-      font-size: 2.6rem;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .subtitulo-pontos {
-      font-size: 0.78rem;
-      opacity: 0.7;
-      margin-bottom: 18px;
-    }
-
+    .valor-pontos { font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .subtitulo-pontos { font-size: 0.78rem; opacity: 0.7; margin-bottom: 18px; }
     .linha-pontos { height: 1px; background: rgba(255,255,255,0.2); margin: 16px 0; }
-
-    .movimentacao-mes {
-      display: flex;
-      gap: 20px;
-    }
+    .movimentacao-mes { display: flex; gap: 20px; }
     .mov-label {
-      font-size: 0.72rem;
-      opacity: 0.65;
-      margin-bottom: 2px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
+      font-size: 0.72rem; opacity: 0.65; margin-bottom: 2px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
     }
-    .mov-valor {
-      font-size: 1rem;
-      font-weight: 700;
-    }
+    .mov-valor { font-size: 1rem; font-weight: 700; }
     .mov-valor.entrada { color: var(--verde-badge); }
     .mov-valor.saida { color: rgba(255,255,255,0.6); }
 
     /* ── MEUS SERVIÇOS ── */
     .card-servico {
-      border: 1px solid #e4ebe2;
-      border-radius: 16px;
-      padding: 18px;
-      margin-top: 16px;
-      transition: box-shadow 0.18s;
+      border: 1px solid #e4ebe2; border-radius: 16px;
+      padding: 18px; margin-top: 16px; transition: box-shadow 0.18s;
     }
     .card-servico:hover { box-shadow: 0 4px 14px rgba(58,90,64,0.1); }
-
-    .topo-servico {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-    .topo-servico h4 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #1a2e1b;
-    }
-
+    .topo-servico { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .topo-servico h4 { font-size: 0.95rem; font-weight: 700; color: #1a2e1b; }
     .tag-ativo {
-      font-size: 0.7rem;
-      font-weight: 700;
-      background: #e6f4ea;
-      color: #2d6a4f;
-      padding: 3px 10px;
-      border-radius: 20px;
+      font-size: 0.7rem; font-weight: 700;
+      background: #e6f4ea; color: #2d6a4f;
+      padding: 3px 10px; border-radius: 20px;
     }
-
-    .descricao-servico {
-      font-size: 0.82rem;
-      color: #7a8c76;
-      margin-bottom: 14px;
-    }
-
-    .rodape-servico {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
+    .descricao-servico { font-size: 0.82rem; color: #7a8c76; margin-bottom: 14px; }
+    .rodape-servico { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .avaliacao-servico {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #f5a623;
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.82rem; font-weight: 600; color: #f5a623;
     }
     .avaliacao-servico span { color: #7a8c76; }
-
     .pontos-servico {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--verde-principal);
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      font-size: 0.82rem; font-weight: 700; color: var(--verde-principal);
+      display: flex; align-items: center; gap: 4px;
     }
-
     .acoes-servico { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .btn-excluir {
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: #fde8e8;
-      color: #b00020;
-      border: none;
-      padding: 7px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background 0.18s;
+      font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 700;
+      background: #fde8e8; color: #b00020;
+      border: none; padding: 7px 16px; border-radius: 20px;
+      cursor: pointer; transition: background 0.18s;
     }
     .btn-excluir:hover { background: #fcc; }
     .btn-editar-servico {
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: var(--verde-palido);
-      color: var(--verde-escuro);
-      border: none;
-      padding: 7px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background 0.18s;
-      text-decoration: none;
+      font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 700;
+      background: var(--verde-palido); color: var(--verde-escuro);
+      border: none; padding: 7px 16px; border-radius: 20px;
+      cursor: pointer; transition: background 0.18s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 5px;
     }
     .btn-editar-servico:hover { background: var(--verde-badge); }
 
     .btn-adicionar {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--verde-principal);
-      color: #fff;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--verde-principal); color: #fff;
       font-family: 'Quicksand', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
-      padding: 8px 18px;
-      border-radius: 20px;
-      text-decoration: none;
-      transition: background 0.18s;
+      font-size: 0.82rem; font-weight: 700;
+      padding: 8px 18px; border-radius: 20px;
+      text-decoration: none; transition: background 0.18s;
     }
     .btn-adicionar:hover { background: var(--verde-escuro); color: #fff; }
 
     /* ── HISTÓRICO ── */
     .barra-filtros-historico {
-      display: flex;
-      gap: 6px;
-      margin: 16px 0;
-      overflow-x: auto;
-      padding-bottom: 2px;
+      display: flex; gap: 6px; margin: 16px 0;
+      overflow-x: auto; padding-bottom: 2px;
     }
     .barra-filtros-historico::-webkit-scrollbar { display: none; }
 
     .btn-filtro-hist {
-      background: #f4f6f3;
-      border: 1px solid #e4ebe2;
-      color: #7a8c76;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 600;
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.18s;
-      flex-shrink: 0;
+      background: #f4f6f3; border: 1px solid #e4ebe2;
+      color: #7a8c76; font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      padding: 8px 18px; border-radius: 20px;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.18s; flex-shrink: 0;
     }
     .btn-filtro-hist:hover { border-color: var(--verde-principal); color: var(--verde-principal); }
     .btn-filtro-hist.ativo { background: var(--verde-principal); border-color: var(--verde-principal); color: #fff; }
@@ -425,92 +591,45 @@
     .lista-historico { display: flex; flex-direction: column; gap: 12px; }
 
     .item-historico {
-      border: 1px solid #e4ebe2;
-      border-radius: 16px;
-      padding: 16px 18px;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      transition: box-shadow 0.18s;
+      border: 1px solid #e4ebe2; border-radius: 16px;
+      padding: 16px 18px; display: flex;
+      align-items: flex-start; gap: 14px; transition: box-shadow 0.18s;
     }
     .item-historico:hover { box-shadow: 0 4px 12px rgba(58,90,64,0.08); }
 
     .icone-historico {
-      width: 40px; height: 40px;
-      border-radius: 12px;
+      width: 40px; height: 40px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
+      font-size: 1rem; flex-shrink: 0;
     }
     .icone-historico.utilizado { background: #fffbe6; color: #f5a623; }
     .icone-historico.confirmar { background: #e8f0fe; color: #3a7bbf; }
 
     .corpo-historico { flex: 1; min-width: 0; }
-    .corpo-historico h4 {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: #1a2e1b;
-      margin-bottom: 2px;
-    }
-    .corpo-historico .participante {
-      font-size: 0.8rem;
-      color: #7a8c76;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
+    .corpo-historico h4 { font-size: 0.92rem; font-weight: 700; color: #1a2e1b; margin-bottom: 2px; }
+    .corpo-historico .participante { font-size: 0.8rem; color: #7a8c76; font-weight: 600; margin-bottom: 8px; }
     .estrelas { display: flex; gap: 2px; color: #f5a623; font-size: 0.78rem; margin-bottom: 6px; }
-
-    .comentario-historico {
-      font-size: 0.82rem;
-      color: #4a6a4e;
-      font-style: italic;
-      margin-bottom: 6px;
-    }
-
+    .comentario-historico { font-size: 0.82rem; color: #4a6a4e; font-style: italic; margin-bottom: 6px; }
     .data-historico {
-      font-size: 0.75rem;
-      color: #b0bfac;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      font-size: 0.75rem; color: #b0bfac; font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
     }
 
-    .pontos-historico {
-      font-size: 0.9rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      align-self: center;
-    }
+    .pontos-historico { font-size: 0.9rem; font-weight: 700; flex-shrink: 0; align-self: center; }
     .pontos-historico.negativo { color: #9aab96; }
 
     .btn-confirmar-servico {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: var(--verde-principal);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background 0.18s;
-      margin-top: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 700;
+      background: var(--verde-principal); color: #fff;
+      border: none; padding: 8px 16px; border-radius: 20px;
+      cursor: pointer; transition: background 0.18s; margin-top: 8px;
     }
     .btn-confirmar-servico:hover { background: var(--verde-escuro); }
 
     .link-comentario {
-      font-size: 0.78rem;
-      color: var(--verde-principal);
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      font-size: 0.78rem; color: var(--verde-principal); font-weight: 600;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
       margin-bottom: 6px;
     }
     .link-comentario:hover { text-decoration: underline; }
@@ -530,251 +649,519 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav>
-    <a class="marca-nav" href="#">
-      <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
-      Mútuo
+<!-- NAVBAR -->
+<nav>
+  <a class="marca-nav" href="#">
+    <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+    Mútuo
+  </a>
+
+  <ul class="links-nav">
+    <li><a href="homeOngMutuo.html">Início</a></li>
+    <li><a href="chatOng.html">Chat</a></li>
+    <li class="dropdown-nav">
+      <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+      <div class="painel-dropdown">
+        <div class="painel-dropdown-interno">
+          <a href="planosOng.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+          <a href="certificadosOng.html"><i class="bi bi-award"></i> Certificados</a>
+          <a href="contatoOng.html"><i class="bi bi-envelope"></i> Contato</a>
+          <a href="comoUsarOng.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+          <a href="quemSomosOng.html"><i class="bi bi-people"></i> Quem somos</a>
+          <a href="../login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="nav-direita">
+    <a href="notificacoesOng.html" class="sino-nav">
+      <i class="bi bi-bell-fill"></i>
+      <span class="badge-sino">3</span>
     </a>
-    <ul class="links-nav">
-      <li><a href="homeOngMutuo.html">Início</a></li>
-      <li><a href="chatOng.html">Chat</a></li>
-      <li class="dropdown-nav">
-        <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
-        <div class="painel-dropdown">
-          <div class="painel-dropdown-interno">
-            <a href="planosOng.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
-            <a href="certificadosOng.html"><i class="bi bi-award"></i> Certificados</a>
-            <a href="contatoOng.html"><i class="bi bi-envelope"></i> Contato</a>
-            <a href="comoUsarOng.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
-            <a href="quemSomosOng.html"><i class="bi bi-people"></i> Quem somos</a>
-            <a href="../login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
-          </div>
-        </div>
-      </li>
-    </ul>
-    <div class="nav-direita">
-      <a href="notificacoesOng.html" class="sino-nav">
-        <i class="bi bi-bell-fill"></i>
-        <span class="badge-sino">3</span>
-      </a>
-      <a href="perfilOngMutuo.html" class="perfil-nav ativo">
-        <img src="../imagens/perfilOngI.png" alt="perfil" onerror="this.src='https://ui-avatars.com/api/?name=Instituto+Infancia+Viva&background=588157&color=fff'">
-        <span>Instituto Infância Viva</span>
-      </a>
+    <a href="perfilOngGMutuo.html" class="perfil-nav">
+      <img src="../imagens/perfilOngI.png" alt="perfil">
+      <span>Instituto Infância Viva</span>
+    </a>
+  </div>
+
+  <button class="nav-hamburger" id="hamburger" aria-label="Abrir menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-profile">
+    <img src="../imagens/perfilOngI.png" alt="perfil" onerror="this.style.background='#588157'">
+    <div class="drawer-profile-info">
+      <strong>Instituto Infância Viva</strong>
+      <small>ONG verificada · São Paulo, SP</small>
     </div>
-  </nav>
+  </div>
 
-  <div class="pagina">
+  <span class="drawer-section-label">Menu</span>
+  <a href="homeOngMutuo.html" class="drawer-nav-link">
+    <i class="bi bi-house-fill"></i> Início
+  </a>
+  <a href="chatOng.html" class="drawer-nav-link">
+    <i class="bi bi-chat-dots-fill"></i> Chat
+  </a>
+  <a href="notificacoesOng.html" class="drawer-nav-link">
+    <i class="bi bi-bell-fill"></i> Notificações
+    <span class="drawer-bell-badge">3</span>
+  </a>
+  <a href="perfilOngGMutuo.html" class="drawer-nav-link active">
+    <i class="bi bi-person-fill"></i> Meu Perfil
+  </a>
 
-    <!-- ── CARD DE PERFIL ONG ── -->
+  <div class="drawer-divider"></div>
+  <span class="drawer-section-label">Mais opções</span>
+
+  <a href="planosOng.html" class="drawer-nav-link">
+    <i class="bi bi-gem"></i> Conheça nossos planos
+  </a>
+  <a href="certificadosOng.html" class="drawer-nav-link">
+    <i class="bi bi-award"></i> Certificados
+  </a>
+
+  <a href="contatoOng.html" class="drawer-nav-link">
+    <i class="bi bi-envelope"></i> Contato
+  </a>
+  <a href="comoUsarOng.html" class="drawer-nav-link">
+    <i class="bi bi-question-circle"></i> Como usar a plataforma
+  </a>
+  <a href="quemSomosOng.html" class="drawer-nav-link">
+    <i class="bi bi-people"></i> Quem somos
+  </a>
+
+  <div class="drawer-divider"></div>
+
+  <a href="../login.html" class="drawer-nav-link danger">
+    <i class="bi bi-box-arrow-right"></i> Sair da conta
+  </a>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="pagina">
+
+  <!-- CARD DE PERFIL ONG -->
+  <div class="bloco">
+    <div class="cabecalho-perfil">
+      <div class="foto-perfil-wrap">
+        <img class="foto-perfil" src="../imagens/perfilOngI.png" alt="Instituto Infância Viva"
+          onerror="this.src='https://ui-avatars.com/api/?name=Instituto+Infancia+Viva&background=588157&color=fff'">
+        <span class="badge-online"></span>
+      </div>
+      <div class="info-perfil">
+        <h2>Instituto Infância Viva</h2>
+        <span>@infanciaViva</span>
+      </div>
+    </div>
+
+    <p class="bio-perfil">
+      Promovemos o bem-estar e o desenvolvimento de crianças e adolescentes em situação de vulnerabilidade, garantindo uma infância segura, saudável e cheia de oportunidades.
+    </p>
+
+    <div class="estatisticas-perfil">
+      <div class="stat-item">
+        <span class="stat-numero">1.000</span>
+        <span class="stat-texto">Voluntários</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-numero">98%</span>
+        <span class="stat-texto">Avaliações positivas</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-numero">8 meses</span>
+        <span class="stat-texto">No Mútuo</span>
+      </div>
+    </div>
+  </div>
+
     <div class="bloco">
-      <div class="cabecalho-perfil">
-        <div class="foto-perfil-wrap">
-          <img class="foto-perfil" src="../imagens/perfilOngI.png" alt="Instituto Infância Viva" onerror="this.src='https://ui-avatars.com/api/?name=Instituto+Infancia+Viva&background=588157&color=fff'">
-          <span class="badge-online"></span>
-        </div>
-        <div class="info-perfil">
-          <h2>Instituto Infância Viva</h2>
-          <span>@infanciaViva</span>
-        </div>
-      </div>
-
-      <p class="bio-perfil">
-        Promovemos o bem-estar e o desenvolvimento de crianças e adolescentes em situação de vulnerabilidade, garantindo uma infância segura, saudável e cheia de oportunidades.
-      </p>
-
-      <div class="estatisticas-perfil">
-        <div class="stat-item">
-          <span class="stat-numero">1.000</span>
-          <span class="stat-texto">Voluntários</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-numero">98%</span>
-          <span class="stat-texto">Avaliações positivas</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-numero">8 meses</span>
-          <span class="stat-texto">No Mútuo</span>
-        </div>
-      </div>
+  <div class="cabecalho-bloco">
+    <div>
+      <h3>Dados do usuário</h3>
+      <p>Informações pessoais e preferências</p>
     </div>
 
-    <!-- ── DADOS DO USUÁRIO ── -->
-    <div class="bloco">
-      <div class="cabecalho-bloco">
-        <div>
-          <h3>Dados do usuário</h3>
-          <p>Informações da organização e preferências</p>
-        </div>
-        <button class="btn-editar"><i class="bi bi-pencil-fill"></i> Editar perfil</button>
+    <button class="btn-editar" id="btnEditar" onclick="ativarEdicao()">
+      <i class="bi bi-pencil-fill"></i> Editar perfil
+    </button>
+  </div>
+
+  <div id="perfilWrap">
+
+    <div class="cabecalho-perfil">
+      <img class="foto-perfil"
+        src="../imagens/perfilOngI.png"
+        alt="Isabela"
+        onerror="this.src='https://ui-avatars.com/api/?name=Isabela+Monteiro&background=588157&color=fff'">
+
+      <div class="info-nome cabecalho-perfil-nome">
+        <h3 id="exibNome">Instituto infância Viva</h3>
+        <span id="exibUser">@infanciaViva</span>
       </div>
 
-      <div class="lista-info">
-        <div class="item-info">
-          <i class="bi bi-envelope-fill"></i>
-          infancia.viva@gmail.com
+      <div class="campo-nome-edit">
+        <div class="campo-edit">
+          <input type="text" id="inputNome" value="Instituto infância Viva" placeholder="Nome completo">
         </div>
-        <div class="item-info">
-          <i class="bi bi-telephone-fill"></i>
-          (19) 99999-9999
-        </div>
-        <div class="item-info">
-          <i class="bi bi-calendar3"></i>
-          Membro desde Fevereiro de 2025
-        </div>
-        <div class="item-info">
-          <i class="bi bi-gem"></i>
-          Plano gratuito
-        </div>
-      </div>
 
-      <div class="divisor"></div>
-
-      <p class="titulo-secao">Áreas de atuação</p>
-      <div class="habilidades">
-        <span class="tag-habilidade">Educação</span>
-        <span class="tag-habilidade">Recreação</span>
-        <span class="tag-habilidade">Artes</span>
-        <span class="tag-habilidade">Jardinagem</span>
-      </div>
-    </div>
-
-    <!-- ── PONTOS ── -->
-    <div class="card-pontos">
-      <div class="topo-pontos">
-        <h3>Saldo de pontos</h3>
-        <div class="icone-pontos"><i class="bi bi-lightning-charge-fill"></i></div>
-      </div>
-      <div class="valor-pontos">1.250</div>
-      <p class="subtitulo-pontos">Pontos disponíveis</p>
-      <div class="linha-pontos"></div>
-      <p style="font-size:0.72rem;opacity:0.6;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Este mês</p>
-      <div class="movimentacao-mes">
-        <div>
-          <p class="mov-label">Gastos</p>
-          <span class="mov-valor entrada">−320 pts</span>
-        </div>
-        <div>
-          <p class="mov-label">Serviços recebidos</p>
-          <span class="mov-valor saida">20</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── MEUS SERVIÇOS ── -->
-    <div class="bloco">
-      <div class="cabecalho-bloco">
-        <div>
-          <h3>Meus serviços</h3>
-          <p>Serviços que você oferece na plataforma</p>
-        </div>
-        <a href="adicionarServicoOng.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
-      </div>
-
-      <div class="card-servico">
-        <div class="topo-servico">
-          <h4>Aulas de ciência</h4>
-          <span class="tag-ativo">Ativo</span>
-        </div>
-        <p class="descricao-servico">Nos ajude com aulas de ciência para crianças de 7 a 14 anos</p>
-        <div class="rodape-servico">
-          <div class="avaliacao-servico">
-            <i class="bi bi-star-fill"></i> 4.5 <span>(23 avaliações)</span>
-          </div>
-          <div class="pontos-servico">
-            <i class="bi bi-lightning-charge-fill"></i> 150 pts/hora
-          </div>
-          <div class="acoes-servico">
-            <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
-            <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-servico">
-        <div class="topo-servico">
-          <h4>Aulas de pintura</h4>
-          <span class="tag-ativo">Ativo</span>
-        </div>
-        <p class="descricao-servico">Nos ajude a criar momentos divertidos para nossas crianças</p>
-        <div class="rodape-servico">
-          <div class="avaliacao-servico">
-            <i class="bi bi-star-fill"></i> 4.2 <span>(10 avaliações)</span>
-          </div>
-          <div class="pontos-servico">
-            <i class="bi bi-lightning-charge-fill"></i> 100 pts/hora
-          </div>
-          <div class="acoes-servico">
-            <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
-            <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
+        <div class="campo-edit">
+          <div class="prefixo-wrap">
+            <span class="prefixo">@</span>
+            <input type="text" id="inputUser" value="infanciaViva" placeholder="nome de usuário">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ── HISTÓRICO ── -->
-    <div class="bloco">
-      <div class="cabecalho-bloco">
-        <div>
-          <h3>Histórico de trocas</h3>
-          <p>Serviços recebidos e confirmações</p>
+    <div class="lista-info" id="modoLeitura">
+      <div class="item-info">
+        <i class="bi bi-envelope-fill"></i>
+        <span id="exibEmail">infancia.viva@gmail.com</span>
+      </div>
+
+      <div class="item-info">
+        <i class="bi bi-telephone-fill"></i>
+        <span id="exibTel">(19) 99999-9999</span>
+      </div>
+
+      <div class="item-info readonly">
+        <i class="bi bi-calendar3"></i>
+        <span class="label-readonly">Membro desde Fevereiro de 2025</span>
+       
+      </div>
+
+      <div class="item-info readonly">
+        <i class="bi bi-gem"></i>
+        <span class="label-readonly">Plano gratuito</span>
+   
+      </div>
+    </div>
+
+    <div class="lista-info" id="modoEdicao" style="display:none">
+      <div class="item-info">
+        <i class="bi bi-envelope-fill"></i>
+
+        <div class="campo-edit">
+          <input type="email" id="inputEmail" value="infancia.viva@gmail.com" placeholder="E-mail">
         </div>
       </div>
 
-      <div class="barra-filtros-historico">
-        <button class="btn-filtro-hist ativo" data-alvo="utilizados">Serviços recebidos</button>
-        <button class="btn-filtro-hist" data-alvo="confirmar">Confirmar serviços</button>
-      </div>
+      <div class="item-info">
+        <i class="bi bi-telephone-fill"></i>
 
-      <!-- RECEBIDOS -->
-      <div class="lista-historico" id="utilizados">
-
-        <div class="item-historico">
-          <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
-          <div class="corpo-historico">
-            <h4>Aula de ciência</h4>
-            <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Marcos Lima</p>
-            <div class="estrelas">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-            </div>
-            <p class="comentario-historico">"Experiência incrível com as crianças!"</p>
-            <p class="data-historico"><i class="bi bi-calendar3"></i> 15 out 2025</p>
-          </div>
-          <span class="pontos-historico negativo">−150 pts</span>
+        <div class="campo-edit">
+          <input type="tel" id="inputTel" value="(19) 99999-9999" placeholder="Telefone">
         </div>
-
       </div>
 
-      <!-- CONFIRMAR -->
-      <div class="lista-historico" id="confirmar" style="display:none;">
-
-        <div class="item-historico">
-          <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
-          <div class="corpo-historico">
-            <h4>Aula de ciência</h4>
-            <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Marcos Lima</p>
-            <a href="#" class="link-comentario"><i class="bi bi-chat-left-text"></i> Adicionar comentário</a>
-            <p class="data-historico"><i class="bi bi-calendar3"></i> 12 nov 2025</p>
-            <button class="btn-confirmar-servico"><i class="bi bi-check-circle-fill"></i> Confirmar realização</button>
-          </div>
-        </div>
-
+      <div class="item-info readonly">
+        <i class="bi bi-calendar3"></i>
+        <span class="label-readonly">Membro desde Fevereiro de 2025</span>
+        <span class="badge-readonly">Fixo</span>
       </div>
+
+      <div class="item-info readonly">
+        <i class="bi bi-gem"></i>
+        <span class="label-readonly">Plano gratuito</span>
+        <span class="badge-readonly">Fixo</span>
+      </div>
+    </div>
+
+    <div class="divisor"></div>
+
+    <p class="titulo-secao">Áreas de atuação</p>
+
+    <div class="habilidades-wrap" id="habilidadesWrap">
+
+      <span class="tag-habilidade" data-tag="Educação">
+        Educação
+        <button class="remover" onclick="removerTag(this)">
+          <i class="bi bi-x"></i>
+        </button>
+      </span>
+
+      <span class="tag-habilidade" data-tag="Recreação">
+        Recreação
+        <button class="remover" onclick="removerTag(this)">
+          <i class="bi bi-x"></i>
+        </button>
+      </span>
+
+      <span class="tag-habilidade" data-tag="Artes">
+        Artes
+        <button class="remover" onclick="removerTag(this)">
+          <i class="bi bi-x"></i>
+        </button>
+      </span>
+
+      <span class="tag-habilidade" data-tag="Jardinagem">
+        Jardinagem
+        <button class="remover" onclick="removerTag(this)">
+          <i class="bi bi-x"></i>
+        </button>
+      </span>
+
+      <div class="add-habilidade">
+        <input
+          type="text"
+          id="inputTag"
+          placeholder="Nova habilidade"
+          onkeydown="if(event.key==='Enter') adicionarTag()">
+
+        <button onclick="adicionarTag()">
+          <i class="bi bi-plus-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="acoes-edit" id="acoesEdit" style="display:none">
+      <button class="btn-cancelar" onclick="cancelarEdicao()">
+        Cancelar
+      </button>
+
+      <button class="btn-salvar" onclick="salvarEdicao()">
+        Salvar alterações
+      </button>
     </div>
 
   </div>
+</div>
+  <!-- PONTOS -->
+  <div class="card-pontos">
+    <div class="topo-pontos">
+      <h3>Saldo de pontos</h3>
+      <div class="icone-pontos"><i class="bi bi-lightning-charge-fill"></i></div>
+    </div>
+    <div class="valor-pontos">1.250</div>
+    <p class="subtitulo-pontos">Pontos disponíveis</p>
+    <div class="linha-pontos"></div>
+    <p style="font-size:0.72rem;opacity:0.6;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Este mês</p>
+    <div class="movimentacao-mes">
+      <div>
+        <p class="mov-label">Gastos</p>
+        <span class="mov-valor entrada">−320 pts</span>
+      </div>
+      <div>
+        <p class="mov-label">Serviços recebidos</p>
+        <span class="mov-valor saida">20</span>
+      </div>
+    </div>
+  </div>
 
-  <script>
-    document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.btn-filtro-hist').forEach(b => b.classList.remove('ativo'));
-        btn.classList.add('ativo');
-        document.querySelectorAll('.lista-historico').forEach(l => l.style.display = 'none');
-        document.getElementById(btn.dataset.alvo).style.display = 'flex';
-      });
+  <!-- MEUS SERVIÇOS -->
+  <div class="bloco">
+    <div class="cabecalho-bloco">
+      <div>
+        <h3>Meus serviços</h3>
+        <p>Serviços que você oferece na plataforma</p>
+      </div>
+      <a href="adicionarServicoOng.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
+    </div>
+
+    <div class="card-servico">
+      <div class="topo-servico">
+        <h4>Aulas de ciência</h4>
+        <span class="tag-ativo">Ativo</span>
+      </div>
+      <p class="descricao-servico">Nos ajude com aulas de ciência para crianças de 7 a 14 anos</p>
+      <div class="rodape-servico">
+        <div class="avaliacao-servico">
+          <i class="bi bi-star-fill"></i> 4.5 <span>(23 avaliações)</span>
+        </div>
+        <div class="pontos-servico">
+          <i class="bi bi-lightning-charge-fill"></i> 150 pts/hora
+        </div>
+        <div class="acoes-servico">
+          <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
+          <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-servico">
+      <div class="topo-servico">
+        <h4>Aulas de pintura</h4>
+        <span class="tag-ativo">Ativo</span>
+      </div>
+      <p class="descricao-servico">Nos ajude a criar momentos divertidos para nossas crianças</p>
+      <div class="rodape-servico">
+        <div class="avaliacao-servico">
+          <i class="bi bi-star-fill"></i> 4.2 <span>(10 avaliações)</span>
+        </div>
+        <div class="pontos-servico">
+          <i class="bi bi-lightning-charge-fill"></i> 100 pts/hora
+        </div>
+        <div class="acoes-servico">
+          <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
+          <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="bloco">
+    <div class="cabecalho-bloco">
+      <div>
+        <h3>Histórico de trocas</h3>
+        <p>Serviços recebidos e confirmações</p>
+      </div>
+    </div>
+
+    <div class="barra-filtros-historico">
+      <button class="btn-filtro-hist ativo" data-alvo="utilizados">Serviços recebidos</button>
+      <button class="btn-filtro-hist" data-alvo="confirmar">Confirmar serviços</button>
+    </div>
+
+    <!-- RECEBIDOS -->
+    <div class="lista-historico" id="utilizados">
+      <div class="item-historico">
+        <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
+        <div class="corpo-historico">
+          <h4>Aula de ciência</h4>
+          <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Marcos Lima</p>
+          <div class="estrelas">
+            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <p class="comentario-historico">"Experiência incrível com as crianças!"</p>
+          <p class="data-historico"><i class="bi bi-calendar3"></i> 15 out 2025</p>
+        </div>
+        <span class="pontos-historico negativo">−150 pts</span>
+      </div>
+    </div>
+
+    <!-- CONFIRMAR -->
+    <div class="lista-historico" id="confirmar" style="display:none;">
+      <div class="item-historico">
+        <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
+        <div class="corpo-historico">
+          <h4>Aula de ciência</h4>
+          <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Marcos Lima</p>
+          <a href="#" class="link-comentario"><i class="bi bi-chat-left-text"></i> Adicionar comentário</a>
+          <p class="data-historico"><i class="bi bi-calendar3"></i> 12 nov 2025</p>
+          <button class="btn-confirmar-servico"><i class="bi bi-check-circle-fill"></i> Confirmar realização</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Filtros histórico
+  document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-filtro-hist').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      document.querySelectorAll('.lista-historico').forEach(l => l.style.display = 'none');
+      document.getElementById(btn.dataset.alvo).style.display = 'flex';
     });
-  </script>
+  });
 
+  
+  const hamburger    = document.getElementById('hamburger');
+  const mobileDrawer = document.getElementById('mobileDrawer');
+  const overlay      = document.getElementById('drawerOverlay');
+
+  function openDrawer() {
+    mobileDrawer.classList.add('open');
+    overlay.classList.add('open');
+    hamburger.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    mobileDrawer.classList.remove('open');
+    overlay.classList.remove('open');
+    hamburger.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  hamburger.addEventListener('click', () =>
+    mobileDrawer.classList.contains('open') ? closeDrawer() : openDrawer()
+  );
+
+  overlay.addEventListener('click', closeDrawer);
+
+  mobileDrawer.querySelectorAll('a').forEach(a =>
+    a.addEventListener('click', closeDrawer)
+  );
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) closeDrawer();
+  });
+  
+     function ativarEdicao() {
+      document.getElementById('modoLeitura').style.display = 'none';
+      document.getElementById('modoEdicao').style.display = 'flex';
+      document.getElementById('acoesEdit').style.display = 'flex';
+      document.getElementById('btnEditar').style.display = 'none';
+      document.getElementById('perfilWrap').classList.add('editando-perfil');
+      document.getElementById('habilidadesWrap').classList.add('editando');
+      document.querySelector('.campo-nome-edit').style.display = 'flex';
+      document.querySelector('.cabecalho-perfil-nome').style.display = 'none';
+      document.getElementById('inputNome').focus();
+    }
+ 
+    function cancelarEdicao() {
+      document.getElementById('modoEdicao').style.display = 'none';
+      document.getElementById('modoLeitura').style.display = 'flex';
+      document.getElementById('acoesEdit').style.display = 'none';
+      document.getElementById('btnEditar').style.display = 'flex';
+      document.getElementById('perfilWrap').classList.remove('editando-perfil');
+      document.getElementById('habilidadesWrap').classList.remove('editando');
+      document.querySelector('.campo-nome-edit').style.display = 'none';
+      document.querySelector('.cabecalho-perfil-nome').style.display = '';
+    }
+ 
+    function salvarEdicao() {
+      const nome = document.getElementById('inputNome').value.trim() || 'Isabela Monteiro';
+      const user = document.getElementById('inputUser').value.trim() || 'isa.monteiro';
+      const email = document.getElementById('inputEmail').value.trim();
+      const tel = document.getElementById('inputTel').value.trim();
+ 
+      document.getElementById('exibNome').textContent = nome;
+      document.getElementById('exibUser').textContent = '@' + user;
+      document.getElementById('exibEmail').textContent = email;
+      document.getElementById('exibTel').textContent = tel;
+ 
+      cancelarEdicao();
+    }
+ 
+    function removerTag(btn) {
+      btn.closest('.tag-habilidade').remove();
+    }
+ 
+    function adicionarTag() {
+      const inp = document.getElementById('inputTag');
+      const val = inp.value.trim();
+      if (!val) return;
+ 
+      const wrap = document.getElementById('habilidadesWrap');
+      const addDiv = wrap.querySelector('.add-habilidade');
+ 
+      const tag = document.createElement('span');
+      tag.className = 'tag-habilidade';
+      tag.dataset.tag = val;
+      tag.innerHTML = val + `
+        <button class="remover" onclick="removerTag(this)" aria-label="Remover ${val}">
+          <i class="bi bi-x"></i>
+        </button>`;
+ 
+      wrap.insertBefore(tag, addDiv);
+      inp.value = '';
+      inp.focus();
+    }
+</script>
 </body>
 </html>
