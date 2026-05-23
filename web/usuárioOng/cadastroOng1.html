@@ -32,7 +32,7 @@
       padding: 40px 16px 60px;
     }
 
-    /* ── TOPO ── */
+   
     .topo {
       display: flex;
       margin-top: 0;
@@ -62,7 +62,7 @@
       margin: 0;
     }
 
-    /* ── CARD ── */
+    
     .card-form {
       width: 100%; max-width: 480px;
       background: rgba(88, 129, 87, 0.649);
@@ -75,7 +75,7 @@
       animation: fadeUp 0.5s ease 0.05s both;
     }
 
-    /* ── CAMPO ── */
+   
     .campo { margin-bottom: 20px; }
 
     .campo label {
@@ -112,7 +112,7 @@
       box-shadow: 0 0 0 3px rgba(88,129,87,0.2);
     }
 
-    /* Input date styling */
+   
     .campo input[type="date"] {
       color: #1a2e1b;
     }
@@ -121,21 +121,20 @@
       cursor: pointer;
     }
 
-    /* ── LINHA DE 2 CAMPOS ── */
+  
     .campos-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
     }
 
-    /* ── DIVISOR ── */
+  
     .divisor {
       height: 1px;
       background: rgba(225,220,208,0.15);
       margin: 8px 0 24px;
     }
 
-    /* ── BOTÃO CONFIRMAR ── */
     .btn-confirmar {
       display: flex; align-items: center; justify-content: center; gap: 8px;
       width: 100%;
@@ -158,7 +157,7 @@
     }
     .btn-confirmar:active { transform: scale(0.98); }
 
-    /* ── LINK VOLTAR ── */
+   
     .link-cancelar {
       display: block; text-align: center;
       margin-top: 14px;
@@ -169,7 +168,13 @@
       cursor: pointer;
     }
     .link-cancelar:hover { color: var(--cream); }
-
+    .erro{
+        color: #ffb3b3;
+        font-size: 0.78rem;
+        margin-top: 6px;
+        padding-left: 4px;
+        font-weight: 600;
+      }
     /* ── ANIMAÇÕES ── */
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-10px); }
@@ -198,22 +203,26 @@
     <div class="campo">
       <label for="nomeOng"><i class="bi bi-building-fill"></i> Nome da ONG</label>
       <input type="text" id="nomeOng" placeholder="Nome da ONG" required autofocus>
+      <p class="erro" id="erroNome"></p>
     </div>
 
     <div class="campo">
       <label for="cnpj"><i class="bi bi-file-earmark-text-fill"></i> CNPJ</label>
       <input type="text" id="cnpj" placeholder="CNPJ" required>
+      <p class="erro" id="erroCnpj"></p>
     </div>
 
     <div class="campos-row">
       <div class="campo">
         <label for="senha"><i class="bi bi-lock-fill"></i> Senha</label>
         <input type="password" id="senha" placeholder="Senha" required>
+        <p class="erro" id="erroSenha"></p>
       </div>
 
       <div class="campo">
         <label for="dataFundacao"><i class="bi bi-calendar-fill"></i> Fundação</label>
         <input type="date" id="dataFundacao" required>
+        <p class="erro" id="erroData"></p>
       </div>
     </div>
 
@@ -227,28 +236,128 @@
   </div>
 
   <script>
-    document.getElementById('proximo').addEventListener('click', () => {
-      const nomeOngValue      = document.getElementById('nomeOng').value;
-      const cnpjValue         = document.getElementById('cnpj').value;
-      const senhaValue        = document.getElementById('senha').value;
-      const dataFundacaoValue = document.getElementById('dataFundacao').value;
 
-      if (!nomeOngValue || !cnpjValue || !senhaValue || !dataFundacaoValue) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Ops...',
-          text: 'Preencha o Nome, CNPJ, Senha e Data de fundação para continuar!',
-          confirmButtonText: 'Entendi',
-          confirmButtonColor: '#3a5a40',
-          heightAuto: false
-        });
-      } else {
-        const params = new URLSearchParams(window.location.search);
-        const tipo = params.get('tipo');
-        window.location.href = `cadastroLocOng.html?tipo=${tipo}`;
-      }
-    });
-  </script>
+// MÁSCARA CNPJ
+document.getElementById('cnpj').addEventListener('input', function () {
+
+  let v = this.value.replace(/\D/g, '').slice(0, 14);
+
+  v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+  v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  v = v.replace(/(\d{4})(\d)/, '$1-$2');
+
+  this.value = v;
+
+});
+
+
+
+document.getElementById('proximo').addEventListener('click', () => {
+
+  const nomeOngValue =
+    document.getElementById('nomeOng').value.trim();
+
+  const cnpjValue =
+    document.getElementById('cnpj').value.trim();
+
+  const senhaValue =
+    document.getElementById('senha').value.trim();
+
+  const dataFundacaoValue =
+    document.getElementById('dataFundacao').value;
+
+
+
+  document.getElementById('erroNome').textContent = '';
+  document.getElementById('erroCnpj').textContent = '';
+  document.getElementById('erroSenha').textContent = '';
+  document.getElementById('erroData').textContent = '';
+
+
+  let formularioValido = true;
+
+
+
+  if (!nomeOngValue) {
+
+    document.getElementById('erroNome').textContent =
+      'Digite o nome da ONG.';
+
+    formularioValido = false;
+
+  }
+
+
+
+  const numerosCnpj = cnpjValue.replace(/\D/g, '');
+
+  if (!cnpjValue) {
+
+    document.getElementById('erroCnpj').textContent =
+      'Digite o CNPJ.';
+
+    formularioValido = false;
+
+  }
+
+  else if (numerosCnpj.length < 14) {
+
+    document.getElementById('erroCnpj').textContent =
+      'Digite um CNPJ válido.';
+
+    formularioValido = false;
+
+  }
+
+
+
+  if (!senhaValue) {
+
+    document.getElementById('erroSenha').textContent =
+      'Digite sua senha.';
+
+    formularioValido = false;
+
+  }
+
+  else if (senhaValue.length < 8) {
+
+    document.getElementById('erroSenha').textContent =
+      'A senha deve ter no mínimo 8 caracteres.';
+
+    formularioValido = false;
+
+  }
+
+
+  
+  if (!dataFundacaoValue) {
+
+    document.getElementById('erroData').textContent =
+      'Selecione a data de fundação.';
+
+    formularioValido = false;
+
+  }
+
+
+  
+  if (formularioValido) {
+
+    const params =
+      new URLSearchParams(window.location.search);
+
+    const tipo = params.get('tipo');
+
+    window.location.href =
+      `cadastroLocOng.html?tipo=${tipo}`;
+
+  }
+
+});
+
+</script>
 
 </body>
 </html>

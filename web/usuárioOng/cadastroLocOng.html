@@ -32,7 +32,7 @@
       padding: 40px 16px 60px;
     }
 
-    /* ── TOPO ── */
+  
     .topo {
       display: flex;
       margin-top: 0;
@@ -62,7 +62,7 @@
       margin: 0;
     }
 
-    /* ── CARD ── */
+
     .card-form {
       width: 100%; max-width: 480px;
       background: rgba(88, 129, 87, 0.649);
@@ -75,7 +75,7 @@
       animation: fadeUp 0.5s ease 0.05s both;
     }
 
-    /* ── CAMPO ── */
+   
     .campo { margin-bottom: 20px; }
 
     .campo label {
@@ -114,21 +114,21 @@
       box-shadow: 0 0 0 3px rgba(88,129,87,0.2);
     }
 
-    /* ── LINHA DE 2 CAMPOS ── */
+
     .campos-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
     }
 
-    /* ── DIVISOR ── */
+  
     .divisor {
       height: 1px;
       background: rgba(225,220,208,0.15);
       margin: 8px 0 24px;
     }
 
-    /* ── BOTÃO CONFIRMAR ── */
+    
     .btn-confirmar {
       display: flex; align-items: center; justify-content: center; gap: 8px;
       width: 100%;
@@ -151,7 +151,7 @@
     }
     .btn-confirmar:active { transform: scale(0.98); }
 
-    /* ── LINK VOLTAR ── */
+  
     .link-cancelar {
       display: block; text-align: center;
       margin-top: 14px;
@@ -163,7 +163,13 @@
     }
     .link-cancelar:hover { color: var(--cream); }
 
-    /* ── ANIMAÇÕES ── */
+   .erro{
+  color: #ffb3b3;
+  font-size: 0.78rem;
+  margin-top: 6px;
+  padding-left: 4px;
+  font-weight: 600;
+}
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -191,22 +197,26 @@
     <div class="campo">
       <label for="enderecoOng"><i class="bi bi-geo-alt-fill"></i> Endereço da ONG</label>
       <input type="text" id="enderecoOng" placeholder="Rua e N°" required autofocus>
+      <p class="erro" id="erroEndereco"></p>
     </div>
 
     <div class="campo">
       <label for="cidade"><i class="bi bi-buildings-fill"></i> Cidade</label>
       <input type="text" id="cidade" placeholder="Cidade" required>
+      <p class="erro" id="erroCidade"></p>
     </div>
 
     <div class="campos-row">
       <div class="campo">
         <label for="estado"><i class="bi bi-map-fill"></i> Estado</label>
-        <input type="text" id="estado" placeholder="Estado" required>
+    <input type="text" id="estado" placeholder="Estado" required>
+    <p class="erro" id="erroEstado"></p>
       </div>
 
       <div class="campo">
         <label for="cep"><i class="bi bi-mailbox-fill"></i> CEP</label>
-        <input type="text" id="cep" placeholder="CEP" required>
+       <input type="text" id="cep" placeholder="CEP" required>
+      <p class="erro" id="erroCep"></p>
       </div>
     </div>
 
@@ -219,38 +229,128 @@
 
   </div>
 
-  <script>
-    document.getElementById('proximo').addEventListener('click', () => {
-      const enderecoOngValue = document.getElementById('enderecoOng').value;
-      const cidadeValue      = document.getElementById('cidade').value;
-      const estadoValue      = document.getElementById('estado').value;
-      const cepValue         = document.getElementById('cep').value;
+ <script>
 
-      if (!enderecoOngValue || !cidadeValue || !estadoValue || !cepValue) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Ops...',
-          text: 'Preencha o Endereço, Cidade, Estado e CEP para continuar!',
-          confirmButtonText: 'Entendi',
-          confirmButtonColor: '#3a5a40',
-          heightAuto: false
-        });
-      } else {
-        Swal.fire({
-          icon: 'success',
-          title: 'Cadastro realizado!',
-          text: 'Seu cadastro foi realizado com sucesso.',
-          confirmButtonText: 'Ótimo',
-          confirmButtonColor: '#3a5a40',
-          heightAuto: false
-        }).then(() => {
-          const params = new URLSearchParams(window.location.search);
-          const tipo = params.get('tipo');
-          window.location.href = `../cadastroConfirmacao.html?tipo=${tipo}`;
-        });
-      }
+// MÁSCARA CEP
+document.getElementById('cep').addEventListener('input', function () {
+
+  let v = this.value.replace(/\D/g, '').slice(0, 8);
+
+  v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+
+  this.value = v;
+
+});
+
+
+
+document.getElementById('proximo').addEventListener('click', () => {
+
+  const enderecoOngValue =
+    document.getElementById('enderecoOng').value.trim();
+
+  const cidadeValue =
+    document.getElementById('cidade').value.trim();
+
+  const estadoValue =
+    document.getElementById('estado').value.trim();
+
+  const cepValue =
+    document.getElementById('cep').value.trim();
+
+
+  // LIMPA ERROS
+  document.getElementById('erroEndereco').textContent = '';
+  document.getElementById('erroCidade').textContent = '';
+  document.getElementById('erroEstado').textContent = '';
+  document.getElementById('erroCep').textContent = '';
+
+
+  let formularioValido = true;
+
+
+  // ENDEREÇO
+  if (!enderecoOngValue) {
+
+    document.getElementById('erroEndereco').textContent =
+      'Digite o endereço da ONG.';
+
+    formularioValido = false;
+
+  }
+
+
+  // CIDADE
+  if (!cidadeValue) {
+
+    document.getElementById('erroCidade').textContent =
+      'Digite a cidade.';
+
+    formularioValido = false;
+
+  }
+
+
+  // ESTADO
+  if (!estadoValue) {
+
+    document.getElementById('erroEstado').textContent =
+      'Digite o estado.';
+
+    formularioValido = false;
+
+  }
+
+
+  // CEP
+  const numerosCep = cepValue.replace(/\D/g, '');
+
+  if (!cepValue) {
+
+    document.getElementById('erroCep').textContent =
+      'Digite o CEP.';
+
+    formularioValido = false;
+
+  }
+
+  else if (numerosCep.length < 8) {
+
+    document.getElementById('erroCep').textContent =
+      'Digite um CEP válido.';
+
+    formularioValido = false;
+
+  }
+
+
+  // SUCESSO
+  if (formularioValido) {
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Cadastro realizado!',
+      text: 'Seu cadastro foi realizado com sucesso.',
+      confirmButtonText: 'Ótimo',
+      confirmButtonColor: '#3a5a40',
+      heightAuto: false
+    }).then(() => {
+
+      const params =
+        new URLSearchParams(window.location.search);
+
+      const tipo = params.get('tipo');
+
+      window.location.href =
+        `../cadastroConfirmacao.html?tipo=${tipo}`;
+
     });
-  </script>
+
+  }
+
+});
+
+</script>
 
 </body>
 </html>

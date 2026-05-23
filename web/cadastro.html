@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro — Mútuo</title>
+  <title>Cadastro | Mútuo</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -233,7 +233,7 @@
 
     .btn-confirmar:active { transform: scale(0.98); }
 
-    /* ── LINK VOLTAR ── */
+    
     .link-cancelar {
       display: block;
       text-align: center;
@@ -248,7 +248,7 @@
 
     .link-cancelar:hover { color: var(--cream); }
 
-    /* ── ANIMAÇÕES ── */
+
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -263,6 +263,13 @@
       .card-form { padding: 28px 20px; }
       .opcoes { grid-template-columns: 1fr 1fr; }
     }
+    .erro{
+  color: #ffb3b3;
+  font-size: 0.78rem;
+  margin-top: 6px;
+  padding-left: 4px;
+  font-weight: 600;
+}
   </style>
 </head>
 <body>
@@ -277,23 +284,28 @@
     <div class="campo">
       <label for="nome"><i class="bi bi-person-fill"></i> Nome</label>
       <input type="text" id="nome" placeholder="Seu nome completo" required autofocus>
+      <p class="erro" id="erroNome"></p>
     </div>
 
     <div class="campo">
       <label for="email"><i class="bi bi-envelope-fill"></i> Email</label>
       <input type="email" id="email" placeholder="seu@email.com" required>
+      <p class="erro" id="erroEmail"></p>
     </div>
 
     <div class="campo">
       <label for="telefone"><i class="bi bi-telephone-fill"></i> Telefone</label>
       <input type="tel" id="telefone" placeholder="(19) 99999-9999" required>
+      <p class="erro" id="erroTelefone"></p>
     </div>
 
     <div class="campo">
       <div class="radio-label"><i class="bi bi-people-fill"></i> Tipo de conta</div>
       <div class="opcoes">
+
         <div class="opcao">
           <input type="radio" id="usuario" name="tipo" value="usuario">
+         
           <label for="usuario">
             <i class="bi bi-person-circle"></i>
             Usuário Comum
@@ -306,6 +318,7 @@
             Representante de ONG
           </label>
         </div>
+         <p class="erro" id="erroTipo"></p>
       </div>
     </div>
 
@@ -320,39 +333,141 @@
   </div>
 
   <script>
-    // Máscara de telefone
-    document.getElementById('telefone').addEventListener('input', function () {
-      let v = this.value.replace(/\D/g, '').slice(0, 11);
-      if (v.length > 6) v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-      else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-      else if (v.length > 0) v = v.replace(/^(\d{0,2})/, '($1');
-      this.value = v;
-    });
 
-    document.getElementById('cadastrar').addEventListener('click', () => {
-      const nome     = document.getElementById('nome').value;
-      const email    = document.getElementById('email').value;
-      const telefone = document.getElementById('telefone').value;
-      const selecao  = document.querySelector('input[name="tipo"]:checked');
+document.getElementById('telefone').addEventListener('input', function () {
 
-      if (!nome || !email || !telefone || !selecao) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Ops...',
-          text: 'Preencha o Nome, Email, Telefone e selecione um tipo para continuar!',
-          confirmButtonText: 'Entendi',
-          confirmButtonColor: '#3a5a40',
-          heightAuto: false
-        });
-      } else {
-        if (selecao.value === 'ong') {
-          window.location.href = "usuárioOng/cadastroOng1.html?tipo=ong";
-        } else {
-          window.location.href = "usuárioComum/cadastroPessoal.html?tipo=usuario";
-        }
-      }
-    });
-  </script>
+  let v = this.value.replace(/\D/g, '').slice(0, 11);
+
+  if (v.length > 6) {
+    v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  }
+
+  else if (v.length > 2) {
+    v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+  }
+
+  else if (v.length > 0) {
+    v = v.replace(/^(\d{0,2})/, '($1');
+  }
+
+  this.value = v;
+
+});
+
+
+
+document.getElementById('cadastrar').addEventListener('click', () => {
+
+  const nome = document.getElementById('nome').value.trim();
+
+  const email = document.getElementById('email').value.trim();
+
+  const telefone = document.getElementById('telefone').value.trim();
+
+  const selecao = document.querySelector(
+    'input[name="tipo"]:checked'
+  );
+
+
+
+  const erroNome = document.getElementById('erroNome');
+
+  const erroEmail = document.getElementById('erroEmail');
+
+  const erroTelefone = document.getElementById('erroTelefone');
+
+  const erroTipo = document.getElementById('erroTipo');
+
+
+ 
+  erroNome.textContent = '';
+
+  erroEmail.textContent = '';
+
+  erroTelefone.textContent = '';
+
+  erroTipo.textContent = '';
+
+
+  let formularioValido = true;
+
+
+  // NOME
+  if (!nome) {
+
+    erroNome.textContent = 'Digite seu nome.';
+    formularioValido = false;
+
+  }
+
+
+  // EMAIL
+  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!email) {
+
+    erroEmail.textContent = 'Digite seu e-mail.';
+    formularioValido = false;
+
+  }
+
+  else if (!emailValido.test(email)) {
+
+    erroEmail.textContent = 'Digite um e-mail válido.';
+    formularioValido = false;
+
+  }
+
+
+  // TELEFONE
+  const numerosTelefone = telefone.replace(/\D/g, '');
+
+  if (!telefone) {
+
+    erroTelefone.textContent = 'Digite seu telefone.';
+    formularioValido = false;
+
+  }
+
+  else if (numerosTelefone.length < 11) {
+
+    erroTelefone.textContent = 'Digite um telefone válido.';
+    formularioValido = false;
+
+  }
+
+
+  // TIPO
+  if (!selecao) {
+
+    erroTipo.textContent = 'Selecione um tipo de conta.';
+    formularioValido = false;
+
+  }
+
+
+  // REDIRECIONAMENTO
+  if (formularioValido) {
+
+    if (selecao.value === 'ong') {
+
+      window.location.href =
+        "usuárioOng/cadastroOng1.html?tipo=ong";
+
+    }
+
+    else {
+
+      window.location.href =
+        "usuárioComum/cadastroPessoal.html?tipo=usuario";
+
+    }
+
+  }
+
+});
+
+</script>
 
 </body>
 </html>
