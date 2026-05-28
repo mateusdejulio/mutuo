@@ -52,7 +52,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                 ),
                 child: ClipOval(
                   child: Image.asset(
-                    "images/logo.png",
+                    "assets/images/logo.png",
                     fit: BoxFit.cover,
                   ),
                 ),

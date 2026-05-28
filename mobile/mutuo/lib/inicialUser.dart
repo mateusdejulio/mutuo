@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
-import 'package:mutuo/servicos.dart'; // ← IMPORT DA NOVA TELA
+import 'package:mutuo/servicos.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 class Vaga {
@@ -161,6 +161,10 @@ class _InicialUsuarioState extends State<InicialUsuario> {
   int _fraseIndex = 0;
   int _bottomNavIndex = 0;
 
+  // ── helper seguro para inicial do nome ──
+  String get _inicial =>
+      widget.nome.isNotEmpty ? widget.nome[0].toUpperCase() : "U";
+
   final List<String> _frases = [
     "Juntos, podemos construir um futuro mais humano.",
     "Pequenos gestos transformam grandes realidades.",
@@ -251,32 +255,23 @@ class _InicialUsuarioState extends State<InicialUsuario> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. HEADER
               _header(context),
               const SizedBox(height: 20),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 2. BOAS-VINDAS
                     _cardBoasVindas(),
                     const SizedBox(height: 24),
-
-                    // 3. GRID ESTATÍSTICAS
                     _sectionTitle("Resumo"),
                     const SizedBox(height: 12),
                     _gridEstatisticas(),
                     const SizedBox(height: 24),
-
-                    // 4. CARD FRASE
                     _sectionTitle("Inspiração"),
                     const SizedBox(height: 12),
                     _cardFrase(),
                     const SizedBox(height: 28),
-
-                    // 5. ACESSO RÁPIDO
                     _sectionTitle("Acesso rápido"),
                     const SizedBox(height: 14),
                     _gridAcessoRapido(),
@@ -284,15 +279,12 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                   ],
                 ),
               ),
-
-              // 6. VAGAS EM DESTAQUE
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _sectionTitle("Vagas em destaque"),
-                    // ← "Ver todas" agora navega para Serviços
                     GestureDetector(
                       onTap: _irParaServicos,
                       child: Text(
@@ -366,7 +358,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
           currentIndex: _bottomNavIndex,
           onTap: (index) {
             if (index == 1) {
-              // ← Tab "Serviços" navega para a tela nova
               _irParaServicos();
             } else if (index == 2) {
               _irParaOngs();
@@ -459,7 +450,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               if (value == 'logout') {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => Login()),
+                  MaterialPageRoute(builder: (_) => const Login()),
                 );
               }
             },
@@ -486,7 +477,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               radius: 20,
               backgroundColor: _bege,
               child: Text(
-                widget.nome.isNotEmpty ? widget.nome[0].toUpperCase() : "U",
+                _inicial, // ✅ usa getter seguro
                 style: GoogleFonts.quicksand(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -533,7 +524,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Bem-vindo(a), ${widget.nome}!",
+                  "Bem-vindo(a), ${widget.nome.isNotEmpty ? widget.nome : 'Usuário'}!",
                   style: GoogleFonts.quicksand(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -592,8 +583,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         iconeColor: const Color(0xFF1A73E8),
         titulo: "Trabalhos concluídos",
         valor: "5",
-        sub: null,
-        subPositivo: false,
       ),
       _StatData(
         icone: Icons.star_rounded,
@@ -611,7 +600,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         titulo: "Plano atual",
         valor: "Gratuito",
         sub: "melhore seu plano",
-        subPositivo: false,
         subLink: true,
       ),
     ];
@@ -685,8 +673,8 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                     color: s.subLink
                         ? _verdeMedio
                         : s.subPositivo
-                        ? const Color(0xFF52B788)
-                        : const Color(0xFF9E9E9E),
+                            ? const Color(0xFF52B788)
+                            : const Color(0xFF9E9E9E),
                   ),
                 ),
             ],
@@ -768,13 +756,16 @@ class _InicialUsuarioState extends State<InicialUsuario> {
   // ─── ACESSO RÁPIDO ────────────────────────────────────────
   Widget _gridAcessoRapido() {
     final itens = [
-      // ← "Buscar Vagas" também vai para Serviços
       _AcessoData(
         icone: Icons.search_rounded,
         label: "Buscar Vagas",
         onTap: _irParaServicos,
       ),
-      _AcessoData(icone: Icons.favorite_border_rounded, label: "ONGs"),
+      _AcessoData(
+        icone: Icons.favorite_border_rounded,
+        label: "ONGs",
+        onTap: _irParaOngs,
+      ),
       _AcessoData(icone: Icons.chat_bubble_outline_rounded, label: "Chat"),
       _AcessoData(
         icone: Icons.workspace_premium_outlined,
@@ -910,7 +901,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Imagem + Tag
             ClipRRect(
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(22),
@@ -962,8 +952,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                 ],
               ),
             ),
-
-            // Conteúdo
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -997,8 +985,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                         ),
                       ],
                     ),
-
-                    // Autor + Avaliação
                     Row(
                       children: [
                         CircleAvatar(
@@ -1068,8 +1054,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                         ),
                       ],
                     ),
-
-                    // Local + Tempo
                     Row(
                       children: [
                         const Icon(

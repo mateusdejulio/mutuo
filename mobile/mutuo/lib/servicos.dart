@@ -349,7 +349,9 @@ class _ServicosState extends State<Servicos> {
                     child: CircleAvatar(
                       backgroundColor: _bege,
                       child: Text(
-                        widget.nome[0].toUpperCase(),
+                          widget.nome.isNotEmpty
+                              ? widget.nome[0].toUpperCase()
+                              : "U",
                         style: const TextStyle(
                           color: _verde,
                           fontWeight: FontWeight.bold,
