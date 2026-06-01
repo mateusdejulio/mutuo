@@ -29,14 +29,21 @@ app.put('/usuarios/:cpf', async (req, res) => {
 
 // Rotas de ONGs e Serviços
 app.get('/ongs', async (req, res) => res.json(await db.getONGs()));
+app.post('/ongs', async (req, res) => {
+    try {
+        const id = await db.cadastrarOng(req.body);
+        res.json({ sucesso: true, id });
+    } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
+});
 app.put('/ongs/:cnpj', async (req, res) => {
     const { ativo, responsavel, foco } = req.body;
     res.json(await db.alterONG(req.params.cnpj, ativo, responsavel, foco));
 });
 app.get('/servicos', async (req, res) => res.json(await db.getServicos()));
 app.put('/servicos/:cod', async (req, res) => {
+    const cod = decodeURIComponent(req.params.cod);
     const { ativo, horas, foco, nota } = req.body;
-    res.json(await db.alterServico(req.params.cod, ativo, horas, foco, nota));
+    res.json(await db.alterServico(cod, ativo, horas, foco, nota));
 });
 
 // Rotas de Solicitações
@@ -54,6 +61,22 @@ app.get('/stats/premium-total', async (req, res) => res.json(await db.countPremi
 app.get('/stats/atrasadas', async (req, res) => res.json(await db.countAtrasadas()));
 
 app.get('/stats/receita', async (req, res) => res.json(await db.countReceita()));
+
+// Rotas de Administrador
+app.put('/adm/login', async (req, res) => {
+    const { loginAntigo, novoLogin } = req.body;
+    res.json(await db.alterarLoginAdm(loginAntigo, novoLogin));
+});
+
+app.put('/adm/senha', async (req, res) => {
+    const { login, senhaAtual, novaSenha } = req.body;
+    res.json(await db.alterarSenhaAdm(login, senhaAtual, novaSenha));
+});
+
+app.post('/adm/cadastrar', async (req, res) => {
+    const { novoLogin, novaSenha } = req.body;
+    res.json(await db.cadastrarAdm(novoLogin, novaSenha));
+});
 
 
 // Rotas de Estatísticas (Dashboard)

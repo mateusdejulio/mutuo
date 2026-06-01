@@ -108,17 +108,19 @@ ipcMain.handle('alterar-usuario', (e, d) => apiFetch(`/usuarios/${d.cpf}`, 'PUT'
 
 ipcMain.handle('buscar-ongs', () => apiFetch('/ongs'));
 
-ipcMain.handle('alterar-ong', (e, d) => apiFetch(`/ongs/${d.cnpj}`, 'PUT', d));
+ipcMain.handle('alterar-ong', (e, d) => apiFetch(`/ongs/${encodeURIComponent(d.cnpj)}`, 'PUT', d));
 
 ipcMain.handle('buscar-servicos', () => apiFetch('/servicos'));
 
-ipcMain.handle('alterar-servico', (e, d) => apiFetch(`/servicos/${d.cod}`, 'PUT', d));
+ipcMain.handle('alterar-servico', (e, d) => apiFetch(`/servicos/${encodeURIComponent(d.cod)}`, 'PUT', d));
 
 ipcMain.handle('buscar-solicitacoes', () => apiFetch('/solicitacoes'));
 
 ipcMain.handle('alterar-solicitacao', (e, d) => apiFetch(`/solicitacoes/${d.cod}`, 'PUT', d));
 
 ipcMain.handle('cadastrar-usuario', (e, usuario) => apiFetch('/usuarios', 'POST', usuario));
+
+ipcMain.handle('cadastrar-ong', (e, ong) => apiFetch('/ongs', 'POST', ong));
 
 ipcMain.handle('buscar-premium', () => apiFetch('/premium'));
 
@@ -127,6 +129,15 @@ ipcMain.handle('total-premium-geral', () => apiFetch('/stats/premium-total'));
 ipcMain.handle('total-atrasadas', () => apiFetch('/stats/atrasadas'));
 
 ipcMain.handle('total-receita', () => apiFetch('/stats/receita'));
+
+ipcMain.handle('alterar-login-adm', (e, loginAntigo, novoLogin) =>
+    apiFetch('/adm/login', 'PUT', { loginAntigo, novoLogin }));
+
+ipcMain.handle('alterar-senha-adm', (e, login, senhaAtual, novaSenha) =>
+    apiFetch('/adm/senha', 'PUT', { login, senhaAtual, novaSenha }));
+
+ipcMain.handle('cadastrar-adm', (e, novoLogin, novaSenha) =>
+    apiFetch('/adm/cadastrar', 'POST', { novoLogin, novaSenha }));
 
 // abertura de janelas
 ipcMain.on('abrir-janela-inicio', () => {
