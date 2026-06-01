@@ -225,6 +225,37 @@ async function cadastrarUsuario(usuario) {
   }
 }
 
+async function cadastrarOng(ong) {
+  const sql = `
+    INSERT INTO Mutuo_ONG
+    (nomeOng, cnpj, email, nomeResponsavel, telefone, cidade, bairro, endereco, estado, senha, foco, descricao)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    ong.nomeOng,
+    ong.cnpj,
+    ong.email,
+    ong.nomeResponsavel,
+    ong.telefone,
+    ong.cidade,
+    ong.bairro,
+    ong.endereco,
+    ong.uf,
+    ong.senha,
+    ong.foco,
+    ong.descricao
+  ];
+
+  try {
+    const [result] = await pool.query(sql, values);
+    return result.insertId;
+  } catch (error) {
+    console.error('Erro ao cadastrar ong:', error);
+    throw error;
+  }
+}
+
 async function getPremium() {
   try {
     const [ongs] = await pool.query('SELECT id, cnpj, statusPag, qtdPag, "ONG" as tipo FROM Mutuo_ONGPremium');
@@ -275,6 +306,51 @@ async function countReceita() {
   }
 }
 
+async function alterarLoginAdm(loginAntigo, novoLogin) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_Adm SET login = ? WHERE login = ?',
+      [novoLogin, loginAntigo]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error("Erro ao alterar login:", err.message);
+    return { error: err.message };
+  }
+}
+
+async function alterarSenhaAdm(login, senhaAtual, novaSenha) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM Mutuo_Adm WHERE login = ? AND senha = ?',
+      [login, senhaAtual]
+    );
+    if (rows.length === 0) return { error: 'Senha atual incorreta' };
+
+    const [result] = await pool.query(
+      'UPDATE Mutuo_Adm SET senha = ? WHERE login = ?',
+      [novaSenha, login]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error("Erro ao alterar senha:", err.message);
+    return { error: err.message };
+  }
+}
+
+async function cadastrarAdm(novoLogin, novaSenha) {
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO Mutuo_Adm (login, senha) VALUES (?, ?)',
+      [novoLogin, novaSenha]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error("Erro ao cadastrar admin:", err.message);
+    return { error: err.message };
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   validarLogin, 
@@ -299,8 +375,12 @@ module.exports = {
   getSolicitacoes, 
   alterSolicitacao, 
   cadastrarUsuario,
+  cadastrarOng,
   getPremium,
   countPremiumTotal,
   countAtrasadas,
-  countReceita
+  countReceita,
+  alterarLoginAdm,
+  alterarSenhaAdm,
+  cadastrarAdm
 };
