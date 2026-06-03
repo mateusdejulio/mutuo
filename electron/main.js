@@ -1,3 +1,14 @@
+console.log("MAIN.JS FOI EXECUTADO");
+process.on('uncaughtException', (err) => {
+  console.error('ERRO NÃO TRATADO:');
+  console.error(err);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('PROMISE REJEITADA:');
+  console.error(err);
+});
+
 //console.log("Processo principal")
 
 // importações
@@ -34,6 +45,7 @@ const createWindow = () => {
   })
 
   win.loadFile('./src/views/index.html')
+  .catch(err => console.error(err));
 }
 
 //janela inicio
