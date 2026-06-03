@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Contet-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
+    <title>Início</title>
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../../node_modules/chart.js/dist/chart.umd.js" defer></script>
+    
+    
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #E1DCD0;
+            overflow-y: hidden;
+            padding: 10px;
+        }
+
+        @media (max-width: 1000px) or (max-height: 680px){
+            #barra-lateral {
+                font-size: 12px;
+                width: 30% !important;
+            }
+
+            #sair {
+                width: 100px;
+            }
+
+            #nomeAdm {
+                font-size: 12px;
+            }
+
+            #emailAdm {
+                font-size: 10px;
+            }
+
+            #navbar {
+                width: 100%;
+            }
+
+            #meuGrafico {
+                width: 400px !important;
+                height: 200px !important;
+            }
+
+            .col-titulo, .col-texto {
+                font-size: 15px !important;
+            }
+
+            #mutuo {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            /*.btn_barra {
+                font-size: 10px;
+            }*/
+
+            .icone-barra {
+                height: 14px;
+            }
+
+        }
+
+    </style>
+
+</head>
+<body class="m-0 light" id="pagina">
+
+    <div class="wrapper fw-bold" id="barra-lateral">
+        <a href="#"><span class="btn_barra" style="background-color: #b7ce8fb3;"><img src="../public/img/dashboard.png" class="icone-barra">Início</a><br><hr>
+        <a href="usuarios.html"><span class="btn_barra"><img src="../public/img/usuarios.png" class="icone-barra">Usuários</span></a><br><hr>
+        <a href="ongs.html"><span class="btn_barra"><img src="../public/img/ongs.png" class="icone-barra">ONGS</span></a><br><hr>
+        <a href="servicos.html"><span class="btn_barra"><img src="../public/img/servicos.png" class="icone-barra">Serviços</span></a><br><hr>
+        <a href="solicitacoes.html"><span class="btn_barra"><img src="../public/img/notificacao.png" class="icone-barra">Solicitações</span></a><br><hr>
+        <a href="premium.html"><span class="btn_barra"><img src="../public/img/premium.png" class="icone-barra">Premium</span></a><br>
+        <hr>
+        <table>
+            <tr>
+                <td rowspan="2"><img src="../public/img/A.png"></td>
+                <td><span id="nomeAdm"></span></td>
+            </tr>
+        </table>
+        <button id="sair" type="button">Sair</button>
+    </div> 
+
+    <div id="main-area">
+
+        <nav class="navbar" id="navbar">
+            <div class="container-fluid align-items-center">
+                <a class="navbar-brand d-flex align-items-center"><img src="../public/img/mutuo_fundo.png" alt="Logo" width="40" height="40" class="d-inline-block"><span id="mutuo">Mútuo</span></a>
+                <!--<form class="d-flex mx-auto w-50" role="search">
+                    <input class="form-control me-2" id="search" type="search" placeholder="Buscar relatório" aria-label="Search"/>
+                </form>-->
+                <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                    <a class="nav-link active" id="tema" aria-current="page" href="#"><img id="img-tema" src="../public/img/escuro.png" height="25px"></a>
+                    <a class="nav-link" href="perfil.html"><img src="../public/img/perfil.png" height="30px"></a>
+                </div>
+            </div>
+        </nav>
+
+        <div id="dashboard">
+            <h2>Gerenciamento do Sistema</h2>
+            <div class="container text-center">
+                <div class="row">
+                    <div class="col">
+                        <span class="col-titulo">Usuários Ativos</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/usuarios_claro.png" height="25px" class="icone_card"><span id="totalUser"></span></span>
+                        
+                    </div>
+                    <div class="col">
+                        <span class="col-titulo">ONGs Ativas</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/ongs_claro.png" height="25px" class="icone_card"><span id="totalONG"></span></span>
+                    </div>
+                    <div class="col">
+                        <span class="col-titulo">Serviços Realizados</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/servicos_claro.png" height="25px" class="icone_card"><span id="totalServico"></span></span>
+                    </div>
+                    <div class="col">
+                        <span class="col-titulo">Horas Voluntárias</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/horas.png" height="25px" class="icone_card"><span id="totalHora"></span></span>
+                    </div>
+                </div>
+                <br>
+                <div id="divGrafico">
+                    <canvas id="meuGrafico"></canvas>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <link rel="stylesheet" href="../../node_modules/sweetalert2/dist/sweetalert2.min.css">
+
+    <!--<script src="../../renderer.js"></script>-->
+    <script src="../../node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+    <script src="../public/js/bootstrap.min.js"></script>
+    
+    <script>
+
+        const totalU = document.getElementById('totalUser');
+        const totalO = document.getElementById('totalONG');
+        const totalS = document.getElementById('totalServico');
+        const totalH = document.getElementById('totalHora');
+
+        window.addEventListener('DOMContentLoaded', async () => {
+
+            const usuario = localStorage.getItem('usuarioLogado');
+
+            if (usuario) {
+                document.getElementById('nomeAdm').textContent = " " + usuario;
+            }
+
+            let user = 0;
+            let ong = 0;
+            let servico = 0;
+            let hora = 0;
+
+            try {
+                user = await window.api.totalUsuarios();
+                totalU.innerHTML = user;
+            }
+            catch (error){
+                console.error('Erro ao buscar total de usuários:', error);
+                totalU.textContent = 'Erro!';
+            }
+
+            try {
+                ong = await window.api.totalONGs();
+                totalO.innerHTML = ong;
+            }
+            catch (error){
+                console.error('Erro ao buscar total de ONGs:', error);
+                totalO.textContent = 'Erro!';
+            }
+
+            try {
+                servico = await window.api.totalServicos();
+                totalS.innerHTML = servico;
+            }
+            catch (error){
+                console.error('Erro ao buscar total de serviços:', error);
+                totalS.textContent = 'Erro!';
+            }
+
+            try {
+                hora = await window.api.totalHoras();
+                totalH.innerHTML = hora;
+            }
+            catch (error){
+                console.error('Erro ao buscar total de horas', error);
+                totalH.textContent = 'Erro!';
+            }
+
+            const ctx = document.getElementById('meuGrafico').getContext('2d');
+        
+            let meuGrafico;
+
+            meuGrafico = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Usuários', 'ONGs', 'Serviços Realizados', 'Horas Voluntárias'],
+                    datasets: [{
+                        label: 'Total de Registros',
+                        data: [user, ong, servico, hora],
+                        backgroundColor: [
+                            'rgba(183, 206, 143, 0.8)',
+                            'rgba(88, 129, 87, 0.8)',
+                            'rgba(58, 90, 64, 0.8)', 
+                            'rgba(52, 78, 65, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(183, 206, 143, 1)',
+                            'rgba(88, 129, 87, 1)',
+                            'rgba(58, 90, 64, 1)',
+                            'rgba(52, 78, 65, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#000000',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        x: { 
+                            ticks: {
+                                color: '#000000',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            function atualizarTemaGrafico() {
+                const isDark = document.body.classList.contains('dark');
+
+                const corTexto = isDark ? '#E1DCD0' : '#000000';
+                const corGrid = isDark ? '#555' : '#ccc';
+
+                meuGrafico.options.scales.x.ticks.color = corTexto;
+                meuGrafico.options.scales.y.ticks.color = corTexto;
+
+                meuGrafico.options.scales.x.grid = { color: corGrid };
+                meuGrafico.options.scales.y.grid = { color: corGrid };
+
+                meuGrafico.update();
+            };
+
+            atualizarTemaGrafico();
+
+        });
+
+        const buttonSair = document.getElementById('sair');
+
+        buttonSair.addEventListener('click', () => {
+            localStorage.removeItem('usuarioLogado');
+            window.api.abrirJanelaLogin();
+        });
+
+    </script>
+</body>
+</html>

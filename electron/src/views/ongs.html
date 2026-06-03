@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Contet-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
+    <title>Início</title>
+    <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="tema.js"></script>
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #E1DCD0;
+            font-weight: 400;
+            padding: 10px;
+            overflow-y: hidden;
+            color: #344e41;
+        }
+
+        #divTabela {
+            height: 43vh !important;
+        }
+
+        @media (max-width: 1000px) or (max-height: 680px) {
+            #barra-lateral {
+                font-size: 12px;
+                width: 30% !important;
+            }
+
+            #sair {
+                width: 100px;
+            }
+
+            #nomeAdm {
+                font-size: 12px;
+            }
+
+            #emailAdm {
+                font-size: 10px;
+            }
+
+            #navbar {
+                width: 100%;
+            }
+
+            .col-titulo, .col-texto {
+                font-size: 15px !important;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            #search {
+                width: 180px;
+                height: 25px;
+            }
+
+            #mutuo {
+                font-size: 20px;
+            }
+
+            #tabela {
+                /*width: 90%;*/
+                font-size: 12px;
+            }
+
+            #divTabela {
+                height: 37vh !important;
+                width: 65.5vw;
+            }
+
+            .col {
+                height: 18vh !important;
+            }
+
+            #btnAdicionar {
+                font-size: 13px;
+                width: 30%;
+            }
+
+            .icone-barra {
+                height: 14px;
+            }
+        }
+
+        #modalOverlay{
+            position: fixed;
+            inset: 0;
+            /*background: rgba(0,0,0,0.45);*/
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+
+        #modalOverlay.ativo{
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #modalFormulario{
+            /*background: white;*/
+            width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform: scale(.9);
+            transition: transform .25s ease;
+        }
+
+        #modalOverlay.ativo #modalFormulario{
+            transform: scale(1);
+        }
+
+    </style>
+</head>
+<body class="m-0 light" id="pagina">
+
+    <div class="wrapper fw-bold" id="barra-lateral">
+        <a href="inicio.html"><span class="btn_barra"><img src="../public/img/dashboard.png" class="icone-barra">Início</a><br><hr>
+        <a href="usuarios.html"><span class="btn_barra"><img src="../public/img/usuarios.png" class="icone-barra">Usuários</span></a><br><hr>
+        <a href="#"><span class="btn_barra" style="background-color: #b7ce8fb3;"><img src="../public/img/ongs.png" class="icone-barra">ONGS</span></a><br><hr>
+        <a href="servicos.html"><span class="btn_barra"><img src="../public/img/servicos.png" class="icone-barra">Serviços</span></a><br><hr>
+        <a href="solicitacoes.html"><span class="btn_barra"><img src="../public/img/notificacao.png" class="icone-barra">Solicitações</span></a><br><hr>
+        <a href="premium.html"><span class="btn_barra"><img src="../public/img/premium.png" class="icone-barra">Premium</span></a><br>
+        <hr>
+        <table>
+            <tr>
+                <td rowspan="2"><img src="../public/img/A.png"></td>
+                <td><span id="nomeAdm"></span></td>
+            </tr>
+        </table>
+        <button id="sair" type="button">Sair</button>
+    </div> 
+
+    <div id="main-area">
+
+        <nav class="navbar" id="navbar">
+            <div class="container-fluid align-items-center">
+                <a class="navbar-brand d-flex align-items-center"><img src="../public/img/mutuo_fundo.png" alt="Logo" width="40" height="40" class="d-inline-block"><span id="mutuo">Mútuo</span></a>
+                <form class="d-flex mx-auto w-50" role="search">
+                    <input class="form-control me-2" id="search" type="search" placeholder="Buscar por Nome ou CNPJ" aria-label="Search"/>
+                </form>
+                <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                    <a class="nav-link active" id="tema" aria-current="page" href="#"><img id="img-tema" src="../public/img/escuro.png" height="25px"></a>
+                    <a class="nav-link" href="perfil.html"><img src="../public/img/perfil.png" height="30px"></a>
+                </div>
+            </div>
+        </nav>
+
+        <div id="dashboard">
+            <h2>Gerenciamento de ONGs</h2>
+            <div class="container text-center">
+                <div class="row">
+                    <div class="col">
+                        <span class="col-titulo">Ativas</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/ongs_claro.png" height="25px" class="icone_card"><span id="totalONG"></span>
+                    </div>
+                    <div class="col">
+                        <span class="col-titulo">Inativas</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/inativo.png" height="25px" class="icone_card"><span id="totalInativa"></span></span>
+                    </div>
+                    <div class="col">
+                        <span class="col-titulo">Premium</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/premium_claro.png" height="25px" class="icone_card"><span id="totalPremium"></span></span>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div id="botoes">
+                <button id="btnAdicionar">
+                    <span class="texto">+ Adicionar ONG</span>
+                    <span class="icone">+</span>
+                </button>
+            </div>
+            <div id="divTabela">
+                <table id="tabela">
+                    <thead>
+                        <tr>
+                            <th>ONG</th>
+                            <th>CNPJ</th>
+                            <th>Responsável</th>
+                            <th>Foco</th>
+                            <th>Status</th>
+                            <!--<th>Premium</th>-->
+                            <!--<th>Voluntários</th>-->
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+
+    <div id="modalOverlay">
+        <div id="modalFormulario">
+            <div id="modalConteudo"></div>
+        </div>
+    </div>
+
+
+    <link rel="stylesheet" href="../../node_modules/sweetalert2/dist/sweetalert2.min.css">
+
+    <!--<script src="../../renderer.js"></script>-->
+    <script src="../../node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+    <script src="../public/js/bootstrap.min.js"></script>
+    
+    <script>
+
+        const totalO = document.getElementById('totalONG');
+        const totalI = document.getElementById('totalInativa');
+        const totalP = document.getElementById('totalPremium');
+        const tbody = document.getElementById('tbody'); 
+        const adicionar = document.getElementById('btnAdicionar');
+        let listaONGS = [];
+
+        window.addEventListener('DOMContentLoaded', async () => {
+
+            const usuario = localStorage.getItem('usuarioLogado');
+
+            if (usuario) {
+                document.getElementById('nomeAdm').textContent = " " + usuario;
+            }
+
+            let ong = 0;
+            let inativa = 0;
+            let premium = 0;
+
+            try {
+                ong = await window.api.totalONGs();
+                totalO.innerHTML = ong;
+            }
+            catch (error){
+                console.error('Erro ao buscar total de ONGs', error);
+                totalO.textContent = 'Erro!';
+            }
+
+            try {
+                inativa = await window.api.totalONGsInativas();
+                totalI.innerHTML = inativa;
+            }
+            catch (error) {
+                console.error('Erro ao buscar total de ONGs inativas', error);
+                totalI.textContent = 'Erro!';
+            }
+
+            try {
+                premium = await window.api.totalPremium();
+                totalP.innerHTML = premium;
+            }
+            catch (error) {
+                console.error('Erro ao buscar total de ONGs premium', error);
+                totalP.textContent = 'Erro!';
+            }
+
+            carregarTabela();
+        });
+
+        async function carregarTabela() {
+            tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
+
+            try {
+                //const ongs = await window.api.buscarONGs();
+                //if (ongs.error) throw new Error(ongs.error);
+                listaONGS = await window.api.buscarONGs();
+                renderizarTabela(listaONGS);
+            }
+            catch (err) {
+                console.error("Erro ao buscar ongs:", err);
+                tbody.innerHTML = `<tr><td colspan="6">Erro ao carregar dados: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderizarTabela(ongs) {
+            tbody.innerHTML = '';
+
+            if (ongs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8">Nenhuma ONG encontrada</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            for (const ong of ongs) {
+                const linha = document.createElement('tr');
+                linha.setAttribute('data-cnpj', ong.cnpj);
+
+                let nomeO = '';
+
+                if (ong.premium == 1) {
+                    nomeO = '⭐' + ong.nomeOng;
+                }
+                else {
+                    nomeO = ong.nomeOng;
+                }
+                
+                linha.innerHTML = `
+                    <td class="tdTabela">${nomeO}</td>
+                    <td class="tdTabela">${ong.cnpj}</td>
+                    <td class="editavel tdTabela" data-coluna="responsavel" data-valor="${ong.nomeResponsavel}">${ong.nomeResponsavel}</td>
+                    
+                    <td class="editavel tdTabela" data-coluna="foco" data-valor="${ong.foco}">${ong.foco}</td>
+                    <td class="editavel tdTabela" data-coluna="ativo" data-valor="${ong.ativo}">${ong.ativo}</td>
+                    
+                    <td data-tipo="acoes" style="width: 70px;">
+                        <button id="salvar" class="save-btn" style="display: none;">Salvar</button>
+                    </td>
+                `;
+                tbody.appendChild(linha);
+            }
+        }
+
+        tbody.addEventListener('dblclick', (e) => {
+            if (e.target.classList.contains('editavel')) {
+           
+                if (document.querySelector('.save-btn[style*="inline-block"]')) {
+                    alert("Salve a linha que já está em edição primeiro.");
+                    return;
+                }
+                const tr = e.target.closest('tr');
+                switchToEditMode(tr);
+            }
+        });
+
+        function switchToEditMode(tr) {
+
+            const tdResponsavel = tr.querySelector('td[data-coluna="responsavel"]');
+            const tdFoco = tr.querySelector('td[data-coluna="foco"]');
+            const tdAtivo = tr.querySelector('td[data-coluna="ativo"]');
+            
+            const tdAcoes = tr.querySelector('td[data-tipo="acoes"]');
+
+            const valAtivo = tdAtivo.dataset.valor;
+            const valResponsavel = tdResponsavel.dataset.valor;
+            const valFoco = tdFoco.dataset.valor;
+
+            tdAtivo.innerHTML = `<input type="number" min="0" max="1" class="edit-input" data-coluna="ativo" value="${valAtivo}">`;
+            tdResponsavel.innerHTML = `<input type="text" id="input-text" class="edit-input" data-coluna="responsavel" value="${valResponsavel}">`;
+            tdFoco.innerHTML = `<input type="text" id="input-text" class="edit-input" data-coluna="foco" value="${valFoco}">`;
+
+            const saveBtn = tdAcoes.querySelector('.save-btn');
+            saveBtn.style.display = 'inline-block';
+        }
+
+        tbody.addEventListener('click', async (e) => {
+     
+            if (e.target.classList.contains('save-btn')) {
+                
+                const tr = e.target.closest('tr');
+                const cnpj = tr.dataset.cnpj;
+
+                const newAtivo = tr.querySelector('input[data-coluna="ativo"]').value;
+                const newResponsavel = tr.querySelector('input[data-coluna="responsavel"]').value;
+                const newFoco = tr.querySelector('input[data-coluna="foco"]').value;
+
+                try {
+                    const resultado = await window.api.editarONG(cnpj, newAtivo, newResponsavel, newFoco);
+                    
+                    if (resultado.error) {
+                        throw new Error(resultado.error);
+                    }
+
+                    await carregarTabela();
+                    
+                } catch (err) {
+                    alert("Erro ao salvar: " + err.message);
+                }
+            }
+        });
+
+        adicionar.addEventListener('click', () => {
+
+            const modal = document.getElementById('modalOverlay');
+            const conteudo = document.getElementById('modalConteudo');
+
+            let ufOng = "";
+
+            modal.classList.add('ativo');
+
+            conteudo.innerHTML = `
+                <div id="form-cadastro-usuario">
+                <h3>Cadastro de Usuário</h3>
+                <br>
+                <form id="formUsuario">
+                    <!-- Campo Nome -->
+            <div class="mb-3">
+                <label for="ong-nome" class="form-label fw-bold">Nome da ONG</label>
+                <input type="text" class="form-control" id="ong-nome" style="height: 40px" required>
+            </div>
+
+            <!-- Divisão em colunas para CNPJ e Email -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ong-cnpj" class="form-label fw-bold">CNPJ</label>
+                    <input type="text" class="form-control" id="ong-cnpj" style="height: 40px" required placeholder="00.000.000/0001-00">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="ong-email" class="form-label fw-bold">Email</label>
+                    <input type="email" class="form-control" id="ong-email" style="height: 40px" required placeholder="exemplo@email.com">
+                </div>
+            </div>
+
+            <!-- Divisão em colunas para Nome e Telefone -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ong-nome-resp" class="form-label fw-bold">Nome Responsável</label>
+                    <input type="text" class="form-control" id="ong-nome-resp" style="height: 40px" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="ong-telefone" class="form-label fw-bold">Telefone</label>
+                    <input type="tel" class="form-control" id="ong-telefone" style="height: 40px" placeholder="(00) 00000-0000">
+                </div>
+            </div>
+
+            <!-- Divisão em colunas para CEP, Cidade e Bairro -->
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="ong-cep" class="form-label fw-bold">CEP</label>
+                    <input type="text" class="form-control" id="ong-cep" style="height: 40px">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="ong-cidade" class="form-label fw-bold">Cidade</label>
+                    <input type="text" class="form-control" id="ong-cidade" style="height: 40px">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="ong-bairro" class="form-label fw-bold">Bairro</label>
+                    <input type="text" class="form-control" id="ong-bairro" style="height: 40px">
+                </div>
+            </div>
+
+            <!-- Campo Endereço -->
+            <div class="mb-3">
+                <label for="ong-endereco" class="form-label fw-bold">Endereço</label>
+                <input type="text" class="form-control" id="ong-endereco" style="height: 40px">
+            </div>
+
+            <!-- Campos Senha e Foco -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ong-senha" class="form-label fw-bold">Senha</label>
+                    <input type="password" class="form-control" id="ong-senha" style="height: 40px" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="ong-foco" class="form-label fw-bold">Foco</label>
+                    <input type="text" class="form-control" id="ong-foco" style="height: 40px" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="ong-descricao" class="form-label fw-bold">Descrição</label>
+                <textarea class="form-control" id="ong-descricao" style="height: 40px" required></textarea>
+            </div>
+
+            <hr class="mt-4 mb-4">
+
+            <!-- Botões de Ação -->
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" id="btn-cancelar">Cancelar</button>
+                <button type="submit" class="btn btn-success" style="background-color: #588157; border-color: #588157;">Cadastrar ONG</button>
+            </div>
+                </form>
+                </div>
+            `;
+
+            const cepInput = document.getElementById("ong-cep");
+
+            cepInput.addEventListener("blur", async () => {
+
+                const cep = cepInput.value.replace(/\D/g, '');
+
+                if (cep.length !== 8) return;
+
+                try {
+
+                    const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const dados = await resposta.json();
+
+                    if (dados.erro) {
+                        Swal.fire("CEP não encontrado");
+                        return;
+                    }
+
+                    document.getElementById("ong-cidade").value = dados.localidade;
+                    document.getElementById("ong-bairro").value = dados.bairro;
+                    document.getElementById("ong-endereco").value = dados.logradouro;
+
+                    // salvar UF na variável
+                    ufOng = dados.uf;
+
+                } catch (erro) {
+                    console.error("Erro ao buscar CEP:", erro);
+                    Swal.fire("Erro ao buscar CEP");
+                }
+            });
+
+
+            document.getElementById('btn-cancelar').addEventListener('click', () => {
+                modal.classList.remove('ativo');
+            });
+
+            document.getElementById('modalOverlay').addEventListener('click', (e) => {
+                if(e.target.id === 'modalOverlay'){
+                    e.currentTarget.classList.remove('ativo');
+                }
+            });
+
+            // *** AQUI: o form já existe no DOM, então pegamos e adicionamos listener ***
+            const form = document.getElementById('formUsuario');
+            if (!form) {
+                console.error('formUsuario não encontrado mesmo após inserção!');
+                return;
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const ong = {
+                    nomeOng: document.getElementById('ong-nome').value.trim(),
+                    cnpj: document.getElementById('ong-cnpj').value.trim(),
+                    email: document.getElementById('ong-email').value.trim(),
+                    nomeResponsavel: document.getElementById('ong-nome-resp').value.trim(),
+                    telefone: document.getElementById('ong-telefone').value.trim(),
+                    cep: document.getElementById('ong-cep')?.value.trim() || '',
+                    cidade: document.getElementById('ong-cidade').value.trim(),
+                    bairro: document.getElementById('ong-bairro').value.trim(),
+                    endereco: document.getElementById('ong-endereco').value.trim(),
+                    uf: ufOng, 
+                    senha: document.getElementById('ong-senha').value.trim(),
+                    foco: document.getElementById('ong-foco').value.trim(),
+                    descricao: document.getElementById('ong-descricao').value.trim()
+
+                };
+
+                try {
+                // Ajuste o nome aqui conforme seu preload: window.electronAPI ou window.api
+                const resultado = await window.api.cadastrarOng(ong);
+
+                if (resultado && resultado.sucesso) {
+                    Swal.fire('Sucesso!', 'ONG cadastrada com sucesso!', 'success');
+                    await carregarTabela();
+                } else {
+                    Swal.fire('Erro', resultado?.erro || 'Erro desconhecido', 'error');
+                }
+                } catch (err) {
+                Swal.fire('Erro', err.message || 'Falha ao cadastrar', 'error');
+                }
+            });
+        });
+
+        const buttonSair = document.getElementById('sair');
+
+        buttonSair.addEventListener('click', () => {
+            localStorage.removeItem('usuarioLogado');
+            window.api.abrirJanelaLogin();
+        });
+
+        const inputBusca = document.getElementById('search');
+
+let timeout;
+
+inputBusca.addEventListener('input', function () {
+    clearTimeout(timeout);
+
+timeout = setTimeout(() => {
+    const texto = this.value.toLowerCase().trim();
+
+    const filtrados = listaONGS.filter(ong =>
+        ong.nomeOng.toLowerCase().includes(texto) ||
+        ong.cnpj.includes(texto)
+    );
+
+    renderizarTabela(filtrados);
+    }, 300); // delay = UX melhor
+});
+        
+    </script>
+</body>
+</html>
