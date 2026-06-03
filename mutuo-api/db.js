@@ -398,6 +398,7 @@ module.exports = {
   getUsuarios, 
   validarLogin, 
   validarLoginUsuario,
+   validarLoginOng,
   countUsuarios, 
   countONGs, 
   countServicos, 
