@@ -169,7 +169,13 @@
       cursor: pointer;
     }
     .link-cancelar:hover { color: var(--cream); }
-
+    .erro{
+  color: #ffb3b3;
+  font-size: 0.78rem;
+  margin-top: 6px;
+  padding-left: 4px;
+  font-weight: 600;
+}
     /* ── ANIMAÇÕES ── */
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-10px); }
@@ -197,18 +203,21 @@
 
     <div class="campo">
       <label for="cpf"><i class="bi bi-file-earmark-text-fill"></i> CPF</label>
-      <input type="text" id="cpf" placeholder="CPF" required>
+    <input type="text" id="cpf" placeholder="CPF" required>
+    <p class="erro" id="erroCpf"></p>
     </div>
 
     <div class="campos-row">
       <div class="campo">
         <label for="senha"><i class="bi bi-lock-fill"></i> Senha</label>
         <input type="password" id="senha" placeholder="Senha" required>
+        <p class="erro" id="erroSenha"></p>
       </div>
 
       <div class="campo">
         <label for="dataNasc"><i class="bi bi-calendar-fill"></i> Data de nascimento</label>
-        <input type="date" id="dataNasc" required>
+       <input type="date" id="dataNasc" required>
+      <p class="erro" id="erroData"></p>
       </div>
     </div>
 
@@ -221,29 +230,112 @@
 
   </div>
 
-  <script>
-    document.getElementById('proximo').addEventListener('click', () => {
-    
-      const cpfValue         = document.getElementById('cpf').value;
-      const senhaValue        = document.getElementById('senha').value;
-      const dataNascValue = document.getElementById('dataNasc').value;
+ <script>
 
-      if ( !cpfValue || !senhaValue || !dataNascValue) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Ops...',
-          text: 'Preencha o  CPF, Senha e Data de nascimento para continuar!',
-          confirmButtonText: 'Entendi',
-          confirmButtonColor: '#3a5a40',
-          heightAuto: false
-        });
-      } else {
-        const params = new URLSearchParams(window.location.search);
-        const tipo = params.get('tipo');
-        window.location.href = `cadastroLocUsuario.html?tipo=${tipo}`;
-      }
-    });
-  </script>
+// MÁSCARA CPF
+document.getElementById('cpf').addEventListener('input', function () {
 
+  let v = this.value.replace(/\D/g, '').slice(0, 11);
+
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+
+  this.value = v;
+
+});
+
+
+
+document.getElementById('proximo').addEventListener('click', () => {
+
+  const cpfValue =
+    document.getElementById('cpf').value.trim();
+
+  const senhaValue =
+    document.getElementById('senha').value.trim();
+
+  const dataNascValue =
+    document.getElementById('dataNasc').value;
+
+
+  // LIMPA ERROS ANTIGOS
+  document.getElementById('erroCpf').textContent = '';
+  document.getElementById('erroSenha').textContent = '';
+  document.getElementById('erroData').textContent = '';
+
+
+  let formularioValido = true;
+
+
+  // CPF
+  const numerosCpf = cpfValue.replace(/\D/g, '');
+
+  if (!cpfValue) {
+
+    document.getElementById('erroCpf').textContent =
+      'Digite seu CPF.';
+
+    formularioValido = false;
+
+  }
+
+  else if (numerosCpf.length < 11) {
+
+    document.getElementById('erroCpf').textContent =
+      'Digite um CPF válido.';
+
+    formularioValido = false;
+
+  }
+
+
+
+  if (!senhaValue) {
+
+    document.getElementById('erroSenha').textContent =
+      'Digite sua senha.';
+
+    formularioValido = false;
+
+  }
+
+  else if (senhaValue.length < 8) {
+
+    document.getElementById('erroSenha').textContent =
+      'A senha deve ter no mínimo 8 caracteres.';
+
+    formularioValido = false;
+
+  }
+
+
+
+  if (!dataNascValue) {
+
+    document.getElementById('erroData').textContent =
+      'Selecione sua data de nascimento.';
+
+    formularioValido = false;
+
+  }
+
+
+ 
+  if (formularioValido) {
+
+    const params =
+      new URLSearchParams(window.location.search);
+
+    const tipo = params.get('tipo');
+
+    window.location.href =
+      `cadastroLocUsuario.html?tipo=${tipo}`;
+
+  }
+
+});
+
+</script>
 </body>
 </html>
