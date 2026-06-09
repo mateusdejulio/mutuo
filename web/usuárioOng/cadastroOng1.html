@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,12 +14,14 @@
       --green-main: #588157;
       --green-dark: #3a5a40;
       --green-light: #6b9e4a;
-      --cream: #E1DCD0;
-      --cream-dark: #cdc7ba;
-      --white: #ffffff;
+      --cream: #E1DCD0
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
     body {
       font-family: 'Quicksand', sans-serif;
@@ -29,18 +32,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 16px 60px;
+      padding: 40px 16px 60px
     }
 
-   
     .topo {
       display: flex;
-      margin-top: 0;
       align-items: center;
       justify-content: center;
       gap: 16px;
       margin-bottom: 20px;
-      animation: fadeDown 0.5s ease both;
+      animation: fadeDown 0.5s ease both
     }
 
     .topo img {
@@ -50,49 +51,55 @@
       background: var(--cream);
       padding: 8px;
       object-fit: contain;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25)
     }
 
     .topo h1 {
       font-size: 1.75rem;
       font-weight: 700;
       color: var(--cream);
-      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       letter-spacing: 0.3px;
-      margin: 0;
+      margin: 0
     }
 
-    
     .card-form {
-      width: 100%; max-width: 480px;
+      width: 100%;
+      max-width: 480px;
       background: rgba(88, 129, 87, 0.649);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(225,220,208,0.2);
+      border: 1px solid rgba(225, 220, 208, 0.2);
       border-radius: 28px;
       padding: 36px 32px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-      animation: fadeUp 0.5s ease 0.05s both;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+      animation: fadeUp 0.5s ease 0.05s both
     }
 
-   
-    .campo { margin-bottom: 20px; }
+    .campo {
+      margin-bottom: 20px
+    }
 
     .campo label {
-      display: flex; align-items: center; gap: 7px;
-      font-size: 0.85rem; font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.85rem;
+      font-weight: 700;
       color: var(--cream);
       margin-bottom: 7px;
-      letter-spacing: 0.2px;
-    }
-    .campo label i {
-      font-size: 0.95rem;
-      color: rgba(225,220,208,0.6);
+      letter-spacing: 0.2px
     }
 
-    .campo input {
+    .campo label i {
+      font-size: 0.95rem;
+      color: rgba(225, 220, 208, 0.6)
+    }
+
+    .campo input,
+    .campo textarea {
       width: 100%;
-      background: rgba(225,220,208,0.92);
+      background: rgba(225, 220, 208, 0.92);
       border: 2px solid transparent;
       border-radius: 14px;
       padding: 12px 16px;
@@ -101,263 +108,236 @@
       font-weight: 500;
       color: #1a2e1b;
       transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-      outline: none;
+      outline: none
     }
-    .campo input::placeholder {
-      color: rgba(30,50,30,0.45);
+
+    .campo textarea {
+      resize: vertical;
+      min-height: 80px
     }
-    .campo input:focus {
+
+    .campo input::placeholder,
+    .campo textarea::placeholder {
+      color: rgba(30, 50, 30, 0.45)
+    }
+
+    .campo input:focus,
+    .campo textarea:focus {
       border-color: var(--green-light);
       background: var(--cream);
-      box-shadow: 0 0 0 3px rgba(88,129,87,0.2);
+      box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.2)
     }
 
-   
     .campo input[type="date"] {
-      color: #1a2e1b;
+      color: #1a2e1b
     }
+
     .campo input[type="date"]::-webkit-calendar-picker-indicator {
       opacity: 0.5;
-      cursor: pointer;
+      cursor: pointer
     }
 
-  
     .campos-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 14px
     }
 
-  
     .divisor {
       height: 1px;
-      background: rgba(225,220,208,0.15);
-      margin: 8px 0 24px;
+      background: rgba(225, 220, 208, 0.15);
+      margin: 8px 0 24px
     }
 
     .btn-confirmar {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       width: 100%;
       background: var(--green-main);
       color: var(--cream);
-      border: none; border-radius: 14px;
+      border: none;
+      border-radius: 14px;
       padding: 15px;
       font-family: 'Quicksand', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 700;
       cursor: pointer;
       transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 16px rgba(58,90,64,0.4);
-      letter-spacing: 0.3px;
+      box-shadow: 0 4px 16px rgba(58, 90, 64, 0.4);
+      letter-spacing: 0.3px
     }
+
     .btn-confirmar:hover {
       background: var(--green-dark);
-      box-shadow: 0 6px 22px rgba(58,90,64,0.5);
-      color: var(--cream);
+      box-shadow: 0 6px 22px rgba(58, 90, 64, 0.5);
+      color: var(--cream)
     }
-    .btn-confirmar:active { transform: scale(0.98); }
 
-   
+    .btn-confirmar:active {
+      transform: scale(0.98)
+    }
+
     .link-cancelar {
-      display: block; text-align: center;
+      display: block;
+      text-align: center;
       margin-top: 14px;
-      color: rgba(225,220,208,0.55);
-      font-size: 0.82rem; font-weight: 600;
+      color: rgba(225, 220, 208, 0.55);
+      font-size: 0.82rem;
+      font-weight: 600;
       text-decoration: none;
       transition: color 0.2s;
-      cursor: pointer;
-    }
-    .link-cancelar:hover { color: var(--cream); }
-    .erro{
-        color: #ffb3b3;
-        font-size: 0.78rem;
-        margin-top: 6px;
-        padding-left: 4px;
-        font-weight: 600;
-      }
-    /* ── ANIMAÇÕES ── */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
+      cursor: pointer
     }
 
-    @media (max-width: 480px) {
-      .card-form { padding: 28px 20px; }
-      .campos-row { grid-template-columns: 1fr; }
+    .link-cancelar:hover {
+      color: var(--cream)
+    }
+
+    .erro {
+      color: #ffb3b3;
+      font-size: 0.78rem;
+      margin-top: 6px;
+      padding-left: 4px;
+      font-weight: 600
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @media(max-width:480px) {
+      .card-form {
+        padding: 28px 20px
+      }
+
+      .campos-row {
+        grid-template-columns: 1fr
+      }
     }
   </style>
 </head>
-<body>
 
+<body>
   <div class="topo">
     <img src="../imagens/logo.png" alt="Logo Mútuo" onerror="this.style.display='none'">
     <h1>Cadastro de ONG</h1>
   </div>
-
   <div class="card-form">
-
     <div class="campo">
       <label for="nomeOng"><i class="bi bi-building-fill"></i> Nome da ONG</label>
       <input type="text" id="nomeOng" placeholder="Nome da ONG" required autofocus>
       <p class="erro" id="erroNome"></p>
     </div>
-
     <div class="campo">
       <label for="cnpj"><i class="bi bi-file-earmark-text-fill"></i> CNPJ</label>
-      <input type="text" id="cnpj" placeholder="CNPJ" required>
+      <input type="text" id="cnpj" placeholder="00.000.000/0000-00" required>
       <p class="erro" id="erroCnpj"></p>
     </div>
-
     <div class="campos-row">
       <div class="campo">
         <label for="senha"><i class="bi bi-lock-fill"></i> Senha</label>
         <input type="password" id="senha" placeholder="Senha" required>
         <p class="erro" id="erroSenha"></p>
       </div>
-
       <div class="campo">
         <label for="dataFundacao"><i class="bi bi-calendar-fill"></i> Fundação</label>
         <input type="date" id="dataFundacao" required>
         <p class="erro" id="erroData"></p>
       </div>
     </div>
-
+    <div class="campo">
+      <label for="foco"><i class="bi bi-bullseye"></i> Foco de atuação</label>
+      <input type="text" id="foco" placeholder="Ex: Meio ambiente, Educação..." required>
+      <p class="erro" id="erroFoco"></p>
+    </div>
+    <div class="campo">
+      <label for="descricao"><i class="bi bi-card-text"></i> Descrição</label>
+      <textarea id="descricao" placeholder="Descreva brevemente a ONG..." required></textarea>
+      <p class="erro" id="erroDescricao"></p>
+    </div>
     <div class="divisor"></div>
-
     <button class="btn-confirmar" id="proximo" type="button">
       <i class="bi bi-arrow-right-circle-fill"></i> Próximo
     </button>
     <a class="link-cancelar" onclick="window.location.href='../cadastro.html'">Voltar</a>
-
   </div>
-
   <script>
+    document.getElementById('cnpj').addEventListener('input', function () {
+      let v = this.value.replace(/\D/g, '').slice(0, 14);
+      v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      v = v.replace(/(\d{4})(\d)/, '$1-$2');
+      this.value = v;
+    });
 
-// MÁSCARA CNPJ
-document.getElementById('cnpj').addEventListener('input', function () {
+    document.getElementById('proximo').addEventListener('click', () => {
+      const nomeOng = document.getElementById('nomeOng').value.trim();
+      const cnpj = document.getElementById('cnpj').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      const dataFundacao = document.getElementById('dataFundacao').value;
+      const foco = document.getElementById('foco').value.trim();
+      const descricao = document.getElementById('descricao').value.trim();
 
-  let v = this.value.replace(/\D/g, '').slice(0, 14);
+      document.getElementById('erroNome').textContent = '';
+      document.getElementById('erroCnpj').textContent = '';
+      document.getElementById('erroSenha').textContent = '';
+      document.getElementById('erroData').textContent = '';
+      document.getElementById('erroFoco').textContent = '';
+      document.getElementById('erroDescricao').textContent = '';
 
-  v = v.replace(/^(\d{2})(\d)/, '$1.$2');
-  v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-  v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
-  v = v.replace(/(\d{4})(\d)/, '$1-$2');
+      let valido = true;
 
-  this.value = v;
+      if (!nomeOng) { document.getElementById('erroNome').textContent = 'Digite o nome da ONG.'; valido = false; }
 
-});
+      const cnpjNums = cnpj.replace(/\D/g, '');
+      if (!cnpj) { document.getElementById('erroCnpj').textContent = 'Digite o CNPJ.'; valido = false; }
+      else if (cnpjNums.length < 14) { document.getElementById('erroCnpj').textContent = 'Digite um CNPJ válido.'; valido = false; }
 
+      if (!senha) { document.getElementById('erroSenha').textContent = 'Digite sua senha.'; valido = false; }
+      else if (senha.length < 8) { document.getElementById('erroSenha').textContent = 'A senha deve ter no mínimo 8 caracteres.'; valido = false; }
 
+      if (!dataFundacao) { document.getElementById('erroData').textContent = 'Selecione a data de fundação.'; valido = false; }
+      if (!foco) { document.getElementById('erroFoco').textContent = 'Digite o foco de atuação.'; valido = false; }
+      if (!descricao) { document.getElementById('erroDescricao').textContent = 'Digite uma descrição.'; valido = false; }
 
-document.getElementById('proximo').addEventListener('click', () => {
-
-  const nomeOngValue =
-    document.getElementById('nomeOng').value.trim();
-
-  const cnpjValue =
-    document.getElementById('cnpj').value.trim();
-
-  const senhaValue =
-    document.getElementById('senha').value.trim();
-
-  const dataFundacaoValue =
-    document.getElementById('dataFundacao').value;
-
-
-
-  document.getElementById('erroNome').textContent = '';
-  document.getElementById('erroCnpj').textContent = '';
-  document.getElementById('erroSenha').textContent = '';
-  document.getElementById('erroData').textContent = '';
-
-
-  let formularioValido = true;
-
-
-
-  if (!nomeOngValue) {
-
-    document.getElementById('erroNome').textContent =
-      'Digite o nome da ONG.';
-
-    formularioValido = false;
-
-  }
-
-
-
-  const numerosCnpj = cnpjValue.replace(/\D/g, '');
-
-  if (!cnpjValue) {
-
-    document.getElementById('erroCnpj').textContent =
-      'Digite o CNPJ.';
-
-    formularioValido = false;
-
-  }
-
-  else if (numerosCnpj.length < 14) {
-
-    document.getElementById('erroCnpj').textContent =
-      'Digite um CNPJ válido.';
-
-    formularioValido = false;
-
-  }
-
-
-
-  if (!senhaValue) {
-
-    document.getElementById('erroSenha').textContent =
-      'Digite sua senha.';
-
-    formularioValido = false;
-
-  }
-
-  else if (senhaValue.length < 8) {
-
-    document.getElementById('erroSenha').textContent =
-      'A senha deve ter no mínimo 8 caracteres.';
-
-    formularioValido = false;
-
-  }
-
-
-  
-  if (!dataFundacaoValue) {
-
-    document.getElementById('erroData').textContent =
-      'Selecione a data de fundação.';
-
-    formularioValido = false;
-
-  }
-
-
-  
-  if (formularioValido) {
-
-    const params =
-      new URLSearchParams(window.location.search);
-
-    const tipo = params.get('tipo');
-
-    window.location.href =
-      `cadastroLocOng.html?tipo=${tipo}`;
-
-  }
-
-});
-
-</script>
-
+      if (valido) {
+        const dados = JSON.parse(sessionStorage.getItem('cadastroMutuo') || '{}');
+        dados.nomeOng = nomeOng;
+        dados.cnpj = cnpjNums;
+        // ✅ nome do cadastro.html é reaproveitado como nomeResponsavel
+        dados.nomeResponsavel = dados.nome;
+        dados.senha = senha;
+        dados.dataFundacao = dataFundacao;
+        dados.foco = foco;
+        dados.descricao = descricao;
+        sessionStorage.setItem('cadastroMutuo', JSON.stringify(dados));
+        window.location.href = 'cadastroLocOng.html';
+      }
+    });
+  </script>
 </body>
+
 </html>
