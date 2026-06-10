@@ -236,6 +236,7 @@ async function alterSolicitacao(cod, statusS, statusE, pontos) {
       return { error: err.message };
     } 
 }
+//cadastros
 
 async function cadastrarUsuario(usuario) {
   const sql = `
