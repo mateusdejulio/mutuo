@@ -251,7 +251,7 @@
       </a>
       <a href="perfilMutuo.html" class="nav-profile">
         <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
-        <span>Isabela Monteiro</span>
+         <span id="nomeUsuario"></span>
       </a>
     </div>
   </nav>
@@ -301,5 +301,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+
+if(usuario){
+    document.getElementById("nomeUsuario").textContent =
+        usuario.nome || usuario.nome_usuario;
+
+    document.getElementById("nomeBoasVindas").textContent =
+        usuario.nome || usuario.nome_usuario;
+
+    document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
+}
+</script>
 </body>
 </html>

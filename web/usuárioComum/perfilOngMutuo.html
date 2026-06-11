@@ -532,7 +532,7 @@
       </a>
       <a href="perfilMutuo.html" class="perfil-nav">
         <img src="imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
-        <span>Isabela Monteiro</span>
+         <span id="nomeUsuario"></span>
       </a>
     </div>
   </nav>
@@ -816,6 +816,18 @@
         document.querySelectorAll('.sobreposicao-modal.aberto').forEach(m => fecharModal(m.id));
       }
     });
+
+    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+
+if(usuario){
+    document.getElementById("nomeUsuario").textContent =
+        usuario.nome || usuario.nome_usuario;
+
+    document.getElementById("nomeBoasVindas").textContent =
+        usuario.nome || usuario.nome_usuario;
+
+    document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
+}
   </script>
 
 </body>
