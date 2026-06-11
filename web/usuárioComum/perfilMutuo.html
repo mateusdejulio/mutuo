@@ -560,7 +560,7 @@
       </a>
       <a href="perfilMutuo.html" class="nav-profile">
         <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
-        <span>Isabela Monteiro</span>
+      <span id="nomeUsuario"></span>
       </a>
     </div>
 
@@ -579,7 +579,7 @@
     <div class="drawer-profile">
       <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.background='var(--verde-principal)'">
       <div class="drawer-profile-info">
-        <strong>Isabela Monteiro</strong>
+          <span id="nomeUsuario"></span>
         <small>Voluntária · São Paulo, SP</small>
       </div>
     </div>
@@ -618,7 +618,7 @@
           <span class="badge-online"></span>
         </div>
         <div class="info-perfil">
-          <h2>Isabela Monteiro</h2>
+            <span id="nomeUsuario"></span>
           <span>@isa.monteiro</span>
         </div>
       </div>
@@ -1013,6 +1013,17 @@
       inp.value = '';
       inp.focus();
     }
+    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+
+  if(usuario){
+    document.getElementById("nomeUsuario").textContent =
+        usuario.nome || usuario.nome_usuario;
+
+    document.getElementById("nomeBoasVindas").textContent =
+        usuario.nome || usuario.nome_usuario;
+
+    document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
+}
   </script>
 
 </body>

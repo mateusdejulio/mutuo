@@ -394,6 +394,31 @@ async function cadastrarAdm(novoLogin, novaSenha) {
     return { error: err.message };
   }
 }
+async function getFotoPerfil(cpf) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT fotoPerfil FROM Mutuo_Usuario WHERE cpf = ?',
+      [cpf]
+    );
+    return rows.length > 0 ? rows[0].fotoPerfil : null;
+  } catch (err) {
+    console.error('Erro ao buscar foto:', err.message);
+    return null;
+  }
+}
+
+async function atualizarFotoPerfil(cpf, nomeArquivo) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_Usuario SET fotoPerfil = ? WHERE cpf = ?',
+      [nomeArquivo, cpf]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Erro ao atualizar foto:', err.message);
+    return { error: err.message };
+  }
+}
 
 module.exports = { 
   getUsuarios, 
@@ -416,6 +441,8 @@ module.exports = {
   getONGs, 
   alterONG, 
   mediaNotas,
+  getFotoPerfil,
+  atualizarFotoPerfil,
   getServicos, 
   alterServico, 
   getSolicitacoes, 

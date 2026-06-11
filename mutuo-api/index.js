@@ -6,6 +6,7 @@ require('dotenv').config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rotas de Autenticação
 app.post('/login', async (req, res) => {
@@ -126,5 +127,49 @@ app.get('/stats/:tipo', async (req, res) => {
     else res.status(404).send('Não encontrado');
 });
 
+//foto de perfil
+const multer = require('multer');
+const path = require('path');
+const { atualizarFotoPerfil, getFotoPerfil } = require('./db');
+
+// Configuração do multer — salva em /uploads/fotos/
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'public', 'uploads', 'fotos'));
+  },
+  filename: (req, file, cb) => {
+    // Nome único: cpf + timestamp + extensão original
+    const cpf = req.session?.usuario?.cpf || 'sem-cpf';
+    const ext = path.extname(file.originalname);
+    cb(null, `${cpf}-${Date.now()}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB
+  fileFilter: (req, file, cb) => {
+    const tipos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (tipos.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.'));
+  }
+});
+
+// POST /perfil/foto — recebe o upload
+app.post('/perfil/foto', upload.single('fotoPerfil'), async (req, res) => {
+  const cpf = req.body.cpf;
+  if (!cpf)      return res.status(400).json({ erro: 'CPF não informado' });
+  if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
+
+  const resultado = await db.atualizarFotoPerfil(cpf, req.file.filename);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+
+  res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${req.file.filename}` });
+});
+
+app.get('/perfil/foto/:cpf', async (req, res) => {
+  const foto = await db.getFotoPerfil(req.params.cpf);
+  res.json({ fotoPerfil: foto ? `/uploads/fotos/${foto}` : null });
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
