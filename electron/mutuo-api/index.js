@@ -14,6 +14,20 @@ app.post('/login', async (req, res) => {
     res.json(result);
 });
 
+// Rota de login de Usuário
+app.post('/login/usuario', async (req, res) => {
+    const { login, senha } = req.body;
+    const result = await db.validarLoginUsuario(login, senha);
+    res.json(result);
+});
+
+// Rota de login de ONG
+app.post('/login/ong', async (req, res) => {
+    const { login, senha } = req.body;
+    const result = await db.validarLoginOng(login, senha);
+    res.json(result);
+});
+
 // Rotas de Usuários
 app.get('/usuarios', async (req, res) => res.json(await db.getUsuarios()));
 app.post('/usuarios', async (req, res) => {
