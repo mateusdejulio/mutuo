@@ -11,7 +11,7 @@
     <link rel="icon" href="../imagens/mutuoLogo.png">
 
     <style>
-        /* Configuração Global para evitar rolagem */
+  
         * {
             box-sizing: border-box;
         }
@@ -20,16 +20,16 @@
             font-family: 'Quicksand', sans-serif;
             background-color: #fff;
             margin: 0;
-            padding-top: 72px; /* Espaço da navbar */
-            height: 100vh; /* Altura total da tela */
+            padding-top: 72px; 
+            height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Remove as barras de rolagem */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             color: #000;
         }
 
-        /* --- NAVBAR (Mantida Original) --- */
+        
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             background-color: #588157;
@@ -124,7 +124,7 @@
         .nav-profile img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
         .nav-profile span { color: #E1DCD0; font-size: 0.84rem; font-weight: 500; }
 
-        /* --- CONTEÚDO PRINCIPAL (One-Page) --- */
+        
         .main-wrapper {
             flex: 1;
             display: flex;
@@ -166,7 +166,7 @@
             text-align: center;
         }
 
-        /* --- GRID DE FOTOS --- */
+       
         .fotos {
             display: flex;
             justify-content: center;
@@ -190,7 +190,7 @@
             object-fit: cover;
             border: 3px solid #588157;
             margin-bottom: 10px;
-            width: 95px; /* Tamanho otimizado para evitar rolagem */
+            width: 95px; 
             height: 95px;
         }
 
@@ -207,7 +207,7 @@
             text-transform: uppercase;
         }
 
-        /* Ajustes para telas muito pequenas verticalmente */
+        
         @media (max-height: 700px) {
             .conteudo h2 { font-size: 1.8rem; margin-bottom: 10px; }
             .conteudo h6 { font-size: 0.85rem; line-height: 1.4; }
@@ -253,7 +253,7 @@
         <span class="bell-badge">3</span>
       </a>
       <a href="perfilMutuo.html" class="nav-profile">
-        <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
+         <img id="fotoNavbarTopo" src="../imagens/mutuoLogo.png" alt="Foto de perfil">
           <span id="nomeUsuario"></span>
       </a>
     </div>
@@ -306,6 +306,8 @@ if(usuario){
 
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
 }
-    </script>
+  carregarFoto();
+</script>
+ <script src="../funcoes.js"></script>
 </body>
 </html>
