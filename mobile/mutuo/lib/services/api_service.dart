@@ -11,6 +11,20 @@ class ApiService {
     'Content-Type': 'application/json',
   };
 
+  Future<Map<String, dynamic>> cadastrarOng(Map<String, dynamic> dadosDaOng) async {
+    final url = Uri.parse('$baseUrl/ongs');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode(dadosDaOng),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'sucesso': false, 'erro': 'Não foi possível conectar ao servidor backend: $e'};
+    }
+  }
+
   Future<Map<String, dynamic>?> fazerLogin(String login, String senha) async {
     final url = Uri.parse('$baseUrl/login');
     try {
@@ -27,12 +41,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> fazerLoginUsuario(String email, String senha) async {
-    final url = Uri.parse('$baseUrl/login/usuario');
+    final url = Uri.parse('$baseUrl/loginUsuario');
     try {
       final response = await http.post(
         url,
         headers: _headers,
-        body: jsonEncode({'login': email, 'senha': senha}),
+        body: jsonEncode({'email': email, 'senha': senha}),
       );
       return jsonDecode(response.body);
     } catch (e) {
@@ -41,12 +55,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> fazerLoginOng(String email, String senha) async {
-    final url = Uri.parse('$baseUrl/login/ong');
+    final url = Uri.parse('$baseUrl/loginOng');
     try {
       final response = await http.post(
         url,
         headers: _headers,
-        body: jsonEncode({'login': email, 'senha': senha}),
+        body: jsonEncode({'email': email, 'senha': senha}),
       );
       return jsonDecode(response.body);
     } catch (e) {
