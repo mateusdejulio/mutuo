@@ -397,10 +397,10 @@ async function cadastrarAdm(novoLogin, novaSenha) {
 async function getFotoPerfil(cpf) {
   try {
     const [rows] = await pool.query(
-      'SELECT fotoPerfil FROM Mutuo_Usuario WHERE cpf = ?',
+      'SELECT foto_perfil FROM Mutuo_Usuario WHERE cpf = ?',
       [cpf]
     );
-    return rows.length > 0 ? rows[0].fotoPerfil : null;
+    return rows.length > 0 ? rows[0].foto_perfil : null;
   } catch (err) {
     console.error('Erro ao buscar foto:', err.message);
     return null;
@@ -410,7 +410,7 @@ async function getFotoPerfil(cpf) {
 async function atualizarFotoPerfil(cpf, nomeArquivo) {
   try {
     const [result] = await pool.query(
-      'UPDATE Mutuo_Usuario SET fotoPerfil = ? WHERE cpf = ?',
+      'UPDATE Mutuo_Usuario SET foto_perfil = ? WHERE cpf = ?',
       [nomeArquivo, cpf]
     );
     return { success: result.affectedRows > 0 };

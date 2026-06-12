@@ -264,80 +264,117 @@
     <a class="link-cancelar" onclick="window.location.href='cadastroPessoal.html'">Voltar</a>
   </div>
   <script>
-    document.getElementById('estado').addEventListener('input', function () {
-      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+document.getElementById('estado').addEventListener('input', function () {
+  this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+});
+
+document.getElementById('cep').addEventListener('input', function () {
+  let v = this.value.replace(/\D/g, '').slice(0, 8);
+  if (v.length > 5) {
+    v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+  }
+  this.value = v;
+});
+
+document.getElementById('finalizar').addEventListener('click', async () => {
+
+  const endereco = document.getElementById('endereco').value.trim();
+  const bairro   = document.getElementById('bairro').value.trim();
+  const cidade   = document.getElementById('cidade').value.trim();
+  const estado   = document.getElementById('estado').value.trim();
+  const cep      = document.getElementById('cep').value.trim();
+
+  document.getElementById('erroEndereco').textContent = '';
+  document.getElementById('erroBairro').textContent   = '';
+  document.getElementById('erroCidade').textContent   = '';
+  document.getElementById('erroEstado').textContent   = '';
+  document.getElementById('erroCep').textContent      = '';
+
+  let valido = true;
+
+  if (!endereco) { document.getElementById('erroEndereco').textContent = 'Digite o endereço.'; valido = false; }
+  if (!bairro)   { document.getElementById('erroBairro').textContent   = 'Digite o bairro.';   valido = false; }
+  if (!cidade)   { document.getElementById('erroCidade').textContent   = 'Digite a cidade.';   valido = false; }
+  if (!estado)   { document.getElementById('erroEstado').textContent   = 'Digite o estado.';   valido = false; }
+
+  const cepNums = cep.replace(/\D/g, '');
+  if (!cep) {
+    document.getElementById('erroCep').textContent = 'Digite o CEP.';
+    valido = false;
+  } else if (cepNums.length < 8) {
+    document.getElementById('erroCep').textContent = 'Digite um CEP válido.';
+    valido = false;
+  }
+
+  if (!valido) return;
+
+  const dados = JSON.parse(sessionStorage.getItem('cadastroMutuo') || '{}');
+  dados.endereco = endereco;
+  dados.bairro   = bairro;
+  dados.cidade   = cidade;
+  dados.uf       = estado;
+  dados.cep      = cepNums;
+  dados.cadastro = new Date().toISOString().slice(0, 10);
+
+  console.log('DADOS ENVIADOS:', dados);
+
+  try {
+    // 1. Cadastra o usuário
+    const resp = await fetch('http://localhost:3000/usuarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
     });
 
-    document.getElementById('cep').addEventListener('input', function () {
-      let v = this.value.replace(/\D/g, '').slice(0, 8);
-      if (v.length > 5) v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
-      this.value = v;
+    const texto = await resp.text();
+    let resultado;
+    try { resultado = JSON.parse(texto); }
+    catch { throw new Error('API retornou resposta inválida: ' + texto); }
+
+    if (!resp.ok || !resultado.sucesso) {
+      Swal.fire({ icon: 'error', title: 'Erro', text: resultado.erro || resultado.mensagem || 'Erro ao cadastrar.' });
+      return;
+    }
+
+    // 2. Envia a foto se o usuário escolheu uma
+    if (dados.fotoBase64) {
+      const base64 = dados.fotoBase64.split(',')[1];
+      const mime   = dados.fotoBase64.split(';')[0].split(':')[1];
+      const bytes  = atob(base64);
+      const arr    = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+      const blob = new Blob([arr], { type: mime });
+
+      const formData = new FormData();
+      formData.append('cpf', dados.cpf);
+      formData.append('fotoPerfil', blob, 'foto.jpg');
+
+      await fetch('http://localhost:3000/perfil/foto', {
+        method: 'POST',
+        body: formData
+      });
+    }
+
+    sessionStorage.removeItem('cadastroMutuo');
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Cadastro realizado!',
+      text: 'Sua conta foi criada com sucesso.',
+      confirmButtonText: 'Entrar',
+      confirmButtonColor: '#3a5a40',
+      heightAuto: false
     });
 
-    document.getElementById('finalizar').addEventListener('click', async () => {
-      const endereco = document.getElementById('endereco').value.trim();
-      const bairro = document.getElementById('bairro').value.trim();
-      const cidade = document.getElementById('cidade').value.trim();
-      const estado = document.getElementById('estado').value.trim();
-      const cep = document.getElementById('cep').value.trim();
+    window.location.href = '../login.html';
 
-      document.getElementById('erroEndereco').textContent = '';
-      document.getElementById('erroBairro').textContent = '';
-      document.getElementById('erroCidade').textContent = '';
-      document.getElementById('erroEstado').textContent = '';
-      document.getElementById('erroCep').textContent = '';
+  } catch (e) {
+    console.error('ERRO COMPLETO:', e);
+    Swal.fire({ icon: 'error', title: 'Não foi possível conectar à API', text: e.message });
+  }
 
-      let valido = true;
-
-      if (!endereco) { document.getElementById('erroEndereco').textContent = 'Digite o endereço.'; valido = false; }
-      if (!bairro) { document.getElementById('erroBairro').textContent = 'Digite o bairro.'; valido = false; }
-      if (!cidade) { document.getElementById('erroCidade').textContent = 'Digite a cidade.'; valido = false; }
-      if (!estado) { document.getElementById('erroEstado').textContent = 'Digite o estado.'; valido = false; }
-
-      const cepNums = cep.replace(/\D/g, '');
-      if (!cep) { document.getElementById('erroCep').textContent = 'Digite o CEP.'; valido = false; }
-      else if (cepNums.length < 8) { document.getElementById('erroCep').textContent = 'Digite um CEP válido.'; valido = false; }
-
-      if (!valido) return;
-
-      // Monta objeto final com todos os dados acumulados
-      const dados = JSON.parse(sessionStorage.getItem('cadastroMutuo') || '{}');
-      dados.endereco = endereco;
-      dados.bairro = bairro;
-      dados.cidade = cidade;
-      dados.uf = estado;
-      dados.cep = cepNums;
-      dados.cadastro = new Date().toISOString().slice(0, 10); // data atual
-
-      try {
-        const resp = await fetch('http://localhost:3000/usuarios', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados)
-        });
-        const resultado = await resp.json();
-
-        if (resultado.sucesso) {
-          sessionStorage.removeItem('cadastroMutuo');
-          Swal.fire({
-            icon: 'success',
-            title: 'Cadastro realizado!',
-            text: 'Sua conta foi criada com sucesso.',
-            confirmButtonText: 'Entrar',
-            confirmButtonColor: '#3a5a40',
-            heightAuto: false
-          }).then(() => {
-            window.location.href = '../login.html';
-          });
-        } else {
-          Swal.fire({ icon: 'error', title: resultado.erro || 'Erro ao cadastrar. Tente novamente.' });
-        }
-      } catch (e) {
-        console.error(e);
-        Swal.fire({ icon: 'error', title: 'Não foi possível conectar à API.' });
-      }
-    });
-  </script>
+});
+</script>
 </body>
 
 </html>

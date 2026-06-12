@@ -8,12 +8,7 @@ function atualizarTodasFotos(url) {
 }
 
 async function carregarFoto() {
-  const usuario = JSON.parse(localStorage.getItem('usuarioMutuo') || '{}');
-
-  if (usuario.fotoPerfil) {
-    atualizarTodasFotos(API_URL + usuario.fotoPerfil);
-    return;
-  }
+  const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
 
   if (!usuario.cpf) return;
 
@@ -23,12 +18,16 @@ async function carregarFoto() {
 
     if (data.fotoPerfil) {
       atualizarTodasFotos(API_URL + data.fotoPerfil);
-      usuario.fotoPerfil = data.fotoPerfil;
-      localStorage.setItem('usuarioMutuo', JSON.stringify(usuario));
     }
   } catch (e) {
     console.error('Erro ao carregar foto:', e);
   }
 }
 
-carregarFoto();
+
+const _usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+if (_usuario.nome) {
+  const elNome = document.getElementById('nomeUsuario');
+  if (elNome) elNome.textContent = _usuario.nome;
+}
+
