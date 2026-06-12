@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   // localhost funciona para Flutter Web no Chrome e simulador iOS
   // Para emulador Android: use 'http://10.0.2.2:3000'
-  // Para celular físico: use o IP da sua máquina ex: 'http://192.168.1.50:3000'
+  // Para celular físico: use o IP da sua máquina ex: 'http://143.106.241.23:3000' (certo)
   static const String baseUrl = 'http://localhost:3000';
 
   final Map<String, String> _headers = {

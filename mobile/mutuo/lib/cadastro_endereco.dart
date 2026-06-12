@@ -130,22 +130,22 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
     Map<String, dynamic> resultado;
 
     if (_isOng) {
-      resultado = await api.cadastrarOng({
-        'nomeOng': widget.nomeOng,
-        'cnpj': widget.cnpj.replaceAll(RegExp(r'[^0-9]'), ''),
-        'email': widget.email,
-        'nomeResponsavel': widget.nome,
-        'telefone': widget.telefone,
-        'cidade': cidadeController.text,
-        'bairro': bairroController.text,
-        'endereco': enderecoController.text,
-        'uf': estadoSelecionado,
-        'senha': widget.senha,
-        'foco': widget.foco,
-        'descricao': widget.descricao,
-        'dataCriacao': _converterData(widget.dataCriacao),
-      });
-    } else {
+  resultado = await api.cadastrarOng({
+    'nomeOng': widget.nomeOng,
+    'cnpj': widget.cnpj.replaceAll(RegExp(r'[^0-9]'), ''),
+    'email': widget.email,
+    'nomeResponsavel': widget.nome,
+    'telefone': widget.telefone,
+    'cidade': cidadeController.text,
+    'bairro': bairroController.text,
+    'endereco': enderecoController.text,
+    'uf': estadoSelecionado,
+    'senha': widget.senha,
+    'foco': widget.foco,
+    'descricao': widget.descricao,
+  });
+}
+     else {
       resultado = await api.cadastrarUsuario({
         'cpf': widget.cpf.replaceAll(RegExp(r'[^0-9]'), ''),
         'nome': widget.nome,
