@@ -645,11 +645,18 @@
   <div id="perfilWrap">
 
     <div class="cabecalho-perfil">
-      <img class="foto-perfil"
-        src="../imagens/perfil3.png"
-        alt="Isabela"
-        onerror="this.src='https://ui-avatars.com/api/?name=Isabela+Monteiro&background=588157&color=fff'">
-
+      <div class="foto-perfil-wrap" style="cursor:pointer" onclick="document.getElementById('inputFoto').click()" title="Trocar foto">
+  <img id="fotoPerfil" class="foto-perfil"
+    src="../imagens/perfil3.png"
+    alt="Foto de perfil">
+  <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;
+    background:var(--verde-principal);border-radius:50%;border:2px solid #fff;
+    display:flex;align-items:center;justify-content:center;">
+    <i class="bi bi-pencil-fill" style="font-size:0.55rem;color:#fff"></i>
+  </div>
+  <input type="file" id="inputFoto" accept="image/jpeg,image/png,image/webp"
+    style="display:none" onchange="enviarFoto(this)">
+</div>
       <div class="info-nome cabecalho-perfil-nome">
         <h3 id="exibNome">Isabela Monteiro</h3>
         <span id="exibUser">@isa.monteiro</span>
