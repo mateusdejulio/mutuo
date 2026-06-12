@@ -250,7 +250,7 @@
         <span class="bell-badge">3</span>
       </a>
       <a href="perfilMutuo.html" class="nav-profile">
-        <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.display='none'">
+       <img id="fotoNavbarTopo" src="../imagens/mutuoLogo.png" alt="Foto de perfil">
          <span id="nomeUsuario"></span>
       </a>
     </div>
@@ -313,6 +313,8 @@ if(usuario){
 
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
 }
+ carregarFoto();
 </script>
+ <script src="../funcoes.js"></script>
 </body>
 </html>

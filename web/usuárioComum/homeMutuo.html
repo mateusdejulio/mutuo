@@ -1066,7 +1066,7 @@
 </div>
 
 <script>
- 
+
   const quotes = [
     "Solidariedade é transformar empatia em ação.",
     "Pequenos gestos criam grandes mudanças.",
@@ -1085,57 +1085,43 @@
   dots.forEach(d => d.addEventListener('click', () => goQ(+d.dataset.i)));
   setInterval(() => goQ((cur + 1) % quotes.length), 4000);
 
-  /* Carossel */
   function makeCarousel(trackId, prevId, nextId) {
     const track = document.getElementById(trackId);
-    const prev = document.getElementById(prevId);
-    const next = document.getElementById(nextId);
+    const prev  = document.getElementById(prevId);
+    const next  = document.getElementById(nextId);
     let idx = 0;
     function getCardW() {
       const card = track.children[0];
       return card ? card.offsetWidth + 16 : 300;
     }
-    function update() {
-      track.style.transform = `translateX(-${getCardW() * idx}px)`;
-    }
+    function update() { track.style.transform = `translateX(-${getCardW() * idx}px)`; }
     next.addEventListener('click', () => {
       const visible = Math.floor(track.parentElement.offsetWidth / getCardW());
       if (idx < track.children.length - visible) { idx++; update(); }
     });
-    prev.addEventListener('click', () => {
-      if (idx > 0) { idx--; update(); }
-    });
+    prev.addEventListener('click', () => { if (idx > 0) { idx--; update(); } });
   }
   makeCarousel('track1', 'prev1', 'next1');
   makeCarousel('track2', 'prev2', 'next2');
 
-  function openModal(id) {
-    document.getElementById(id).classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal(id) {
-    document.getElementById(id).classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  function openModal(id)  { document.getElementById(id).classList.add('open');    document.body.style.overflow = 'hidden'; }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
   document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
   });
 
+  // ── Carrega usuário e foto ──
+  const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
 
-const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
-
-if(usuario){
-    document.getElementById("nomeUsuario").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.getElementById("nomeBoasVindas").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
-}
-
-
+  if (usuario && usuario.nome) {
+    document.getElementById('nomeUsuario').textContent   = usuario.nome;
+    document.getElementById('nomeBoasVindas').textContent = usuario.nome;
+    document.title = 'Mútuo | ' + usuario.nome;
+  }
+  carregarFoto();
 </script>
-<script src="../funcoes.js"></script>
+ <script src="../funcoes.js"></script>
+
+
 </body>
 </html>
