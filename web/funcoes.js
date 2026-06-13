@@ -1,7 +1,7 @@
 const API_URL = 'http://localhost:3000';
 
 function atualizarTodasFotos(url) {
-  ['fotoNavbarTopo', 'fotoPerfil', 'fotoDrawer'].forEach(id => {
+  ['fotoTopo','fotoNavbarTopo', 'fotoPerfil', 'fotoDrawer'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.src = url;
   });
