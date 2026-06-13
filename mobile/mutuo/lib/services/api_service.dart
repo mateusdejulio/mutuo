@@ -4,12 +4,27 @@ import 'package:http/http.dart' as http;
 class ApiService {
   // localhost funciona para Flutter Web no Chrome e simulador iOS
   // Para emulador Android: use 'http://10.0.2.2:3000'
-  // Para celular físico: use o IP da sua máquina ex: 'http://192.168.1.50:3000'
+  // Para celular físico: use o IP da sua máquina ex: 'http://143.106.241.23:3000' (certo)
   static const String baseUrl = 'http://localhost:3000';
 
   final Map<String, String> _headers = {
     'Content-Type': 'application/json',
   };
+
+
+  Future<Map<String, dynamic>> cadastrarOng(Map<String, dynamic> dadosDaOng) async {
+    final url = Uri.parse('$baseUrl/ongs');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode(dadosDaOng),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'sucesso': false, 'erro': 'Não foi possível conectar ao servidor backend: $e'};
+    }
+  }
 
   Future<Map<String, dynamic>?> fazerLogin(String login, String senha) async {
     final url = Uri.parse('$baseUrl/login');
@@ -27,12 +42,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> fazerLoginUsuario(String email, String senha) async {
-    final url = Uri.parse('$baseUrl/login/usuario');
+    final url = Uri.parse('$baseUrl/loginUsuario');
     try {
       final response = await http.post(
         url,
         headers: _headers,
-        body: jsonEncode({'login': email, 'senha': senha}),
+        body: jsonEncode({'email': email, 'senha': senha}),
       );
       return jsonDecode(response.body);
     } catch (e) {
@@ -41,12 +56,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> fazerLoginOng(String email, String senha) async {
-    final url = Uri.parse('$baseUrl/login/ong');
+    final url = Uri.parse('$baseUrl/loginOng');
     try {
       final response = await http.post(
         url,
         headers: _headers,
-        body: jsonEncode({'login': email, 'senha': senha}),
+        body: jsonEncode({'email': email, 'senha': senha}),
       );
       return jsonDecode(response.body);
     } catch (e) {

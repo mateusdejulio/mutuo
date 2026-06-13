@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'inicialUser.dart';
-import 'inicialOng.dart';
+import 'cadastro_documento.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -14,9 +13,11 @@ class _CadastroState extends State<Cadastro> {
 
   final nomeController = TextEditingController();
   final emailController = TextEditingController();
+  final senhaController = TextEditingController();
   final telefoneController = TextEditingController();
 
   String? tipoConta;
+  bool _ocultarSenha = true;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +64,11 @@ class _CadastroState extends State<Cadastro> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "Etapa 1 de 3 — Dados básicos",
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
                   ],
                 ),
 
@@ -85,40 +91,6 @@ class _CadastroState extends State<Cadastro> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _label("Nome", Icons.person),
-                            _input(
-                              controller: nomeController,
-                              hint: "Seu nome completo",
-                              validator: (v) =>
-                                  v!.isEmpty ? "Digite seu nome" : null,
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            _label("Email", Icons.email),
-                            _input(
-                              controller: emailController,
-                              hint: "seu@email.com",
-                              validator: (v) {
-                                if (v!.isEmpty) return "Digite seu email";
-                                if (!v.contains("@")) return "Email inválido";
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            _label("Telefone", Icons.phone),
-                            _input(
-                              controller: telefoneController,
-                              hint: "(19) 99999-9999",
-                              keyboardType: TextInputType.phone,
-                              validator: (v) =>
-                                  v!.isEmpty ? "Digite seu telefone" : null,
-                            ),
-
-                            const SizedBox(height: 20),
-
                             _label("Tipo de conta", Icons.group),
 
                             const SizedBox(height: 10),
@@ -153,6 +125,73 @@ class _CadastroState extends State<Cadastro> {
                               ],
                             ),
 
+                            const SizedBox(height: 20),
+
+                            _label(
+                              tipoConta == "ong" ? "Nome do responsável" : "Nome",
+                              Icons.person,
+                            ),
+                            _input(
+                              controller: nomeController,
+                              hint: tipoConta == "ong"
+                                  ? "Nome do responsável pela ONG"
+                                  : "Seu nome completo",
+                              validator: (v) =>
+                                  v!.isEmpty ? "Digite o nome" : null,
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            _label("Email", Icons.email),
+                            _input(
+                              controller: emailController,
+                              hint: "seu@email.com",
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (v) {
+                                if (v!.isEmpty) return "Digite seu email";
+                                if (!v.contains("@")) return "Email inválido";
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            _label("Senha", Icons.lock),
+                            _input(
+                              controller: senhaController,
+                              hint: "Mínimo 6 caracteres",
+                              obscureText: _ocultarSenha,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _ocultarSenha
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: Colors.white70,
+                                ),
+                                onPressed: () => setState(
+                                  () => _ocultarSenha = !_ocultarSenha,
+                                ),
+                              ),
+                              validator: (v) {
+                                if (v!.isEmpty) return "Digite uma senha";
+                                if (v.length < 6) {
+                                  return "Mínimo de 6 caracteres";
+                                }
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            _label("Telefone", Icons.phone),
+                            _input(
+                              controller: telefoneController,
+                              hint: "(19) 99999-9999",
+                              keyboardType: TextInputType.phone,
+                              validator: (v) =>
+                                  v!.isEmpty ? "Digite o telefone" : null,
+                            ),
+
                             const SizedBox(height: 25),
 
                             SizedBox(
@@ -166,8 +205,7 @@ class _CadastroState extends State<Cadastro> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  if (!_formKey.currentState!.validate())
-                                    return;
+                                  if (!_formKey.currentState!.validate()) return;
 
                                   if (tipoConta == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -180,25 +218,18 @@ class _CadastroState extends State<Cadastro> {
                                     return;
                                   }
 
-                                  if (tipoConta == "usuario") {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => InicialUsuario(
-                                          nome: nomeController.text,
-                                        ),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CadastroDocumento(
+                                        tipoConta: tipoConta!,
+                                        nome: nomeController.text,
+                                        email: emailController.text,
+                                        senha: senhaController.text,
+                                        telefone: telefoneController.text,
                                       ),
-                                    );
-                                  } else {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => InicialOng(
-                                          nome: nomeController.text,
-                                        ),
-                                      ),
-                                    );
-                                  }
+                                    ),
+                                  );
                                 },
                                 child: const Text(
                                   "Próximo",
@@ -247,6 +278,8 @@ class _CadastroState extends State<Cadastro> {
     required String hint,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    bool obscureText = false,
+    Widget? suffixIcon,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5),
@@ -254,10 +287,12 @@ class _CadastroState extends State<Cadastro> {
         controller: controller,
         validator: validator,
         keyboardType: keyboardType,
+        obscureText: obscureText,
         decoration: InputDecoration(
           hintText: hint,
           filled: true,
           fillColor: const Color(0xFFE5E2D8),
+          suffixIcon: suffixIcon,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide.none,
