@@ -28,7 +28,6 @@
       padding-top: var(--altura-nav);
     }
 
-    /* ── NAVBAR ── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
       background-color: var(--verde-principal);
@@ -127,7 +126,6 @@
     .nav-profile img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
     .nav-profile span { color: var(--creme); font-size: 0.84rem; font-weight: 500; white-space: nowrap; }
 
-    /* ── HAMBURGER ── */
     .nav-hamburger {
       display: none;
       flex-direction: column;
@@ -153,7 +151,6 @@
     .nav-hamburger.open span:nth-child(2) { opacity: 0; }
     .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    /* ── MOBILE DRAWER ── */
     .mobile-drawer {
       display: none;
       position: fixed;
@@ -227,7 +224,6 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* ── RESPONSIVO ── */
     @media (max-width: 768px) {
       .nav-links  { display: none !important; }
       .nav-right  { display: none !important; }
@@ -236,7 +232,7 @@
       .drawer-overlay { display: block; }
       .nav-brand { font-size: 1.35rem; margin-right: 0; }
     }
-    /* ── LAYOUT ── */
+
     .pagina {
       max-width: 860px;
       margin: 0 auto;
@@ -253,161 +249,48 @@
       padding: 24px;
       animation: subirSuave 0.4s ease both;
     }
-    .campo-nome-edit {
-  display: none;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-#exibNome{
-  color: var(--verde-escuro);
-}
-#exibUser{
-  color: var(--verde-escuro);
-}
 
-.editando-perfil .campo-nome-edit {
-  display: flex;
-}
+    .campo-nome-edit { display: none; flex-direction: column; gap: 6px; flex: 1; }
+    #exibNome { color: var(--verde-escuro); }
 
-.editando-perfil .cabecalho-perfil-nome {
-  display: none;
-}
+    .editando-perfil .campo-nome-edit { display: flex; }
+    .editando-perfil .cabecalho-perfil-nome { display: none; }
 
-.readonly .label-readonly {
-  color: #666;
-  font-size: 14px;
-}
+    .readonly .label-readonly { color: #666; font-size: 14px; }
+    .badge-readonly {
+      font-size: 11px; background: #f4f4f0; color: #999;
+      border-radius: 4px; padding: 2px 7px; margin-left: 6px; border: 1px solid #ddd;
+    }
 
-.badge-readonly {
-  font-size: 11px;
-  background: #f4f4f0;
-  color: #999;
-  border-radius: 4px;
-  padding: 2px 7px;
-  margin-left: 6px;
-  border: 1px solid #ddd;
-}
+    .campo-edit { flex: 1; }
+    .campo-edit input {
+      width: 100%; border: 1px solid #ccc; border-radius: 10px;
+      padding: 8px 12px; font-family: 'Quicksand', sans-serif; font-size: 14px;
+    }
+    .campo-edit input:focus { outline: none; border-color: var(--verde-principal); }
 
-.campo-edit {
-  flex: 1;
-}
+    .habilidades-wrap { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .tag-habilidade { display: flex; align-items: center; gap: 6px; }
+    .tag-habilidade .remover { display: none; border: none; background: none; cursor: pointer; color: #888; }
+    .editando .tag-habilidade .remover { display: flex; }
 
-.campo-edit input {
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-family: 'Quicksand', sans-serif;
-  font-size: 14px;
-}
+    .add-habilidade { display: none; align-items: center; gap: 6px; }
+    .editando .add-habilidade { display: flex; }
+    .add-habilidade input { border: 1px dashed #bbb; border-radius: 20px; padding: 6px 12px; background: transparent; }
+    .add-habilidade button { border: none; background: none; cursor: pointer; font-size: 22px; color: var(--verde-principal); }
 
-.campo-edit input:focus {
-  outline: none;
-  border-color: var(--verde-principal);
-}
+    .acoes-edit { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-salvar {
+      border: none; background: var(--verde-escuro); color: white;
+      padding: 9px 18px; border-radius: 12px;
+      font-family: 'Quicksand', sans-serif; font-weight: 700; cursor: pointer;
+    }
+    .btn-cancelar {
+      border: 1px solid #ccc; background: white;
+      padding: 9px 18px; border-radius: 12px;
+      font-family: 'Quicksand', sans-serif; font-weight: 700; cursor: pointer;
+    }
 
-.prefixo-wrap {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #fff;
-}
-
-.prefixo {
-  padding: 8px 10px;
-  background: #f4f4f0;
-  border-right: 1px solid #ddd;
-  color: #666;
-  font-size: 14px;
-}
-
-.prefixo-wrap input {
-  border: none !important;
-  border-radius: 0 !important;
-}
-
-.habilidades-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.tag-habilidade {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.tag-habilidade .remover {
-  display: none;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: #888;
-}
-
-.editando .tag-habilidade .remover {
-  display: flex;
-}
-
-.add-habilidade {
-  display: none;
-  align-items: center;
-  gap: 6px;
-}
-
-.editando .add-habilidade {
-  display: flex;
-}
-
-.add-habilidade input {
-  border: 1px dashed #bbb;
-  border-radius: 20px;
-  padding: 6px 12px;
-  background: transparent;
-}
-
-.add-habilidade button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 22px;
-  color: var(--verde-principal);
-}
-
-.acoes-edit {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.btn-salvar {
-  border: none;
-  background: var(--verde-escuro);
-  color: white;
-  padding: 9px 18px;
-  border-radius: 12px;
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.btn-cancelar {
-  border: 1px solid #ccc;
-  background: white;
-  padding: 9px 18px;
-  border-radius: 12px;
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-    /* ── CARD DE PERFIL ── */
     .cabecalho-perfil { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
     .foto-perfil-wrap { position: relative; flex-shrink: 0; }
     .foto-perfil { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid var(--verde-badge); }
@@ -424,7 +307,6 @@
     .stat-numero { font-size: 1.2rem; font-weight: 700; color: var(--verde-escuro); display: block; }
     .stat-texto { font-size: 0.72rem; color: #9aab96; font-weight: 600; }
 
-    /* ── DADOS ── */
     .cabecalho-bloco { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
     .cabecalho-bloco h3 { font-size: 1rem; font-weight: 700; color: var(--verde-escuro); margin-bottom: 2px; }
     .cabecalho-bloco p { font-size: 0.78rem; color: #9aab96; font-weight: 500; }
@@ -448,7 +330,6 @@
     .habilidades { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag-habilidade { background: var(--verde-palido); color: var(--verde-escuro); font-size: 0.8rem; font-weight: 600; padding: 6px 14px; border-radius: 20px; }
 
-    /* ── PONTOS ── */
     .card-pontos {
       background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
       border-radius: 20px; padding: 24px; color: #fff;
@@ -466,7 +347,6 @@
     .mov-valor.entrada { color: var(--verde-badge); }
     .mov-valor.saida { color: rgba(255,255,255,0.6); }
 
-    /* ── SERVIÇOS ── */
     .card-servico { border: 1px solid #e4ebe2; border-radius: 16px; padding: 18px; margin-top: 16px; transition: box-shadow 0.18s; }
     .card-servico:hover { box-shadow: 0 4px 14px rgba(58,90,64,0.1); }
     .topo-servico { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
@@ -485,7 +365,6 @@
     .btn-adicionar { display: inline-flex; align-items: center; gap: 6px; background: var(--verde-principal); color: #fff; font-family: 'Quicksand', sans-serif; font-size: 0.82rem; font-weight: 700; padding: 8px 18px; border-radius: 20px; text-decoration: none; transition: background 0.18s; }
     .btn-adicionar:hover { background: var(--verde-escuro); color: #fff; }
 
-    /* ── HISTÓRICO ── */
     .barra-filtros-historico { display: flex; gap: 6px; margin: 16px 0; overflow-x: auto; padding-bottom: 2px; }
     .barra-filtros-historico::-webkit-scrollbar { display: none; }
     .btn-filtro-hist { background: #f4f6f3; border: 1px solid #e4ebe2; color: #7a8c76; font-family: 'Quicksand', sans-serif; font-size: 0.82rem; font-weight: 600; padding: 8px 18px; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: all 0.18s; flex-shrink: 0; }
@@ -532,7 +411,6 @@
       <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
       Mútuo
     </a>
-
     <ul class="nav-links">
       <li><a href="homeMutuo.html">Início</a></li>
       <li><a href="serviçosMutuo.html">Serviços</a></li>
@@ -552,7 +430,6 @@
         </div>
       </li>
     </ul>
-
     <div class="nav-right">
       <a href="notificacoesMutuo.html" class="nav-bell">
         <i class="bi bi-bell-fill"></i>
@@ -560,30 +437,25 @@
       </a>
       <a href="perfilMutuo.html" class="nav-profile">
         <img id="fotoNavbarTopo" src="../imagens/mutuoLogo.png" alt="Foto de perfil">
-      <span id="nomeUsuario"></span>
+        <span id="nomeNavbar"></span>
       </a>
     </div>
-
     <button class="nav-hamburger" id="hamburger" aria-label="Abrir menu">
-      <span></span>
-      <span></span>
-      <span></span>
+      <span></span><span></span><span></span>
     </button>
   </nav>
 
-  <!-- OVERLAY -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
 
   <!-- MOBILE DRAWER -->
   <div class="mobile-drawer" id="mobileDrawer">
     <div class="drawer-profile">
-      <img src="../imagens/perfil3.png" alt="perfil" onerror="this.style.background='var(--verde-principal)'">
+      <img id="fotoDrawer" src="../imagens/perfil3.png" alt="perfil">
       <div class="drawer-profile-info">
-          <span id="nomeUsuario"></span>
-        <small>Voluntária · São Paulo, SP</small>
+        <strong id="nomeDrawer"></strong>
+        <small id="emailDrawer"></small>
       </div>
     </div>
-
     <span class="drawer-section-label">Menu</span>
     <a href="homeMutuo.html" class="drawer-nav-link"><i class="bi bi-house-fill"></i> Início</a>
     <a href="serviçosMutuo.html" class="drawer-nav-link"><i class="bi bi-grid-fill"></i> Serviços</a>
@@ -593,17 +465,14 @@
       <i class="bi bi-bell-fill"></i> Notificações
       <span class="drawer-bell-badge">3</span>
     </a>
-    <a href="perfilMutuo.html" class="drawer-nav-link active "><i class="bi bi-person-fill"></i> Meu Perfil</a>
-
+    <a href="perfilMutuo.html" class="drawer-nav-link active"><i class="bi bi-person-fill"></i> Meu Perfil</a>
     <div class="drawer-divider"></div>
     <span class="drawer-section-label">Mais opções</span>
-
     <a href="planosMutuo.html" class="drawer-nav-link"><i class="bi bi-gem"></i> Conheça nossos planos</a>
     <a href="certificadosMutuo.html" class="drawer-nav-link"><i class="bi bi-award"></i> Certificados</a>
     <a href="contatoMutuo.html" class="drawer-nav-link"><i class="bi bi-envelope"></i> Contato</a>
     <a href="comoUsarMutuo.html" class="drawer-nav-link"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
     <a href="quemSomosMutuo.html" class="drawer-nav-link"><i class="bi bi-people"></i> Quem somos</a>
-
     <div class="drawer-divider"></div>
     <a href="../login.html" class="drawer-nav-link danger"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
   </div>
@@ -611,15 +480,16 @@
   <!-- CONTEÚDO -->
   <div class="pagina">
 
+    <!-- CARD TOPO -->
     <div class="bloco">
       <div class="cabecalho-perfil">
         <div class="foto-perfil-wrap">
-          <img class="foto-perfil" src="../imagens/perfil3.png" alt="Isabela" onerror="this.src='https://ui-avatars.com/api/?name=Isabela+Monteiro&background=588157&color=fff'">
+          <img id="fotoTopo" class="foto-perfil" src="../imagens/logo.png" alt="Foto">
           <span class="badge-online"></span>
         </div>
         <div class="info-perfil">
-            <span id="nomeUsuario"></span>
-          <span>@isa.monteiro</span>
+          <h2 id="nomeTopoCard"></h2>
+          <span id="emailTopoCard"></span>
         </div>
       </div>
       <p class="bio-perfil">Professora de yoga e entusiasta da economia colaborativa. Adoro trocar conhecimentos e aprender coisas novas!</p>
@@ -630,172 +500,116 @@
       </div>
     </div>
 
+    <!-- DADOS DO USUÁRIO -->
     <div class="bloco">
-  <div class="cabecalho-bloco">
-    <div>
-      <h3>Dados do usuário</h3>
-      <p>Informações pessoais e preferências</p>
-    </div>
-
-    <button class="btn-editar" id="btnEditar" onclick="ativarEdicao()">
-      <i class="bi bi-pencil-fill"></i> Editar perfil
-    </button>
-  </div>
-
-  <div id="perfilWrap">
-
-    <div class="cabecalho-perfil">
-      <div class="foto-perfil-wrap" style="cursor:pointer" onclick="document.getElementById('inputFoto').click()" title="Trocar foto">
-  <img id="fotoPerfil" class="foto-perfil"
-    src="../imagens/perfil3.png"
-    alt="Foto de perfil">
-  <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;
-    background:var(--verde-principal);border-radius:50%;border:2px solid #fff;
-    display:flex;align-items:center;justify-content:center;">
-    <i class="bi bi-pencil-fill" style="font-size:0.55rem;color:#fff"></i>
-  </div>
-  <input type="file" id="inputFoto" accept="image/jpeg,image/png,image/webp"
-    style="display:none" onchange="enviarFoto(this)">
-</div>
-      <div class="info-nome cabecalho-perfil-nome">
-        <h3 id="exibNome">Isabela Monteiro</h3>
-        <span id="exibUser">@isa.monteiro</span>
+      <div class="cabecalho-bloco">
+        <div>
+          <h3>Dados do usuário</h3>
+          <p>Informações pessoais e preferências</p>
+        </div>
+        <button class="btn-editar" id="btnEditar" onclick="ativarEdicao()">
+          <i class="bi bi-pencil-fill"></i> Editar perfil
+        </button>
       </div>
 
-      <div class="campo-nome-edit">
-        <div class="campo-edit">
-          <input type="text" id="inputNome" value="Isabela Monteiro" placeholder="Nome completo">
-        </div>
+      <div id="perfilWrap">
+        <div class="cabecalho-perfil">
+          <div class="foto-perfil-wrap" style="cursor:pointer" onclick="document.getElementById('inputFoto').click()" title="Trocar foto">
+            <img id="fotoPerfil" class="foto-perfil" src="../imagens/logo.png" alt="Foto de perfil">
+            <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;
+              background:var(--verde-principal);border-radius:50%;border:2px solid #fff;
+              display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-pencil-fill" style="font-size:0.55rem;color:#fff"></i>
+            </div>
+            <input type="file" id="inputFoto" accept="image/jpeg,image/png,image/webp"
+              style="display:none" onchange="enviarFoto(this)">
+          </div>
 
-        <div class="campo-edit">
-          <div class="prefixo-wrap">
-            <span class="prefixo">@</span>
-            <input type="text" id="inputUser" value="isa.monteiro" placeholder="nome de usuário">
+          <div class="info-nome cabecalho-perfil-nome">
+            <h3 id="exibNome"></h3>
+            <span id="exibEmail"></span>
+          </div>
+
+          <div class="campo-nome-edit">
+            <div class="campo-edit">
+              <input type="text" id="inputNome" placeholder="Nome completo">
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="lista-info" id="modoLeitura">
-      <div class="item-info">
-        <i class="bi bi-envelope-fill"></i>
-        <span id="exibEmail">isa.monteiro@gmail.com</span>
-      </div>
+        <!-- MODO LEITURA -->
+        <div class="lista-info" id="modoLeitura">
+          <div class="item-info">
+            <i class="bi bi-envelope-fill"></i>
+            <span id="exibEmailLeitura"></span>
+          </div>
+          <div class="item-info">
+            <i class="bi bi-telephone-fill"></i>
+            <span id="exibTel"></span>
+          </div>
+          <div class="item-info readonly">
+            <i class="bi bi-calendar3"></i>
+            <span class="label-readonly">Membro desde <span id="exibCadastro"></span></span>
+          </div>
+          <div class="item-info readonly">
+            <i class="bi bi-gem"></i>
+            <span class="label-readonly">Plano gratuito</span>
+          </div>
+        </div>
 
-      <div class="item-info">
-        <i class="bi bi-telephone-fill"></i>
-        <span id="exibTel">(19) 99999-9999</span>
-      </div>
+        <!-- MODO EDIÇÃO -->
+        <div class="lista-info" id="modoEdicao" style="display:none">
+          <div class="item-info">
+            <i class="bi bi-envelope-fill"></i>
+            <div class="campo-edit">
+              <input type="email" id="inputEmail" placeholder="E-mail">
+            </div>
+          </div>
+          <div class="item-info">
+            <i class="bi bi-telephone-fill"></i>
+            <div class="campo-edit">
+              <input type="tel" id="inputTel2" placeholder="Telefone">
+            </div>
+          </div>
+          <div class="item-info readonly">
+            <i class="bi bi-calendar3"></i>
+            <span class="label-readonly">Membro desde <span id="exibCadastroEdit"></span></span>
+            <span class="badge-readonly">Fixo</span>
+          </div>
+          <div class="item-info readonly">
+            <i class="bi bi-gem"></i>
+            <span class="label-readonly">Plano gratuito</span>
+            <span class="badge-readonly">Fixo</span>
+          </div>
+        </div>
 
-      <div class="item-info readonly">
-        <i class="bi bi-calendar3"></i>
-        <span class="label-readonly">Membro desde Fevereiro de 2025</span>
-       
-      </div>
+        <div class="divisor"></div>
+        <p class="titulo-secao">Habilidades</p>
+        <div class="habilidades-wrap" id="habilidadesWrap">
+          <span class="tag-habilidade" data-tag="Yoga">Yoga <button class="remover" onclick="removerTag(this)"><i class="bi bi-x"></i></button></span>
+          <span class="tag-habilidade" data-tag="Nutrição">Nutrição <button class="remover" onclick="removerTag(this)"><i class="bi bi-x"></i></button></span>
+          <span class="tag-habilidade" data-tag="Meditação">Meditação <button class="remover" onclick="removerTag(this)"><i class="bi bi-x"></i></button></span>
+          <span class="tag-habilidade" data-tag="Tradução">Tradução <button class="remover" onclick="removerTag(this)"><i class="bi bi-x"></i></button></span>
+          <div class="add-habilidade">
+            <input type="text" id="inputTag" placeholder="Nova habilidade" onkeydown="if(event.key==='Enter') adicionarTag()">
+            <button onclick="adicionarTag()"><i class="bi bi-plus-circle"></i></button>
+          </div>
+        </div>
 
-      <div class="item-info readonly">
-        <i class="bi bi-gem"></i>
-        <span class="label-readonly">Plano gratuito</span>
-   
-      </div>
-    </div>
-
-    <div class="lista-info" id="modoEdicao" style="display:none">
-      <div class="item-info">
-        <i class="bi bi-envelope-fill"></i>
-
-        <div class="campo-edit">
-          <input type="email" id="inputEmail" value="isa.monteiro@gmail.com" placeholder="E-mail">
+        <div class="acoes-edit" id="acoesEdit" style="display:none">
+          <button class="btn-cancelar" onclick="cancelarEdicao()">Cancelar</button>
+          <button class="btn-salvar" onclick="salvarEdicao()">Salvar alterações</button>
         </div>
       </div>
-
-      <div class="item-info">
-        <i class="bi bi-telephone-fill"></i>
-
-        <div class="campo-edit">
-          <input type="tel" id="inputTel" value="(19) 99999-9999" placeholder="Telefone">
-        </div>
-      </div>
-
-      <div class="item-info readonly">
-        <i class="bi bi-calendar3"></i>
-        <span class="label-readonly">Membro desde Fevereiro de 2025</span>
-        <span class="badge-readonly">Fixo</span>
-      </div>
-
-      <div class="item-info readonly">
-        <i class="bi bi-gem"></i>
-        <span class="label-readonly">Plano gratuito</span>
-        <span class="badge-readonly">Fixo</span>
-      </div>
     </div>
 
-    <div class="divisor"></div>
-
-    <p class="titulo-secao">Habilidades</p>
-
-    <div class="habilidades-wrap" id="habilidadesWrap">
-
-      <span class="tag-habilidade" data-tag="Yoga">
-        Yoga
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <span class="tag-habilidade" data-tag="Nutrição">
-        Nutrição
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <span class="tag-habilidade" data-tag="Meditação">
-        Meditação
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <span class="tag-habilidade" data-tag="Tradução">
-        Tradução
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <div class="add-habilidade">
-        <input
-          type="text"
-          id="inputTag"
-          placeholder="Nova habilidade"
-          onkeydown="if(event.key==='Enter') adicionarTag()">
-
-        <button onclick="adicionarTag()">
-          <i class="bi bi-plus-circle"></i>
-        </button>
-      </div>
-    </div>
-
-    <div class="acoes-edit" id="acoesEdit" style="display:none">
-      <button class="btn-cancelar" onclick="cancelarEdicao()">
-        Cancelar
-      </button>
-
-      <button class="btn-salvar" onclick="salvarEdicao()">
-        Salvar alterações
-      </button>
-    </div>
-
-  </div>
-</div>
-
+    <!-- PONTOS -->
     <div class="card-pontos">
       <div class="topo-pontos">
         <h3>Saldo de pontos</h3>
         <div class="icone-pontos"><i class="bi bi-lightning-charge-fill"></i></div>
       </div>
-      <div class="valor-pontos">1.250</div>
+      <div class="valor-pontos" id="exibPontos">0</div>
       <p class="subtitulo-pontos">Pontos disponíveis</p>
       <div class="linha-pontos"></div>
       <p style="font-size:0.72rem;opacity:0.6;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Este mês</p>
@@ -805,12 +619,12 @@
       </div>
     </div>
 
+    <!-- SERVIÇOS -->
     <div class="bloco">
       <div class="cabecalho-bloco">
         <div><h3>Meus serviços</h3><p>Serviços que você oferece na plataforma</p></div>
         <a href="adicionarServicoMutuo.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
       </div>
-
       <div class="card-servico">
         <div class="topo-servico"><h4>Aulas de yoga</h4><span class="tag-ativo">Ativo</span></div>
         <p class="descricao-servico">Aulas personalizadas de yoga para iniciantes e intermediários</p>
@@ -823,32 +637,18 @@
           </div>
         </div>
       </div>
-
-      <div class="card-servico">
-        <div class="topo-servico"><h4>Aulas de meditação</h4><span class="tag-ativo">Ativo</span></div>
-        <p class="descricao-servico">Aulas personalizadas de meditação para redução de estresse e ansiedade</p>
-        <div class="rodape-servico">
-          <div class="avaliacao-servico"><i class="bi bi-star-fill"></i> 4.2 <span>(10 avaliações)</span></div>
-          <div class="pontos-servico"><i class="bi bi-lightning-charge-fill"></i> 150 pts/hora</div>
-          <div class="acoes-servico">
-            <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
-            <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
-          </div>
-        </div>
-      </div>
     </div>
 
+    <!-- HISTÓRICO -->
     <div class="bloco">
       <div class="cabecalho-bloco">
         <div><h3>Histórico de trocas</h3><p>Serviços prestados e recebidos</p></div>
       </div>
-
       <div class="barra-filtros-historico">
         <button class="btn-filtro-hist ativo" data-alvo="prestados">Serviços prestados</button>
         <button class="btn-filtro-hist" data-alvo="utilizados">Serviços utilizados</button>
         <button class="btn-filtro-hist" data-alvo="confirmar">Confirmar serviços</button>
       </div>
-
       <div class="lista-historico" id="prestados">
         <div class="item-historico">
           <div class="icone-historico prestado"><i class="bi bi-arrow-up-right"></i></div>
@@ -861,19 +661,7 @@
           </div>
           <span class="pontos-historico positivo">+150 pts</span>
         </div>
-        <div class="item-historico">
-          <div class="icone-historico prestado"><i class="bi bi-arrow-up-right"></i></div>
-          <div class="corpo-historico">
-            <h4>Aula de yoga</h4>
-            <p class="participante"><i class="bi bi-person-fill"></i> Cliente: Maria Fernanda</p>
-            <div class="estrelas"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
-            <p class="comentario-historico">"Ótima aula, me senti muito bem!"</p>
-            <p class="data-historico"><i class="bi bi-calendar3"></i> 02 out 2025</p>
-          </div>
-          <span class="pontos-historico positivo">+150 pts</span>
-        </div>
       </div>
-
       <div class="lista-historico" id="utilizados" style="display:none;">
         <div class="item-historico">
           <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
@@ -886,19 +674,7 @@
           </div>
           <span class="pontos-historico negativo">−150 pts</span>
         </div>
-        <div class="item-historico">
-          <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
-          <div class="corpo-historico">
-            <h4>Conserto de geladeira</h4>
-            <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Lucas Oliveira</p>
-            <div class="estrelas"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-            <p class="comentario-historico">"Muito rápido e prestativo. Foi ótimo!"</p>
-            <p class="data-historico"><i class="bi bi-calendar3"></i> 10 out 2025</p>
-          </div>
-          <span class="pontos-historico negativo">−150 pts</span>
-        </div>
       </div>
-
       <div class="lista-historico" id="confirmar" style="display:none;">
         <div class="item-historico">
           <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
@@ -910,22 +686,13 @@
             <button class="btn-confirmar-servico"><i class="bi bi-check-circle-fill"></i> Confirmar realização</button>
           </div>
         </div>
-        <div class="item-historico">
-          <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
-          <div class="corpo-historico">
-            <h4>Conserto de geladeira</h4>
-            <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Lucas Oliveira</p>
-            <a href="#" class="link-comentario"><i class="bi bi-chat-left-text"></i> Adicionar comentário</a>
-            <p class="data-historico"><i class="bi bi-calendar3"></i> 15 out 2025</p>
-            <button class="btn-confirmar-servico"><i class="bi bi-check-circle-fill"></i> Confirmar realização</button>
-          </div>
-        </div>
       </div>
     </div>
 
   </div>
 
   <script>
+    // ── FILTROS HISTÓRICO ──
     document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.btn-filtro-hist').forEach(b => b.classList.remove('ativo'));
@@ -935,31 +702,62 @@
       });
     });
 
+    // ── DRAWER ──
     const hamburger    = document.getElementById('hamburger');
     const mobileDrawer = document.getElementById('mobileDrawer');
     const overlay      = document.getElementById('drawerOverlay');
 
-    function openDrawer() {
-      mobileDrawer.classList.add('open');
-      overlay.classList.add('open');
-      hamburger.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeDrawer() {
-      mobileDrawer.classList.remove('open');
-      overlay.classList.remove('open');
-      hamburger.classList.remove('open');
-      document.body.style.overflow = '';
-    }
+    function openDrawer() { mobileDrawer.classList.add('open'); overlay.classList.add('open'); hamburger.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeDrawer() { mobileDrawer.classList.remove('open'); overlay.classList.remove('open'); hamburger.classList.remove('open'); document.body.style.overflow = ''; }
 
-    hamburger.addEventListener('click', () => {
-      mobileDrawer.classList.contains('open') ? closeDrawer() : openDrawer();
-    });
+    hamburger.addEventListener('click', () => mobileDrawer.classList.contains('open') ? closeDrawer() : openDrawer());
     overlay.addEventListener('click', closeDrawer);
     mobileDrawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeDrawer(); });
 
-     function ativarEdicao() {
+    // ── DADOS DO USUÁRIO ──
+    const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+
+    if (usuario.nome) {
+      // navbar
+      document.getElementById('nomeNavbar').textContent = usuario.nome;
+
+      // drawer
+      document.getElementById('nomeDrawer').textContent = usuario.nome;
+      document.getElementById('emailDrawer').textContent = usuario.email || '';
+
+      // card topo
+      document.getElementById('nomeTopoCard').textContent = usuario.nome;
+      document.getElementById('emailTopoCard').textContent = usuario.email || '';
+
+      // bloco dados — modo leitura
+      document.getElementById('exibNome').textContent = usuario.nome;
+      document.getElementById('exibEmail').textContent = usuario.email || '';
+      document.getElementById('exibEmailLeitura').textContent = usuario.email || '';
+      document.getElementById('exibTel').textContent = usuario.telefone || '';
+
+      // data de cadastro
+      if (usuario.cadastro) {
+        const data = new Date(usuario.cadastro).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        document.getElementById('exibCadastro').textContent = data;
+        document.getElementById('exibCadastroEdit').textContent = data;
+      }
+
+      // pontos
+      if (usuario.pontos !== undefined) {
+        document.getElementById('exibPontos').textContent = usuario.pontos.toLocaleString('pt-BR');
+      }
+
+      // inputs edição
+      document.getElementById('inputNome').value  = usuario.nome;
+      document.getElementById('inputEmail').value = usuario.email || '';
+      document.getElementById('inputTel2').value  = usuario.telefone || '';
+
+      document.title = 'Mútuo | ' + usuario.nome;
+    }
+
+    // ── EDIÇÃO ──
+    function ativarEdicao() {
       document.getElementById('modoLeitura').style.display = 'none';
       document.getElementById('modoEdicao').style.display = 'flex';
       document.getElementById('acoesEdit').style.display = 'flex';
@@ -970,7 +768,7 @@
       document.querySelector('.cabecalho-perfil-nome').style.display = 'none';
       document.getElementById('inputNome').focus();
     }
- 
+
     function cancelarEdicao() {
       document.getElementById('modoEdicao').style.display = 'none';
       document.getElementById('modoLeitura').style.display = 'flex';
@@ -981,58 +779,43 @@
       document.querySelector('.campo-nome-edit').style.display = 'none';
       document.querySelector('.cabecalho-perfil-nome').style.display = '';
     }
- 
+
     function salvarEdicao() {
-      const nome = document.getElementById('inputNome').value.trim() || 'Isabela Monteiro';
-      const user = document.getElementById('inputUser').value.trim() || 'isa.monteiro';
+      const nome  = document.getElementById('inputNome').value.trim()  || usuario.nome;
       const email = document.getElementById('inputEmail').value.trim();
-      const tel = document.getElementById('inputTel').value.trim();
- 
-      document.getElementById('exibNome').textContent = nome;
-      document.getElementById('exibUser').textContent = '@' + user;
-      document.getElementById('exibEmail').textContent = email;
-      document.getElementById('exibTel').textContent = tel;
- 
+      const tel   = document.getElementById('inputTel2').value.trim();
+
+      // atualiza leitura
+      document.getElementById('exibNome').textContent         = nome;
+      document.getElementById('exibEmail').textContent        = email;
+      document.getElementById('exibEmailLeitura').textContent = email;
+      document.getElementById('exibTel').textContent          = tel;
+
+      // atualiza navbar e topo
+      document.getElementById('nomeNavbar').textContent    = nome;
+      document.getElementById('nomeDrawer').textContent    = nome;
+      document.getElementById('nomeTopoCard').textContent  = nome;
+
       cancelarEdicao();
     }
- 
-    function removerTag(btn) {
-      btn.closest('.tag-habilidade').remove();
-    }
- 
+
+    function removerTag(btn) { btn.closest('.tag-habilidade').remove(); }
+
     function adicionarTag() {
       const inp = document.getElementById('inputTag');
       const val = inp.value.trim();
       if (!val) return;
- 
-      const wrap = document.getElementById('habilidadesWrap');
+      const wrap   = document.getElementById('habilidadesWrap');
       const addDiv = wrap.querySelector('.add-habilidade');
- 
       const tag = document.createElement('span');
-      tag.className = 'tag-habilidade';
+      tag.className   = 'tag-habilidade';
       tag.dataset.tag = val;
-      tag.innerHTML = val + `
-        <button class="remover" onclick="removerTag(this)" aria-label="Remover ${val}">
-          <i class="bi bi-x"></i>
-        </button>`;
- 
+      tag.innerHTML   = val + `<button class="remover" onclick="removerTag(this)"><i class="bi bi-x"></i></button>`;
       wrap.insertBefore(tag, addDiv);
       inp.value = '';
       inp.focus();
     }
-    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
-
-  if(usuario){
-    document.getElementById("nomeUsuario").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.getElementById("nomeBoasVindas").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
-}
- carregarFoto();
-</script>
- <script src="../funcoes.js"></script>
+  </script>
+  <script src="../funcoes.js"></script>
 </body>
 </html>

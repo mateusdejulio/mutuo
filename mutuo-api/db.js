@@ -33,7 +33,7 @@ async function validarLogin(login, senha) {
 async function validarLoginUsuario(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cpf, nome, email, pontos, horasVoluntarias FROM Mutuo_Usuario WHERE email = ? AND senha = ? AND ativo = 1',
+      'SELECT cpf, nome, email, telefone, pontos, horasVoluntarias, cadastro FROM Mutuo_Usuario WHERE email = ? AND senha = ? AND ativo = 1',
       [email, senha]
     );
 
