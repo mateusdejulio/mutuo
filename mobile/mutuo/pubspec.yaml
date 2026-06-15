@@ -76,6 +76,15 @@ flutter:
     - assets/images/professor.png
     - assets/images/yoga.png
     - assets/images/cabelo.jpg
+    - assets/images/passeioCachorro.png
+    - assets/images/aulaOng.png
+    - assets/images/imagemensino.jpg
+    - assets/images/imagemjardineiro.png
+    - assets/images/evento.png
+    - assets/images/feira.png
+    - assets/images/deJulio.png
+    - assets/images/manuela.png
+    - assets/images/elis.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
