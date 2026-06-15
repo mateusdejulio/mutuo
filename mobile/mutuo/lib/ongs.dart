@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/servicos.dart';
+import 'package:mutuo/quem_somos.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 class Ong {
@@ -13,12 +14,14 @@ class Ong {
   final String nomeOng;
   final double avaliacao;
   final int totalAvaliacoes;
+  final String imagem;
 
   Ong({
     required this.titulo,
     required this.descricao,
     required this.local,
     required this.tempo,
+    required this.imagem,
     this.categoria = "Geral",
     this.nomeOng = "ONG",
     this.avaliacao = 4.0,
@@ -52,15 +55,18 @@ class DetalheOng extends StatelessWidget {
           children: [
             Hero(
               tag: 'ong_${ong.titulo}',
-              child: Container(
+              child: Image.asset(
+                ong.imagem,
                 height: 220,
                 width: double.infinity,
-                color: const Color(0xFFB7D5B0),
-                child: const Icon(
-                  Icons.favorite_rounded,
-                  color: Colors.white54,
-                  size: 64,
-                ),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) {
+                  return Container(
+                    height: 220,
+                    width: double.infinity,
+                    color: const Color(0xFFB7D5B0),
+                  );
+                },
               ),
             ),
             Padding(
@@ -212,14 +218,12 @@ class _OngsState extends State<Ongs> {
   final List<Ong> _todasOngs = [
     Ong(
       titulo: "Passeie com os cachorros",
-      descricao:
-          "Ande com os nossos cachorros e leve alegria a quem mais precisa! Venha fazer parte desta corrente do bem.",
+      descricao: "...",
       local: "Rio de Janeiro, RJ",
       tempo: "30min",
+      imagem: "assets/images/passeioCachorro.png",
       categoria: "Animais",
       nomeOng: "Instituto Cães Amigos",
-      avaliacao: 5.0,
-      totalAvaliacoes: 1024,
     ),
     Ong(
       titulo: "Aulas de reforço para crianças",
@@ -227,6 +231,7 @@ class _OngsState extends State<Ongs> {
           "Apoie crianças em situação de vulnerabilidade com aulas de reforço escolar. Faça a diferença na educação.",
       local: "São Paulo, SP",
       tempo: "2h",
+      imagem: "assets/images/aulaOng.png",
       categoria: "Crianças e adolescentes",
       nomeOng: "ONG Crescer Juntos",
       avaliacao: 4.8,
@@ -238,6 +243,7 @@ class _OngsState extends State<Ongs> {
           "Leve companhia e carinho a idosos em asilos. Uma hora do seu tempo transforma o dia de alguém.",
       local: "Curitiba, PR",
       tempo: "1h",
+      imagem: "assets/images/imagemensino.jpg",
       categoria: "Idosos",
       nomeOng: "Instituto Viver Bem",
       avaliacao: 4.9,
@@ -249,6 +255,7 @@ class _OngsState extends State<Ongs> {
           "Participe do nosso mutirão de reflorestamento urbano. Juntos podemos recuperar áreas degradadas.",
       local: "Belo Horizonte, MG",
       tempo: "3h",
+      imagem: "assets/images/imagemjardineiro.png",
       categoria: "Ambientais",
       nomeOng: "Verde Vivo",
       avaliacao: 4.6,
@@ -260,6 +267,7 @@ class _OngsState extends State<Ongs> {
           "Oriente jovens em fase escolar com mentoria de carreira e apoio emocional. Seja um tutor voluntário.",
       local: "Online",
       tempo: "1h 30min",
+      imagem: "assets/images/evento.png",
       categoria: "Educação",
       nomeOng: "Conecta Jovem",
       avaliacao: 4.7,
@@ -271,6 +279,7 @@ class _OngsState extends State<Ongs> {
           "Ajude a encontrar lares para animais resgatados. Faça triagem, fotos e divulgação para adoção.",
       local: "Porto Alegre, RS",
       tempo: "2h",
+      imagem: "feira.png",
       categoria: "Animais",
       nomeOng: "Patinhas Felizes",
       avaliacao: 4.4,
@@ -442,6 +451,13 @@ class _OngsState extends State<Ongs> {
                   MaterialPageRoute(builder: (_) => Login()),
                   (route) => false,
                 );
+              } else if (value == 'quem_somos') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuemSomos(nome: widget.nome),
+                  ),
+                );
               }
             },
             offset: const Offset(0, 50),
@@ -449,6 +465,19 @@ class _OngsState extends State<Ongs> {
               borderRadius: BorderRadius.circular(14),
             ),
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'quem_somos',
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, size: 18, color: _verde),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Quem somos",
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'logout',
                 child: Row(
@@ -699,15 +728,18 @@ class _OngsState extends State<Ongs> {
                 children: [
                   Hero(
                     tag: 'ong_${ong.titulo}',
-                    child: Container(
+                    child: Image.asset(
+                      ong.imagem,
                       height: 170,
                       width: double.infinity,
-                      color: const Color(0xFFB7D5B0),
-                      child: const Icon(
-                        Icons.favorite_rounded,
-                        color: Colors.white54,
-                        size: 56,
-                      ),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) {
+                        return Container(
+                          height: 170,
+                          width: double.infinity,
+                          color: const Color(0xFFB7D5B0),
+                        );
+                      },
                     ),
                   ),
                   Positioned(

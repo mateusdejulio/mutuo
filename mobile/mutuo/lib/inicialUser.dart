@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
+import 'package:mutuo/quem_somos.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 class Vaga {
@@ -452,6 +453,13 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),
                 );
+              } else if (value == 'quem_somos') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuemSomos(nome: widget.nome),
+                  ),
+                );
               }
             },
             offset: const Offset(0, 50),
@@ -459,6 +467,19 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               borderRadius: BorderRadius.circular(14),
             ),
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'quem_somos',
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, size: 18, color: _verde),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Quem somos",
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'logout',
                 child: Row(
@@ -477,7 +498,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               radius: 20,
               backgroundColor: _bege,
               child: Text(
-                _inicial, // ✅ usa getter seguro
+                _inicial,
                 style: GoogleFonts.quicksand(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -673,8 +694,8 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                     color: s.subLink
                         ? _verdeMedio
                         : s.subPositivo
-                            ? const Color(0xFF52B788)
-                            : const Color(0xFF9E9E9E),
+                        ? const Color(0xFF52B788)
+                        : const Color(0xFF9E9E9E),
                   ),
                 ),
             ],
