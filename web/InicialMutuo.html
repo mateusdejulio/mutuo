@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mútuo — Troque, Conecte, Transforme</title>
+  <title>Mútuo | Troque, Conecte, Transforme</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="icon" href="imagens/mutuoLogo.png">
+
 
   <style>
     :root {
@@ -161,7 +163,7 @@
       box-shadow: 0 6px 20px rgba(88,129,87,0.4);
     }
 
-    /* ─── HERO ─── */
+  
     .hero {
       min-height: 100vh;
       background: var(--verde-escuro);
@@ -172,7 +174,7 @@
       padding: 0 5vw;
     }
 
-    /* Organic blob background */
+ 
     .hero::before {
       content: '';
       position: absolute;
@@ -1107,18 +1109,13 @@
       </div>
     </div>
 
-    <!-- Floating visual cards -->
+    
     
 
-      <div class="icon-pills">
-        <span class="pill"><i class="bi bi-recycle"></i> Economia Circular</span>
-        <span class="pill"><i class="bi bi-people"></i> Comunidade</span>
-        <span class="pill"><i class="bi bi-flower3"></i> Sustentabilidade</span>
-      </div>
     </div>
   </section>
 
-  <!-- ─── FEATURES ─── -->
+ 
   <section class="features" id="funcionalidades">
     <div class="features-header" data-reveal>
       <div class="section-label">Funcionalidades</div>
@@ -1160,7 +1157,7 @@
     </div>
   </section>
 
-  <!-- ─── SHOWCASE ─── -->
+ 
   <section class="showcase">
     <div class="showcase-header" data-reveal>
       <div class="section-label">A Plataforma em Ação</div>
@@ -1201,7 +1198,7 @@
     </div>
   </section>
 
-  <!-- ─── METRICS ─── -->
+
   <div class="metrics">
     <div class="metrics-inner">
       <div class="metric" data-reveal>
@@ -1226,7 +1223,7 @@
     </div>
   </div>
 
-  <!-- ─── TESTIMONIALS ─── -->
+
   <section class="testimonials" id="avaliacoes">
     <div class="testimonials-header" data-reveal>
       <div>
@@ -1317,7 +1314,7 @@
     </div>
   </section>
 
-  <!-- ─── CTA ─── -->
+
   <section class="cta-section" id="sobre">
     <div class="cta-inner" data-reveal>
       <div class="cta-text">
@@ -1332,12 +1329,11 @@
     </div>
   </section>
 
-  <!-- ─── FOOTER ─── -->
   <footer>
     <div class="footer-top">
       <div class="footer-brand">
         <div class="logo-name">
-          <div class="logo-mark">🌿</div>
+         
           Mútuo
         </div>
         <p class="footer-desc">Transformando o mundo através da economia circular e troca de serviços sustentáveis entre comunidades.</p>
@@ -1402,7 +1398,7 @@
   </footer>
 
   <script>
-    // Scroll reveal
+   
     const revealEls = document.querySelectorAll('[data-reveal]');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((e, i) => {
@@ -1415,7 +1411,7 @@
 
     
 
-    // Showcase card hover glow
+   
     document.querySelectorAll('.showcase-card').forEach(card => {
       card.addEventListener('mousemove', e => {
         const rect = card.getBoundingClientRect();
