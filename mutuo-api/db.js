@@ -53,7 +53,7 @@ async function validarLoginUsuario(email, senha) {
 async function validarLoginOng(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cnpj, nomeOng, nomeResponsavel, email, foco, premium FROM Mutuo_ONG WHERE email = ? AND senha = ? AND ativo = 1',
+      'SELECT cnpj, nomeOng, nomeResponsavel, email, telefone, foco, premium, cadastro FROM Mutuo_ONG WHERE email = ? AND senha = ? AND ativo = 1',
       [email, senha]
     );
 
@@ -62,7 +62,6 @@ async function validarLoginOng(email, senha) {
     } else {
       return { sucesso: false, mensagem: 'Email ou senha incorretos, ou conta inativa.' };
     }
-
   } catch (error) {
     console.error('Erro ao validar ONG:', error);
     return { sucesso: false, mensagem: 'Erro interno ao validar login.' };
@@ -420,6 +419,59 @@ async function atualizarFotoPerfil(cpf, nomeArquivo) {
   }
 }
 
+// Buscar dados completos da ONG pelo CNPJ (perfil)
+async function getOngPorCnpj(cnpj) {
+  try {
+    const [rows] = await pool.query('SELECT * FROM Mutuo_ONG WHERE cnpj = ?', [cnpj]);
+    if (rows.length === 0) return null;
+ 
+    // nunca devolve a senha pro front-end
+    const ong = rows[0];
+    delete ong.senha;
+    return ong;
+  } catch (err) {
+    console.error('Erro ao buscar ONG por cnpj:', err.message);
+    return { error: err.message };
+  }
+}
+ 
+async function getFotoPerfilOng(cnpj) {
+  try {
+    const [rows] = await pool.query('SELECT foto_perfil FROM Mutuo_ONG WHERE cnpj = ?', [cnpj]);
+    return rows.length > 0 ? rows[0].foto_perfil : null;
+  } catch (err) {
+    console.error('Erro ao buscar foto da ONG:', err.message);
+    return null;
+  }
+}
+ 
+async function atualizarFotoPerfilOng(cnpj, nomeArquivo) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_ONG SET foto_perfil = ? WHERE cnpj = ?',
+      [nomeArquivo, cnpj]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Erro ao atualizar foto da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+ 
+// Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone)
+async function atualizarDadosOng(cnpj, { nomeOng, email, telefone }) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_ONG SET nomeOng = ?, email = ?, telefone = ? WHERE cnpj = ?',
+      [nomeOng, email, telefone, cnpj]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Erro ao atualizar dados da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   validarLogin, 
@@ -455,5 +507,9 @@ module.exports = {
   countReceita,
   alterarLoginAdm,
   alterarSenhaAdm,
-  cadastrarAdm
+  cadastrarAdm,
+  getOngPorCnpj,
+  getFotoPerfilOng,
+  atualizarFotoPerfilOng,
+  atualizarDadosOng
 };

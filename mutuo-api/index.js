@@ -25,9 +25,10 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, 'uploads', 'fotos'));
   },
   filename: (req, file, cb) => {
-    const cpf = req.body?.cpf || 'sem-cpf';
+    // Aceita tanto cpf (usuário comum) quanto cnpj (ONG) como identificador do arquivo
+    const id = req.body?.cnpj || req.body?.cpf || 'sem-id';
     const ext = path.extname(file.originalname);
-    cb(null, `${cpf}-${Date.now()}${ext}`);
+    cb(null, `${id}-${Date.now()}${ext}`);
   }
 });
 
@@ -90,10 +91,31 @@ app.post('/ongs', async (req, res) => {
         res.json({ sucesso: true, id });
     } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
 });
+
+// Busca os dados completos de UMA ong específica (usado na tela de perfil)
+app.get('/ongs/:cnpj', async (req, res) => {
+  const ong = await db.getOngPorCnpj(req.params.cnpj);
+  if (!ong) return res.status(404).json({ erro: 'ONG não encontrada' });
+  if (ong.error) return res.status(500).json({ erro: ong.error });
+  res.json(ong);
+});
+
 app.put('/ongs/:cnpj', async (req, res) => {
     const { ativo, responsavel, foco } = req.body;
     res.json(await db.alterONG(req.params.cnpj, ativo, responsavel, foco));
 });
+
+// Atualiza os campos editáveis do perfil da ONG (nome, email, telefone)
+app.put('/ongs/:cnpj/perfil', async (req, res) => {
+  const { nomeOng, email, telefone } = req.body;
+  if (!nomeOng || !email) {
+    return res.status(400).json({ erro: 'Nome e e-mail são obrigatórios' });
+  }
+  const resultado = await db.atualizarDadosOng(req.params.cnpj, { nomeOng, email, telefone });
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
+});
+
 app.get('/servicos', async (req, res) => res.json(await db.getServicos()));
 app.put('/servicos/:cod', async (req, res) => {
     const cod = decodeURIComponent(req.params.cod);
@@ -134,7 +156,7 @@ app.get('/stats/:tipo', async (req, res) => {
     else res.status(404).send('Não encontrado');
 });
 
-// ── Foto de Perfil ── (UMA só vez, depois do upload estar definido)
+// ── Foto de Perfil (Usuário comum) ──
 app.post('/perfil/foto', upload.single('fotoPerfil'), async (req, res) => {
   console.log('📸 CPF recebido:', req.body.cpf);
   console.log('📁 Arquivo recebido:', req.file);
@@ -152,6 +174,27 @@ app.post('/perfil/foto', upload.single('fotoPerfil'), async (req, res) => {
 
 app.get('/perfil/foto/:cpf', async (req, res) => {
   const foto = await db.getFotoPerfil(req.params.cpf);
+  res.json({ fotoPerfil: foto ? `/uploads/fotos/${foto}` : null });
+});
+
+// ── Foto de Perfil (ONG) ──
+app.post('/perfil/foto/ong', upload.single('fotoPerfil'), async (req, res) => {
+  console.log('📸 CNPJ recebido:', req.body.cnpj);
+  console.log('📁 Arquivo recebido:', req.file);
+
+  const cnpj = req.body.cnpj;
+  if (!cnpj)     return res.status(400).json({ erro: 'CNPJ não informado' });
+  if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
+
+  const resultado = await db.atualizarFotoPerfilOng(cnpj, req.file.filename);
+  console.log('💾 Resultado do banco:', resultado);
+
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${req.file.filename}` });
+});
+
+app.get('/perfil/foto/ong/:cnpj', async (req, res) => {
+  const foto = await db.getFotoPerfilOng(req.params.cnpj);
   res.json({ fotoPerfil: foto ? `/uploads/fotos/${foto}` : null });
 });
 

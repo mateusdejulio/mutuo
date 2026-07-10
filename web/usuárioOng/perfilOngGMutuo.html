@@ -28,7 +28,6 @@
       padding-top: var(--altura-nav);
     }
 
-    /* ── NAVBAR ── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
       background-color: var(--verde-principal);
@@ -114,7 +113,6 @@
     }
     .perfil-nav span { color: var(--creme); font-size: 0.84rem; font-weight: 500; }
 
-    /* ── HAMBURGER ── */
     .nav-hamburger {
       display: none;
       flex-direction: column;
@@ -140,7 +138,6 @@
     .nav-hamburger.open span:nth-child(2) { opacity: 0; }
     .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    /* ── MOBILE DRAWER ── */
     .mobile-drawer {
       display: none;
       position: fixed;
@@ -227,7 +224,6 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* ── RESPONSIVE NAVBAR ── */
     @media (max-width: 768px) {
       .links-nav   { display: none !important; }
       .nav-direita { display: none !important; }
@@ -237,7 +233,6 @@
       .marca-nav { margin-right: 0; font-size: 1.35rem; }
     }
 
-    /* ── LAYOUT ── */
     .pagina {
       max-width: 860px;
       margin: 0 auto;
@@ -247,7 +242,6 @@
       gap: 18px;
     }
 
-    /* ── BLOCO BASE ── */
     .bloco {
       background: #fff;
       border: 1px solid #e4ebe2;
@@ -256,7 +250,6 @@
       animation: subirSuave 0.4s ease both;
     }
 
-    /* ── CARD DE PERFIL ONG ── */
     .cabecalho-perfil {
       display: flex; align-items: center; gap: 18px; margin-bottom: 16px;
     }
@@ -270,6 +263,17 @@
       width: 14px; height: 14px;
       background: #4caf50; border-radius: 50%; border: 2px solid #fff;
     }
+
+    .btn-trocar-foto {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--verde-escuro); color: #fff;
+      border: 2px solid #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; transition: background 0.18s, transform 0.15s;
+    }
+    .btn-trocar-foto:hover { background: var(--verde-principal); transform: scale(1.06); }
+
     .info-perfil h2 { font-size: 1.15rem; font-weight: 700; color: #1a2e1b; margin-bottom: 2px; }
     .info-perfil span { font-size: 0.82rem; color: #9aab96; font-weight: 600; }
 
@@ -287,167 +291,132 @@
     .stat-numero { font-size: 1.2rem; font-weight: 700; color: var(--verde-escuro); display: block; }
     .stat-texto { font-size: 0.72rem; color: #9aab96; font-weight: 600; }
 
-    /* ── DADOS DO USUÁRIO ── */
-       .bloco {
-      background: #fff;
-      border: 1px solid #e4ebe2;
-      border-radius: 20px;
-      padding: 24px;
-      animation: subirSuave 0.4s ease both;
-    }
     .campo-nome-edit {
-  display: none;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-#exibNome{
-  color: var(--verde-escuro);
-}
-#exibUser{
-  color: var(--verde-escuro);
-}
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    #exibNome{ color: var(--verde-escuro); }
+    #exibUser{ color: var(--verde-escuro); }
 
-.editando-perfil .campo-nome-edit {
-  display: flex;
-}
+    .editando-perfil .campo-nome-edit { display: flex; }
+    .editando-perfil .cabecalho-perfil-nome { display: none; }
 
-.editando-perfil .cabecalho-perfil-nome {
-  display: none;
-}
+    .readonly .label-readonly { color: #666; font-size: 14px; }
 
-.readonly .label-readonly {
-  color: #666;
-  font-size: 14px;
-}
+    .badge-readonly {
+      font-size: 11px;
+      background: #f4f4f0;
+      color: #999;
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin-left: 6px;
+      border: 1px solid #ddd;
+    }
 
-.badge-readonly {
-  font-size: 11px;
-  background: #f4f4f0;
-  color: #999;
-  border-radius: 4px;
-  padding: 2px 7px;
-  margin-left: 6px;
-  border: 1px solid #ddd;
-}
+    .campo-edit { flex: 1; }
 
-.campo-edit {
-  flex: 1;
-}
+    .campo-edit input {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 14px;
+    }
 
-.campo-edit input {
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-family: 'Quicksand', sans-serif;
-  font-size: 14px;
-}
+    .campo-edit input:focus {
+      outline: none;
+      border-color: var(--verde-principal);
+    }
 
-.campo-edit input:focus {
-  outline: none;
-  border-color: var(--verde-principal);
-}
+    .prefixo-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
 
-.prefixo-wrap {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #fff;
-}
+    .prefixo {
+      padding: 8px 10px;
+      background: #f4f4f0;
+      border-right: 1px solid #ddd;
+      color: #666;
+      font-size: 14px;
+    }
 
-.prefixo {
-  padding: 8px 10px;
-  background: #f4f4f0;
-  border-right: 1px solid #ddd;
-  color: #666;
-  font-size: 14px;
-}
+    .prefixo-wrap input {
+      border: none !important;
+      border-radius: 0 !important;
+    }
 
-.prefixo-wrap input {
-  border: none !important;
-  border-radius: 0 !important;
-}
+    .habilidades-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
 
-.habilidades-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
+    .tag-habilidade { display: flex; align-items: center; gap: 6px; }
 
-.tag-habilidade {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+    .tag-habilidade .remover {
+      display: none;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #888;
+    }
 
-.tag-habilidade .remover {
-  display: none;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: #888;
-}
+    .editando .tag-habilidade .remover { display: flex; }
 
-.editando .tag-habilidade .remover {
-  display: flex;
-}
+    .add-habilidade { display: none; align-items: center; gap: 6px; }
+    .editando .add-habilidade { display: flex; }
 
-.add-habilidade {
-  display: none;
-  align-items: center;
-  gap: 6px;
-}
+    .add-habilidade input {
+      border: 1px dashed #bbb;
+      border-radius: 20px;
+      padding: 6px 12px;
+      background: transparent;
+    }
 
-.editando .add-habilidade {
-  display: flex;
-}
+    .add-habilidade button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 22px;
+      color: var(--verde-principal);
+    }
 
-.add-habilidade input {
-  border: 1px dashed #bbb;
-  border-radius: 20px;
-  padding: 6px 12px;
-  background: transparent;
-}
+    .acoes-edit {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-.add-habilidade button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 22px;
-  color: var(--verde-principal);
-}
+    .btn-salvar {
+      border: none;
+      background: var(--verde-escuro);
+      color: white;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
-.acoes-edit {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.btn-salvar {
-  border: none;
-  background: var(--verde-escuro);
-  color: white;
-  padding: 9px 18px;
-  border-radius: 12px;
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.btn-cancelar {
-  border: 1px solid #ccc;
-  background: white;
-  padding: 9px 18px;
-  border-radius: 12px;
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  cursor: pointer;
-}
+    .btn-cancelar {
+      border: 1px solid #ccc;
+      background: white;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
     .cabecalho-bloco {
       display: flex; justify-content: space-between;
       align-items: flex-start; margin-bottom: 18px;
@@ -491,7 +460,6 @@
       padding: 6px 14px; border-radius: 20px;
     }
 
-    /* ── PONTOS ── */
     .card-pontos {
       background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
       border-radius: 20px; padding: 24px; color: #fff;
@@ -519,7 +487,6 @@
     .mov-valor.entrada { color: var(--verde-badge); }
     .mov-valor.saida { color: rgba(255,255,255,0.6); }
 
-    /* ── MEUS SERVIÇOS ── */
     .card-servico {
       border: 1px solid #e4ebe2; border-radius: 16px;
       padding: 18px; margin-top: 16px; transition: box-shadow 0.18s;
@@ -570,7 +537,6 @@
     }
     .btn-adicionar:hover { background: var(--verde-escuro); color: #fff; }
 
-    /* ── HISTÓRICO ── */
     .barra-filtros-historico {
       display: flex; gap: 6px; margin: 16px 0;
       overflow-x: auto; padding-bottom: 2px;
@@ -634,7 +600,6 @@
     }
     .link-comentario:hover { text-decoration: underline; }
 
-    /* ── ANIMAÇÕES ── */
     @keyframes subirSuave {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -649,7 +614,6 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav>
   <a class="marca-nav" href="#">
     <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
@@ -680,8 +644,8 @@
       <span class="badge-sino">3</span>
     </a>
     <a href="perfilOngGMutuo.html" class="perfil-nav">
-      <img src="../imagens/perfilOngI.png" alt="perfil">
-      <span>Instituto Infância Viva</span>
+      <img src="../imagens/mutuoLogo.png" alt="perfil" id="navFotoPerfil">
+      <span id="navNomeOng">Carregando...</span>
     </a>
   </div>
 
@@ -696,9 +660,9 @@
 
 <div class="mobile-drawer" id="mobileDrawer">
   <div class="drawer-profile">
-    <img src="../imagens/perfilOngI.png" alt="perfil" onerror="this.style.background='#588157'">
+    <img src="../imagens/perfilOngI.png" alt="perfil" id="drawerFotoPerfil" onerror="this.style.background='#588157'">
     <div class="drawer-profile-info">
-      <strong>Instituto Infância Viva</strong>
+      <strong id="drawerNomeOng">Carregando...</strong>
       <small>ONG verificada · São Paulo, SP</small>
     </div>
   </div>
@@ -745,24 +709,25 @@
   </a>
 </div>
 
-<!-- CONTEÚDO -->
 <div class="pagina">
 
-  <!-- CARD DE PERFIL ONG -->
   <div class="bloco">
     <div class="cabecalho-perfil">
       <div class="foto-perfil-wrap">
-        <img class="foto-perfil" src="../imagens/perfilOngI.png" alt="Instituto Infância Viva"
-          onerror="this.src='https://ui-avatars.com/api/?name=Instituto+Infancia+Viva&background=588157&color=fff'">
+        <img class="foto-perfil" id="cardFotoPerfil" src="../imagens/perfilOngI.png" alt="Foto da ONG"
+          onerror="this.src='https://ui-avatars.com/api/?name=ONG&background=588157&color=fff'">
         <span class="badge-online"></span>
+        <button type="button" class="btn-trocar-foto" id="btnTrocarFoto" title="Trocar foto de perfil">
+          <i class="bi bi-camera-fill"></i>
+        </button>
       </div>
       <div class="info-perfil">
-        <h2>Instituto Infância Viva</h2>
-        <span>@infanciaViva</span>
+        <h2 id="cardNomeOng">Carregando...</h2>
+        <span id="cardUserHandle">@...</span>
       </div>
     </div>
 
-    <p class="bio-perfil">
+    <p class="bio-perfil" id="cardDescricao">
       Promovemos o bem-estar e o desenvolvimento de crianças e adolescentes em situação de vulnerabilidade, garantindo uma infância segura, saudável e cheia de oportunidades.
     </p>
 
@@ -782,6 +747,8 @@
     </div>
   </div>
 
+  <input type="file" id="inputFotoPerfil" accept="image/jpeg,image/png,image/webp" hidden>
+
     <div class="bloco">
   <div class="cabecalho-bloco">
     <div>
@@ -797,25 +764,25 @@
   <div id="perfilWrap">
 
     <div class="cabecalho-perfil">
-      <img class="foto-perfil"
+      <img class="foto-perfil" id="perfilFotoSecundaria"
         src="../imagens/perfilOngI.png"
-        alt="Isabela"
-        onerror="this.src='https://ui-avatars.com/api/?name=Isabela+Monteiro&background=588157&color=fff'">
+        alt="Foto da ONG"
+        onerror="this.src='https://ui-avatars.com/api/?name=ONG&background=588157&color=fff'">
 
       <div class="info-nome cabecalho-perfil-nome">
-        <h3 id="exibNome">Instituto infância Viva</h3>
-        <span id="exibUser">@infanciaViva</span>
+        <h3 id="exibNome">Carregando...</h3>
+        <span id="exibUser">@...</span>
       </div>
 
       <div class="campo-nome-edit">
         <div class="campo-edit">
-          <input type="text" id="inputNome" value="Instituto infância Viva" placeholder="Nome completo">
+          <input type="text" id="inputNome" placeholder="Nome da ONG">
         </div>
 
         <div class="campo-edit">
           <div class="prefixo-wrap">
             <span class="prefixo">@</span>
-            <input type="text" id="inputUser" value="infanciaViva" placeholder="nome de usuário">
+            <input type="text" id="inputUser" placeholder="nome de usuário" disabled title="Gerado automaticamente a partir do nome da ONG">
           </div>
         </div>
       </div>
@@ -824,23 +791,23 @@
     <div class="lista-info" id="modoLeitura">
       <div class="item-info">
         <i class="bi bi-envelope-fill"></i>
-        <span id="exibEmail">infancia.viva@gmail.com</span>
+        <span id="exibEmail">-</span>
       </div>
 
       <div class="item-info">
         <i class="bi bi-telephone-fill"></i>
-        <span id="exibTel">(19) 99999-9999</span>
+        <span id="exibTel">-</span>
       </div>
 
       <div class="item-info readonly">
         <i class="bi bi-calendar3"></i>
-        <span class="label-readonly">Membro desde Fevereiro de 2025</span>
+        <span class="label-readonly" id="exibMembroDesde">Membro desde -</span>
        
       </div>
 
       <div class="item-info readonly">
         <i class="bi bi-gem"></i>
-        <span class="label-readonly">Plano gratuito</span>
+        <span class="label-readonly" id="exibPlano">Plano gratuito</span>
    
       </div>
     </div>
@@ -850,7 +817,7 @@
         <i class="bi bi-envelope-fill"></i>
 
         <div class="campo-edit">
-          <input type="email" id="inputEmail" value="infancia.viva@gmail.com" placeholder="E-mail">
+          <input type="email" id="inputEmail" placeholder="E-mail">
         </div>
       </div>
 
@@ -858,19 +825,19 @@
         <i class="bi bi-telephone-fill"></i>
 
         <div class="campo-edit">
-          <input type="tel" id="inputTel" value="(19) 99999-9999" placeholder="Telefone">
+          <input type="tel" id="inputTel" placeholder="Telefone">
         </div>
       </div>
 
       <div class="item-info readonly">
         <i class="bi bi-calendar3"></i>
-        <span class="label-readonly">Membro desde Fevereiro de 2025</span>
+        <span class="label-readonly" id="exibMembroDesdeEdit">Membro desde -</span>
         <span class="badge-readonly">Fixo</span>
       </div>
 
       <div class="item-info readonly">
         <i class="bi bi-gem"></i>
-        <span class="label-readonly">Plano gratuito</span>
+        <span class="label-readonly" id="exibPlanoEdit">Plano gratuito</span>
         <span class="badge-readonly">Fixo</span>
       </div>
     </div>
@@ -934,7 +901,6 @@
 
   </div>
 </div>
-  <!-- PONTOS -->
   <div class="card-pontos">
     <div class="topo-pontos">
       <h3>Saldo de pontos</h3>
@@ -956,7 +922,6 @@
     </div>
   </div>
 
-  <!-- MEUS SERVIÇOS -->
   <div class="bloco">
     <div class="cabecalho-bloco">
       <div>
@@ -1007,7 +972,6 @@
     </div>
   </div>
 
-  <!-- HISTÓRICO -->
   <div class="bloco">
     <div class="cabecalho-bloco">
       <div>
@@ -1021,7 +985,6 @@
       <button class="btn-filtro-hist" data-alvo="confirmar">Confirmar serviços</button>
     </div>
 
-    <!-- RECEBIDOS -->
     <div class="lista-historico" id="utilizados">
       <div class="item-historico">
         <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
@@ -1040,7 +1003,6 @@
       </div>
     </div>
 
-    <!-- CONFIRMAR -->
     <div class="lista-historico" id="confirmar" style="display:none;">
       <div class="item-historico">
         <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
@@ -1058,7 +1020,8 @@
 </div>
 
 <script>
-  // Filtros histórico
+  const API_BASE = 'http://localhost:3000';
+
   document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.btn-filtro-hist').forEach(b => b.classList.remove('ativo'));
@@ -1100,7 +1063,173 @@
   window.addEventListener('resize', () => {
     if (window.innerWidth > 768) closeDrawer();
   });
-  
+
+  // ── Carregar dados da ONG logada (a partir do banco) ──
+  let ongAtual = null;
+
+  function pegarOngLogada() {
+    const raw = sessionStorage.getItem('ongLogada');
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+
+  function gerarHandle(nomeOng) {
+    if (!nomeOng) return '@ong';
+    return '@' + nomeOng
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toLowerCase();
+  }
+
+  function urlDaFoto(nomeArquivo, nomeOngFallback) {
+    if (nomeArquivo) return `${API_BASE}/uploads/fotos/${nomeArquivo}`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeOngFallback || 'ONG')}&background=588157&color=fff`;
+  }
+
+  function aplicarFotoEmTodosOsLugares(nomeArquivo, nomeOngFallback) {
+    const url = urlDaFoto(nomeArquivo, nomeOngFallback);
+    ['navFotoPerfil', 'drawerFotoPerfil', 'cardFotoPerfil', 'perfilFotoSecundaria'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.src = url;
+    });
+  }
+
+  function formatarData(dataStr) {
+    if (!dataStr) return null;
+    const d = new Date(dataStr);
+    if (isNaN(d)) return null;
+    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+
+  function preencherTela(ong) {
+    const handle = gerarHandle(ong.nomeOng);
+
+    document.getElementById('navNomeOng').textContent = ong.nomeOng || 'ONG';
+    document.getElementById('drawerNomeOng').textContent = ong.nomeOng || 'ONG';
+
+    document.getElementById('cardNomeOng').textContent = ong.nomeOng || 'ONG';
+    document.getElementById('cardUserHandle').textContent = handle;
+    if (ong.descricao) document.getElementById('cardDescricao').textContent = ong.descricao;
+
+    document.getElementById('exibNome').textContent = ong.nomeOng || '';
+    document.getElementById('exibUser').textContent = handle;
+    document.getElementById('exibEmail').textContent = ong.email || '-';
+    document.getElementById('exibTel').textContent = ong.telefone || 'Não informado';
+
+    const dataFormatada = formatarData(ong.cadastro || ong.dataFundacao || ong.criadoEm);
+    const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
+    document.getElementById('exibMembroDesde').textContent = textoMembro;
+    document.getElementById('exibMembroDesdeEdit').textContent = textoMembro;
+
+    const textoPlano = ong.premium ? 'Plano premium' : 'Plano gratuito';
+    document.getElementById('exibPlano').textContent = textoPlano;
+    document.getElementById('exibPlanoEdit').textContent = textoPlano;
+
+    document.getElementById('inputNome').value = ong.nomeOng || '';
+    document.getElementById('inputUser').value = handle.replace('@', '');
+    document.getElementById('inputEmail').value = ong.email || '';
+    document.getElementById('inputTel').value = ong.telefone || '';
+
+    aplicarFotoEmTodosOsLugares(ong.foto_perfil, ong.nomeOng);
+  }
+
+  async function carregarPerfilOng() {
+    const logada = pegarOngLogada();
+    if (!logada || !logada.cnpj) {
+      window.location.href = '../login.html';
+      return;
+    }
+
+    try {
+      const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(logada.cnpj)}`);
+      if (!resposta.ok) throw new Error('Não foi possível carregar os dados da ONG.');
+
+      const ong = await resposta.json();
+      ongAtual = ong;
+      preencherTela(ong);
+
+      sessionStorage.setItem('ongLogada', JSON.stringify({
+        ...logada,
+        nomeOng: ong.nomeOng,
+        email: ong.email,
+        foco: ong.foco,
+        premium: ong.premium,
+        foto_perfil: ong.foto_perfil
+      }));
+
+    } catch (erro) {
+      console.error(erro);
+      if (logada) {
+        ongAtual = logada;
+        preencherTela(logada);
+      }
+      alert('Não foi possível conectar à API para carregar seus dados. Verifique se o servidor está rodando.');
+    }
+  }
+
+  // ── Trocar foto de perfil ──
+  const btnTrocarFoto   = document.getElementById('btnTrocarFoto');
+  const inputFotoPerfil = document.getElementById('inputFotoPerfil');
+
+  btnTrocarFoto.addEventListener('click', () => inputFotoPerfil.click());
+
+  inputFotoPerfil.addEventListener('change', async () => {
+    const arquivo = inputFotoPerfil.files[0];
+    if (!arquivo) return;
+
+    if (!ongAtual || !ongAtual.cnpj) {
+      alert('Não foi possível identificar a ONG logada.');
+      return;
+    }
+
+    const tiposAceitos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!tiposAceitos.includes(arquivo.type)) {
+      alert('Envie uma imagem em JPG, PNG ou WEBP.');
+      inputFotoPerfil.value = '';
+      return;
+    }
+
+    if (arquivo.size > 3 * 1024 * 1024) {
+      alert('A imagem deve ter no máximo 3MB.');
+      inputFotoPerfil.value = '';
+      return;
+    }
+
+    btnTrocarFoto.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+    const formData = new FormData();
+    formData.append('cnpj', ongAtual.cnpj);
+    formData.append('fotoPerfil', arquivo);
+
+    try {
+      const resposta = await fetch(`${API_BASE}/perfil/foto/ong`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || !resultado.sucesso) {
+        throw new Error(resultado.erro || 'Erro ao enviar a foto.');
+      }
+
+      const nomeArquivo = resultado.fotoPerfil.split('/').pop();
+      aplicarFotoEmTodosOsLugares(nomeArquivo, ongAtual.nomeOng);
+      ongAtual.foto_perfil = nomeArquivo;
+
+      const logada = pegarOngLogada() || {};
+      sessionStorage.setItem('ongLogada', JSON.stringify({ ...logada, foto_perfil: nomeArquivo }));
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível trocar a foto de perfil.');
+    } finally {
+      btnTrocarFoto.innerHTML = '<i class="bi bi-camera-fill"></i>';
+      inputFotoPerfil.value = '';
+    }
+  });
+
+  // ── Edição de perfil ──
      function ativarEdicao() {
       document.getElementById('modoLeitura').style.display = 'none';
       document.getElementById('modoEdicao').style.display = 'flex';
@@ -1122,20 +1251,59 @@
       document.getElementById('habilidadesWrap').classList.remove('editando');
       document.querySelector('.campo-nome-edit').style.display = 'none';
       document.querySelector('.cabecalho-perfil-nome').style.display = '';
+
+      if (ongAtual) preencherTela(ongAtual);
     }
  
-    function salvarEdicao() {
-      const nome = document.getElementById('inputNome').value.trim() || 'Isabela Monteiro';
-      const user = document.getElementById('inputUser').value.trim() || 'isa.monteiro';
-      const email = document.getElementById('inputEmail').value.trim();
-      const tel = document.getElementById('inputTel').value.trim();
- 
-      document.getElementById('exibNome').textContent = nome;
-      document.getElementById('exibUser').textContent = '@' + user;
-      document.getElementById('exibEmail').textContent = email;
-      document.getElementById('exibTel').textContent = tel;
- 
-      cancelarEdicao();
+    async function salvarEdicao() {
+      if (!ongAtual || !ongAtual.cnpj) {
+        alert('Não foi possível identificar a ONG logada.');
+        return;
+      }
+
+      const nomeOng = document.getElementById('inputNome').value.trim();
+      const email   = document.getElementById('inputEmail').value.trim();
+      const tel     = document.getElementById('inputTel').value.trim();
+
+      if (!nomeOng || !email) {
+        alert('Nome e e-mail são obrigatórios.');
+        return;
+      }
+
+      const btnSalvar = document.querySelector('.btn-salvar');
+      const textoOriginalBtn = btnSalvar.textContent;
+      btnSalvar.textContent = 'Salvando...';
+      btnSalvar.disabled = true;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/ongs/${ongAtual.cnpj}/perfil`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nomeOng, email, telefone: tel })
+        });
+
+        const resultado = await resposta.json();
+        if (!resposta.ok || resultado.error) {
+          throw new Error(resultado.erro || resultado.error || 'Erro ao salvar.');
+        }
+
+        ongAtual.nomeOng = nomeOng;
+        ongAtual.email = email;
+        ongAtual.telefone = tel;
+        preencherTela(ongAtual);
+
+        const logada = pegarOngLogada() || {};
+        sessionStorage.setItem('ongLogada', JSON.stringify({ ...logada, nomeOng, email }));
+
+        cancelarEdicao();
+
+      } catch (erro) {
+        console.error(erro);
+        alert(erro.message || 'Não foi possível salvar as alterações.');
+      } finally {
+        btnSalvar.textContent = textoOriginalBtn;
+        btnSalvar.disabled = false;
+      }
     }
  
     function removerTag(btn) {
@@ -1162,6 +1330,8 @@
       inp.value = '';
       inp.focus();
     }
+
+  carregarPerfilOng();
 </script>
 </body>
 </html>
