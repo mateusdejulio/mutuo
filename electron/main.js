@@ -64,7 +64,7 @@ const inicioWindow = () => {
   })
 
   inicio.maximize()
-  inicio.webContents.openDevTools()
+  
 
   inicio.setResizable(true)
   inicio.on('will-resize', (event) => {

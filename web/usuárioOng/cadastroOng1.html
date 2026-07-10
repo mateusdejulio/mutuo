@@ -278,6 +278,32 @@
       <p class="erro" id="erroDescricao"></p>
     </div>
     <div class="divisor"></div>
+
+<div class="campo">
+  <label for="fotoPerfil"><i class="bi bi-camera-fill"></i> Foto de perfil</label>
+
+  <!-- Preview circular -->
+  <div style="display:flex; align-items:center; gap:16px; margin-bottom:10px">
+    <img id="previewFoto" src="../imagens/mutuoLogo.png"
+      style="width:72px; height:72px; border-radius:50%; object-fit:cover;
+             border:3px solid rgba(225,220,208,0.5); background:var(--cream)">
+    <div>
+      <label for="fotoPerfil" style="cursor:pointer; background:var(--green-dark);
+        color:var(--cream); border-radius:10px; padding:8px 14px;
+        font-size:0.82rem; font-weight:600; display:inline-flex;
+        align-items:center; gap:6px; margin-bottom:0">
+        <i class="bi bi-upload"></i> Escolher foto
+      </label>
+      <p style="color:rgba(225,220,208,0.55); font-size:0.75rem; margin-top:5px">
+        JPG ou PNG, até 5 MB
+      </p>
+    </div>
+  </div>
+
+  <input type="file" id="fotoPerfil" accept="image/jpeg,image/png"
+    style="display:none">
+</div>
+    <div class="divisor"></div>
     <button class="btn-confirmar" id="proximo" type="button">
       <i class="bi bi-arrow-right-circle-fill"></i> Próximo
     </button>
@@ -291,6 +317,27 @@
       v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
       v = v.replace(/(\d{4})(\d)/, '$1-$2');
       this.value = v;
+    });
+
+    // ✅ Listener da foto — fora do clique
+    document.getElementById('fotoPerfil').addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire({ icon: 'warning', title: 'Arquivo grande', text: 'A foto deve ter no máximo 5 MB.' });
+        this.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('previewFoto').src = e.target.result;
+        const dados = JSON.parse(sessionStorage.getItem('cadastroMutuo') || '{}');
+        dados.fotoBase64 = e.target.result;
+        sessionStorage.setItem('cadastroMutuo', JSON.stringify(dados));
+      };
+      reader.readAsDataURL(file);
     });
 
     document.getElementById('proximo').addEventListener('click', () => {
@@ -327,7 +374,7 @@
         const dados = JSON.parse(sessionStorage.getItem('cadastroMutuo') || '{}');
         dados.nomeOng = nomeOng;
         dados.cnpj = cnpjNums;
-        // ✅ nome do cadastro.html é reaproveitado como nomeResponsavel
+       
         dados.nomeResponsavel = dados.nome;
         dados.senha = senha;
         dados.dataFundacao = dataFundacao;
