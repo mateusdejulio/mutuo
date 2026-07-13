@@ -20,12 +20,11 @@
         body, html {
             height: 100%;
             margin: 0;
-            overflow: hidden; 
             font-family: 'Quicksand', sans-serif;
             background-color: #f9fbf9;
         }
 
-        /* NAVBAR ORIGINAL */
+        
         nav {
           position: fixed; top: 0; left: 0; right: 0; z-index: 100;
           background-color: #588157;
@@ -135,10 +134,34 @@
           .nav-links { display: none; }
           .nav-profile span { display: none; }
         }
+        .perfil-nav {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(225, 220, 208, 0.18);
+      border-radius: 40px;
+      padding: 5px 14px 5px 5px;
+    }
+
+    .perfil-nav img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(225, 220, 208, 0.4);
+    }
+
+    .perfil-nav span {
+      color: var(--bege);
+      font-size: 0.84rem;
+      font-weight: 500;
+    }
 
         /* CONTAINER DOS PLANOS */
         .plans-wrapper {
-            height: calc(100vh - 72px);
+            height: calc(100vh - 30px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -296,10 +319,10 @@
       <i class="bi bi-bell-fill"></i>
       <span class="bell-badge">3</span>
     </a>
-    <a href="perfilOngGMutuo.html" class="nav-profile">
-      <img src="../imagens/perfilOngI.png" alt="perfil">
-      <span>Instituto Infância Viva</span>
-    </a>
+    <a href="perfilOngGMutuo.html" class="perfil-nav">
+        <img src="../imagens/mutuoLogo.png" alt="perfil" id="navFotoPerfil">
+        <span id="navNomeOng"></span>
+      </a>
   </div>
 </nav>
 <div class="plans-wrapper">
@@ -343,7 +366,8 @@
         </div>
     </div>
 </div>
-
+<script src="../funcoes.js"></script>
+<script>carregarNavOng()</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

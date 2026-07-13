@@ -103,3 +103,61 @@ async function enviarFotoOng(input) {
     alert('Falha ao enviar a foto.');
   }
 }
+// ===== Navbar da ONG (nome e foto) =====
+
+function pegarOngLogada() {
+  const raw = sessionStorage.getItem('ongLogada');
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function urlDaFoto(nomeArquivo, nomeOngFallback) {
+  if (nomeArquivo) return `${API_URL}/uploads/fotos/${nomeArquivo}`;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeOngFallback || 'ONG')}&background=588157&color=fff`;
+}
+
+function aplicarFotoEmTodosOsLugares(nomeArquivo, nomeOngFallback) {
+  const url = urlDaFoto(nomeArquivo, nomeOngFallback);
+  ['navFotoPerfil', 'drawerFotoPerfil'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.src = url;
+  });
+}
+
+async function carregarNavOng() {
+  const logada = pegarOngLogada();
+  if (!logada || !logada.cnpj) {
+    window.location.href = '../login.html';
+    return;
+  }
+
+  const navNome = document.getElementById('navNomeOng');
+  const drawerNome = document.getElementById('drawerNomeOng');
+
+  if (navNome) navNome.textContent = logada.nomeOng || 'ONG';
+  if (drawerNome) drawerNome.textContent = logada.nomeOng || 'ONG';
+  aplicarFotoEmTodosOsLugares(logada.foto_perfil, logada.nomeOng);
+
+  try {
+    const resposta = await fetch(`${API_URL}/ongs/${encodeURIComponent(logada.cnpj)}`);
+    if (!resposta.ok) throw new Error('Não foi possível carregar os dados da ONG.');
+
+    const ong = await resposta.json();
+
+    if (navNome) navNome.textContent = ong.nomeOng || 'ONG';
+    if (drawerNome) drawerNome.textContent = ong.nomeOng || 'ONG';
+    aplicarFotoEmTodosOsLugares(ong.foto_perfil, ong.nomeOng);
+
+    sessionStorage.setItem('ongLogada', JSON.stringify({
+      ...logada,
+      nomeOng: ong.nomeOng,
+      email: ong.email,
+      foco: ong.foco,
+      premium: ong.premium,
+      foto_perfil: ong.foto_perfil
+    }));
+
+  } catch (erro) {
+    console.error(erro);
+  }
+}

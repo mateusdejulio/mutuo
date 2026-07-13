@@ -37,6 +37,8 @@
             display: flex; align-items: center;
             padding: 0 2rem;
             box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+            
+            
         }
 
         .nav-brand {
@@ -123,8 +125,31 @@
         }
         .nav-profile img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
         .nav-profile span { color: #E1DCD0; font-size: 0.84rem; font-weight: 500; }
+.perfil-nav {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(225, 220, 208, 0.18);
+      border-radius: 40px;
+      padding: 5px 14px 5px 5px;
+    }
 
-        /* --- CONTEÚDO PRINCIPAL (One-Page) --- */
+    .perfil-nav img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(225, 220, 208, 0.4);
+    }
+
+    .perfil-nav span {
+      color: #E1DCD0;
+      font-size: 0.84rem;
+      font-weight: 500;
+    }
+        /* --- CONTEÚDO PRINCIPAL --- */
         .main-wrapper {
             flex: 1;
             display: flex;
@@ -253,10 +278,10 @@
                 <i class="bi bi-bell-fill"></i>
                 <span class="bell-badge">3</span>
             </a>
-            <a href="perfilOngGMutuo.html" class="nav-profile">
-                <img src="../imagens/perfilOngI.png" alt="perfil">
-                <span>Instituto Infância Viva</span>
-            </a>
+           <a href="perfilOngGMutuo.html" class="perfil-nav">
+        <img src="../imagens/mutuoLogo.png" alt="perfil" id="navFotoPerfil">
+        <span id="navNomeOng"></span>
+      </a>
         </div>
     </nav>
 
@@ -294,7 +319,8 @@
             </div>
         </div>
     </div>
-
+<script src="../funcoes.js"></script>
+<script>carregarNavOng()</script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
