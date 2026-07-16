@@ -514,7 +514,7 @@
   <div class="welcome-left">
     <div class="welcome-icon"><i class="bi bi-sun-fill"></i></div>
     <div class="welcome-text">
-      <strong>Bem-vindo(a), Instituto Infância Viva!</strong>
+      <strong>Bem-vindo(a), <span id="welcomeNomeOng"></span>!</strong>
       <small>Confira as novidades do seu painel hoje</small>
     </div>
   </div>
@@ -524,12 +524,12 @@
 <!-- HERO CARD -->
 <div class="hero-wrap">
   <div class="ong-hero">
-    <div class="hero-info">
-      <h2>Instituto Infância Viva</h2>
-      <div class="hero-tags">
-        <span class="hero-tag"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-        <span class="hero-tag"><i class="bi bi-patch-check-fill"></i> ONG verificada</span>
-      </div>
+   <div class="hero-info">
+  <h2 id="heroNomeOng"></h2>
+  <div class="hero-tags">
+    <span class="hero-tag"><i class="bi bi-geo-alt-fill"></i> <span id="heroLocalOng">-</span></span>
+    <span class="hero-tag"><i class="bi bi-patch-check-fill"></i> ONG verificada</span>
+  </div>
       <div class="hero-stats">
         <div class="stat-box">
           <span class="stat-num">1.000</span>
@@ -546,9 +546,9 @@
       </div>
     </div>
     <div class="hero-avatar">
-      <img src="../imagens/perfilOngI.png" alt="Instituto Infância Viva">
-      <div class="hero-badge"><i class="bi bi-check-lg"></i></div>
-    </div>
+  <img id="heroFotoOng" src="../imagens/mutuoLogo.png" alt="Foto da ONG">
+  <div class="hero-badge"><i class="bi bi-check-lg"></i></div>
+</div>
   </div>
 </div>
 
@@ -679,7 +679,34 @@
 
   dots.forEach(d => d.addEventListener('click', () => go(+d.dataset.i)));
   setInterval(() => go((cur + 1) % quotes.length), 4000);
+
+ function pegarOngLogada() {
+  const raw = sessionStorage.getItem('ongLogada');
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function preencherPainelOng(ong) {
+  document.getElementById('welcomeNomeOng').textContent = ong.nomeOng || 'ONG';
+  document.getElementById('heroNomeOng').textContent = ong.nomeOng || 'ONG';
+
+  const cidade = ong.cidade || '';
+  const estado = ong.estado || '';
+  const local = [cidade, estado].filter(Boolean).join(', ');
+  document.getElementById('heroLocalOng').textContent = local || 'Localização não informada';
+  document.getElementById('heroFotoOng').src = urlDaFoto(ong.foto_perfil);
+}
+
+const ongLogada = pegarOngLogada();
+if (ongLogada) {
+  preencherPainelOng(ongLogada);
+}
+function urlDaFoto(nomeArquivo) {
+  if (nomeArquivo) return `${API_BASE}/uploads/fotos/${nomeArquivo}`;
+  return '../imagens/mutuoLogo.png';
+}
   carregarNavOng();
+
 </script>
 </body>
 </html>

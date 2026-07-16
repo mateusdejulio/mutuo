@@ -801,7 +801,8 @@
 
       <div class="item-info readonly">
         <i class="bi bi-calendar3"></i>
-        <span class="label-readonly" id="exibMembroDesde">Membro desde -</span>
+        
+       <span class="label-readonly" id="exibCadastroEdit">Membro desde -</span>
        
       </div>
 
@@ -831,7 +832,7 @@
 
       <div class="item-info readonly">
         <i class="bi bi-calendar3"></i>
-        <span class="label-readonly" id="exibMembroDesdeEdit">Membro desde -</span>
+        <span class="label-readonly" id="exibCadastro">Membro desde -</span>
         <span class="badge-readonly">Fixo</span>
       </div>
 
@@ -906,7 +907,7 @@
       <h3>Saldo de pontos</h3>
       <div class="icone-pontos"><i class="bi bi-lightning-charge-fill"></i></div>
     </div>
-    <div class="valor-pontos">1.250</div>
+    <div class="valor-pontos" id="exibePontos">0</div>
     <p class="subtitulo-pontos">Pontos disponíveis</p>
     <div class="linha-pontos"></div>
     <p style="font-size:0.72rem;opacity:0.6;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Este mês</p>
@@ -1083,7 +1084,7 @@
 
   function urlDaFoto(nomeArquivo, nomeOngFallback) {
     if (nomeArquivo) return `${API_BASE}/uploads/fotos/${nomeArquivo}`;
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeOngFallback || 'ONG')}&background=588157&color=fff`;
+     return '../imagens/mutuoLogo.png';
   }
 
   function aplicarFotoEmTodosOsLugares(nomeArquivo, nomeOngFallback) {
@@ -1095,11 +1096,12 @@
   }
 
   function formatarData(dataStr) {
-    if (!dataStr) return null;
-    const d = new Date(dataStr);
-    if (isNaN(d)) return null;
-    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  }
+  if (!dataStr) return null;
+  const normalizada = typeof dataStr === 'string' ? dataStr.replace(' ', 'T') : dataStr;
+  const d = new Date(normalizada);
+  if (isNaN(d)) return null;
+  return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
 
   function preencherTela(ong) {
     const handle = gerarHandle(ong.nomeOng);
@@ -1116,10 +1118,7 @@
     document.getElementById('exibEmail').textContent = ong.email || '-';
     document.getElementById('exibTel').textContent = ong.telefone || 'Não informado';
 
-    const dataFormatada = formatarData(ong.cadastro || ong.dataFundacao || ong.criadoEm);
-    const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
-    document.getElementById('exibMembroDesde').textContent = textoMembro;
-    document.getElementById('exibMembroDesdeEdit').textContent = textoMembro;
+    
 
     const textoPlano = ong.premium ? 'Plano premium' : 'Plano gratuito';
     document.getElementById('exibPlano').textContent = textoPlano;
@@ -1129,6 +1128,15 @@
     document.getElementById('inputUser').value = handle.replace('@', '');
     document.getElementById('inputEmail').value = ong.email || '';
     document.getElementById('inputTel').value = ong.telefone || '';
+
+    if (ong.pontos !== undefined) {
+  document.getElementById('exibePontos').textContent = ong.pontos.toLocaleString('pt-BR');
+
+}
+const dataFormatada = formatarData(ong.cadastro);
+  const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
+  document.getElementById('exibCadastro').textContent = textoMembro;
+  document.getElementById('exibCadastroEdit').textContent = textoMembro;
 
     aplicarFotoEmTodosOsLugares(ong.foto_perfil, ong.nomeOng);
   }
@@ -1330,7 +1338,7 @@
       inp.value = '';
       inp.focus();
     }
-
+   
   carregarPerfilOng();
 </script>
 </body>

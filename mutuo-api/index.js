@@ -42,6 +42,34 @@ const upload = multer({
   }
 });
 
+// ── Upload de imagem para Serviços de ONG (pasta separada) ──
+const pastaServicos = path.join(__dirname, 'uploads', 'servicos');
+if (!fs.existsSync(pastaServicos)) {
+  fs.mkdirSync(pastaServicos, { recursive: true });
+  console.log('Pasta criada:', pastaServicos);
+}
+
+const storageServico = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, pastaServicos);
+  },
+  filename: (req, file, cb) => {
+    const cnpj = req.body?.cnpj || 'sem-cnpj';
+    const ext = path.extname(file.originalname);
+    cb(null, `${cnpj}-${Date.now()}${ext}`);
+  }
+});
+
+const uploadServico = multer({
+  storage: storageServico,
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const tipos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (tipos.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.'));
+  }
+});
+
 // ── Rotas de Autenticação ──
 app.post('/login', async (req, res) => {
     const { login, senha } = req.body;
@@ -123,6 +151,43 @@ app.put('/servicos/:cod', async (req, res) => {
     res.json(await db.alterServico(cod, ativo, horas, foco, nota));
 });
 
+// ── Cadastro de Serviço da ONG ──
+app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
+  try {
+    const { nomeServico, descricao, foco, duracao, cnpj } = req.body;
+
+    if (!nomeServico || !descricao || !foco || !duracao || !cnpj) {
+      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+    }
+
+    const imagem = req.file ? req.file.filename : null;
+
+    const id = await db.cadastrarServicoOng({
+      nomeServico,
+      cnpj,
+      horas: duracao,
+      descricao,
+      foco,
+      imagem
+    });
+
+    res.json({
+      sucesso: true,
+      id,
+      imagem: imagem ? `/uploads/servicos/${imagem}` : null
+    });
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
+// Lista os serviços cadastrados por uma ONG (útil pro perfil dela)
+app.get('/servicos/ong/:cnpj', async (req, res) => {
+  const servicos = await db.getServicosOng(req.params.cnpj);
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+  res.json(servicos);
+});
+
 // ── Rotas de Solicitações ──
 app.get('/solicitacoes', async (req, res) => res.json(await db.getSolicitacoes()));
 app.put('/solicitacoes/:cod', async (req, res) => {
@@ -179,15 +244,15 @@ app.get('/perfil/foto/:cpf', async (req, res) => {
 
 // ── Foto de Perfil (ONG) ──
 app.post('/perfil/foto/ong', upload.single('fotoPerfil'), async (req, res) => {
-  console.log('📸 CNPJ recebido:', req.body.cnpj);
-  console.log('📁 Arquivo recebido:', req.file);
+  console.log(' CNPJ recebido:', req.body.cnpj);
+  console.log(' Arquivo recebido:', req.file);
 
   const cnpj = req.body.cnpj;
   if (!cnpj)     return res.status(400).json({ erro: 'CNPJ não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
   const resultado = await db.atualizarFotoPerfilOng(cnpj, req.file.filename);
-  console.log('💾 Resultado do banco:', resultado);
+  console.log(' Resultado do banco:', resultado);
 
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
   res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${req.file.filename}` });
@@ -198,5 +263,24 @@ app.get('/perfil/foto/ong/:cnpj', async (req, res) => {
   res.json({ fotoPerfil: foto ? `/uploads/fotos/${foto}` : null });
 });
 
+//rota pegar pontos da ong 
+app.get('/ongs/:cnpj', async (req, res) => {
+  const ong = await buscarOngPorCnpj(req.params.cnpj);
+  if (!ong) return res.status(404).json({ erro: 'ONG não encontrada' });
+
+
+  const pontos = await countPontosOng(req.params.cnpj);
+  res.json({ ...ong, pontos });
+});
+
 const PORT = process.env.PORT || 3000;
+
+
+// Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
+// campo com nome errado) sempre responda em JSON, nunca em HTML.
+app.use((err, req, res, next) => {
+  console.error('Erro capturado pelo middleware global:', err.message);
+  res.status(400).json({ erro: err.message || 'Erro ao processar a requisição.' });
+});
+
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));

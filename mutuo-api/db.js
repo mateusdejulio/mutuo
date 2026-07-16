@@ -7,12 +7,12 @@ console.log("Tentando conectar ao banco:", process.env.DB_HOST);
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 async function validarLogin(login, senha) {
@@ -53,7 +53,7 @@ async function validarLoginUsuario(email, senha) {
 async function validarLoginOng(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cnpj, nomeOng, nomeResponsavel, email, telefone, foco, premium, cadastro FROM Mutuo_ONG WHERE email = ? AND senha = ? AND ativo = 1',
+      'SELECT cnpj, nomeOng, nomeResponsavel, email, telefone, cidade, estado, foco, premium, cadastro FROM Mutuo_ONG WHERE email = ? AND senha = ? AND ativo = 1',
       [email, senha]
     );
 
@@ -271,8 +271,8 @@ async function cadastrarUsuario(usuario) {
 async function cadastrarOng(ong) {
   const sql = `
     INSERT INTO Mutuo_ONG
-    (nomeOng, cnpj, email, nomeResponsavel, telefone, cidade, bairro, endereco, estado, senha, foco, descricao)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (nomeOng, cnpj, email, nomeResponsavel, telefone, cidade, bairro, endereco, estado, senha, foco, descricao, foto_perfil, cadastro, pontos)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,0)
   `;
 
   const values = [
@@ -287,7 +287,9 @@ async function cadastrarOng(ong) {
     ong.uf,
     ong.senha,
     ong.foco,
-    ong.descricao
+    ong.descricao,
+    ong.foto_perfil,
+    ong.cadastro
   ];
 
   try {
@@ -296,6 +298,49 @@ async function cadastrarOng(ong) {
   } catch (error) {
     console.error('Erro ao cadastrar ong:', error);
     throw error;
+  }
+}
+
+// ── Cadastro de serviço oferecido pela ONG ──
+async function cadastrarServicoOng(servico) {
+  const sql = `
+    INSERT INTO Mutuo_ServicoOng
+    (nomeServico, cnpj, horas, descricao, foco, imagem)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    servico.nomeServico,
+    servico.cnpj,
+    servico.horas,
+    servico.descricao,
+    servico.foco,
+    servico.imagem
+  ];
+
+  try {
+    const [result] = await pool.query(sql, values);
+    return result.insertId;
+  } catch (error) {
+    console.error('Erro ao cadastrar serviço da ONG:', error);
+    throw error;
+  }
+}
+
+// Lista os serviços cadastrados por uma ONG específica
+async function getServicosOng(cnpj) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem FROM Mutuo_ServicoOng WHERE cnpj = ?',
+      [cnpj]
+    );
+    return rows.map(servico => ({
+      ...servico,
+      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar serviços da ONG:', err.message);
+    return { error: err.message };
   }
 }
 
@@ -471,6 +516,13 @@ async function atualizarDadosOng(cnpj, { nomeOng, email, telefone }) {
     return { error: err.message };
   }
 }
+async function countPontosOng(cnpj) {
+  const [rows] = await pool.query(
+    'SELECT pontos FROM Mutuo_ONG WHERE cnpj = ?',
+    [cnpj]
+  );
+  return rows[0] ? rows[0].pontos : 0;
+}
 
 module.exports = { 
   getUsuarios, 
@@ -489,6 +541,7 @@ module.exports = {
   countSolicitacoesAceitas, 
   countSolicitacoesPendentes,
   countSolicitacoesRecusadas, 
+  countPontosOng,
   alterUsuario, 
   getONGs, 
   alterONG, 
@@ -501,6 +554,8 @@ module.exports = {
   alterSolicitacao, 
   cadastrarUsuario,
   cadastrarOng,
+  cadastrarServicoOng,
+  getServicosOng,
   getPremium,
   countPremiumTotal,
   countAtrasadas,

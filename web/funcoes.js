@@ -37,7 +37,7 @@ carregarFoto();
   const arquivo = input.files[0];
   if (!arquivo) return;
 
-  atualizarTodasFotos(URL.createObjectURL(arquivo)); // preview imediato
+  atualizarTodasFotos(URL.createObjectURL(arquivo)); 
 
   const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
   if (!usuario.cpf) return alert('Sessão expirada.');
@@ -86,7 +86,7 @@ async function enviarFotoOng(input) {
   const arquivo = input.files[0];
   if (!arquivo) return;
 
-  atualizarTodasFotosOng(URL.createObjectURL(arquivo)); // preview imediato
+  atualizarTodasFotosOng(URL.createObjectURL(arquivo)); 
 
   const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
   if (!ong.cnpj) return alert('Sessão expirada.');
@@ -113,7 +113,7 @@ function pegarOngLogada() {
 
 function urlDaFoto(nomeArquivo, nomeOngFallback) {
   if (nomeArquivo) return `${API_URL}/uploads/fotos/${nomeArquivo}`;
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeOngFallback || 'ONG')}&background=588157&color=fff`;
+  return '../imagens/mutuoLogo.png';
 }
 
 function aplicarFotoEmTodosOsLugares(nomeArquivo, nomeOngFallback) {
