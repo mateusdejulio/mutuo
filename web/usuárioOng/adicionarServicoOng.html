@@ -219,6 +219,10 @@
       color: var(--cream);
     }
     .btn-confirmar:active { transform: scale(0.98); }
+    .btn-confirmar:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     /* ── LINK CANCELAR ── */
     .link-cancelar {
@@ -230,6 +234,29 @@
       transition: color 0.2s;
     }
     .link-cancelar:hover { color: var(--cream); }
+
+    /* ── MENSAGEM DE FEEDBACK ── */
+    .mensagem-feedback {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .mensagem-feedback.erro {
+      display: block;
+      background: rgba(220, 53, 69, 0.25);
+      color: #ffdada;
+      border: 1px solid rgba(220, 53, 69, 0.4);
+    }
+    .mensagem-feedback.sucesso {
+      display: block;
+      background: rgba(88, 129, 87, 0.4);
+      color: var(--cream);
+      border: 1px solid rgba(225,220,208,0.4);
+    }
 
     /* ── ANIMAÇÕES ── */
     @keyframes fadeDown {
@@ -254,22 +281,24 @@
     <h1>Cadastro de serviço</h1>
   </div>
 
-  <div class="card-form">
+  <form class="card-form" id="form-servico" novalidate>
+
+    <div class="mensagem-feedback" id="mensagem-feedback"></div>
 
     <div class="campo">
       <label for="nome-servico"><i class="bi bi-briefcase-fill"></i> Nome do serviço</label>
-      <input type="text" id="nome-servico" placeholder="Ex: Aula de matemática" required>
+      <input type="text" id="nome-servico" name="nomeServico" placeholder="Ex: Aula de matemática" required>
     </div>
 
     <div class="campo">
       <label for="descricao-servico"><i class="bi bi-text-left"></i> Descrição</label>
-      <textarea id="descricao-servico" placeholder="Descreva o serviço, público-alvo e objetivos..." required></textarea>
+      <textarea id="descricao-servico" name="descricao" placeholder="Descreva o serviço, público-alvo e objetivos..." required></textarea>
     </div>
 
     <div class="campos-row">
       <div class="campo">
         <label for="foco-servico"><i class="bi bi-tag-fill"></i> Foco</label>
-        <select id="foco-servico" required>
+        <select id="foco-servico" name="foco" required>
           <option value="" disabled selected>Selecionar</option>
           <option value="educacao">Educação</option>
           <option value="saude">Saúde</option>
@@ -281,7 +310,7 @@
 
       <div class="campo">
         <label for="duracao-servico"><i class="bi bi-clock-fill"></i> Duração</label>
-        <input type="text" id="duracao-servico" placeholder="Ex: 2 horas" required>
+        <input type="text" id="duracao-servico" name="duracao" placeholder="Ex: 2 horas" required>
       </div>
     </div>
 
@@ -290,7 +319,7 @@
     <div class="upload-area">
       <label class="label-campo"><i class="bi bi-image-fill"></i> Imagem do serviço</label>
       <div class="upload-inner">
-        <input type="file" id="input-imagem" style="display:none" accept="image/*">
+        <input type="file" id="input-imagem" name="imagem" style="display:none" accept="image/*">
         <div class="upload-btn" onclick="document.getElementById('input-imagem').click()">
           <i class="bi bi-cloud-arrow-up"></i>
           <span>Clique para enviar</span>
@@ -302,22 +331,83 @@
       </div>
     </div>
 
-    <a href="perfilOngGMutuo.html" class="btn-confirmar">
+    <button type="submit" class="btn-confirmar" id="btn-confirmar">
       <i class="bi bi-check-circle-fill"></i> Confirmar cadastro
-    </a>
+    </button>
     <a href="javascript:history.back()" class="link-cancelar">Cancelar</a>
 
-  </div>
+  </form>
 
   <script>
     const inputImg = document.getElementById('input-imagem');
     const previewImg = document.getElementById('preview-img');
+    const form = document.getElementById('form-servico');
+    const btnConfirmar = document.getElementById('btn-confirmar');
+    const mensagemFeedback = document.getElementById('mensagem-feedback');
 
+    // ── Prévia da imagem selecionada ──
     inputImg.addEventListener('change', function () {
       if (this.files && this.files[0]) {
         const reader = new FileReader();
         reader.onload = e => { previewImg.src = e.target.result; };
         reader.readAsDataURL(this.files[0]);
+      }
+    });
+
+    function mostrarMensagem(texto, tipo) {
+      mensagemFeedback.textContent = texto;
+      mensagemFeedback.className = `mensagem-feedback ${tipo}`;
+    }
+
+    // ── Envio do formulário para a API ──
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      mensagemFeedback.className = 'mensagem-feedback';
+
+      // CNPJ da ONG logada, salvo no sessionStorage pela página de login
+      const ongLogadaStr = sessionStorage.getItem('ongLogada');
+      const ongLogada = ongLogadaStr ? JSON.parse(ongLogadaStr) : null;
+      const cnpj = ongLogada?.cnpj;
+
+      if (!cnpj) {
+        mostrarMensagem('Sessão expirada. Faça login novamente.', 'erro');
+        return;
+      }
+
+      const dados = new FormData();
+      dados.append('cnpj', cnpj);
+      dados.append('nomeServico', document.getElementById('nome-servico').value);
+      dados.append('descricao', document.getElementById('descricao-servico').value);
+      dados.append('foco', document.getElementById('foco-servico').value);
+      dados.append('duracao', document.getElementById('duracao-servico').value);
+      if (inputImg.files[0]) {
+        dados.append('imagem', inputImg.files[0]);
+      }
+
+      btnConfirmar.disabled = true;
+      btnConfirmar.textContent = 'Enviando...';
+
+      try {
+        const resposta = await fetch('http://localhost:3000/servicos/ong', {
+          method: 'POST',
+          body: dados
+        });
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(resultado.erro || 'Erro ao cadastrar serviço.');
+        }
+
+        mostrarMensagem('Serviço cadastrado com sucesso!', 'sucesso');
+        setTimeout(() => {
+          window.location.href = 'homeOngMutuo.html';
+        }, 1000);
+
+      } catch (erro) {
+        mostrarMensagem(erro.message, 'erro');
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirmar cadastro';
       }
     });
   </script>

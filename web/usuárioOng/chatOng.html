@@ -684,7 +684,7 @@
       document.getElementById('header-name').textContent = name;
       const img = document.getElementById('header-avatar');
       img.src = avatar;
-      img.onerror = () => img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=588157&color=fff`;
+      img.onerror = () => img.src ='../imagens/mutuoLogo.png' ;
 
       const statusEl = document.getElementById('header-status');
       statusEl.textContent = isOnline ? 'Online agora' : 'Visto por último ontem';
@@ -734,6 +734,7 @@
         sendMessage();
       }
     }
+    
     carregarNavOng();
   </script>
 </body>
