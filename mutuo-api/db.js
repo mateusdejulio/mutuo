@@ -331,7 +331,7 @@ async function cadastrarServicoOng(servico) {
 async function getServicosOng(cnpj) {
   try {
     const [rows] = await pool.query(
-      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem FROM Mutuo_ServicoOng WHERE cnpj = ?',
+      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1',
       [cnpj]
     );
     return rows.map(servico => ({
@@ -524,6 +524,39 @@ async function countPontosOng(cnpj) {
   return rows[0] ? rows[0].pontos : 0;
 }
 
+async function getServicoOngPorId(id) {
+  const [rows] = await pool.query(
+    'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem FROM Mutuo_ServicoOng WHERE id = ?',
+    [id]
+  );
+  if (rows.length === 0) return null;
+  const servico = rows[0];
+  servico.imagem = servico.imagem ? `/uploads/servicos/${servico.imagem}` : null;
+  return servico;
+}
+
+async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem }) {
+  const campos = ['nomeServico = ?', 'descricao = ?', 'foco = ?', 'horas = ?'];
+  const values = [nomeServico, descricao, foco, horas];
+  if (imagem) { campos.push('imagem = ?'); values.push(imagem); }
+  values.push(id);
+  const [result] = await pool.query(`UPDATE Mutuo_ServicoOng SET ${campos.join(', ')} WHERE id = ?`, values);
+  return { success: result.affectedRows > 0 };
+}
+// Muda o status "ativo" do serviço da ONG (soft delete: ativo 1 -> 0)
+async function alterarStatusServicoOng(id, ativo) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_ServicoOng SET ativo = ? WHERE id = ?',
+      [ativo, id]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Erro ao alterar status do serviço da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   validarLogin, 
@@ -566,5 +599,9 @@ module.exports = {
   getOngPorCnpj,
   getFotoPerfilOng,
   atualizarFotoPerfilOng,
-  atualizarDadosOng
+  atualizarDadosOng,
+  getServicoOngPorId,
+  atualizarServicoOng,
+  alterarStatusServicoOng
+
 };

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Editar Serviço</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+   :root {
+  --verde-principal: #588157;
+  --verde-escuro: #3a5a40;
+  --verde-claro: #6b9e4a;
+  --vermelho-principal: #b3413e;
+  --vermelho-escuro: #8f2f2c;
+  --creme: #E1DCD0;
+  --creme-escuro: #cdc7ba;
+  --branco: #ffffff;
+}
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-image: url("../imagens/fundo.png");
+      background-size: cover;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 60px;
+    }
+
+  
+    .topo {
+      display: flex;
+      margin-top: 0;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      animation: fadeDown 0.5s ease both;
+    }
+
+    .topo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--creme);
+      padding: 8px;
+      object-fit: contain;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    .topo h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--creme);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      letter-spacing: 0.3px;
+      margin: 0;
+    }
+
+   
+    .card-form {
+      width: 100%; max-width: 480px;
+      background: rgba(88, 129, 87, 0.649);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(225,220,208,0.2);
+      border-radius: 28px;
+      padding: 36px 32px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      animation: fadeUp 0.5s ease 0.05s both;
+      position: relative;
+    }
+
+    
+    .form-loading {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px;
+      padding: 40px 0;
+      color: var(--creme);
+      font-size: 0.9rem; font-weight: 600;
+    }
+    .form-loading i { font-size: 1.8rem; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-conteudo { display: none; }
+    .form-conteudo.pronto { display: block; }
+
+   
+    .campo { margin-bottom: 20px; }
+
+    .campo label {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--creme);
+      margin-bottom: 7px;
+      letter-spacing: 0.2px;
+    }
+    .campo label i {
+      font-size: 0.95rem;
+      color: rgba(225,220,208,0.6);
+    }
+
+    .campo input,
+    .campo textarea,
+    .campo select {
+      width: 100%;
+      background: rgba(225,220,208,0.92);
+      border: 2px solid transparent;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.92rem;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      color: #1a2e1b;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .campo input::placeholder,
+    .campo textarea::placeholder {
+      color: rgba(30,50,30,0.45);
+    }
+    .campo input:focus,
+    .campo textarea:focus,
+    .campo select:focus {
+      border-color: var(--verde-claro);
+      background: var(--creme);
+      box-shadow: 0 0 0 3px rgba(88,129,87,0.2);
+    }
+
+    .campo textarea {
+      resize: none; height: 110px;
+      border-radius: 14px;
+    }
+
+    .campo select {
+      appearance: none;
+      background-image: url("../imagens/fundo.png");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-color: rgba(225,220,208,0.92);
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+   
+    .campos-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+  
+    .upload-area {
+      margin-bottom: 28px;
+    }
+    .upload-area label.label-campo {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--creme); margin-bottom: 10px;
+      letter-spacing: 0.2px;
+    }
+    .upload-area label.label-campo i { color: rgba(225,220,208,0.6); }
+
+    .upload-inner {
+      display: flex; align-items: center; gap: 16px;
+    }
+
+    .upload-btn {
+      flex: 1;
+      background: rgba(225,220,208,0.15);
+      border: 2px dashed rgba(225,220,208,0.4);
+      border-radius: 14px;
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      color: var(--creme);
+    }
+    .upload-btn:hover {
+      background: rgba(225,220,208,0.22);
+      border-color: rgba(225,220,208,0.65);
+    }
+    .upload-btn i { font-size: 1.5rem; display: block; margin-bottom: 5px; opacity: 0.7; }
+    .upload-btn span { font-size: 0.78rem; font-weight: 600; opacity: 0.8; }
+
+    .preview-wrap { position: relative; flex-shrink: 0; }
+    .preview-img {
+      width: 80px; height: 80px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.3);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    }
+    .preview-badge {
+      position: absolute; bottom: -4px; right: -4px;
+      width: 22px; height: 22px;
+      background: var(--verde-principal);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid rgba(255,255,255,0.2);
+      color: #fff; font-size: 0.65rem;
+    }
+
+    
+    .divisor {
+      height: 1px;
+      background: rgba(225,220,208,0.15);
+      margin: 8px 0 24px;
+    }
+
+   
+    .btn-confirmar {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      background: var(--verde-principal);
+      color: var(--creme);
+      border: none; border-radius: 14px;
+      padding: 15px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(58,90,64,0.4);
+      letter-spacing: 0.3px;
+    }
+    .btn-confirmar:hover {
+      background: var(--verde-escuro);
+      box-shadow: 0 6px 22px rgba(58,90,64,0.5);
+      color: var(--creme);
+    }
+    .btn-confirmar:active { transform: scale(0.98); }
+    .btn-confirmar:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    
+    .btn-excluir {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      background: rgba(179, 65, 62, 0.25);
+      color: #ffdada;
+      border: 1.5px solid rgba(179, 65, 62, 0.55);
+      border-radius: 14px;
+      padding: 13px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.92rem; font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .btn-excluir:hover {
+      background: var(--vermelho-principal);
+      border-color: var(--vermelho-principal);
+      color: #fff;
+    }
+    .btn-excluir:active { transform: scale(0.98); }
+    .btn-excluir:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+   
+    .link-cancelar {
+      display: block; text-align: center;
+      margin-top: 14px;
+      color: rgba(225,220,208,0.55);
+      font-size: 0.82rem; font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .link-cancelar:hover { color: var(--creme); }
+
+   
+    .mensagem-feedback {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .mensagem-feedback.erro {
+      display: block;
+      background: rgba(220, 53, 69, 0.25);
+      color: #ffdada;
+      border: 1px solid rgba(220, 53, 69, 0.4);
+    }
+    .mensagem-feedback.sucesso {
+      display: block;
+      background: rgba(88, 129, 87, 0.4);
+      color: var(--creme);
+      border: 1px solid rgba(225,220,208,0.4);
+    }
+
+   
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(20, 30, 20, 0.55);
+      align-items: center; justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    .modal-overlay.aberto { display: flex; }
+    .modal-box {
+      background: var(--branco);
+      border-radius: 20px;
+      padding: 28px 26px;
+      max-width: 360px; width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+      animation: fadeUp 0.3s ease both;
+    }
+    .modal-box i.icone-alerta {
+      font-size: 2.2rem; color: var(--vermelho-principal);
+      margin-bottom: 10px; display: block;
+    }
+    .modal-box h3 {
+      font-family: 'Quicksand', sans-serif;
+      color: var(--verde-principal);
+      font-size: 1.1rem; margin-bottom: 8px;
+    }
+    .modal-box p {
+      font-size: 0.85rem; color: #5a6b58;
+      margin-bottom: 20px; line-height: 1.5;
+    }
+    .modal-acoes { display: flex; gap: 10px; }
+    .modal-acoes button {
+      flex: 1; border: none; border-radius: 12px;
+      padding: 11px; font-family: 'Quicksand', sans-serif;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .modal-acoes button:hover { opacity: 0.9; }
+    .btn-modal-cancelar { background: var(--creme); color: var(--verde-escuro); }
+    .btn-modal-confirmar { background: var(--vermelho-principal); color: #fff; }
+
+   
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card-form { padding: 28px 20px; }
+      .campos-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topo">
+    <img src="../imagens/logo.png" alt="Logo Mútuo" onerror="this.style.display='none'">
+    <h1>Editar serviço</h1>
+  </div>
+
+  <div class="card-form">
+
+    <div class="mensagem-feedback" id="mensagem-feedback"></div>
+
+    <div class="form-loading" id="form-loading">
+      <i class="bi bi-arrow-repeat"></i>
+      <span>Carregando dados do serviço...</span>
+    </div>
+    <form id="form-servico" class="form-conteudo" novalidate>
+
+      <div class="campo">
+        <label for="nome-servico"><i class="bi bi-briefcase-fill"></i> Nome do serviço</label>
+        <input type="text" id="nome-servico" name="nomeServico" placeholder="Ex: Aula de matemática" required>
+      </div>
+
+      <div class="campo">
+        <label for="descricao-servico"><i class="bi bi-text-left"></i> Descrição</label>
+        <textarea id="descricao-servico" name="descricao" placeholder="Descreva o serviço, público-alvo e objetivos..." required></textarea>
+      </div>
+
+      <div class="campos-row">
+        <div class="campo">
+          <label for="foco-servico"><i class="bi bi-tag-fill"></i> Foco</label>
+          <select id="foco-servico" name="foco" required>
+            <option value="" disabled>Selecionar</option>
+            <option value="educacao">Educação</option>
+            <option value="saude">Saúde</option>
+            <option value="animais">Animais</option>
+            <option value="idosos">Idosos</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="duracao-servico"><i class="bi bi-clock-fill"></i> Duração</label>
+          <input type="text" id="duracao-servico" name="duracao" placeholder="Ex: 2 horas" required>
+        </div>
+      </div>
+
+      <div class="divisor"></div>
+
+      <div class="upload-area">
+        <label class="label-campo"><i class="bi bi-image-fill"></i> Imagem do serviço</label>
+        <div class="upload-inner">
+          <input type="file" id="input-imagem" name="imagem" style="display:none" accept="image/*">
+          <div class="upload-btn" onclick="document.getElementById('input-imagem').click()">
+            <i class="bi bi-cloud-arrow-up"></i>
+            <span>Clique para trocar</span>
+          </div>
+          <div class="preview-wrap">
+            <img src="../imagens/mutuoLogo.png" class="preview-img" id="preview-img" alt="Prévia">
+            <div class="preview-badge"><i class="bi bi-pencil-fill"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-confirmar" id="btn-confirmar">
+        <i class="bi bi-check-circle-fill"></i> Salvar alterações
+      </button>
+
+      <button type="button" class="btn-excluir" id="btn-excluir">
+        <i class="bi bi-trash-fill"></i> Excluir atividade
+      </button>
+
+      <a href="homeOngMutuo.html" class="link-cancelar">Cancelar</a>
+    </form>
+
+  </div>
+
+  <!-- Modal de confirmação de exclusão -->
+  <div class="modal-overlay" id="modal-excluir">
+    <div class="modal-box">
+      <i class="bi bi-exclamation-triangle-fill icone-alerta"></i>
+      <h3>Excluir atividade?</h3>
+      <p>Essa atividade deixará de aparecer para os voluntários. Você pode reativá-la a qualquer momento.</p>
+      <div class="modal-acoes">
+        <button class="btn-modal-cancelar" id="btn-modal-cancelar">Cancelar</button>
+        <button class="btn-modal-confirmar" id="btn-modal-confirmar">
+          <i class="bi bi-trash-fill"></i> Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../funcoes.js"></script>
+  <script>
+    
+    const formLoading   = document.getElementById('form-loading');
+    const form           = document.getElementById('form-servico');
+    const inputImg        = document.getElementById('input-imagem');
+    const previewImg      = document.getElementById('preview-img');
+    const btnConfirmar    = document.getElementById('btn-confirmar');
+    const btnExcluir       = document.getElementById('btn-excluir');
+    const mensagemFeedback = document.getElementById('mensagem-feedback');
+    const modalExcluir     = document.getElementById('modal-excluir');
+    const btnModalCancelar = document.getElementById('btn-modal-cancelar');
+    const btnModalConfirmar = document.getElementById('btn-modal-confirmar');
+
+    const params = new URLSearchParams(window.location.search);
+    const servicoId = params.get('id');
+
+   
+    const ongLogadaStr = sessionStorage.getItem('ongLogada');
+    const ongLogada = ongLogadaStr ? JSON.parse(ongLogadaStr) : null;
+
+    function mostrarMensagem(texto, tipo) {
+      mensagemFeedback.textContent = texto;
+      mensagemFeedback.className = `mensagem-feedback ${tipo}`;
+    }
+
+    function urlDaImagemServico(caminhoImagem) {
+      if (!caminhoImagem) return '../imagens/mutuoLogo.png';
+     
+      return caminhoImagem.startsWith('http') ? caminhoImagem : `${API_URL}${caminhoImagem}`;
+    }
+
+   
+    async function carregarServico() {
+      if (!servicoId) {
+        formLoading.innerHTML = `<span>Serviço não encontrado (id ausente na URL).</span>`;
+        return;
+      }
+      if (!ongLogada || !ongLogada.cnpj) {
+        formLoading.innerHTML = `<span>Sessão expirada. Faça login novamente.</span>`;
+        return;
+      }
+
+      try {
+        
+        const resposta = await fetch(`${API_URL}/servicos/${servicoId}`);
+
+        if (!resposta.ok) {
+          throw new Error('Não foi possível carregar os dados dessa atividade.');
+        }
+
+        const servico = await resposta.json();
+
+        document.getElementById('nome-servico').value = servico.nomeServico || '';
+        document.getElementById('descricao-servico').value = servico.descricao || '';
+        document.getElementById('foco-servico').value = servico.foco || '';
+        document.getElementById('horas-servico').value = servico.duracao || servico.horas || '';
+        previewImg.src = urlDaImagemServico(servico.imagem);
+
+        formLoading.style.display = 'none';
+        form.classList.add('pronto');
+
+      } catch (erro) {
+        console.error(erro);
+        formLoading.innerHTML = `<span>${erro.message || 'Erro ao carregar a atividade.'}</span>`;
+      }
+    }
+
+    
+    inputImg.addEventListener('change', function () {
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => { previewImg.src = e.target.result; };
+        reader.readAsDataURL(this.files[0]);
+      }
+    });
+
+    
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      mensagemFeedback.className = 'mensagem-feedback';
+
+      if (!ongLogada || !ongLogada.cnpj) {
+        mostrarMensagem('Sessão expirada. Faça login novamente.', 'erro');
+        return;
+      }
+
+      const dados = new FormData();
+      dados.append('cnpj', ongLogada.cnpj);
+      dados.append('nomeServico', document.getElementById('nome-servico').value);
+      dados.append('descricao', document.getElementById('descricao-servico').value);
+      dados.append('foco', document.getElementById('foco-servico').value);
+      dados.append('duracao', document.getElementById('duracao-servico').value);
+    
+      if (inputImg.files[0]) {
+        dados.append('imagem', inputImg.files[0]);
+      }
+
+      btnConfirmar.disabled = true;
+      btnConfirmar.innerHTML = 'Salvando...';
+
+      try {
+        //
+        const resposta = await fetch(`${API_URL}/servicos/${servicoId}`, {
+          method: 'PUT',
+          body: dados
+        });
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(resultado.erro || 'Erro ao salvar as alterações.');
+        }
+
+        mostrarMensagem('Alterações salvas com sucesso!', 'sucesso');
+        setTimeout(() => {
+          window.location.href = 'homeOngMutuo.html';
+        }, 1000);
+
+      } catch (erro) {
+        mostrarMensagem(erro.message, 'erro');
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Salvar alterações';
+      }
+    });
+
+    //exclusão do serviço mudando de ativo =1 para ativo = 0
+    btnExcluir.addEventListener('click', () => {
+      modalExcluir.classList.add('aberto');
+    });
+
+    btnModalCancelar.addEventListener('click', () => {
+      modalExcluir.classList.remove('aberto');
+    });
+
+    btnModalConfirmar.addEventListener('click', async () => {
+      btnModalConfirmar.disabled = true;
+      btnModalConfirmar.innerHTML = 'Excluindo...';
+
+      try {
+        .
+        const resposta = await fetch(`${API_URL}/servicos/${servicoId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ativo: 0 })
+        });
+
+        const resultado = await resposta.json().catch(() => ({}));
+
+        if (!resposta.ok) {
+          throw new Error(resultado.erro || 'Erro ao excluir a atividade.');
+        }
+
+        modalExcluir.classList.remove('aberto');
+        mostrarMensagem('Atividade excluída com sucesso!', 'sucesso');
+        setTimeout(() => {
+          window.location.href = 'homeOngMutuo.html';
+        }, 900);
+
+      } catch (erro) {
+        modalExcluir.classList.remove('aberto');
+        mostrarMensagem(erro.message, 'erro');
+        btnModalConfirmar.disabled = false;
+        btnModalConfirmar.innerHTML = '<i class="bi bi-trash-fill"></i> Excluir';
+      }
+    });
+
+    carregarServico();
+  </script>
+</body>
+</html>
