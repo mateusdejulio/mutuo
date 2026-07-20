@@ -223,15 +223,15 @@ app.get('/stats/:tipo', async (req, res) => {
 
 // ── Foto de Perfil (Usuário comum) ──
 app.post('/perfil/foto', upload.single('fotoPerfil'), async (req, res) => {
-  console.log('📸 CPF recebido:', req.body.cpf);
-  console.log('📁 Arquivo recebido:', req.file);
+  console.log(' CPF recebido:', req.body.cpf);
+  console.log(' Arquivo recebido:', req.file);
 
   const cpf = req.body.cpf;
   if (!cpf)      return res.status(400).json({ erro: 'CPF não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
   const resultado = await db.atualizarFotoPerfil(cpf, req.file.filename);
-  console.log('💾 Resultado do banco:', resultado);
+  console.log(' Resultado do banco:', resultado);
 
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
   res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${req.file.filename}` });
@@ -281,6 +281,23 @@ const PORT = process.env.PORT || 3000;
 app.use((err, req, res, next) => {
   console.error('Erro capturado pelo middleware global:', err.message);
   res.status(400).json({ erro: err.message || 'Erro ao processar a requisição.' });
+});
+
+app.get('/servicos/ong/detalhe/:id', async (req, res) => {
+  const servico = await db.getServicoOngPorId(req.params.id);
+  if (!servico) return res.status(404).json({ erro: 'Serviço não encontrado' });
+  res.json(servico);
+});
+
+app.put('/servicos/ong/:id', uploadServico.single('imagem'), async (req, res) => {
+  const { nomeServico, descricao, foco, duracao } = req.body;
+  if (!nomeServico || !descricao || !foco || !duracao) {
+    return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+  }
+  const imagem = req.file ? req.file.filename : null;
+  const resultado = await db.atualizarServicoOng(req.params.id, { nomeServico, descricao, foco, horas: duracao, imagem });
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json({ sucesso: true });
 });
 
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));

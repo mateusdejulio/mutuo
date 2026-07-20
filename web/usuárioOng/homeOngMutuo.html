@@ -401,6 +401,10 @@
     .act-desc {
       font-size: 0.81rem; color: var(--text-muted);
       line-height: 1.5; margin-bottom: 0.9rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .act-ong {
@@ -416,7 +420,7 @@
     .act-stars { color: var(--green-main); font-size: 0.7rem; }
     .act-stars span { color: var(--text-muted); font-size: 0.73rem; }
 
-    .act-meta { display: flex; gap: 1rem; margin-bottom: 0.95rem; }
+    .act-meta { display: flex; gap: 1rem; margin-bottom: 0.95rem; flex-wrap: wrap; }
     .act-meta-i {
       display: flex; align-items: center; gap: 5px;
       font-size: 0.78rem; color: var(--text-muted);
@@ -446,6 +450,35 @@
       display: flex; align-items: center; justify-content: center;
     }
     .act-empty-body i { font-size: 2.2rem; color: rgba(88,129,87,0.35); }
+
+    /* ── ESTADOS DE CARREGAMENTO / VAZIO ── */
+    .cards-status {
+      grid-column: 1 / -1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.6rem;
+      padding: 2.5rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .cards-status i { font-size: 1.6rem; color: var(--green-main); opacity: 0.6; }
+    .skeleton-card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1.5px solid var(--cream);
+      overflow: hidden;
+    }
+    .skeleton-img, .skeleton-line {
+      background: linear-gradient(90deg, var(--cream-light) 25%, var(--cream) 37%, var(--cream-light) 63%);
+      background-size: 400% 100%;
+      animation: skeletonPulse 1.4s ease infinite;
+    }
+    .skeleton-img { height: 155px; }
+    .skeleton-line { height: 12px; border-radius: 6px; margin: 10px 1.2rem; }
+    @keyframes skeletonPulse {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0 50%; }
+    }
 
     /* ── ANIMATIONS ── */
     @keyframes fadeDown {
@@ -540,7 +573,7 @@
           <span class="stat-label">Avaliação</span>
         </div>
         <div class="stat-box">
-          <span class="stat-num">12</span>
+          <span class="stat-num" id="heroQtdAtividades">0</span>
           <span class="stat-label">Atividades</span>
         </div>
       </div>
@@ -604,37 +637,12 @@
     <h2 class="section-title">Adicionados recentemente</h2>
     <a href="#" class="section-link">Ver todos <i class="bi bi-arrow-right"></i></a>
   </div>
-  <div class="cards-grid">
+  <div class="cards-grid" id="cards-grid">
 
-    <div class="act-card">
-      <div class="act-img-wrap">
-        <img src="../imagens/aulaCiencia.png" alt="Aula de ciências">
-        <span class="act-tag">Educação</span>
-      </div>
-      <div class="act-body">
-        <h3>Aula de ciências</h3>
-        <p class="act-desc">Nos ajude com aulas de ciência para crianças de 6 a 12 anos e inspire mentes curiosas.</p>
-        <div class="act-ong">
-          <img src="../imagens/perfilOngI.png" alt="ONG">
-          <div>
-            <div class="act-ong-name">Instituto Infância Viva</div>
-            <div class="act-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <span> 5.0 (1.000)</span>
-            </div>
-          </div>
-        </div>
-        <div class="act-meta">
-          <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-          <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 2h por semana</span>
-        </div>
-        <button class="btn-edit"><i class="bi bi-pencil-fill"></i> Editar atividade</button>
-      </div>
-    </div>
+    <!-- Os cards de serviço cadastrados pela ONG são inseridos aqui dinamicamente via JS -->
 
-    <div class="act-card">
+    <!-- Card fixo de "adicionar nova atividade" -->
+    <div class="act-card" id="card-adicionar">
       <div class="act-empty-body">
         <i class="bi bi-plus-lg"></i>
       </div>
@@ -646,7 +654,7 @@
         <div style="margin-bottom:0.85rem; margin-top:0.3rem;">
           <span class="act-meta-i" style="font-size:0.79rem; color:var(--text-muted)">
             <i class="bi bi-info-circle" style="color:var(--green-main)"></i>
-            Plano gratuito: 3 atividades
+            <span id="planoTextoLimite">Plano gratuito: 3 atividades</span>
           </span>
         </div>
        <a href="adicionarServicoOng.html" class="btn-edit btn-new" style="text-decoration: none;">
@@ -659,7 +667,8 @@
 </div>
 <script src="../funcoes.js"></script>
 <script>
-  
+
+  // ── FRASES ROTATIVAS ──
   const quotes = [
     "Solidariedade é transformar empatia em ação.",
     "Pequenos gestos criam grandes mudanças.",
@@ -680,31 +689,183 @@
   dots.forEach(d => d.addEventListener('click', () => go(+d.dataset.i)));
   setInterval(() => go((cur + 1) % quotes.length), 4000);
 
- function pegarOngLogada() {
-  const raw = sessionStorage.getItem('ongLogada');
-  if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
-}
+  // ── DADOS DA ONG LOGADA ──
+  function pegarOngLogada() {
+    const raw = sessionStorage.getItem('ongLogada');
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
+  }
 
-function preencherPainelOng(ong) {
-  document.getElementById('welcomeNomeOng').textContent = ong.nomeOng || 'ONG';
-  document.getElementById('heroNomeOng').textContent = ong.nomeOng || 'ONG';
+  function preencherPainelOng(ong) {
+    document.getElementById('welcomeNomeOng').textContent = ong.nomeOng || 'ONG';
+    document.getElementById('heroNomeOng').textContent = ong.nomeOng || 'ONG';
 
-  const cidade = ong.cidade || '';
-  const estado = ong.estado || '';
-  const local = [cidade, estado].filter(Boolean).join(', ');
-  document.getElementById('heroLocalOng').textContent = local || 'Localização não informada';
-  document.getElementById('heroFotoOng').src = urlDaFoto(ong.foto_perfil);
-}
+    const cidade = ong.cidade || '';
+    const estado = ong.estado || '';
+    const local = [cidade, estado].filter(Boolean).join(', ');
+    document.getElementById('heroLocalOng').textContent = local || 'Localização não informada';
+    document.getElementById('heroFotoOng').src = urlDaFoto(ong.foto_perfil);
+  }
 
-const ongLogada = pegarOngLogada();
-if (ongLogada) {
-  preencherPainelOng(ongLogada);
-}
-function urlDaFoto(nomeArquivo) {
-  if (nomeArquivo) return `${API_BASE}/uploads/fotos/${nomeArquivo}`;
-  return '../imagens/mutuoLogo.png';
-}
+  function urlDaFoto(nomeArquivo) {
+    if (nomeArquivo) return `${API_URL}/uploads/fotos/${nomeArquivo}`;
+    return '../imagens/mutuoLogo.png';
+  }
+
+  // O endpoint GET /servicos/ong/:cnpj já devolve "imagem" como caminho
+  // relativo pronto (ex: "/uploads/servicos/arquivo.png"), então só
+  // prefixamos com API_URL. Se vier null, usamos a logo padrão.
+  function urlDaImagemServico(caminhoImagem) {
+    if (caminhoImagem) return `${API_URL}${caminhoImagem}`;
+    return '../imagens/mutuoLogo.png';
+  }
+
+  const ongLogada = pegarOngLogada();
+  if (ongLogada) {
+    preencherPainelOng(ongLogada);
+  }
+
+  // ── CARREGAR SERVIÇOS CADASTRADOS PELA ONG ──
+  const gridEl = document.getElementById('cards-grid');
+  const cardAdicionar = document.getElementById('card-adicionar');
+  const LIMITE_PLANO_GRATUITO = 3; // ajuste conforme o plano da ONG, se aplicável
+
+  function mostrarCarregando() {
+    const status = document.createElement('div');
+    status.className = 'cards-status';
+    status.id = 'cards-status';
+    status.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Carregando suas atividades...</span>`;
+    gridEl.insertBefore(status, cardAdicionar);
+  }
+
+  function removerStatus() {
+    const status = document.getElementById('cards-status');
+    if (status) status.remove();
+  }
+
+  function mostrarErro(mensagem) {
+    removerStatus();
+    const status = document.createElement('div');
+    status.className = 'cards-status';
+    status.id = 'cards-status';
+    status.innerHTML = `<i class="bi bi-exclamation-triangle"></i><span>${mensagem}</span>`;
+    gridEl.insertBefore(status, cardAdicionar);
+  }
+
+  function criarCardServico(servico) {
+    const card = document.createElement('div');
+    card.className = 'act-card';
+
+    const nome = servico.nomeServico || 'Serviço sem nome';
+    const descricao = servico.descricao || '';
+    const foco = servico.foco || 'Outro';
+    const horas = servico.horas || '-';
+    const imagem = servico.imagem;
+    const id = servico.id;
+
+    const cidade = ongLogada?.cidade || '';
+    const estado = ongLogada?.estado || '';
+    const local = [cidade, estado].filter(Boolean).join(', ') || 'Localização não informada';
+
+    card.innerHTML = `
+      <div class="act-img-wrap">
+        <img src="${urlDaImagemServico(imagem)}" alt="${nome}">
+        <span class="act-tag">${foco}</span>
+      </div>
+      <div class="act-body">
+        <h3>${nome}</h3>
+        <p class="act-desc">${descricao}</p>
+        <div class="act-ong">
+          <img src="${urlDaFoto(ongLogada?.foto_perfil)}" alt="ONG">
+          <div>
+            <div class="act-ong-name">${ongLogada?.nomeOng || 'Sua ONG'}</div>
+            <div class="act-stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span> 5.0</span>
+            </div>
+          </div>
+        </div>
+        <div class="act-meta">
+          <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> ${local}</span>
+          <span class="act-meta-i"><i class="bi bi-clock-fill"></i> ${horas} horas</span>
+        </div>
+        <button class="btn-edit" data-id="${id}">
+          <i class="bi bi-pencil-fill"></i> Editar atividade
+        </button>
+      </div>
+    `;
+
+    card.querySelector('.btn-edit').addEventListener('click', () => {
+     
+      window.location.href = `editarServicoOng.html?id=${id}`;
+    });
+
+    return card;
+  }
+
+  async function carregarServicosOng() {
+    if (!ongLogada || !ongLogada.cnpj) {
+      mostrarErro('Sessão expirada. Faça login novamente.');
+      return;
+    }
+
+    mostrarCarregando();
+
+    try {
+    
+      const resposta = await fetch(`${API_URL}/servicos/ong/${ongLogada.cnpj}`);
+
+      if (!resposta.ok) {
+        throw new Error('Não foi possível carregar suas atividades.');
+      }
+
+      const servicos = await resposta.json();
+      removerStatus();
+
+      // Remove cards de serviço antigos, mantendo apenas o card "adicionar"
+      gridEl.querySelectorAll('.act-card:not(#card-adicionar)').forEach(el => el.remove());
+
+      const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
+
+      if (lista.length === 0) {
+        const vazio = document.createElement('div');
+        vazio.className = 'cards-status';
+        vazio.innerHTML = `<i class="bi bi-inboxes"></i><span>Você ainda não cadastrou nenhuma atividade.</span>`;
+        gridEl.insertBefore(vazio, cardAdicionar);
+      } else {
+        lista.forEach(servico => {
+          gridEl.insertBefore(criarCardServico(servico), cardAdicionar);
+        });
+      }
+
+      // Atualiza contador de atividades no hero e o texto do plano
+      const qtd = lista.length;
+      const heroQtd = document.getElementById('heroQtdAtividades');
+      if (heroQtd) heroQtd.textContent = qtd;
+
+      const planoTexto = document.getElementById('planoTextoLimite');
+      if (planoTexto) {
+        planoTexto.textContent = `Plano gratuito: ${qtd}/${LIMITE_PLANO_GRATUITO} atividades`;
+      }
+
+      // Se atingiu o limite do plano gratuito, bloqueia a criação de novas atividades
+      if (qtd >= LIMITE_PLANO_GRATUITO) {
+        const link = cardAdicionar.querySelector('a.btn-new');
+        if (link) {
+          link.href = 'planosOng.html';
+          link.innerHTML = '<i class="bi bi-gem"></i> Fazer upgrade de plano';
+        }
+      }
+
+    } catch (erro) {
+      console.error(erro);
+      mostrarErro(erro.message || 'Erro ao carregar suas atividades.');
+    }
+  }
+
+  carregarServicosOng();
   carregarNavOng();
 
 </script>
