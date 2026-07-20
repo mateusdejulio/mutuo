@@ -543,7 +543,7 @@ async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, im
   const [result] = await pool.query(`UPDATE Mutuo_ServicoOng SET ${campos.join(', ')} WHERE id = ?`, values);
   return { success: result.affectedRows > 0 };
 }
-// Muda o status "ativo" do serviço da ONG (soft delete: ativo 1 -> 0)
+// Muda o status "ativo" do serviço da ONG (ativo 1 -> 0)
 async function alterarStatusServicoOng(id, ativo) {
   try {
     const [result] = await pool.query(
