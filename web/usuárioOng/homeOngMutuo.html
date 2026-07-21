@@ -641,7 +641,7 @@
 
     <!-- Os cards de serviço cadastrados pela ONG são inseridos aqui dinamicamente via JS -->
 
-    <!-- Card fixo de "adicionar nova atividade" -->
+    
     <div class="act-card" id="card-adicionar">
       <div class="act-empty-body">
         <i class="bi bi-plus-lg"></i>
@@ -668,7 +668,7 @@
 <script src="../funcoes.js"></script>
 <script>
 
-  // ── FRASES ROTATIVAS ──
+  // ── FRASES 
   const quotes = [
     "Solidariedade é transformar empatia em ação.",
     "Pequenos gestos criam grandes mudanças.",
@@ -805,7 +805,7 @@
     return card;
   }
 
-  async function carregarServicosOng() {
+ async function carregarServicosOng() {
     if (!ongLogada || !ongLogada.cnpj) {
       mostrarErro('Sessão expirada. Faça login novamente.');
       return;
@@ -814,8 +814,7 @@
     mostrarCarregando();
 
     try {
-    
-      const resposta = await fetch(`${API_URL}/servicos/ong/${ongLogada.cnpj}`);
+      const resposta = await fetch(`${API_URL}/servicos/ong/${encodeURIComponent(ongLogada.cnpj)}`); // corrigido
 
       if (!resposta.ok) {
         throw new Error('Não foi possível carregar suas atividades.');

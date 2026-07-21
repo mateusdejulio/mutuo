@@ -12,10 +12,9 @@
   --verde-principal: #588157;
   --verde-escuro: #3a5a40;
   --verde-claro: #6b9e4a;
-  --vermelho-principal: #b3413e;
+  --vermelho-principal: #ae4e4a;
   --vermelho-escuro: #8f2f2c;
   --creme: #E1DCD0;
-  --creme-escuro: #cdc7ba;
   --branco: #ffffff;
 }
 
@@ -84,9 +83,12 @@
       padding: 40px 0;
       color: var(--creme);
       font-size: 0.9rem; font-weight: 600;
+      text-align: center;
     }
     .form-loading i { font-size: 1.8rem; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-loading.erro-carregamento i { animation: none; color: #ffb3b0; }
 
     .form-conteudo { display: none; }
     .form-conteudo.pronto { display: block; }
@@ -140,9 +142,6 @@
 
     .campo select {
       appearance: none;
-      background-image: url("../imagens/fundo.png");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
       background-color: rgba(225,220,208,0.92);
       padding-right: 40px;
       cursor: pointer;
@@ -374,7 +373,7 @@
 
     <div class="form-loading" id="form-loading">
       <i class="bi bi-arrow-repeat"></i>
-      <span>Carregando dados do serviço...</span>
+      <span id="form-loading-texto">Carregando dados do serviço...</span>
     </div>
     <form id="form-servico" class="form-conteudo" novalidate>
 
@@ -437,12 +436,12 @@
 
   </div>
 
-  <!-- Modal de confirmação de exclusão -->
+  
   <div class="modal-overlay" id="modal-excluir">
     <div class="modal-box">
       <i class="bi bi-exclamation-triangle-fill icone-alerta"></i>
       <h3>Excluir atividade?</h3>
-      <p>Essa atividade deixará de aparecer para os voluntários. Você pode reativá-la a qualquer momento.</p>
+      <p>Essa atividade deixará de aparecer para os voluntários.</p>
       <div class="modal-acoes">
         <button class="btn-modal-cancelar" id="btn-modal-cancelar">Cancelar</button>
         <button class="btn-modal-confirmar" id="btn-modal-confirmar">
@@ -454,22 +453,23 @@
 
   <script src="../funcoes.js"></script>
   <script>
-    
-    const formLoading   = document.getElementById('form-loading');
-    const form           = document.getElementById('form-servico');
-    const inputImg        = document.getElementById('input-imagem');
-    const previewImg      = document.getElementById('preview-img');
-    const btnConfirmar    = document.getElementById('btn-confirmar');
-    const btnExcluir       = document.getElementById('btn-excluir');
-    const mensagemFeedback = document.getElementById('mensagem-feedback');
-    const modalExcluir     = document.getElementById('modal-excluir');
-    const btnModalCancelar = document.getElementById('btn-modal-cancelar');
+
+    const formLoading      = document.getElementById('form-loading');
+    const formLoadingTexto  = document.getElementById('form-loading-texto');
+    const form              = document.getElementById('form-servico');
+    const inputImg          = document.getElementById('input-imagem');
+    const previewImg        = document.getElementById('preview-img');
+    const btnConfirmar      = document.getElementById('btn-confirmar');
+    const btnExcluir        = document.getElementById('btn-excluir');
+    const mensagemFeedback  = document.getElementById('mensagem-feedback');
+    const modalExcluir      = document.getElementById('modal-excluir');
+    const btnModalCancelar  = document.getElementById('btn-modal-cancelar');
     const btnModalConfirmar = document.getElementById('btn-modal-confirmar');
 
     const params = new URLSearchParams(window.location.search);
     const servicoId = params.get('id');
 
-   
+
     const ongLogadaStr = sessionStorage.getItem('ongLogada');
     const ongLogada = ongLogadaStr ? JSON.parse(ongLogadaStr) : null;
 
@@ -478,49 +478,68 @@
       mensagemFeedback.className = `mensagem-feedback ${tipo}`;
     }
 
+    function mostrarErroCarregamento(texto) {
+      formLoading.classList.add('erro-carregamento');
+      formLoadingTexto.textContent = texto;
+    }
+
     function urlDaImagemServico(caminhoImagem) {
       if (!caminhoImagem) return '../imagens/mutuoLogo.png';
-     
+
       return caminhoImagem.startsWith('http') ? caminhoImagem : `${API_URL}${caminhoImagem}`;
     }
 
-   
+
     async function carregarServico() {
+      
+      console.log('[editarServico] servicoId lido da URL:', servicoId);
+
       if (!servicoId) {
-        formLoading.innerHTML = `<span>Serviço não encontrado (id ausente na URL).</span>`;
+        mostrarErroCarregamento('Serviço não encontrado (id ausente na URL). Volte e clique em "Editar" novamente.');
         return;
       }
       if (!ongLogada || !ongLogada.cnpj) {
-        formLoading.innerHTML = `<span>Sessão expirada. Faça login novamente.</span>`;
+        mostrarErroCarregamento('Sessão expirada. Faça login novamente.');
         return;
       }
 
       try {
+        const resposta = await fetch(`${API_URL}/servicos/ong/detalhe/${servicoId}`);
+
         
-        const resposta = await fetch(`${API_URL}/servicos/${servicoId}`);
+        console.log('[editarServico] status da resposta:', resposta.status);
 
         if (!resposta.ok) {
-          throw new Error('Não foi possível carregar os dados dessa atividade.');
+          let detalhe = '';
+          try {
+            const corpoErro = await resposta.json();
+            detalhe = corpoErro.erro || '';
+          } catch (_) { }
+
+          throw new Error(
+            detalhe || `Não foi possível carregar os dados dessa atividade (status ${resposta.status}).`
+          );
         }
 
         const servico = await resposta.json();
+        console.log('[editarServico] dados recebidos:', servico);
 
         document.getElementById('nome-servico').value = servico.nomeServico || '';
         document.getElementById('descricao-servico').value = servico.descricao || '';
         document.getElementById('foco-servico').value = servico.foco || '';
-        document.getElementById('horas-servico').value = servico.duracao || servico.horas || '';
+        document.getElementById('duracao-servico').value = servico.duracao || servico.horas || '';
         previewImg.src = urlDaImagemServico(servico.imagem);
 
         formLoading.style.display = 'none';
         form.classList.add('pronto');
 
       } catch (erro) {
-        console.error(erro);
-        formLoading.innerHTML = `<span>${erro.message || 'Erro ao carregar a atividade.'}</span>`;
+        console.error('[editarServico] erro ao carregar:', erro);
+        mostrarErroCarregamento(erro.message || 'Erro ao carregar a atividade.');
       }
     }
 
-    
+
     inputImg.addEventListener('change', function () {
       if (this.files && this.files[0]) {
         const reader = new FileReader();
@@ -529,7 +548,7 @@
       }
     });
 
-    
+
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       mensagemFeedback.className = 'mensagem-feedback';
@@ -545,7 +564,7 @@
       dados.append('descricao', document.getElementById('descricao-servico').value);
       dados.append('foco', document.getElementById('foco-servico').value);
       dados.append('duracao', document.getElementById('duracao-servico').value);
-    
+
       if (inputImg.files[0]) {
         dados.append('imagem', inputImg.files[0]);
       }
@@ -554,8 +573,7 @@
       btnConfirmar.innerHTML = 'Salvando...';
 
       try {
-        //
-        const resposta = await fetch(`${API_URL}/servicos/${servicoId}`, {
+        const resposta = await fetch(`${API_URL}/servicos/ong/${servicoId}`, {
           method: 'PUT',
           body: dados
         });
@@ -578,7 +596,7 @@
       }
     });
 
-    //exclusão do serviço mudando de ativo =1 para ativo = 0
+    // Exclusão do serviço (soft delete: ativo = 1 -> ativo = 0)
     btnExcluir.addEventListener('click', () => {
       modalExcluir.classList.add('aberto');
     });
@@ -592,8 +610,7 @@
       btnModalConfirmar.innerHTML = 'Excluindo...';
 
       try {
-        .
-        const resposta = await fetch(`${API_URL}/servicos/${servicoId}/status`, {
+        const resposta = await fetch(`${API_URL}/servicos/ong/${servicoId}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ativo: 0 })

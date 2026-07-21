@@ -924,54 +924,18 @@
   </div>
 
   <div class="bloco">
-    <div class="cabecalho-bloco">
-      <div>
-        <h3>Meus serviços</h3>
-        <p>Serviços que você oferece na plataforma</p>
-      </div>
-      <a href="adicionarServicoOng.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
+  <div class="cabecalho-bloco">
+    <div>
+      <h3>Meus serviços</h3>
+      <p>Serviços que você oferece na plataforma</p>
     </div>
-
-    <div class="card-servico">
-      <div class="topo-servico">
-        <h4>Aulas de ciência</h4>
-        <span class="tag-ativo">Ativo</span>
-      </div>
-      <p class="descricao-servico">Nos ajude com aulas de ciência para crianças de 7 a 14 anos</p>
-      <div class="rodape-servico">
-        <div class="avaliacao-servico">
-          <i class="bi bi-star-fill"></i> 4.5 <span>(23 avaliações)</span>
-        </div>
-        <div class="pontos-servico">
-          <i class="bi bi-lightning-charge-fill"></i> 150 pts/hora
-        </div>
-        <div class="acoes-servico">
-          <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
-          <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="card-servico">
-      <div class="topo-servico">
-        <h4>Aulas de pintura</h4>
-        <span class="tag-ativo">Ativo</span>
-      </div>
-      <p class="descricao-servico">Nos ajude a criar momentos divertidos para nossas crianças</p>
-      <div class="rodape-servico">
-        <div class="avaliacao-servico">
-          <i class="bi bi-star-fill"></i> 4.2 <span>(10 avaliações)</span>
-        </div>
-        <div class="pontos-servico">
-          <i class="bi bi-lightning-charge-fill"></i> 100 pts/hora
-        </div>
-        <div class="acoes-servico">
-          <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
-          <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
-        </div>
-      </div>
-    </div>
+    <a href="adicionarServicoOng.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
   </div>
+
+  <div id="listaServicosOng">
+    <!-- Cards de serviço inseridos aqui dinamicamente via JS -->
+  </div>
+</div>
 
   <div class="bloco">
     <div class="cabecalho-bloco">
@@ -1129,14 +1093,16 @@
     document.getElementById('inputEmail').value = ong.email || '';
     document.getElementById('inputTel').value = ong.telefone || '';
 
-    if (ong.pontos !== undefined) {
-  document.getElementById('exibePontos').textContent = ong.pontos.toLocaleString('pt-BR');
+    // Correção: "ong.pontos !== undefined" deixava passar o valor null
+    // (comum quando o SQL faz SUM() sem linhas correspondentes), e
+    // null.toLocaleString() quebrava o script no meio da execução,
+    // interrompendo o preenchimento do resto da tela.
+    document.getElementById('exibePontos').textContent = (ong.pontos ?? 0).toLocaleString('pt-BR');
 
-}
-const dataFormatada = formatarData(ong.cadastro);
-  const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
-  document.getElementById('exibCadastro').textContent = textoMembro;
-  document.getElementById('exibCadastroEdit').textContent = textoMembro;
+    const dataFormatada = formatarData(ong.cadastro);
+    const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
+    document.getElementById('exibCadastro').textContent = textoMembro;
+    document.getElementById('exibCadastroEdit').textContent = textoMembro;
 
     aplicarFotoEmTodosOsLugares(ong.foto_perfil, ong.nomeOng);
   }
@@ -1338,8 +1304,113 @@ const dataFormatada = formatarData(ong.cadastro);
       inp.value = '';
       inp.focus();
     }
+   const containerServicos = document.getElementById('listaServicosOng');
+
+function criarCardServicoPerfil(servico) {
+  const div = document.createElement('div');
+  div.className = 'card-servico';
+
+  const nome = servico.nomeServico || 'Serviço sem nome';
+  const descricao = servico.descricao || '';
+  const ativo = servico.ativo === undefined ? true : !!servico.ativo;
+  const nota = servico.nota ? Number(servico.nota).toFixed(1) : '—';
+  const avaliacoes = servico.avaliacoes ?? 0;
+  const pontos = servico.pontos ?? 0;
+
+  div.innerHTML = `
+    <div class="topo-servico">
+      <h4>${nome}</h4>
+      <span class="tag-ativo" style="${ativo ? '' : 'background:#f4f4f0;color:#999;'}">
+        ${ativo ? 'Ativo' : 'Inativo'}
+      </span>
+    </div>
+    <p class="descricao-servico">${descricao}</p>
+    <div class="rodape-servico">
+      <div class="avaliacao-servico">
+        <i class="bi bi-star-fill"></i> ${nota} <span>(${avaliacoes} avaliações)</span>
+      </div>
+      <div class="pontos-servico">
+        <i class="bi bi-lightning-charge-fill"></i> ${pontos} pts/hora
+      </div>
+      <div class="acoes-servico">
+        <button class="btn-excluir" data-id="${servico.id}">
+          <i class="bi bi-trash3"></i> Excluir
+        </button>
+        <a href="editarServicoOng.html?id=${servico.id}" class="btn-editar-servico">
+          <i class="bi bi-pencil"></i> Editar
+        </a>
+      </div>
+    </div>
+  `;
+
+  div.querySelector('.btn-excluir').addEventListener('click', () => excluirServicoPerfil(servico.id, div));
+
+  return div;
+}
+
+async function excluirServicoPerfil(id, cardEl) {
+  if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+
+  try {
+    const resposta = await fetch(`${API_BASE}/servicos/ong/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ativo: 0 })
+    });
+
+    const resultado = await resposta.json();
+    if (!resposta.ok || resultado.error) {
+      throw new Error(resultado.erro || resultado.error || 'Erro ao excluir serviço.');
+    }
+
+    cardEl.remove();
+
+  } catch (erro) {
+    console.error(erro);
+    alert(erro.message || 'Não foi possível excluir o serviço.');
+  }
+}
+
+async function carregarServicosPerfilOng() {
+  const logada = pegarOngLogada();
+  if (!logada || !logada.cnpj) return;
+
+  containerServicos.innerHTML = `
+    <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+      Carregando seus serviços...
+    </p>`;
+
+  try {
+    const resposta = await fetch(`${API_BASE}/servicos/ong/${encodeURIComponent(logada.cnpj)}`); // corrigido
+    if (!resposta.ok) throw new Error('Não foi possível carregar seus serviços.');
    
+    const servicos = await resposta.json();
+    const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
+
+    containerServicos.innerHTML = '';
+
+    if (lista.length === 0) {
+      containerServicos.innerHTML = `
+        <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+          Você ainda não cadastrou nenhum serviço.
+        </p>`;
+      return;
+    }
+
+    lista.forEach(servico => {
+      containerServicos.appendChild(criarCardServicoPerfil(servico));
+    });
+
+  } catch (erro) {
+    console.error(erro);
+    containerServicos.innerHTML = `
+      <p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">
+        Erro ao carregar seus serviços.
+      </p>`;
+  }
+}
   carregarPerfilOng();
+  carregarServicosPerfilOng();
 </script>
 </body>
 </html>

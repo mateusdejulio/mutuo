@@ -12,6 +12,7 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+
 // Garante que a pasta existe
 const pastaFotos = path.join(__dirname, 'uploads', 'fotos');
 if (!fs.existsSync(pastaFotos)) {
@@ -121,11 +122,14 @@ app.post('/ongs', async (req, res) => {
 });
 
 // Busca os dados completos de UMA ong específica (usado na tela de perfil)
+// Já inclui os pontos da ONG na mesma resposta.
 app.get('/ongs/:cnpj', async (req, res) => {
   const ong = await db.getOngPorCnpj(req.params.cnpj);
   if (!ong) return res.status(404).json({ erro: 'ONG não encontrada' });
   if (ong.error) return res.status(500).json({ erro: ong.error });
-  res.json(ong);
+
+  const pontos = await db.countPontosOng(req.params.cnpj);
+  res.json({ ...ong, pontos });
 });
 
 app.put('/ongs/:cnpj', async (req, res) => {
@@ -186,6 +190,36 @@ app.get('/servicos/ong/:cnpj', async (req, res) => {
   const servicos = await db.getServicosOng(req.params.cnpj);
   if (servicos.error) return res.status(500).json({ erro: servicos.error });
   res.json(servicos);
+});
+
+// Busca os dados de UM serviço específico da ONG (usado na tela de edição)
+app.get('/servicos/ong/detalhe/:id', async (req, res) => {
+  const servico = await db.getServicoOngPorId(req.params.id);
+  if (!servico) return res.status(404).json({ erro: 'Serviço não encontrado' });
+  res.json(servico);
+});
+
+// Atualiza um serviço existente da ONG
+app.put('/servicos/ong/:id', uploadServico.single('imagem'), async (req, res) => {
+  const { nomeServico, descricao, foco, duracao } = req.body;
+  if (!nomeServico || !descricao || !foco || !duracao) {
+    return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+  }
+  const imagem = req.file ? req.file.filename : null;
+  const resultado = await db.atualizarServicoOng(req.params.id, { nomeServico, descricao, foco, horas: duracao, imagem });
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json({ sucesso: true });
+});
+
+// Muda o status "ativo" do serviço da ONG (soft delete: ativo 1 -> 0)
+app.patch('/servicos/ong/:id/status', async (req, res) => {
+  const { ativo } = req.body;
+  if (ativo === undefined) {
+    return res.status(400).json({ erro: 'Informe o campo "ativo".' });
+  }
+  const resultado = await db.alterarStatusServicoOng(req.params.id, ativo);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
 });
 
 // ── Rotas de Solicitações ──
@@ -263,41 +297,16 @@ app.get('/perfil/foto/ong/:cnpj', async (req, res) => {
   res.json({ fotoPerfil: foto ? `/uploads/fotos/${foto}` : null });
 });
 
-//rota pegar pontos da ong 
-app.get('/ongs/:cnpj', async (req, res) => {
-  const ong = await buscarOngPorCnpj(req.params.cnpj);
-  if (!ong) return res.status(404).json({ erro: 'ONG não encontrada' });
-
-
-  const pontos = await countPontosOng(req.params.cnpj);
-  res.json({ ...ong, pontos });
-});
-
-const PORT = process.env.PORT || 3000;
 
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
+// Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.
 app.use((err, req, res, next) => {
   console.error('Erro capturado pelo middleware global:', err.message);
   res.status(400).json({ erro: err.message || 'Erro ao processar a requisição.' });
 });
 
-app.get('/servicos/ong/detalhe/:id', async (req, res) => {
-  const servico = await db.getServicoOngPorId(req.params.id);
-  if (!servico) return res.status(404).json({ erro: 'Serviço não encontrado' });
-  res.json(servico);
-});
 
-app.put('/servicos/ong/:id', uploadServico.single('imagem'), async (req, res) => {
-  const { nomeServico, descricao, foco, duracao } = req.body;
-  if (!nomeServico || !descricao || !foco || !duracao) {
-    return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
-  }
-  const imagem = req.file ? req.file.filename : null;
-  const resultado = await db.atualizarServicoOng(req.params.id, { nomeServico, descricao, foco, horas: duracao, imagem });
-  if (resultado.error) return res.status(500).json({ erro: resultado.error });
-  res.json({ sucesso: true });
-});
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
