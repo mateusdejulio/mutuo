@@ -625,17 +625,8 @@
         <div><h3>Meus serviços</h3><p>Serviços que você oferece na plataforma</p></div>
         <a href="adicionarServicoMutuo.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
       </div>
-      <div class="card-servico">
-        <div class="topo-servico"><h4>Aulas de yoga</h4><span class="tag-ativo">Ativo</span></div>
-        <p class="descricao-servico">Aulas personalizadas de yoga para iniciantes e intermediários</p>
-        <div class="rodape-servico">
-          <div class="avaliacao-servico"><i class="bi bi-star-fill"></i> 4.5 <span>(23 avaliações)</span></div>
-          <div class="pontos-servico"><i class="bi bi-lightning-charge-fill"></i> 150 pts/hora</div>
-          <div class="acoes-servico">
-            <button class="btn-excluir"><i class="bi bi-trash3"></i> Excluir</button>
-            <a href="#" class="btn-editar-servico"><i class="bi bi-pencil"></i> Editar</a>
-          </div>
-        </div>
+      <div id="listaServicosMutuo">
+        <!-- Cards de serviço inseridos aqui dinamicamente via JS -->
       </div>
     </div>
 
@@ -815,6 +806,115 @@
       inp.value = '';
       inp.focus();
     }
+
+    // ── SERVIÇOS DO USUÁRIO ──
+    const API_BASE = 'http://localhost:3000';
+    const containerServicosMutuo = document.getElementById('listaServicosMutuo');
+
+    function criarCardServicoUsuario(servico) {
+      const div = document.createElement('div');
+      div.className = 'card-servico';
+
+      const nome = servico.nomeServico || 'Serviço sem nome';
+      const descricao = servico.descricao || '';
+      const ativo = servico.ativo === undefined ? true : !!servico.ativo;
+      const nota = servico.nota ? Number(servico.nota).toFixed(1) : '—';
+      const avaliacoes = servico.avaliacoes ?? 0;
+      const pontos = servico.pontos ?? 0;
+
+      div.innerHTML = `
+        <div class="topo-servico">
+          <h4>${nome}</h4>
+          <span class="tag-ativo" style="${ativo ? '' : 'background:#f4f4f0;color:#999;'}">
+            ${ativo ? 'Ativo' : 'Inativo'}
+          </span>
+        </div>
+        <p class="descricao-servico">${descricao}</p>
+        <div class="rodape-servico">
+          <div class="avaliacao-servico">
+            <i class="bi bi-star-fill"></i> ${nota} <span>(${avaliacoes} avaliações)</span>
+          </div>
+          <div class="pontos-servico">
+            <i class="bi bi-lightning-charge-fill"></i> ${pontos} pts/hora
+          </div>
+          <div class="acoes-servico">
+            <button class="btn-excluir" data-id="${servico.id}">
+              <i class="bi bi-trash3"></i> Excluir
+            </button>
+            <a href="editarServicoMutuo.html?id=${servico.id}" class="btn-editar-servico">
+              <i class="bi bi-pencil"></i> Editar
+            </a>
+          </div>
+        </div>
+      `;
+
+      div.querySelector('.btn-excluir').addEventListener('click', () => excluirServicoUsuario(servico.id, div));
+
+      return div;
+    }
+
+    async function excluirServicoUsuario(id, cardEl) {
+      if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/servicos/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ativo: 0 })
+        });
+
+        const resultado = await resposta.json();
+        if (!resposta.ok || resultado.error) {
+          throw new Error(resultado.erro || resultado.error || 'Erro ao excluir serviço.');
+        }
+
+        cardEl.remove();
+
+      } catch (erro) {
+        console.error(erro);
+        alert(erro.message || 'Não foi possível excluir o serviço.');
+      }
+    }
+
+    async function carregarServicosUsuario() {
+      if (!containerServicosMutuo || !usuario.cpf) return;
+
+      containerServicosMutuo.innerHTML = `
+        <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+          Carregando seus serviços...
+        </p>`;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/servicos/usuario/${encodeURIComponent(usuario.cpf)}`);
+        if (!resposta.ok) throw new Error('Não foi possível carregar seus serviços.');
+
+        const servicos = await resposta.json();
+        const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
+
+        containerServicosMutuo.innerHTML = '';
+
+        if (lista.length === 0) {
+          containerServicosMutuo.innerHTML = `
+            <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+              Você ainda não cadastrou nenhum serviço.
+            </p>`;
+          return;
+        }
+
+        lista.forEach(servico => {
+          containerServicosMutuo.appendChild(criarCardServicoUsuario(servico));
+        });
+
+      } catch (erro) {
+        console.error(erro);
+        containerServicosMutuo.innerHTML = `
+          <p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">
+            Erro ao carregar seus serviços.
+          </p>`;
+      }
+    }
+
+    carregarServicosUsuario();
   </script>
   <script src="../funcoes.js"></script>
 </body>

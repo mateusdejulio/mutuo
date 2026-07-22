@@ -535,8 +535,10 @@
         if (resultado.sucesso === true) {
 
           if (tipoSelecionado === 'ong') {
+            sessionStorage.removeItem('usuarioLogado');
             sessionStorage.setItem('ongLogada', JSON.stringify(resultado.usuario));
           } else {
+            sessionStorage.removeItem('ongLogada');
             sessionStorage.setItem('usuarioLogado', JSON.stringify(resultado.usuario));
           }
 

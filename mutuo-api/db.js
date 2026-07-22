@@ -301,6 +301,32 @@ async function cadastrarOng(ong) {
   }
 }
 
+// ── Cadastro de serviço oferecido por usuário ──
+async function cadastrarServico(servico) {
+  const sql = `
+    INSERT INTO Mutuo_Servico
+    (nome, descricao, foco, qtdHoras, idUsuario, imagem)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    servico.nomeServico,
+    servico.descricao,
+    servico.foco,
+    servico.duracao,
+    servico.cpf,
+    servico.imagem
+  ];
+
+  try {
+    const [result] = await pool.query(sql, values);
+    return result.insertId;
+  } catch (error) {
+    console.error('Erro ao cadastrar serviço:', error);
+    throw error;
+  }
+}
+
 // ── Cadastro de serviço oferecido pela ONG ──
 async function cadastrarServicoOng(servico) {
   const sql = `
@@ -323,6 +349,73 @@ async function cadastrarServicoOng(servico) {
     return result.insertId;
   } catch (error) {
     console.error('Erro ao cadastrar serviço da ONG:', error);
+    throw error;
+  }
+}
+
+// Lista os serviços cadastrados por um usuário comum
+async function getServicosUsuario(cpf) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS horas, imagem, ativo
+       FROM Mutuo_Servico
+       WHERE idUsuario = ? AND ativo = 1`,
+      [cpf]
+    );
+    return rows.map(servico => ({
+      ...servico,
+      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar serviços do usuário:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Ativa/desativa um serviço de usuário
+async function atualizarStatusServico(id, ativo) {
+  const [result] = await pool.query(
+    'UPDATE Mutuo_Servico SET ativo = ? WHERE cod = ?',
+    [ativo, id]
+  );
+  return result.affectedRows;
+}
+
+// Busca um serviço específico do usuário pelo ID
+async function getServicoPorId(id) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS duracao, imagem, idUsuario
+       FROM Mutuo_Servico
+       WHERE cod = ?`,
+      [id]
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error('Erro ao buscar serviço:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Atualiza um serviço do usuário
+async function atualizarServico(id, servico) {
+  const campos = ['nome = ?', 'descricao = ?', 'foco = ?', 'qtdHoras = ?'];
+  const valores = [servico.nomeServico, servico.descricao, servico.foco, servico.duracao];
+
+  if (servico.imagem) {
+    campos.push('imagem = ?');
+    valores.push(servico.imagem);
+  }
+
+  valores.push(id);
+
+  const sql = `UPDATE Mutuo_Servico SET ${campos.join(', ')} WHERE cod = ?`;
+
+  try {
+    const [result] = await pool.query(sql, valores);
+    return result.affectedRows;
+  } catch (error) {
+    console.error('Erro ao atualizar serviço:', error);
     throw error;
   }
 }
@@ -587,7 +680,12 @@ module.exports = {
   alterSolicitacao, 
   cadastrarUsuario,
   cadastrarOng,
+  cadastrarServico,
   cadastrarServicoOng,
+  getServicosUsuario,
+  atualizarStatusServico,
+  getServicoPorId,
+  atualizarServico,
   getServicosOng,
   getPremium,
   countPremiumTotal,
@@ -603,5 +701,4 @@ module.exports = {
   getServicoOngPorId,
   atualizarServicoOng,
   alterarStatusServicoOng
-
 };

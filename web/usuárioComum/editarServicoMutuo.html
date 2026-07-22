@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mútuo | Cadastro de Serviço</title>
+  <title>Mútuo | Editar Serviço</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="../imagens/mutuoLogo.png">
@@ -29,213 +29,119 @@
       padding: 40px 16px 60px;
     }
     .topo {
-      display: flex;
-      margin-top: 0;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 20px;
-      animation: fadeDown 0.5s ease both;
+      display: flex; margin-top: 0; align-items: center; justify-content: center;
+      gap: 16px; margin-bottom: 20px; animation: fadeDown 0.5s ease both;
     }
     .topo img {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      background: var(--cream);
-      padding: 8px;
-      object-fit: contain;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      width: 80px; height: 80px; border-radius: 50%; background: var(--cream);
+      padding: 8px; object-fit: contain; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     }
     .topo h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--cream);
-      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      letter-spacing: 0.3px;
-      margin: 0;
+      font-size: 1.75rem; font-weight: 700; color: var(--cream);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3); letter-spacing: 0.3px; margin: 0;
     }
     .card-form {
       width: 100%; max-width: 480px;
       background: rgba(88, 129, 87, 0.649);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(225,220,208,0.2);
-      border-radius: 28px;
-      padding: 36px 32px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(225,220,208,0.2); border-radius: 28px;
+      padding: 36px 32px; box-shadow: 0 8px 40px rgba(0,0,0,0.3);
       animation: fadeUp 0.5s ease 0.05s both;
     }
     .campo { margin-bottom: 20px; }
     .campo label {
       display: flex; align-items: center; gap: 7px;
-      font-size: 0.85rem; font-weight: 700;
-      color: var(--cream);
-      margin-bottom: 7px;
-      letter-spacing: 0.2px;
+      font-size: 0.85rem; font-weight: 700; color: var(--cream);
+      margin-bottom: 7px; letter-spacing: 0.2px;
     }
-    .campo label i {
-      font-size: 0.95rem;
-      color: rgba(225,220,208,0.6);
-    }
-    .campo input,
-    .campo textarea,
-    .campo select {
-      width: 100%;
-      background: rgba(225,220,208,0.92);
-      border: 2px solid transparent;
-      border-radius: 14px;
-      padding: 12px 16px;
-      font-size: 0.92rem;
-      font-family: 'Quicksand', sans-serif;
-      font-weight: 500;
-      color: #1a2e1b;
-      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    .campo label i { font-size: 0.95rem; color: rgba(225,220,208,0.6); }
+    .campo input, .campo textarea, .campo select {
+      width: 100%; background: rgba(225,220,208,0.92);
+      border: 2px solid transparent; border-radius: 14px;
+      padding: 12px 16px; font-size: 0.92rem;
+      font-family: 'Quicksand', sans-serif; font-weight: 500;
+      color: #1a2e1b; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
       outline: none;
     }
-    .campo input::placeholder,
-    .campo textarea::placeholder {
-      color: rgba(30,50,30,0.45);
-    }
-    .campo input:focus,
-    .campo textarea:focus,
-    .campo select:focus {
-      border-color: var(--green-light);
-      background: var(--cream);
+    .campo input::placeholder, .campo textarea::placeholder { color: rgba(30,50,30,0.45); }
+    .campo input:focus, .campo textarea:focus, .campo select:focus {
+      border-color: var(--green-light); background: var(--cream);
       box-shadow: 0 0 0 3px rgba(88,129,87,0.2);
     }
-    .campo textarea {
-      resize: none; height: 110px;
-      border-radius: 14px;
-    }
+    .campo textarea { resize: none; height: 110px; border-radius: 14px; }
     .campo select {
-      appearance: none;
-      background-color: rgba(225,220,208,0.92);
-      padding-right: 40px;
-      cursor: pointer;
+      appearance: none; background-color: rgba(225,220,208,0.92);
+      padding-right: 40px; cursor: pointer;
     }
-    .campos-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+    .campos-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .upload-area { margin-bottom: 28px; }
     .upload-area label.label-campo {
       display: flex; align-items: center; gap: 7px;
-      font-size: 0.85rem; font-weight: 700;
-      color: var(--cream); margin-bottom: 10px;
-      letter-spacing: 0.2px;
+      font-size: 0.85rem; font-weight: 700; color: var(--cream);
+      margin-bottom: 10px; letter-spacing: 0.2px;
     }
     .upload-area label.label-campo i { color: rgba(225,220,208,0.6); }
     .upload-inner { display: flex; align-items: center; gap: 16px; }
     .upload-btn {
-      flex: 1;
-      background: rgba(225,220,208,0.15);
-      border: 2px dashed rgba(225,220,208,0.4);
-      border-radius: 14px;
-      padding: 18px 14px;
-      text-align: center;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      color: var(--cream);
+      flex: 1; background: rgba(225,220,208,0.15);
+      border: 2px dashed rgba(225,220,208,0.4); border-radius: 14px;
+      padding: 18px 14px; text-align: center; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s; color: var(--cream);
     }
-    .upload-btn:hover {
-      background: rgba(225,220,208,0.22);
-      border-color: rgba(225,220,208,0.65);
-    }
+    .upload-btn:hover { background: rgba(225,220,208,0.22); border-color: rgba(225,220,208,0.65); }
     .upload-btn i { font-size: 1.5rem; display: block; margin-bottom: 5px; opacity: 0.7; }
     .upload-btn span { font-size: 0.78rem; font-weight: 600; opacity: 0.8; }
     .preview-wrap { position: relative; flex-shrink: 0; }
     .preview-img {
-      width: 80px; height: 80px;
-      border-radius: 14px;
-      object-fit: cover;
-      border: 2px solid rgba(225,220,208,0.3);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+      width: 80px; height: 80px; border-radius: 14px; object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.3); box-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
     .preview-badge {
       position: absolute; bottom: -4px; right: -4px;
-      width: 22px; height: 22px;
-      background: var(--green-main);
-      border-radius: 50%;
+      width: 22px; height: 22px; background: var(--green-main); border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      border: 2px solid rgba(255,255,255,0.2);
-      color: #fff; font-size: 0.65rem;
+      border: 2px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.65rem;
     }
-    .divisor {
-      height: 1px;
-      background: rgba(225,220,208,0.15);
-      margin: 8px 0 24px;
-    }
+    .divisor { height: 1px; background: rgba(225,220,208,0.15); margin: 8px 0 24px; }
     .btn-confirmar {
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%;
-      background: var(--green-main);
-      color: var(--cream);
-      border: none; border-radius: 14px;
-      padding: 15px;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 16px rgba(58,90,64,0.4);
-      letter-spacing: 0.3px;
+      width: 100%; background: var(--green-main); color: var(--cream);
+      border: none; border-radius: 14px; padding: 15px;
+      font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(58,90,64,0.4); letter-spacing: 0.3px;
     }
-    .btn-confirmar:hover {
-      background: var(--green-dark);
-      box-shadow: 0 6px 22px rgba(58,90,64,0.5);
-      color: var(--cream);
-    }
+    .btn-confirmar:hover { background: var(--green-dark); box-shadow: 0 6px 22px rgba(58,90,64,0.5); }
     .btn-confirmar:active { transform: scale(0.98); }
     .btn-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
     .link-cancelar {
-      display: block; text-align: center;
-      margin-top: 14px;
-      color: rgba(225,220,208,0.55);
-      font-size: 0.82rem; font-weight: 600;
-      text-decoration: none;
-      transition: color 0.2s;
+      display: block; text-align: center; margin-top: 14px;
+      color: rgba(225,220,208,0.55); font-size: 0.82rem; font-weight: 600;
+      text-decoration: none; transition: color 0.2s;
     }
     .link-cancelar:hover { color: var(--cream); }
     .mensagem-feedback {
-      display: none;
-      margin-bottom: 16px;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-align: center;
+      display: none; margin-bottom: 16px; padding: 12px 16px;
+      border-radius: 12px; font-size: 0.85rem; font-weight: 600; text-align: center;
     }
     .mensagem-feedback.erro {
-      display: block;
-      background: rgba(220, 53, 69, 0.25);
-      color: #ffdada;
+      display: block; background: rgba(220, 53, 69, 0.25); color: #ffdada;
       border: 1px solid rgba(220, 53, 69, 0.4);
     }
     .mensagem-feedback.sucesso {
-      display: block;
-      background: rgba(88, 129, 87, 0.4);
-      color: var(--cream);
+      display: block; background: rgba(88, 129, 87, 0.4); color: var(--cream);
       border: 1px solid rgba(225,220,208,0.4);
     }
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @media (max-width: 480px) {
-      .card-form { padding: 28px 20px; }
-      .campos-row { grid-template-columns: 1fr; }
-    }
+    @keyframes fadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 480px) { .card-form { padding: 28px 20px; } .campos-row { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 
   <div class="topo">
     <img src="../imagens/logo.png" alt="Logo Mútuo" onerror="this.style.display='none'">
-    <h1>Cadastro de serviço</h1>
+    <h1>Editar serviço</h1>
   </div>
 
   <form class="card-form" id="form-servico" novalidate>
@@ -256,7 +162,7 @@
       <div class="campo">
         <label for="foco-servico"><i class="bi bi-tag-fill"></i> Foco</label>
         <select id="foco-servico" name="foco" required>
-          <option value="" disabled selected>Selecionar</option>
+          <option value="" disabled>Selecionar</option>
           <option value="educacao">Educação</option>
           <option value="saude">Saúde</option>
           <option value="animais">Animais</option>
@@ -279,7 +185,7 @@
         <input type="file" id="input-imagem" name="imagem" style="display:none" accept="image/*">
         <div class="upload-btn" onclick="document.getElementById('input-imagem').click()">
           <i class="bi bi-cloud-arrow-up"></i>
-          <span>Clique para enviar</span>
+          <span>Clique para trocar</span>
         </div>
         <div class="preview-wrap">
           <img src="../imagens/aulaCiencia.png" class="preview-img" id="preview-img" alt="Prévia">
@@ -289,18 +195,29 @@
     </div>
 
     <button type="submit" class="btn-confirmar" id="btn-confirmar">
-      <i class="bi bi-check-circle-fill"></i> Confirmar cadastro
+      <i class="bi bi-check-circle-fill"></i> Salvar alterações
     </button>
-    <a href="javascript:history.back()" class="link-cancelar">Cancelar</a>
+    <a href="perfilMutuo.html" class="link-cancelar">Cancelar</a>
 
   </form>
 
   <script>
+    const API_URL = 'http://localhost:3000';
+
     const inputImg = document.getElementById('input-imagem');
     const previewImg = document.getElementById('preview-img');
     const form = document.getElementById('form-servico');
     const btnConfirmar = document.getElementById('btn-confirmar');
     const mensagemFeedback = document.getElementById('mensagem-feedback');
+
+    // Pega o ID do serviço pela URL: editarServicoMutuo.html?id=5
+    const params = new URLSearchParams(window.location.search);
+    const idServico = params.get('id');
+
+    function mostrarMensagem(texto, tipo) {
+      mensagemFeedback.textContent = texto;
+      mensagemFeedback.className = `mensagem-feedback ${tipo}`;
+    }
 
     // ── Prévia da imagem selecionada ──
     inputImg.addEventListener('change', function () {
@@ -311,29 +228,41 @@
       }
     });
 
-    function mostrarMensagem(texto, tipo) {
-      mensagemFeedback.textContent = texto;
-      mensagemFeedback.className = `mensagem-feedback ${tipo}`;
+    // ── Carrega os dados atuais do serviço ──
+    async function carregarServico() {
+      if (!idServico) {
+        mostrarMensagem('Serviço não identificado.', 'erro');
+        btnConfirmar.disabled = true;
+        return;
+      }
+
+      try {
+        const resposta = await fetch(`${API_URL}/servicos/${idServico}`);
+        if (!resposta.ok) throw new Error('Não foi possível carregar o serviço.');
+
+        const servico = await resposta.json();
+
+        document.getElementById('nome-servico').value = servico.nomeServico || '';
+        document.getElementById('descricao-servico').value = servico.descricao || '';
+        document.getElementById('foco-servico').value = servico.foco || '';
+        document.getElementById('duracao-servico').value = servico.duracao || '';
+
+        if (servico.imagem) {
+          previewImg.src = `${API_URL}${servico.imagem}`;
+        }
+
+      } catch (erro) {
+        console.error(erro);
+        mostrarMensagem(erro.message, 'erro');
+      }
     }
 
-    // ── Envio do formulário para a API ──
+    // ── Envia as alterações ──
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       mensagemFeedback.className = 'mensagem-feedback';
 
-      // CPF do usuário logado, salvo no sessionStorage pela página de login
-      // ATENÇÃO: ajuste a chave 'usuarioLogado' se o seu login salvar com outro nome
-      const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
-      const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
-      const cpf = usuarioLogado?.cpf;
-
-      if (!cpf) {
-        mostrarMensagem('Sessão expirada. Faça login novamente.', 'erro');
-        return;
-      }
-
       const dados = new FormData();
-      dados.append('cpf', cpf);
       dados.append('nomeServico', document.getElementById('nome-servico').value);
       dados.append('descricao', document.getElementById('descricao-servico').value);
       dados.append('foco', document.getElementById('foco-servico').value);
@@ -343,21 +272,21 @@
       }
 
       btnConfirmar.disabled = true;
-      btnConfirmar.textContent = 'Enviando...';
+      btnConfirmar.textContent = 'Salvando...';
 
       try {
-        const resposta = await fetch('http://localhost:3000/servicos', {
-          method: 'POST',
+        const resposta = await fetch(`${API_URL}/servicos/${idServico}`, {
+          method: 'PUT',
           body: dados
         });
 
         const resultado = await resposta.json();
 
-        if (!resposta.ok) {
-          throw new Error(resultado.erro || 'Erro ao cadastrar serviço.');
+        if (!resposta.ok || !resultado.sucesso) {
+          throw new Error(resultado.erro || 'Erro ao salvar alterações.');
         }
 
-        mostrarMensagem('Serviço cadastrado com sucesso!', 'sucesso');
+        mostrarMensagem('Serviço atualizado com sucesso!', 'sucesso');
         setTimeout(() => {
           window.location.href = 'perfilMutuo.html';
         }, 1000);
@@ -365,9 +294,11 @@
       } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
         btnConfirmar.disabled = false;
-        btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirmar cadastro';
+        btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Salvar alterações';
       }
     });
+
+    carregarServico();
   </script>
 </body>
 </html>

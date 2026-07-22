@@ -30,7 +30,7 @@ if (_usuario.nome) {
   const elNome = document.getElementById('nomeUsuario');
   if (elNome) elNome.textContent = _usuario.nome;
 }
-carregarFoto();
+if (sessionStorage.getItem('usuarioLogado')) carregarFoto();
 
 
   async function enviarFoto(input) {
@@ -80,7 +80,7 @@ async function carregarFotoOng() {
   }
 }
 
-carregarFotoOng();
+if (sessionStorage.getItem('ongLogada')) carregarFotoOng();
 
 async function enviarFotoOng(input) {
   const arquivo = input.files[0];

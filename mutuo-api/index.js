@@ -12,6 +12,20 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.patch('/servicos/:id/status', async (req, res) => {
+  try {
+    const { ativo } = req.body || {};
+
+    if (ativo === undefined) {
+      return res.status(400).json({ sucesso: false, erro: 'Campo "ativo" não informado.' });
+    }
+
+    await db.atualizarStatusServico(req.params.id, ativo);
+    res.json({ sucesso: true });
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
 
 // Garante que a pasta existe
 const pastaFotos = path.join(__dirname, 'uploads', 'fotos');
@@ -149,10 +163,35 @@ app.put('/ongs/:cnpj/perfil', async (req, res) => {
 });
 
 app.get('/servicos', async (req, res) => res.json(await db.getServicos()));
-app.put('/servicos/:cod', async (req, res) => {
-    const cod = decodeURIComponent(req.params.cod);
-    const { ativo, horas, foco, nota } = req.body;
-    res.json(await db.alterServico(cod, ativo, horas, foco, nota));
+
+// ── Cadastro de Serviço do Usuário ──
+app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
+  try {
+    const { nomeServico, descricao, foco, duracao, cpf } = req.body;
+
+    if (!nomeServico || !descricao || !foco || !duracao || !cpf) {
+      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+    }
+
+    const imagem = req.file ? req.file.filename : null;
+
+    const id = await db.cadastrarServico({
+      nomeServico,
+      descricao,
+      foco,
+      duracao,
+      cpf,
+      imagem
+    });
+
+    res.json({
+      sucesso: true,
+      id,
+      imagem: imagem ? `/uploads/servicos/${imagem}` : null
+    });
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
 });
 
 // ── Cadastro de Serviço da ONG ──
@@ -180,6 +219,54 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
       id,
       imagem: imagem ? `/uploads/servicos/${imagem}` : null
     });
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
+// Lista os serviços cadastrados por um usuário comum
+app.get('/servicos/usuario/:cpf', async (req, res) => {
+  const servicos = await db.getServicosUsuario(req.params.cpf);
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+  res.json(servicos);
+});
+
+// Busca um serviço específico (para preencher o formulário de edição)
+app.get('/servicos/:id', async (req, res) => {
+  try {
+    const servico = await db.getServicoPorId(req.params.id);
+    if (!servico) return res.status(404).json({ erro: 'Serviço não encontrado.' });
+    if (servico.error) return res.status(500).json({ erro: servico.error });
+
+    res.json({
+      ...servico,
+      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null
+    });
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// Atualiza um serviço do usuário
+app.put('/servicos/:id', uploadServico.single('imagem'), async (req, res) => {
+  try {
+    const { nomeServico, descricao, foco, duracao } = req.body;
+
+    if (!nomeServico || !descricao || !foco || !duracao) {
+      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+    }
+
+    const imagem = req.file ? req.file.filename : null;
+
+    await db.atualizarServico(req.params.id, {
+      nomeServico,
+      descricao,
+      foco,
+      duracao,
+      imagem
+    });
+
+    res.json({ sucesso: true });
   } catch (e) {
     res.status(500).json({ sucesso: false, erro: e.message });
   }
