@@ -27,7 +27,7 @@
       padding-top: 72px;
     }
 
-    /* ── BARRA DE NAVEGAÇÃO ── */
+   
     .barra-nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       background-color: var(--verde-principal);
@@ -111,7 +111,7 @@
       white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* ── HERÓI DE BUSCA ── */
+   
     .heroi-busca {
       background: var(--verde-principal);
       padding: 3rem 2rem 3.5rem;
@@ -159,7 +159,7 @@
     }
     .botao-buscar:hover { background: var(--verde-escuro); }
 
-    /* ── FILTROS ── */
+   
     .area-filtros {
       margin: 1.5rem 2rem;
       animation: subirFade 0.45s ease 0.05s both;
@@ -198,7 +198,7 @@
       border-color: var(--verde-principal);
     }
 
-    /* ── GRADE DE CARTÕES ── */
+   
     .area-cartoes {
       margin: 0 2rem 3rem;
       animation: subirFade 0.5s ease 0.1s both;
@@ -369,7 +369,7 @@
     .botao-inscrever:hover { background: var(--verde-escuro); }
     .botao-inscrever:active { transform: scale(0.98); }
 
-    /* ── ANIMAÇÕES ── */
+    
     @keyframes descerFade {
       from { opacity: 0; transform: translateY(-8px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -379,7 +379,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── RESPONSIVO ── */
+   
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-perfil span { display: none; }
@@ -392,7 +392,7 @@
 </head>
 <body>
 
-<!-- BARRA DE NAVEGAÇÃO -->
+
 <nav class="barra-nav">
   <a class="nav-marca" href="#">
     <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
@@ -429,7 +429,7 @@
   </div>
 </nav>
 
-<!-- HERÓI DE BUSCA -->
+
 <section class="heroi-busca">
   <div class="heroi-busca-interno">
     <h2>Encontre serviços solidários e apoie ONGs</h2>
@@ -442,7 +442,7 @@
   </div>
 </section>
 
-<!-- FILTROS -->
+
 <div class="area-filtros">
   <div class="topo-filtros">
     <span class="contador-resultados"><strong id="labelContador">5</strong> serviços encontrados</span>
@@ -461,7 +461,7 @@
   </div>
 </div>
 
-<!-- CARTÕES -->
+
 <div class="area-cartoes">
   <div class="grade-cartoes" id="gradeCartoes">
 
@@ -619,9 +619,7 @@
   </div>
 </div>
 
-<!-- ── MODAIS ── -->
 
-<!-- Modal Passeio -->
 <div class="sobreposicao-modal" id="modalPasseio">
   <div class="folha-modal">
     <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorros" class="imagem-modal" onerror="this.style.display='none'">
@@ -668,7 +666,7 @@
   </div>
 </div>
 
-<!-- Modal Limpeza -->
+
 <div class="sobreposicao-modal" id="modalLimpeza">
   <div class="folha-modal">
     <img src="../imagens/banho.png" alt="Limpeza dos animais" class="imagem-modal" onerror="this.style.display='none'">
@@ -715,7 +713,7 @@
   </div>
 </div>
 
-<!-- Modal Feira -->
+
 <div class="sobreposicao-modal" id="modalFeira">
   <div class="folha-modal">
     <img src="../imagens/feira.png" alt="Feira de adoções" class="imagem-modal" onerror="this.style.display='none'">
@@ -762,7 +760,7 @@
   </div>
 </div>
 
-<!-- Modal Transporte -->
+
 <div class="sobreposicao-modal" id="modalTransporte">
   <div class="folha-modal">
     <img src="../imagens/transporte.png" alt="Transporte de animais" class="imagem-modal" onerror="this.style.display='none'">
@@ -809,7 +807,7 @@
   </div>
 </div>
 
-<!-- Modal Lar Temporário -->
+
 <div class="sobreposicao-modal" id="modalLar">
   <div class="folha-modal">
     <img src="../imagens/lar.png" alt="Acolhimento temporário" class="imagem-modal" onerror="this.style.display='none'">
@@ -857,7 +855,7 @@
 </div>
 
 <script>
-  /* FILTRO DE CATEGORIA */
+  
   function filtrarCategoria(botao) {
     document.querySelectorAll('.pilula-categoria').forEach(p => p.classList.remove('ativa'));
     botao.classList.add('ativa');
@@ -872,7 +870,7 @@
     document.getElementById('labelContador').textContent = visiveis;
   }
 
-  /* FILTRO DE BUSCA */
+
   function filtrarCartoes() {
     const termo = document.getElementById('campoBusca').value.toLowerCase();
     const catAtiva = document.querySelector('.pilula-categoria.ativa')?.dataset.categoria || 'todos';
@@ -888,7 +886,7 @@
     document.getElementById('labelContador').textContent = visiveis;
   }
 
-  /* MODAIS */
+ 
   function abrirModal(id) {
     document.getElementById(id).classList.add('aberto');
     document.body.style.overflow = 'hidden';
@@ -901,7 +899,7 @@
     m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
   });
 
-  /* Inicializar com categoria "animais" ativa */
+
   window.addEventListener('load', () => {
     filtrarCategoria(document.querySelector('.pilula-categoria.ativa'));
   });
