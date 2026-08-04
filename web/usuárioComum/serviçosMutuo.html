@@ -109,7 +109,7 @@
       white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* ── HERO SEARCH ── */
+  
     .hero-search {
       background: var(--green-main);
       padding: 3rem 2rem 3.5rem;
@@ -158,7 +158,7 @@
     }
     .btn-search:hover { background: var(--green-dark); }
 
-    /* ── FILTERS SECTION ── */
+   
     .filters-wrap {
       margin: 1.5rem 2rem;
       animation: fadeUp 0.45s ease 0.05s both;
@@ -182,7 +182,7 @@
     }
     .btn-filter:hover { border-color: var(--green-main); background: var(--cream-light); }
 
-    /* Category pills */
+    
     .cats {
       display: flex; flex-wrap: wrap; gap: 8px;
     }
@@ -200,7 +200,7 @@
       border-color: var(--green-main);
     }
 
-    /* ── CARDS GRID ── */
+  
     .cards-wrap {
       margin: 0 2rem 3rem;
       animation: fadeUp 0.5s ease 0.1s both;
@@ -280,7 +280,7 @@
     .btn-saiba:hover { background: var(--green-dark); }
     .btn-saiba:active { transform: scale(0.98); }
 
-    /* ── MODAL ── */
+   
     .modal-overlay {
       display: none; position: fixed; inset: 0; z-index: 200;
       background: rgba(30,46,31,0.55); backdrop-filter: blur(4px);
@@ -365,7 +365,7 @@
     .btn-inscribe:hover { background: var(--green-dark); }
     .btn-inscribe:active { transform: scale(0.98); }
 
-    /* ── ANIMATIONS ── */
+   
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-8px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -375,7 +375,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── RESPONSIVE ── */
+  
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-profile span { display: none; }
@@ -425,7 +425,7 @@
   </div>
 </nav>
 
-<!-- HERO SEARCH -->
+
 <section class="hero-search">
   <div class="hero-search-inner">
     <h2>Encontre Serviços na Sua Comunidade</h2>
@@ -438,7 +438,7 @@
   </div>
 </section>
 
-<!-- FILTERS -->
+
 <div class="filters-wrap">
   <div class="filters-top">
     <span class="results-count"><strong id="countLabel">7</strong> serviços encontrados</span>
@@ -460,7 +460,7 @@
   </div>
 </div>
 
-<!-- CARDS -->
+
 <div class="cards-wrap">
   <div class="cards-grid" id="cardsGrid">
 
@@ -663,9 +663,7 @@
   </div>
 </div>
 
-<!-- ── MODALS ── -->
 
-<!-- Modal Culinária -->
 <div class="modal-overlay" id="modalAula">
   <div class="modal-sheet">
     <img src="../imagens/aula.png" alt="Aula de culinária" class="modal-img" onerror="this.style.display='none'">
@@ -712,7 +710,7 @@
   </div>
 </div>
 
-<!-- Modal Manutenção -->
+
 <div class="modal-overlay" id="modalManutencao">
   <div class="modal-sheet">
     <img src="../imagens/manutencao.png" alt="Conserto de geladeira" class="modal-img" onerror="this.style.display='none'">
@@ -752,7 +750,7 @@
   </div>
 </div>
 
-<!-- Modal Yoga -->
+
 <div class="modal-overlay" id="modalYoga">
   <div class="modal-sheet">
     <img src="../imagens/yoga.png" alt="Aula de yoga" class="modal-img" onerror="this.style.display='none'">
@@ -799,7 +797,7 @@
   </div>
 </div>
 
-<!-- Modal Violão -->
+
 <div class="modal-overlay" id="modalViolao">
   <div class="modal-sheet">
     <img src="../imagens/violao.png" alt="Aula de violão" class="modal-img" onerror="this.style.display='none'">
@@ -847,7 +845,7 @@
 </div>
 
 <script>
-  /* CATEGORY FILTER */
+
   function filterCat(btn) {
     document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
@@ -862,7 +860,7 @@
     document.getElementById('countLabel').textContent = visible;
   }
 
-  /* SEARCH FILTER */
+ 
   function filterCards() {
     const q = document.getElementById('searchInput').value.toLowerCase();
     const cards = document.querySelectorAll('.svc-card');
@@ -878,7 +876,7 @@
     document.getElementById('countLabel').textContent = visible;
   }
 
-  /* MODALS */
+ 
   function openModal(id) {
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';

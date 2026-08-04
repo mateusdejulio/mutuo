@@ -81,14 +81,13 @@
     .nav-profile img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
     .nav-profile span { color: var(--cream); font-size: 0.84rem; font-weight: 500; }
 
-    /* ── PAGE WRAPPER ── */
+   
     .page {
       max-width: 720px;
       margin: 0 auto;
       padding: 32px 16px 60px;
     }
 
-    /* ── CABEÇALHO DA PÁGINA ── */
     .page-header {
       display: flex;
       align-items: center;
@@ -125,7 +124,7 @@
     }
     .mark-all:hover { background: var(--green-pale); }
 
-    /* ── FILTROS ── */
+   
     .filters {
       display: flex;
       gap: 6px;
@@ -157,7 +156,6 @@
       color: #fff;
     }
 
-    /* ── LISTA ── */
     .notif-list {
       display: flex;
       flex-direction: column;
@@ -165,7 +163,7 @@
       animation: fadeUp 0.4s ease 0.1s both;
     }
 
-    /* ── CARD ── */
+
     .notif-card {
       display: flex;
       align-items: flex-start;
@@ -193,7 +191,6 @@
       border-radius: 16px 0 0 16px;
     }
 
-    /* Avatar */
     .notif-avatar {
       position: relative;
       flex-shrink: 0;
@@ -218,7 +215,7 @@
     .type-icon.req   { background: #e08c2c; }
     .type-icon.order { background: #3a7bbf; }
 
-    /* Body */
+
     .notif-body { flex: 1; min-width: 0; }
 
     .notif-top {
@@ -261,7 +258,7 @@
     }
     .notif-service i { margin-right: 4px; font-size: 0.75rem; }
 
-    /* Ações */
+   
     .notif-actions {
       display: flex;
       gap: 8px;
@@ -297,7 +294,7 @@
     }
     .action-btn.message:hover { background: var(--green-pale); }
 
-    /* Timestamp */
+   
     .notif-time {
       font-size: 0.72rem;
       color: #b0bfac;
@@ -307,7 +304,7 @@
       margin-top: 2px;
     }
 
-    /* Empty state */
+    
     .empty {
       text-align: center;
       padding: 48px 20px;
@@ -316,7 +313,6 @@
     .empty i { font-size: 2.5rem; margin-bottom: 12px; display: block; opacity: 0.4; }
     .empty p { font-size: 0.9rem; font-weight: 600; }
 
-    /* Animations */
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-8px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -366,7 +362,7 @@
     </div>
   </nav>
 
-  <!-- PAGE -->
+  
   <div class="page">
 
     <div class="page-header">
@@ -386,7 +382,7 @@
       <button class="filter-btn" data-target="mensagens">Mensagens</button>
     </div>
 
-    <!-- TODAS -->
+   
     <div class="notif-list" id="todas">
 
       <div class="notif-card unread" data-id="1">
