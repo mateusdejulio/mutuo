@@ -96,6 +96,21 @@
       color: rgba(225, 220, 208, 0.6)
     }
 
+    .campo label .spinner-cep {
+      display: none;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(225, 220, 208, 0.35);
+      border-top-color: var(--cream);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-left: 2px
+    }
+
+    .campo label .spinner-cep.ativo {
+      display: inline-block
+    }
+
     .campo input,
     .campo select {
       width: 100%;
@@ -120,6 +135,15 @@
       border-color: var(--green-light);
       background: var(--cream);
       box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.2)
+    }
+
+    .campo input:disabled {
+      opacity: 0.75;
+      cursor: not-allowed
+    }
+
+    .campo input.preenchido-auto {
+      border-color: var(--green-light)
     }
 
     .campos-row {
@@ -212,6 +236,12 @@
       }
     }
 
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
     @media(max-width:480px) {
       .card-form {
         padding: 28px 20px
@@ -231,8 +261,13 @@
   </div>
   <div class="card-form">
     <div class="campo">
+      <label for="cep"><i class="bi bi-mailbox-fill"></i> CEP <span class="spinner-cep" id="spinnerCep"></span></label>
+      <input type="text" id="cep" placeholder="00000-000" required autofocus>
+      <p class="erro" id="erroCep"></p>
+    </div>
+    <div class="campo">
       <label for="endereco"><i class="bi bi-geo-alt-fill"></i> Endereço</label>
-      <input type="text" id="endereco" placeholder="Rua e N°" required autofocus>
+      <input type="text" id="endereco" placeholder="Rua e N°" required>
       <p class="erro" id="erroEndereco"></p>
     </div>
     <div class="campo">
@@ -251,11 +286,6 @@
         <input type="text" id="estado" placeholder="Ex: SP" maxlength="2" required>
         <p class="erro" id="erroEstado"></p>
       </div>
-      <div class="campo">
-        <label for="cep"><i class="bi bi-mailbox-fill"></i> CEP</label>
-        <input type="text" id="cep" placeholder="00000-000" required>
-        <p class="erro" id="erroCep"></p>
-      </div>
     </div>
     <div class="divisor"></div>
     <button class="btn-confirmar" id="finalizar" type="button">
@@ -268,13 +298,67 @@ document.getElementById('estado').addEventListener('input', function () {
   this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
 });
 
-document.getElementById('cep').addEventListener('input', function () {
+const inputCep      = document.getElementById('cep');
+const inputEndereco = document.getElementById('endereco');
+const inputBairro   = document.getElementById('bairro');
+const inputCidade   = document.getElementById('cidade');
+const inputEstado   = document.getElementById('estado');
+const spinnerCep    = document.getElementById('spinnerCep');
+const erroCepEl     = document.getElementById('erroCep');
+
+inputCep.addEventListener('input', function () {
   let v = this.value.replace(/\D/g, '').slice(0, 8);
   if (v.length > 5) {
     v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
   }
   this.value = v;
+  erroCepEl.textContent = '';
+
+  const cepNums = v.replace(/\D/g, '');
+  if (cepNums.length === 8) {
+    buscarCep(cepNums);
+  }
 });
+
+async function buscarCep(cep) {
+  spinnerCep.classList.add('ativo');
+  [inputEndereco, inputBairro, inputCidade, inputEstado].forEach(el => el.disabled = true);
+
+  try {
+    const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    if (!resp.ok) throw new Error('Falha na consulta do CEP.');
+    const dados = await resp.json();
+
+    if (dados.erro) {
+      erroCepEl.textContent = 'CEP não encontrado.';
+      return;
+    }
+
+    inputEndereco.value = dados.logradouro || '';
+    inputBairro.value   = dados.bairro || '';
+    inputCidade.value   = dados.localidade || '';
+    inputEstado.value   = dados.uf || '';
+
+    [inputEndereco, inputBairro, inputCidade, inputEstado].forEach(el => {
+      el.classList.add('preenchido-auto');
+    });
+
+    // Se o logradouro veio vazio (CEPs genéricos), deixa o usuário digitar
+    if (!dados.logradouro) {
+      inputEndereco.focus();
+    } else {
+      inputEndereco.focus();
+      inputEndereco.select();
+    }
+
+  } catch (e) {
+    console.error('Erro ao buscar CEP:', e);
+    erroCepEl.textContent = 'Não foi possível buscar o CEP. Preencha manualmente.';
+  } finally {
+    spinnerCep.classList.remove('ativo');
+    [inputEndereco, inputBairro, inputCidade, inputEstado].forEach(el => el.disabled = false);
+  }
+}
 
 document.getElementById('finalizar').addEventListener('click', async () => {
 
