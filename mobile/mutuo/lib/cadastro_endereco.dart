@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mutuo/services/api_service.dart';
 import 'inicialUser.dart';
 import 'inicialOng.dart';
+import 'utils/input_formatters.dart';
 
 class CadastroEndereco extends StatefulWidget {
   final String tipoConta;
@@ -130,22 +132,21 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
     Map<String, dynamic> resultado;
 
     if (_isOng) {
-  resultado = await api.cadastrarOng({
-    'nomeOng': widget.nomeOng,
-    'cnpj': widget.cnpj.replaceAll(RegExp(r'[^0-9]'), ''),
-    'email': widget.email,
-    'nomeResponsavel': widget.nome,
-    'telefone': widget.telefone,
-    'cidade': cidadeController.text,
-    'bairro': bairroController.text,
-    'endereco': enderecoController.text,
-    'uf': estadoSelecionado,
-    'senha': widget.senha,
-    'foco': widget.foco,
-    'descricao': widget.descricao,
-  });
-}
-     else {
+      resultado = await api.cadastrarOng({
+        'nomeOng': widget.nomeOng,
+        'cnpj': widget.cnpj.replaceAll(RegExp(r'[^0-9]'), ''),
+        'email': widget.email,
+        'nomeResponsavel': widget.nome,
+        'telefone': widget.telefone,
+        'cidade': cidadeController.text,
+        'bairro': bairroController.text,
+        'endereco': enderecoController.text,
+        'uf': estadoSelecionado,
+        'senha': widget.senha,
+        'foco': widget.foco,
+        'descricao': widget.descricao,
+      });
+    } else {
       resultado = await api.cadastrarUsuario({
         'cpf': widget.cpf.replaceAll(RegExp(r'[^0-9]'), ''),
         'nome': widget.nome,
@@ -279,6 +280,7 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
                                     controller: cepController,
                                     hint: "00000-000",
                                     keyboardType: TextInputType.number,
+                                    inputFormatters: [InputMasks.cep()],
                                     validator: (v) =>
                                         v!.isEmpty ? "Digite o CEP" : null,
                                   ),
@@ -439,6 +441,7 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
     required String hint,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5),
@@ -446,6 +449,7 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
         controller: controller,
         validator: validator,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           hintText: hint,
           filled: true,

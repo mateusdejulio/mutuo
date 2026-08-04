@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'cadastro_documento.dart';
+import 'utils/input_formatters.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -188,8 +190,16 @@ class _CadastroState extends State<Cadastro> {
                               controller: telefoneController,
                               hint: "(19) 99999-9999",
                               keyboardType: TextInputType.phone,
-                              validator: (v) =>
-                                  v!.isEmpty ? "Digite o telefone" : null,
+                              inputFormatters: [InputMasks.telefone()],
+                              validator: (v) {
+                                if (v!.isEmpty) return "Digite o telefone";
+                                final numeros =
+                                    v.replaceAll(RegExp(r'[^0-9]'), '');
+                                if (numeros.length < 10) {
+                                  return "Telefone incompleto";
+                                }
+                                return null;
+                              },
                             ),
 
                             const SizedBox(height: 25),
@@ -280,6 +290,7 @@ class _CadastroState extends State<Cadastro> {
     TextInputType? keyboardType,
     bool obscureText = false,
     Widget? suffixIcon,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5),
@@ -288,6 +299,7 @@ class _CadastroState extends State<Cadastro> {
         validator: validator,
         keyboardType: keyboardType,
         obscureText: obscureText,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           hintText: hint,
           filled: true,

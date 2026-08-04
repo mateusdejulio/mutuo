@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'cadastro_endereco.dart';
+import 'utils/input_formatters.dart';
 
 class CadastroDocumento extends StatefulWidget {
   final String tipoConta;
@@ -215,6 +217,7 @@ class _CadastroDocumentoState extends State<CadastroDocumento> {
         controller: cpfController,
         hint: "000.000.000-00",
         keyboardType: TextInputType.number,
+        inputFormatters: [InputMasks.cpf()],
         validator: (v) {
           if (v!.isEmpty) return "Digite o CPF";
           final numeros = v.replaceAll(RegExp(r'[^0-9]'), '');
@@ -253,6 +256,7 @@ class _CadastroDocumentoState extends State<CadastroDocumento> {
         controller: cnpjController,
         hint: "00.000.000/0000-00",
         keyboardType: TextInputType.number,
+        inputFormatters: [InputMasks.cnpj()],
         validator: (v) {
           if (v!.isEmpty) return "Digite o CNPJ";
           final numeros = v.replaceAll(RegExp(r'[^0-9]'), '');
@@ -260,7 +264,6 @@ class _CadastroDocumentoState extends State<CadastroDocumento> {
           return null;
         },
       ),
-
 
       const SizedBox(height: 15),
 
@@ -312,6 +315,7 @@ class _CadastroDocumentoState extends State<CadastroDocumento> {
     bool readOnly = false,
     VoidCallback? onTap,
     int maxLines = 1,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5),
@@ -322,6 +326,7 @@ class _CadastroDocumentoState extends State<CadastroDocumento> {
         readOnly: readOnly,
         onTap: onTap,
         maxLines: maxLines,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           hintText: hint,
           filled: true,
