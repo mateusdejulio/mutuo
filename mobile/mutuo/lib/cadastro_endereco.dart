@@ -177,7 +177,7 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
       } else {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => InicialUsuario(nome: widget.nome)),
+          MaterialPageRoute(builder: (_) => InicialUsuario(nome: widget.nome, cpf: '',)),
           (route) => false,
         );
       }

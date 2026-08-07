@@ -4,6 +4,7 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
+import 'package:mutuo/perfil.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 class Vaga {
@@ -151,8 +152,9 @@ class _AcessoData {
 // ─── TELA PRINCIPAL ───────────────────────────────────────
 class InicialUsuario extends StatefulWidget {
   final String nome;
+  final String cpf;
 
-  const InicialUsuario({super.key, required this.nome});
+  const InicialUsuario({super.key, required this.nome, required this.cpf});
 
   @override
   State<InicialUsuario> createState() => _InicialUsuarioState();
@@ -453,6 +455,16 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),
                 );
+              } else if (value == 'meu_perfil') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PerfilUsuario(
+                      cpf: widget.cpf,
+                      nomeInicial: widget.nome,
+                    ),
+                  ),
+                );
               } else if (value == 'quem_somos') {
                 Navigator.push(
                   context,
@@ -467,6 +479,19 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               borderRadius: BorderRadius.circular(14),
             ),
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'meu_perfil',
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline, size: 18, color: _verde),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Meu Perfil",
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'quem_somos',
                 child: Row(

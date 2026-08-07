@@ -35,11 +35,15 @@ class _LoginState extends State<Login> {
     final resUsuario = await api.fazerLoginUsuario(email, senha);
 
     if (resUsuario['sucesso'] == true) {
-      final nome = resUsuario['usuario']['nome'] ?? email;
+      final dadosUsuario = resUsuario['usuario'] ?? {};
+      final nome = dadosUsuario['nome'] ?? email;
+      final cpf = dadosUsuario['cpf']?.toString() ?? '';
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => InicialUsuario(nome: nome)),
+        MaterialPageRoute(
+          builder: (_) => InicialUsuario(nome: nome, cpf: cpf),
+        ),
       );
       return;
     }
@@ -64,10 +68,7 @@ class _LoginState extends State<Login> {
 
   void _mostrarErro(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.redAccent,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.redAccent),
     );
   }
 
@@ -205,7 +206,10 @@ class _LoginState extends State<Login> {
                               )
                             : const Text(
                                 "Entrar",
-                                style: TextStyle(fontSize: 16, color: Colors.white),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
                               ),
                       ),
                     ),

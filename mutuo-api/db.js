@@ -75,6 +75,36 @@ async function getUsuarios() {
   return rows;
 }
 
+// Busca os dados completos de UM usuário específico pelo CPF (usado na tela de perfil)
+async function getUsuarioPorCpf(cpf) {
+  try {
+    const [rows] = await pool.query('SELECT * FROM Mutuo_Usuario WHERE cpf = ?', [cpf]);
+    if (rows.length === 0) return null;
+
+    // nunca devolve a senha pro front-end
+    const usuario = rows[0];
+    delete usuario.senha;
+    return usuario;
+  } catch (err) {
+    console.error('Erro ao buscar usuário por cpf:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone)
+async function atualizarDadosUsuario(cpf, { nome, email, telefone }) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_Usuario SET nome = ?, email = ?, telefone = ? WHERE cpf = ?',
+      [nome, email, telefone, cpf]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Erro ao atualizar dados do usuário:', err.message);
+    return { error: err.message };
+  }
+}
+
 async function getONGs() {
   const [rows] = await pool.query('SELECT cnpj, nomeOng, nomeResponsavel, email, foco, ativo, premium FROM Mutuo_ONG');
   return rows;
@@ -652,6 +682,8 @@ async function alterarStatusServicoOng(id, ativo) {
 
 module.exports = { 
   getUsuarios, 
+  getUsuarioPorCpf,
+  atualizarDadosUsuario,
   validarLogin, 
   validarLoginUsuario,
    validarLoginOng,
