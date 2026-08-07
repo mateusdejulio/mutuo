@@ -121,9 +121,29 @@ app.post('/usuarios', async (req, res) => {
         res.json({ sucesso: true, id });
     } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
 });
+
+// Busca os dados completos de UM usuário específico (usado na tela de perfil)
+app.get('/usuarios/:cpf', async (req, res) => {
+  const usuario = await db.getUsuarioPorCpf(req.params.cpf);
+  if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado' });
+  if (usuario.error) return res.status(500).json({ erro: usuario.error });
+  res.json(usuario);
+});
+
 app.put('/usuarios/:cpf', async (req, res) => {
     const { ativo, pontos, horas } = req.body;
     res.json(await db.alterUsuario(req.params.cpf, ativo, pontos, horas));
+});
+
+// Atualiza os campos editáveis do perfil do usuário (nome, email, telefone)
+app.put('/usuarios/:cpf/perfil', async (req, res) => {
+  const { nome, email, telefone } = req.body;
+  if (!nome || !email) {
+    return res.status(400).json({ erro: 'Nome e e-mail são obrigatórios' });
+  }
+  const resultado = await db.atualizarDadosUsuario(req.params.cpf, { nome, email, telefone });
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
 });
 
 // ── Rotas de ONGs e Serviços ──

@@ -50,7 +50,8 @@ class _QuemSomosState extends State<QuemSomos> {
         context,
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 250),
-          pageBuilder: (_, __, ___) => InicialUsuario(nome: widget.nome),
+          pageBuilder: (_, __, ___) =>
+              InicialUsuario(nome: widget.nome, cpf: ''),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
