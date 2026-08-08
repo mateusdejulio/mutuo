@@ -749,6 +749,84 @@ async function getServicosUsuarioTodos() {
   }
 }
 
+// Cria uma nova solicitação de um usuário em um serviço
+async function cadastrarSolicitacao(codServico, codUsuario, pontos) {
+  const sql = `
+    INSERT INTO Mutuo_Solicitacao
+    (codServico, codUsuario, statusSolicitacao, statusExecucao, dataSolicitacao, pontos)
+    VALUES (?, ?, 'Pendente', 'Não iniciado', NOW(), ?)
+  `;
+
+  try {
+    const [result] = await pool.query(sql, [codServico, codUsuario, pontos]);
+    return { success: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao cadastrar solicitação:', err.message);
+    return { error: err.message };
+  }
+}
+// Solicitações que ESTE usuário recebeu (ele é o dono do serviço)
+async function getSolicitacoesPrestador(cpfPrestador) {
+  const sql = `
+    SELECT 
+      SOL.codSolicitacao,
+      SOL.statusSolicitacao,
+      SOL.statusExecucao,
+      SOL.dataSolicitacao,
+      SOL.pontos,
+      SERV.nome AS nomeServico,
+      USOL.nome AS nomeSolicitador,
+      USOL.cpf AS cpfSolicitador,
+      USOL.foto_perfil AS fotoSolicitador
+    FROM Mutuo_Solicitacao AS SOL
+    JOIN Mutuo_Servico AS SERV ON SOL.codServico = SERV.cod
+    JOIN Mutuo_Usuario AS USOL ON SOL.codUsuario = USOL.cpf
+    WHERE SERV.idUsuario = ?
+    ORDER BY SOL.dataSolicitacao DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cpfPrestador]);
+    return rows.map(r => ({
+      ...r,
+      fotoSolicitador: r.fotoSolicitador ? `/uploads/fotos/${r.fotoSolicitador}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar solicitações do prestador:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Solicitações que ESTE usuário enviou (ele é quem pediu o serviço)
+async function getSolicitacoesUsuario(cpfUsuario) {
+  const sql = `
+    SELECT 
+      SOL.codSolicitacao,
+      SOL.statusSolicitacao,
+      SOL.statusExecucao,
+      SOL.dataSolicitacao,
+      SOL.pontos,
+      SERV.nome AS nomeServico,
+      UPRES.nome AS nomePrestador,
+      UPRES.cpf AS cpfPrestador,
+      UPRES.foto_perfil AS fotoPrestador
+    FROM Mutuo_Solicitacao AS SOL
+    JOIN Mutuo_Servico AS SERV ON SOL.codServico = SERV.cod
+    JOIN Mutuo_Usuario AS UPRES ON SERV.idUsuario = UPRES.cpf
+    WHERE SOL.codUsuario = ?
+    ORDER BY SOL.dataSolicitacao DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cpfUsuario]);
+    return rows.map(r => ({
+      ...r,
+      fotoPrestador: r.fotoPrestador ? `/uploads/fotos/${r.fotoPrestador}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar solicitações do usuário:', err.message);
+    return { error: err.message };
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   getUsuarioPorCpf,
@@ -803,5 +881,8 @@ module.exports = {
   atualizarServicoOng,
   alterarStatusServicoOng,
   getServicosOngTodos,
-  getServicosUsuarioTodos
+  getServicosUsuarioTodos,
+  cadastrarSolicitacao,
+  getSolicitacoesPrestador,
+  getSolicitacoesUsuario
 };

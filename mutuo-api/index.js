@@ -417,6 +417,35 @@ app.get('/servicos-usuario', async (req, res) => {
   res.json(servicos);
 });
 
+// Cria uma nova solicitação (inscrição em um serviço)
+app.post('/solicitacoes', async (req, res) => {
+  try {
+    const { codServico, codUsuario, pontos } = req.body;
+
+    if (!codServico || !codUsuario) {
+      return res.status(400).json({ erro: 'codServico e codUsuario são obrigatórios.' });
+    }
+
+    const resultado = await db.cadastrarSolicitacao(codServico, codUsuario, pontos || 0);
+    if (resultado.error) return res.status(500).json({ erro: resultado.error });
+
+    res.json(resultado);
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+app.get('/solicitacoes/prestador/:cpf', async (req, res) => {
+  const solicitacoes = await db.getSolicitacoesPrestador(req.params.cpf);
+  if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });
+  res.json(solicitacoes);
+});
+
+app.get('/solicitacoes/usuario/:cpf', async (req, res) => {
+  const solicitacoes = await db.getSolicitacoesUsuario(req.params.cpf);
+  if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });
+  res.json(solicitacoes);
+});
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.

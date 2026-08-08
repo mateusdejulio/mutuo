@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mútuo |S Notificações</title>
+  <title>Mútuo | Notificações</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="../imagens/mutuoLogo.png">
@@ -41,7 +41,7 @@
     .nav-brand {
       display: flex; align-items: center; gap: 10px;
       text-decoration: none;
-      font-size: 1.55rem; font-weight: 700;
+      font-size: 1.55rem; 
       color: var(--cream);
       letter-spacing: 0.4px;
       margin-right: 2rem;
@@ -293,7 +293,7 @@
       color: var(--green-dark);
     }
     .action-btn.message:hover { background: var(--green-pale); }
-
+    
    
     .notif-time {
       font-size: 0.72rem;
@@ -370,9 +370,6 @@
         <h1>Notificações</h1>
         <span class="counter-badge" id="counter-badge">2 novas</span>
       </div>
-      <button class="mark-all" onclick="markAllRead()">
-        <i class="bi bi-check2-all"></i> Marcar todas como lidas
-      </button>
     </div>
 
     <div class="filters">
@@ -382,280 +379,161 @@
       <button class="filter-btn" data-target="mensagens">Mensagens</button>
     </div>
 
-   
-    <div class="notif-list" id="todas">
-
-      <div class="notif-card unread" data-id="1">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil4.png" alt="Mateus" onerror="this.src='https://ui-avatars.com/api/?name=MD&background=588157&color=fff'">
-          <span class="type-icon msg"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Nova mensagem</span>
-          </div>
-          <p class="notif-name">Mateus De Julio</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Aula de yoga</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 5 min</span>
-      </div>
-
-      <div class="notif-card unread" data-id="2">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil1.png" alt="Luisa" onerror="this.src='https://ui-avatars.com/api/?name=LA&background=e08c2c&color=fff'">
-          <span class="type-icon req"><i class="bi bi-person-fill"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Solicitação recebida</span>
-            <span class="status-pill pendente">Pendente</span>
-          </div>
-          <p class="notif-name">Luisa Andrade</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Aula de yoga</p>
-          <div class="notif-actions">
-            <button class="action-btn accept" onclick="handleAction(this,'aceito')"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
-            <button class="action-btn decline" onclick="handleAction(this,'recusado')"><i class="bi bi-x-circle-fill"></i> Recusar</button>
-          </div>
-        </div>
-        <span class="notif-time">Há 30 min</span>
-      </div>
-
-      <div class="notif-card" data-id="3">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.src='https://ui-avatars.com/api/?name=ML&background=3a7bbf&color=fff'">
-          <span class="type-icon order"><i class="bi bi-arrow-down-up"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Seu pedido</span>
-            <span class="status-pill pendente">Pendente</span>
-          </div>
-          <p class="notif-name">Mariana Lacerda</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Consultoria de moda</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 2 h</span>
-      </div>
-
-      <div class="notif-card" data-id="4">
-        <div class="notif-avatar">
-          <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.src='https://ui-avatars.com/api/?name=IC&background=3a7bbf&color=fff'">
-          <span class="type-icon order"><i class="bi bi-arrow-down-up"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Seu pedido</span>
-            <span class="status-pill aceito">Aceito</span>
-          </div>
-          <p class="notif-name">Instituto Cães Amigos</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Passeio com os cachorros</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 2 h</span>
-      </div>
-
-      <div class="notif-card" data-id="5">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil2.png" alt="Marcelo" onerror="this.src='https://ui-avatars.com/api/?name=MF&background=588157&color=fff'">
-          <span class="type-icon msg"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Nova mensagem</span>
-          </div>
-          <p class="notif-name">Marcelo Fernandes</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Aula de yoga</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 5 h</span>
-      </div>
-
-    </div>
-
-    <!-- RECEBIDAS -->
-    <div class="notif-list" id="recebidas" style="display:none;">
-      <div class="notif-card" data-id="6">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil1.png" alt="Luisa" onerror="this.src='https://ui-avatars.com/api/?name=LA&background=e08c2c&color=fff'">
-          <span class="type-icon req"><i class="bi bi-person-fill"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Solicitação recebida</span>
-            <span class="status-pill pendente">Pendente</span>
-          </div>
-          <p class="notif-name">Luisa Andrade</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Aula de yoga</p>
-          <div class="notif-actions">
-            <button class="action-btn accept" onclick="handleAction(this,'aceito')"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
-            <button class="action-btn decline" onclick="handleAction(this,'recusado')"><i class="bi bi-x-circle-fill"></i> Recusar</button>
-          </div>
-        </div>
-        <span class="notif-time">Há 30 min</span>
-      </div>
-    </div>
-
-    <!-- MEUS PEDIDOS -->
-    <div class="notif-list" id="meus-pedidos" style="display:none;">
-      <div class="notif-card" data-id="7">
-        <div class="notif-avatar">
-          <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.src='https://ui-avatars.com/api/?name=IC&background=3a7bbf&color=fff'">
-          <span class="type-icon order"><i class="bi bi-arrow-down-up"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Seu pedido</span>
-            <span class="status-pill aceito">Aceito</span>
-          </div>
-          <p class="notif-name">Instituto Cães Amigos</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Passeio com os cachorros</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 2 h</span>
-      </div>
-      <div class="notif-card" data-id="8">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.src='https://ui-avatars.com/api/?name=ML&background=3a7bbf&color=fff'">
-          <span class="type-icon order"><i class="bi bi-arrow-down-up"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Seu pedido</span>
-            <span class="status-pill pendente">Pendente</span>
-          </div>
-          <p class="notif-name">Mariana Lacerda</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Consultoria de moda</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 2 h</span>
-      </div>
-    </div>
-
-    <!-- MENSAGENS -->
-    <div class="notif-list" id="mensagens" style="display:none;">
-      <div class="notif-card unread" data-id="9">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil4.png" alt="Mateus" onerror="this.src='https://ui-avatars.com/api/?name=MD&background=588157&color=fff'">
-          <span class="type-icon msg"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Nova mensagem</span>
-          </div>
-          <p class="notif-name">Mateus De Julio</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Aula de yoga</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 5 min</span>
-      </div>
-      <div class="notif-card" data-id="10">
-        <div class="notif-avatar">
-          <img src="../imagens/perfil2.png" alt="Marcelo" onerror="this.src='https://ui-avatars.com/api/?name=MF&background=588157&color=fff'">
-          <span class="type-icon msg"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="notif-body">
-          <div class="notif-top">
-            <span class="notif-type">Nova mensagem</span>
-          </div>
-          <p class="notif-name">Marcelo Fernandes</p>
-          <p class="notif-service"><i class="bi bi-briefcase-fill"></i> Aula de yoga</p>
-          <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="notif-time">Há 5 h</span>
-      </div>
-    </div>
-
-  </div>
-
+    <div class="notif-list" id="todas"></div>
+<div class="notif-list" id="recebidas" style="display:none;"></div>
+<div class="notif-list" id="meus-pedidos" style="display:none;"></div>
+<div class="notif-list" id="mensagens" style="display:none;">
+  <!-- mensagens continua estática até o chat ter backend -->
+</div>
+       
   <script>
-    // Filtros
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.notif-list').forEach(l => l.style.display = 'none');
-        document.getElementById(btn.dataset.target).style.display = 'flex';
-      });
-    });
+   let recebidas = [];
+let enviadas = [];
 
-    // Marcar como lida ao clicar no card
-    document.querySelectorAll('.notif-card').forEach(card => {
-      card.addEventListener('click', function(e) {
-        if (e.target.closest('.action-btn')) return;
-        if (this.classList.contains('unread')) {
-          this.classList.remove('unread');
-          updateCounter();
-        }
-      });
-    });
-
-    // Botões aceitar / recusar
-    function handleAction(btn, status) {
-      const card = btn.closest('.notif-card');
-      const pill = card.querySelector('.status-pill');
-      if (pill) {
-        pill.className = 'status-pill ' + status;
-        pill.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-      }
-      const actions = card.querySelector('.notif-actions');
-      if (actions) {
-        actions.innerHTML = `<a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>`;
-      }
-      if (card.classList.contains('unread')) {
-        card.classList.remove('unread');
-        updateCounter();
-      }
-    }
-
-    // Marcar todas como lidas
-    function markAllRead() {
-      document.querySelectorAll('.notif-card.unread').forEach(c => c.classList.remove('unread'));
-      updateCounter();
-    }
-
-    // Atualizar contador
-    function updateCounter() {
-      const count = document.querySelectorAll('.notif-card.unread').length;
-      const badge = document.getElementById('counter-badge');
-      const bellBadge = document.querySelector('.bell-badge');
-      if (count === 0) {
-        badge.style.display = 'none';
-        if (bellBadge) bellBadge.style.display = 'none';
-      } else {
-        badge.style.display = '';
-        badge.textContent = count + (count === 1 ? ' nova' : ' novas');
-        if (bellBadge) { bellBadge.style.display = ''; bellBadge.textContent = count; }
-      }
-    }
-
-    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
-
-if(usuario){
-    document.getElementById("nomeUsuario").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.getElementById("nomeBoasVindas").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
+function statusClasse(status) {
+  if (status === 'Aceita') return 'aceito';
+  if (status === 'Recusada') return 'recusado';
+  return 'pendente';
 }
+
+function tempoRelativo(dataStr) {
+  const diffMs = Date.now() - new Date(dataStr).getTime();
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return 'Agora';
+  if (min < 60) return `Há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Há ${h} h`;
+  return `Há ${Math.floor(h / 24)} d`;
+}
+
+function cardRecebida(s) {
+  return `
+    <div class="notif-card unread" data-id="${s.codSolicitacao}">
+      <div class="notif-avatar">
+        <img src="${resolverImagem(s.fotoSolicitador)}" alt="${s.nomeSolicitador}">
+        <span class="type-icon req"><i class="bi bi-person-fill"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Solicitação recebida</span>
+          <span class="status-pill ${statusClasse(s.statusSolicitacao)}">${s.statusSolicitacao}</span>
+        </div>
+        <p class="notif-name">${s.nomeSolicitador}</p>
+        <p class="notif-service"><i class="bi bi-briefcase-fill"></i> ${s.nomeServico}</p>
+        ${s.statusSolicitacao === 'Pendente' ? `
+          <div class="notif-actions">
+            <button class="action-btn accept" onclick="responderSolicitacao(${s.codSolicitacao}, true, ${s.pontos})"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
+            <button class="action-btn decline" onclick="responderSolicitacao(${s.codSolicitacao}, false, ${s.pontos})"><i class="bi bi-x-circle-fill"></i> Recusar</button>
+            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+          </div>` : `
+          <div class="notif-actions">
+            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+          </div>`}
+      </div>
+      <span class="notif-time">${tempoRelativo(s.dataSolicitacao)}</span>
+    </div>`;
+}
+function cardEnviada(s) {
+  return `
+    <div class="notif-card" data-id="${s.codSolicitacao}">
+      <div class="notif-avatar">
+       <img src="${resolverImagem(s.fotoPrestador)}" alt="${s.nomePrestador}">
+        <span class="type-icon order"><i class="bi bi-arrow-down-up"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Seu pedido</span>
+          <span class="status-pill ${statusClasse(s.statusSolicitacao)}">${s.statusSolicitacao}</span>
+        </div>
+        <p class="notif-name">${s.nomePrestador}</p>
+        <p class="notif-service"><i class="bi bi-briefcase-fill"></i> ${s.nomeServico}</p>
+        <div class="notif-actions">
+          <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+        </div>
+      </div>
+      <span class="notif-time">${tempoRelativo(s.dataSolicitacao)}</span>
+    </div>`;
+}
+
+async function carregarSolicitacoes() {
+  const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+  const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+  if (!usuarioLogado || !usuarioLogado.cpf) return;
+
+  try {
+    const [respRecebidas, respEnviadas] = await Promise.all([
+      fetch(`${API_URL}/solicitacoes/prestador/${usuarioLogado.cpf}`),
+      fetch(`${API_URL}/solicitacoes/usuario/${usuarioLogado.cpf}`)
+    ]);
+    recebidas = await respRecebidas.json();
+    enviadas = await respEnviadas.json();
+
+    document.getElementById('recebidas').innerHTML = recebidas.map(cardRecebida).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
+    document.getElementById('meus-pedidos').innerHTML = enviadas.map(cardEnviada).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Você ainda não fez pedidos.</p></div>';
+
+    const todasHtml = [...recebidas.map(cardRecebida), ...enviadas.map(cardEnviada)];
+    document.getElementById('todas').innerHTML = todasHtml.join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma notificação.</p></div>';
+
+    updateCounter();
+  } catch (err) {
+    console.error('Erro ao carregar solicitações:', err);
+  }
+}
+
+async function responderSolicitacao(cod, aceitar, pontos) {
+  try {
+    const resp = await fetch(`${API_URL}/solicitacoes/${cod}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        statusS: aceitar ? 'Aceita' : 'Recusada',
+        statusE: aceitar ? 'Não iniciado' : 'Cancelado',
+        pontos: pontos || 0
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    await carregarSolicitacoes();
+  } catch (err) {
+    console.error('Erro ao responder solicitação:', err);
+    alert('Não foi possível atualizar a solicitação.');
+  }
+}
+
+function updateCounter() {
+  const count = document.querySelectorAll('.notif-card.unread').length;
+  const badge = document.getElementById('counter-badge');
+  const bellBadge = document.querySelector('.bell-badge');
+  if (count === 0) {
+    badge.style.display = 'none';
+    if (bellBadge) bellBadge.style.display = 'none';
+  } else {
+    badge.style.display = '';
+    badge.textContent = count + (count === 1 ? ' nova' : ' novas');
+    if (bellBadge) { bellBadge.style.display = ''; bellBadge.textContent = count; }
+  }
+}
+
+function markAllRead() {
+  document.querySelectorAll('.notif-card.unread').forEach(c => c.classList.remove('unread'));
+  updateCounter();
+}
+function resolverImagem(caminho) {
+  if (!caminho) return '../imagens/mutuoLogo.png';
+  if (caminho.startsWith('http')) return caminho;
+  return `${API_URL}${caminho}`;
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.notif-list').forEach(l => l.style.display = 'none');
+    document.getElementById(btn.dataset.target).style.display = 'flex';
+  });
+});
+
+window.addEventListener('load', carregarSolicitacoes);
  carregarFoto();
 </script>
  <script src="../funcoes.js"></script>
