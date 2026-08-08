@@ -299,7 +299,7 @@
     .info-perfil h2 { font-size: 1.15rem; font-weight: 700; color: #1a2e1b; margin-bottom: 2px; }
     .info-perfil span { font-size: 0.82rem; color: #9aab96; font-weight: 600; }
 
-    .bio-perfil { font-size: 0.88rem; color: #4a6a4e; line-height: 1.55; padding-bottom: 16px; border-bottom: 1px solid #f0f4ef; margin-bottom: 16px; }
+
 
     .estatisticas-perfil { display: flex; gap: 0; }
     .stat-item { flex: 1; text-align: center; padding: 8px 4px; border-right: 1px solid #f0f4ef; }
@@ -334,6 +334,11 @@
       background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
       border-radius: 20px; padding: 24px; color: #fff;
       animation: subirSuave 0.4s ease 0.05s both;
+    }
+    .divisor {
+      height: 1px;
+      background: rgba(216, 211, 199, 0.367);
+      margin: 8px 0 24px
     }
     .topo-pontos { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .topo-pontos h3 { font-size: 0.9rem; font-weight: 600; opacity: 0.85; }
@@ -391,7 +396,30 @@
     .btn-confirmar-servico:hover { background: var(--verde-escuro); }
     .link-comentario { font-size: 0.78rem; color: var(--verde-principal); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; }
     .link-comentario:hover { text-decoration: underline; }
-
+.mensagem-salva {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--verde-escuro);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 14px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 500;
+}
+.mensagem-salva.visivel {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
     @keyframes subirSuave {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -492,11 +520,11 @@
           <span id="emailTopoCard"></span>
         </div>
       </div>
-      <p class="bio-perfil">Professora de yoga e entusiasta da economia colaborativa. Adoro trocar conhecimentos e aprender coisas novas!</p>
+      <div class="divisor"></div>
       <div class="estatisticas-perfil">
         <div class="stat-item"><span class="stat-numero">27</span><span class="stat-texto">Trocas realizadas</span></div>
-        <div class="stat-item"><span class="stat-numero">98%</span><span class="stat-texto">Avaliações positivas</span></div>
-        <div class="stat-item"><span class="stat-numero">8 meses</span><span class="stat-texto">No Mútuo</span></div>
+        <div class="stat-item"><span class="stat-numero">5.0</span><span class="stat-texto">Média de avaliações</span></div>
+        <div class="stat-item"><span class="stat-numero" id="tempoMembro">—</span><span class="stat-texto">No Mútuo</span></div>
       </div>
     </div>
 
@@ -669,7 +697,10 @@
     </div>
 
   </div>
-
+  <div class="mensagem-salva" id="mensagemSalva">
+  <i class="bi bi-check-circle-fill"></i>
+  <span id="mensagemSalvaTexto">Alterações salvas com sucesso!</span>
+</div>
   <script>
     // ── FILTROS HISTÓRICO ──
     document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
@@ -715,12 +746,16 @@
       document.getElementById('exibEmailLeitura').textContent = usuario.email || '';
       document.getElementById('exibTel').textContent = usuario.telefone || '';
 
-      // data de cadastro
-      if (usuario.cadastro) {
-        const data = new Date(usuario.cadastro).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-        document.getElementById('exibCadastro').textContent = data;
-        document.getElementById('exibCadastroEdit').textContent = data;
-      }
+  
+     // data de cadastro
+  if (usuario.cadastro) {
+    const data = new Date(usuario.cadastro).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    document.getElementById('exibCadastro').textContent = data;
+    document.getElementById('exibCadastroEdit').textContent = data;
+
+    // tempo como membro
+    document.getElementById('tempoMembro').textContent = calcularTempoMembro(usuario.cadastro);
+  }
 
       // pontos
       if (usuario.pontos !== undefined) {
@@ -736,47 +771,85 @@
     }
 
     // ── EDIÇÃO ──
-    function ativarEdicao() {
-      document.getElementById('modoLeitura').style.display = 'none';
-      document.getElementById('modoEdicao').style.display = 'flex';
-      document.getElementById('acoesEdit').style.display = 'flex';
-      document.getElementById('btnEditar').style.display = 'none';
-      document.getElementById('perfilWrap').classList.add('editando-perfil');
-      document.getElementById('habilidadesWrap').classList.add('editando');
-      document.querySelector('.campo-nome-edit').style.display = 'flex';
-      document.querySelector('.cabecalho-perfil-nome').style.display = 'none';
-      document.getElementById('inputNome').focus();
+   function ativarEdicao() {
+  document.getElementById('modoLeitura').style.display = 'none';
+  document.getElementById('modoEdicao').style.display = 'flex';
+  document.getElementById('acoesEdit').style.display = 'flex';
+  document.getElementById('btnEditar').style.display = 'none';
+  document.getElementById('perfilWrap').classList.add('editando-perfil');
+  document.getElementById('habilidadesWrap')?.classList.add('editando');
+  document.querySelector('.campo-nome-edit').style.display = 'flex';
+  document.querySelector('.cabecalho-perfil-nome').style.display = 'none';
+  document.getElementById('inputNome').focus();
+}
+
+  function cancelarEdicao() {
+  document.getElementById('modoEdicao').style.display = 'none';
+  document.getElementById('modoLeitura').style.display = 'flex';
+  document.getElementById('acoesEdit').style.display = 'none';
+  document.getElementById('btnEditar').style.display = 'flex';
+  document.getElementById('perfilWrap').classList.remove('editando-perfil');
+  document.getElementById('habilidadesWrap')?.classList.remove('editando');
+  document.querySelector('.campo-nome-edit').style.display = 'none';
+  document.querySelector('.cabecalho-perfil-nome').style.display = '';
+}
+
+    async function salvarEdicao() {
+  const nome  = document.getElementById('inputNome').value.trim()  || usuario.nome;
+  const email = document.getElementById('inputEmail').value.trim();
+  const tel   = document.getElementById('inputTel2').value.trim();
+
+  if (!nome || !email) {
+    alert('Nome e e-mail são obrigatórios.');
+    return;
+  }
+
+  const btnSalvar = document.querySelector('.btn-salvar');
+  btnSalvar.disabled = true;
+  btnSalvar.textContent = 'Salvando...';
+
+  try {
+    const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}/perfil`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, telefone: tel })
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok || resultado.error) {
+      throw new Error(resultado.erro || resultado.error || 'Erro ao salvar alterações.');
     }
 
-    function cancelarEdicao() {
-      document.getElementById('modoEdicao').style.display = 'none';
-      document.getElementById('modoLeitura').style.display = 'flex';
-      document.getElementById('acoesEdit').style.display = 'none';
-      document.getElementById('btnEditar').style.display = 'flex';
-      document.getElementById('perfilWrap').classList.remove('editando-perfil');
-      document.getElementById('habilidadesWrap').classList.remove('editando');
-      document.querySelector('.campo-nome-edit').style.display = 'none';
-      document.querySelector('.cabecalho-perfil-nome').style.display = '';
-    }
+    // atualiza leitura
+    document.getElementById('exibNome').textContent         = nome;
+    document.getElementById('exibEmail').textContent        = email;
+    document.getElementById('exibEmailLeitura').textContent = email;
+    document.getElementById('exibTel').textContent          = tel;
 
-    function salvarEdicao() {
-      const nome  = document.getElementById('inputNome').value.trim()  || usuario.nome;
-      const email = document.getElementById('inputEmail').value.trim();
-      const tel   = document.getElementById('inputTel2').value.trim();
+    // atualiza navbar e topo
+    document.getElementById('nomeNavbar').textContent    = nome;
+    document.getElementById('nomeDrawer').textContent    = nome;
+    document.getElementById('nomeTopoCard').textContent  = nome;
+    document.getElementById('emailTopoCard').textContent = email;
 
-      // atualiza leitura
-      document.getElementById('exibNome').textContent         = nome;
-      document.getElementById('exibEmail').textContent        = email;
-      document.getElementById('exibEmailLeitura').textContent = email;
-      document.getElementById('exibTel').textContent          = tel;
+    // atualiza o objeto local e o sessionStorage, pra não perder ao recarregar a página
+    usuario.nome = nome;
+    usuario.email = email;
+    usuario.telefone = tel;
+    sessionStorage.setItem('usuarioLogado', JSON.stringify(usuario));
 
-      // atualiza navbar e topo
-      document.getElementById('nomeNavbar').textContent    = nome;
-      document.getElementById('nomeDrawer').textContent    = nome;
-      document.getElementById('nomeTopoCard').textContent  = nome;
+   cancelarEdicao();
+mostrarMensagemSalva('Perfil atualizado com sucesso!');
 
-      cancelarEdicao();
-    }
+  } catch (erro) {
+    console.error(erro);
+    alert(erro.message || 'Não foi possível salvar as alterações.');
+  } finally {
+    btnSalvar.disabled = false;
+    btnSalvar.textContent = 'Salvar alterações';
+  }
+}
 
     function removerTag(btn) { btn.closest('.tag-habilidade').remove(); }
 
@@ -901,7 +974,41 @@
           </p>`;
       }
     }
+    function mostrarMensagemSalva(texto) {
+      const mensagem = document.getElementById('mensagemSalva');
+      document.getElementById('mensagemSalvaTexto').textContent = texto;
+      mensagem.classList.add('visivel');
+      clearTimeout(mensagem._timeout);
+      mensagem._timeout = setTimeout(() => mensagem.classList.remove('visivel'), 3000);
+    }
 
+    function calcularTempoMembro(dataCadastro) {
+      const inicio = new Date(dataCadastro);
+      const agora = new Date();
+
+      let anos = agora.getFullYear() - inicio.getFullYear();
+      let meses = agora.getMonth() - inicio.getMonth();
+
+      // ajusta se o dia do mês ainda não chegou (evita arredondar mês incompleto pra cima)
+      if (agora.getDate() < inicio.getDate()) {
+        meses--;
+      }
+
+      if (meses < 0) {
+        anos--;
+        meses += 12;
+      }
+
+      if (anos <= 0 && meses <= 0) {
+        return 'Menos de 1 mês';
+      }
+
+      const partes = [];
+      if (anos > 0) partes.push(`${anos} ${anos === 1 ? 'ano' : 'anos'}`);
+      if (meses > 0) partes.push(`${meses} ${meses === 1 ? 'mês' : 'meses'}`);
+
+      return partes.join(' e ');
+    }
     carregarServicosUsuario();
   </script>
   <script src="../funcoes.js"></script>

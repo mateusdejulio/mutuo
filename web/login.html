@@ -353,6 +353,31 @@
     .mutuo-bar.go {
       animation: fillBar 1.8s linear 0.2s forwards;
     }
+    .senha-container {
+  position: relative;
+  width: 100%;
+}
+
+.senha-container input {
+  padding-right: 48px;
+}
+
+.btn-olho {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(30, 50, 30, 0.55);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.btn-olho:hover {
+  color: #3a5a40;
+}
 
     @keyframes fillBar { to { width: 100%; } }
 
@@ -403,13 +428,22 @@
     </div>
 
     <div class="campo">
-      <label for="senha"><i class="bi bi-lock-fill"></i> Senha</label>
-      <input type="password" id="senha" placeholder="Sua senha" required>
-      <p class="erro" id="erroSenha"></p>
-      <div class="link-esqueceu">
-        <a href="#">Esqueceu sua senha?</a>
-      </div>
-    </div>
+  <label for="senha"><i class="bi bi-lock-fill"></i> Senha</label>
+
+  <div class="senha-container">
+  <input type="password" id="senha" placeholder="Sua senha" required>
+
+  <button type="button" class="btn-olho" id="btn-olho">
+    <i class="bi bi-eye-slash"></i>
+  </button>
+</div>
+
+  <p class="erro" id="erroSenha"></p>
+
+  <div class="link-esqueceu">
+    <a href="#">Esqueceu sua senha?</a>
+  </div>
+</div>
 
     <div class="divisor"></div>
 
@@ -567,6 +601,18 @@
         });
       });
   }
+  const btnOlho = document.getElementById('btn-olho');
+const campoSenha = document.getElementById('senha');
+
+btnOlho.addEventListener('click', function () {
+  if (campoSenha.type === 'password') {
+    campoSenha.type = 'text';
+    this.innerHTML = '<i class="bi bi-eye"></i>';
+  } else {
+    campoSenha.type = 'password';
+    this.innerHTML = '<i class="bi bi-eye-slash"></i>';
+  }
+});
 </script>
 </body>
 </html>

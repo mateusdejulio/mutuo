@@ -217,6 +217,12 @@
       color: var(--cream);
       border: 1px solid rgba(225,220,208,0.4);
     }
+    #contador-descricao {
+  text-align: right;
+  font-size: 0.75rem;
+  color: rgba(225, 220, 208, 0.7);
+  margin-top: 5px;
+}
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -249,7 +255,8 @@
 
     <div class="campo">
       <label for="descricao-servico"><i class="bi bi-text-left"></i> Descrição</label>
-      <textarea id="descricao-servico" name="descricao" placeholder="Descreva o serviço, público-alvo e objetivos..." required></textarea>
+      <textarea id="descricao-servico" name="descricao" placeholder="Descreva o serviço, público-alvo e objetivos..." maxlength="150" required></textarea>
+      <div id="contador-descricao">0/150</div>
     </div>
 
     <div class="campos-row">
@@ -257,8 +264,8 @@
         <label for="foco-servico"><i class="bi bi-tag-fill"></i> Foco</label>
         <select id="foco-servico" name="foco" required>
           <option value="" disabled selected>Selecionar</option>
-          <option value="educacao">Educação</option>
-          <option value="saude">Saúde</option>
+          <option value="educação">Educação</option>
+          <option value="saúdes">Saúde</option>
           <option value="animais">Animais</option>
           <option value="idosos">Idosos</option>
           <option value="outro">Outro</option>
@@ -310,7 +317,12 @@
         reader.readAsDataURL(this.files[0]);
       }
     });
+    const descricao = document.getElementById('descricao-servico');
+    const contador = document.getElementById('contador-descricao');
 
+    descricao.addEventListener('input', function () {
+      contador.textContent = `${this.value.length}/150`;
+});
     function mostrarMensagem(texto, tipo) {
       mensagemFeedback.textContent = texto;
       mensagemFeedback.className = `mensagem-feedback ${tipo}`;

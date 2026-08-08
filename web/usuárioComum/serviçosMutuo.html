@@ -441,442 +441,150 @@
 
 <div class="filters-wrap">
   <div class="filters-top">
-    <span class="results-count"><strong id="countLabel">7</strong> serviços encontrados</span>
+    <span class="results-count"><strong id="countLabel">0</strong> serviços encontrados</span>
     <div class="filter-btns">
       <button class="btn-filter"><i class="bi bi-funnel"></i> Filtros</button>
       <button class="btn-filter"><i class="bi bi-arrow-down-up"></i> Ordenar</button>
     </div>
   </div>
-  <div class="cats">
+  <div class="cats" id="listaCategorias">
     <button class="cat-pill active" data-cat="todos" onclick="filterCat(this)">Todos</button>
-    <button class="cat-pill" data-cat="jardinagem" onclick="filterCat(this)">Jardinagem</button>
-    <button class="cat-pill" data-cat="culinaria" onclick="filterCat(this)">Culinária</button>
-    <button class="cat-pill" data-cat="manutencao" onclick="filterCat(this)">Manutenção</button>
-    <button class="cat-pill" data-cat="educacao" onclick="filterCat(this)">Educação</button>
-    <button class="cat-pill" data-cat="tecnologia" onclick="filterCat(this)">Tecnologia</button>
-    <button class="cat-pill" data-cat="beleza" onclick="filterCat(this)">Beleza</button>
-    <button class="cat-pill" data-cat="bem-estar" onclick="filterCat(this)">Bem-estar</button>
-    <button class="cat-pill" data-cat="musica" onclick="filterCat(this)">Música</button>
+    
   </div>
 </div>
 
 
 <div class="cards-wrap">
   <div class="cards-grid" id="cardsGrid">
-
-    <div class="svc-card" data-cat="culinaria" data-name="aula de culinária">
-      <div class="svc-img-wrap">
-        <img src="../imagens/aula.png" alt="Aula de culinária">
-        <span class="svc-tag">Culinária</span>
-      </div>
-      <div class="svc-body">
-        <h3>Aula de culinária</h3>
-        <p class="svc-desc">Aprenda a fazer pratos deliciosos e saudáveis. Aulas práticas e divertidas para todos os níveis.</p>
-        <div class="svc-person">
-          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="svc-person-name">Mariana Lopes</div>
-            <div class="svc-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <span> 5.0 (1.024)</span>
-            </div>
-          </div>
-        </div>
-        <div class="svc-meta">
-          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
-        </div>
-        <button class="btn-saiba" onclick="openModal('modalAula')"><i class="bi bi-info-circle"></i> Saiba mais</button>
-      </div>
-    </div>
-
-    <div class="svc-card" data-cat="manutencao" data-name="conserto de geladeira">
-      <div class="svc-img-wrap">
-        <img src="../imagens/manutencao.png" alt="Conserto de geladeira">
-        <span class="svc-tag">Manutenção</span>
-      </div>
-      <div class="svc-body">
-        <h3>Conserto de geladeira</h3>
-        <p class="svc-desc">Sua geladeira parou? Atendimento ágil com serviço de qualidade garantida para todas as marcas.</p>
-        <div class="svc-person">
-          <img src="../imagens/perfil2.png" alt="Lucas" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="svc-person-name">Lucas Oliveira</div>
-            <div class="svc-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-half"></i>
-              <span> 4.8 (300)</span>
-            </div>
-          </div>
-        </div>
-        <div class="svc-meta">
-          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
-        </div>
-        <button class="btn-saiba" onclick="openModal('modalManutencao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
-      </div>
-    </div>
-
-    <div class="svc-card" data-cat="bem-estar" data-name="aula de yoga">
-      <div class="svc-img-wrap">
-        <img src="../imagens/yoga.png" alt="Aula de yoga">
-        <span class="svc-tag">Bem-estar</span>
-      </div>
-      <div class="svc-body">
-        <h3>Aula de yoga</h3>
-        <p class="svc-desc">Encontre equilíbrio e bem-estar! Aulas para todos os níveis, do iniciante ao avançado.</p>
-        <div class="svc-person">
-          <img src="../imagens/perfil3.png" alt="Isadora" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="svc-person-name">Isadora Moraes</div>
-            <div class="svc-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <span> 5.0 (800)</span>
-            </div>
-          </div>
-        </div>
-        <div class="svc-meta">
-          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
-        </div>
-        <button class="btn-saiba" onclick="openModal('modalYoga')"><i class="bi bi-info-circle"></i> Saiba mais</button>
-      </div>
-    </div>
-
-    <div class="svc-card" data-cat="musica" data-name="aula de violão">
-      <div class="svc-img-wrap">
-        <img src="../imagens/violao.png" alt="Aula de violão">
-        <span class="svc-tag">Música</span>
-      </div>
-      <div class="svc-body">
-        <h3>Aula de violão</h3>
-        <p class="svc-desc">Aprenda violão do zero ou aperfeiçoe seu som. Aulas leves com foco no ritmo de cada aluno.</p>
-        <div class="svc-person">
-          <img src="../imagens/perfil4.png" alt="Marcos" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="svc-person-name">Marcos Lima</div>
-            <div class="svc-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-half"></i>
-              <span> 4.3 (40)</span>
-            </div>
-          </div>
-        </div>
-        <div class="svc-meta">
-          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
-        </div>
-        <button class="btn-saiba" onclick="openModal('modalViolao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
-      </div>
-    </div>
-
-    <div class="svc-card" data-cat="manutencao" data-name="conserto de geladeira">
-      <div class="svc-img-wrap">
-        <img src="../imagens/manutencao.png" alt="Conserto de geladeira">
-        <span class="svc-tag">Manutenção</span>
-      </div>
-      <div class="svc-body">
-        <h3>Conserto de geladeira</h3>
-        <p class="svc-desc">Sua geladeira parou? Atendimento ágil com serviço de qualidade garantida para todas as marcas.</p>
-        <div class="svc-person">
-          <img src="../imagens/perfil2.png" alt="Lucas" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="svc-person-name">Lucas Oliveira</div>
-            <div class="svc-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-half"></i>
-              <span> 4.8 (300)</span>
-            </div>
-          </div>
-        </div>
-        <div class="svc-meta">
-          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
-        </div>
-        <button class="btn-saiba" onclick="openModal('modalManutencao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
-      </div>
-    </div>
-
-    <div class="svc-card" data-cat="musica" data-name="aula de violão">
-      <div class="svc-img-wrap">
-        <img src="../imagens/violao.png" alt="Aula de violão">
-        <span class="svc-tag">Música</span>
-      </div>
-      <div class="svc-body">
-        <h3>Aula de violão</h3>
-        <p class="svc-desc">Aprenda violão do zero ou aperfeiçoe seu som. Aulas leves com foco no ritmo de cada aluno.</p>
-        <div class="svc-person">
-          <img src="../imagens/perfil4.png" alt="Marcos" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="svc-person-name">Marcos Lima</div>
-            <div class="svc-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-half"></i>
-              <span> 4.3 (40)</span>
-            </div>
-          </div>
-        </div>
-        <div class="svc-meta">
-          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h</span>
-        </div>
-        <button class="btn-saiba" onclick="openModal('modalViolao')"><i class="bi bi-info-circle"></i> Saiba mais</button>
-      </div>
-    </div>
-
-    <div class="svc-card" data-cat="culinaria" data-name="aula de culinária">
-      <div class="svc-img-wrap">
-        <img src="../imagens/aula.png" alt="Aula de culinária">
-        <span class="svc-tag">Culinária</span>
-      </div>
-      <div class="svc-body">
-        <h3>Aula de culinária</h3>
-        <p class="svc-desc">Aprenda a fazer pratos deliciosos e saudáveis. Aulas práticas e divertidas para todos os níveis.</p>
-        <div class="svc-person">
-          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="svc-person-name">Mariana Lopes</div>
-            <div class="svc-stars">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <span> 5.0 (1.024)</span>
-            </div>
-          </div>
-        </div>
-        <div class="svc-meta">
-          <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
-        </div>
-        <button class="btn-saiba" onclick="openModal('modalAula')"><i class="bi bi-info-circle"></i> Saiba mais</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-<div class="modal-overlay" id="modalAula">
-  <div class="modal-sheet">
-    <img src="../imagens/aula.png" alt="Aula de culinária" class="modal-img" onerror="this.style.display='none'">
-    <button class="modal-close" onclick="closeModal('modalAula')"><i class="bi bi-x-lg"></i></button>
-    <div class="modal-body">
-      <h3>Aula de culinária</h3>
-      <p class="desc">Aprenda a fazer pratos deliciosos e saudáveis. Aulas práticas e divertidas que ensinam desde receitas simples do dia a dia até pratos especiais para surpreender a família.</p>
-      <div class="modal-person-row">
-        <div class="modal-person-left">
-          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="modal-person-name">Mariana Lopes</div>
-            <div class="modal-person-meta">
-              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 5.0 (1.024) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h 30min
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="modal-pts">230 pontos necessários</span>
-          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="modal-reviews">
-        <h5>Avaliações</h5>
-        <div class="review-box">
-          <h6>Aula de culinária</h6>
-          <div class="reviewer">Cliente: João Silva</div>
-          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="review-text">"Excelente professora! Muito atenciosa e paciente."</div>
-          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-        <div class="review-box">
-          <h6>Aula de culinária</h6>
-          <div class="reviewer">Cliente: Ana Paula</div>
-          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="review-text">"Muito divertido!"</div>
-          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
-  </div>
-</div>
-
-
-<div class="modal-overlay" id="modalManutencao">
-  <div class="modal-sheet">
-    <img src="../imagens/manutencao.png" alt="Conserto de geladeira" class="modal-img" onerror="this.style.display='none'">
-    <button class="modal-close" onclick="closeModal('modalManutencao')"><i class="bi bi-x-lg"></i></button>
-    <div class="modal-body">
-      <h3>Conserto de geladeira</h3>
-      <p class="desc">Sua geladeira parou? Atendimento ágil e serviço de qualidade garantida. Trabalhamos com conserto, manutenção e higienização de todas as marcas.</p>
-      <div class="modal-person-row">
-        <div class="modal-person-left">
-          <img src="../imagens/perfil2.png" alt="Lucas" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="modal-person-name">Lucas Oliveira</div>
-            <div class="modal-person-meta">
-              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 4.8 (300) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> São Paulo, SP &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="modal-pts">260 pontos necessários</span>
-          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="modal-reviews">
-        <h5>Avaliações</h5>
-        <div class="review-box">
-          <h6>Conserto de geladeira</h6>
-          <div class="reviewer">Cliente: João Silva</div>
-          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="review-text">"Muito rápido e eficiente!"</div>
-          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
-  </div>
-</div>
-
-
-<div class="modal-overlay" id="modalYoga">
-  <div class="modal-sheet">
-    <img src="../imagens/yoga.png" alt="Aula de yoga" class="modal-img" onerror="this.style.display='none'">
-    <button class="modal-close" onclick="closeModal('modalYoga')"><i class="bi bi-x-lg"></i></button>
-    <div class="modal-body">
-      <h3>Aula de yoga</h3>
-      <p class="desc">Venha relaxar em uma aula de yoga transformadora, onde corpo e mente se conectam em harmonia. Aberto para todos os níveis.</p>
-      <div class="modal-person-row">
-        <div class="modal-person-left">
-          <img src="../imagens/perfil3.png" alt="Isadora" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="modal-person-name">Isadora Moraes</div>
-            <div class="modal-person-meta">
-              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 5.0 (800) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="modal-pts">180 pontos necessários</span>
-          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="modal-reviews">
-        <h5>Avaliações</h5>
-        <div class="review-box">
-          <h6>Aula de yoga</h6>
-          <div class="reviewer">Cliente: Mariana Lopes</div>
-          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="review-text">"Excelente professora! Muito atenciosa e paciente."</div>
-          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-        <div class="review-box">
-          <h6>Aula de yoga</h6>
-          <div class="reviewer">Cliente: João Silva</div>
-          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="review-text">"Muito divertido e relaxante!"</div>
-          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
-  </div>
-</div>
-
-
-<div class="modal-overlay" id="modalViolao">
-  <div class="modal-sheet">
-    <img src="../imagens/violao.png" alt="Aula de violão" class="modal-img" onerror="this.style.display='none'">
-    <button class="modal-close" onclick="closeModal('modalViolao')"><i class="bi bi-x-lg"></i></button>
-    <div class="modal-body">
-      <h3>Aula de violão</h3>
-      <p class="desc">Aulas leves e divertidas com foco na prática e no ritmo de cada aluno. Descubra o prazer de tocar suas músicas favoritas!</p>
-      <div class="modal-person-row">
-        <div class="modal-person-left">
-          <img src="../imagens/perfil4.png" alt="Marcos" onerror="this.style.background='var(--cream)'">
-          <div>
-            <div class="modal-person-name">Marcos Lima</div>
-            <div class="modal-person-meta">
-              <i class="bi bi-star-fill" style="color:var(--green-main)"></i> 4.3 (40) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> 1h
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="modal-pts">110 pontos necessários</span>
-          <button class="btn-chat"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="modal-reviews">
-        <h5>Avaliações</h5>
-        <div class="review-box">
-          <h6>Aula de violão</h6>
-          <div class="reviewer">Cliente: João Silva</div>
-          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="review-text">"Excelente professor! Muito atencioso e paciente."</div>
-          <div class="review-date"><i class="bi bi-calendar-fill"></i> 10 Out 2025</div>
-        </div>
-        <div class="review-box">
-          <h6>Aula de violão</h6>
-          <div class="reviewer">Cliente: Ana Lima</div>
-          <div class="review-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
-          <div class="review-text">"Muito divertido, aprendi bastante!"</div>
-          <div class="review-date"><i class="bi bi-calendar-fill"></i> 16 Mar 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-cta"><button class="btn-inscribe">Inscrever-me</button></div>
+    
   </div>
 </div>
 
 <script>
+  const API_URL = 'http://localhost:3000'; // ajuste para a URL da sua API em produção
 
-  function filterCat(btn) {
+  let todosServicos = [];
+  let categoriaAtiva = 'todos';
+
+  function resolverImagem(caminho) {
+    if (!caminho) return '../imagens/mutuoLogo.png';
+    if (caminho.startsWith('http')) return caminho;
+    return `${API_URL}${caminho}`;
+  }
+
+  async function carregarServicos() {
+  try {
+    const resp = await fetch(`${API_URL}/servicos-usuario`);
+    if (!resp.ok) throw new Error('Erro ao buscar serviços');
+    let servicos = await resp.json();
+
+    // Remove os serviços do próprio usuário logado
+    const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+    const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+    if (usuarioLogado?.cpf) {
+      servicos = servicos.filter(s => String(s.idUsuario) !== String(usuarioLogado.cpf));
+    }
+
+    todosServicos = servicos;
+
+    montarCategorias(todosServicos);
+    renderizarCards(todosServicos);
+  } catch (err) {
+    console.error('Erro ao carregar serviços:', err);
+    document.getElementById('cardsGrid').innerHTML =
+      `<p style="color:var(--text-muted)">Não foi possível carregar os serviços agora. Tente novamente mais tarde.</p>`;
+  }
+}
+
+  function montarCategorias(servicos) {
+    const container = document.getElementById('listaCategorias');
+    const focosUnicos = [...new Set(servicos.map(s => s.foco).filter(Boolean))];
+
+    focosUnicos.forEach(foco => {
+      const btn = document.createElement('button');
+      btn.className = 'cat-pill';
+      btn.dataset.cat = foco;
+      btn.textContent = foco;
+      btn.onclick = () => filterCat(btn);
+      container.appendChild(btn);
+    });
+  }
+
+  function filterCat(botao) {
     document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    const cat = btn.dataset.cat;
-    const cards = document.querySelectorAll('.svc-card');
-    let visible = 0;
-    cards.forEach(c => {
-      const show = cat === 'todos' || c.dataset.cat === cat;
-      c.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-    document.getElementById('countLabel').textContent = visible;
+    botao.classList.add('active');
+    categoriaAtiva = botao.dataset.cat;
+    aplicarFiltros();
   }
 
- 
   function filterCards() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const cards = document.querySelectorAll('.svc-card');
-    const activeCat = document.querySelector('.cat-pill.active')?.dataset.cat || 'todos';
-    let visible = 0;
-    cards.forEach(c => {
-      const matchCat = activeCat === 'todos' || c.dataset.cat === activeCat;
-      const matchQ = c.dataset.name.includes(q);
-      const show = matchCat && matchQ;
-      c.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-    document.getElementById('countLabel').textContent = visible;
+    aplicarFiltros();
   }
 
- 
+  function aplicarFiltros() {
+    const termo = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filtrados = todosServicos.filter(s => {
+      const bateCat = categoriaAtiva === 'todos' || s.foco === categoriaAtiva;
+      const bateTermo = !termo ||
+        s.nome.toLowerCase().includes(termo) ||
+        (s.descricao || '').toLowerCase().includes(termo);
+      return bateCat && bateTermo;
+    });
+    renderizarCards(filtrados);
+  }
+
+  function renderizarCards(servicos) {
+    const grade = document.getElementById('cardsGrid');
+    document.getElementById('countLabel').textContent = servicos.length;
+
+    if (servicos.length === 0) {
+      grade.innerHTML = `<p style="color:var(--text-muted)">Nenhum serviço encontrado.</p>`;
+      return;
+    }
+
+    grade.innerHTML = servicos.map(s => `
+      <div class="svc-card">
+        <div class="svc-img-wrap">
+          <img src="${resolverImagem(s.imagem)}" alt="${s.nome}">
+          <span class="svc-tag">${s.foco || ''}</span>
+          <span class="modal-pts" style="position:absolute;top:11px;right:12px;font-size:0.7rem;padding:3px 10px;"><i class="bi bi-star-fill"></i> ${s.pontos || 0} pts</span>
+        </div>
+        <div class="svc-body">
+          <h3>${s.nome}</h3>
+          <p class="svc-desc">${s.descricao || ''}</p>
+          <div class="svc-person">
+            <img src="${resolverImagem(s.fotoUsuario)}" alt="${s.nomeUsuario}">
+            <div>
+              <div class="svc-person-name">${s.nomeUsuario}</div>
+            </div>
+          </div>
+          <div class="svc-meta">
+            <span class="svc-meta-i"><i class="bi bi-geo-alt-fill"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''}</span>
+            <span class="svc-meta-i"><i class="bi bi-clock-fill"></i> ${s.qtdHoras || ''}h</span>
+          </div>
+          <button class="btn-saiba" onclick="abrirModalServico(${s.cod})"><i class="bi bi-info-circle"></i> Saiba mais</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function abrirModalServico(cod) {
+    const s = todosServicos.find(item => item.cod === cod);
+    if (!s) return;
+
+    document.getElementById('modalImagem').src = resolverImagem(s.imagem);
+    document.getElementById('modalTitulo').textContent = s.nome;
+    document.getElementById('modalDescricao').textContent = s.descricao || '';
+    document.getElementById('modalFotoUsuario').src = resolverImagem(s.fotoUsuario);
+    document.getElementById('modalNomeUsuario').textContent = s.nomeUsuario;
+    document.getElementById('modalMetaUsuario').innerHTML =
+      `<i class="bi bi-geo-alt-fill" style="color:var(--green-main)"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''} &nbsp;·&nbsp;
+       <i class="bi bi-clock-fill" style="color:var(--green-main)"></i> ${s.qtdHoras || ''}h`;
+    document.getElementById('modalPontos').textContent = `${s.pontos || 0} pontos necessários`;
+
+    openModal('modalServico');
+  }
+
   function openModal(id) {
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -888,19 +596,20 @@
   document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
   });
+
+  window.addEventListener('load', () => {
+    carregarServicos();
+  });
+
   const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
 
-if(usuario){
-    document.getElementById("nomeUsuario").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.getElementById("nomeBoasVindas").textContent =
-        usuario.nome || usuario.nome_usuario;
-
+  if (usuario) {
+    document.getElementById("nomeUsuario").textContent = usuario.nome || usuario.nome_usuario;
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
-}
- carregarFoto();
+  }
+  carregarFoto();
 </script>
+<script src="../funcoes.js"></script>
  <script src="../funcoes.js"></script>
 </body>
 </html>
