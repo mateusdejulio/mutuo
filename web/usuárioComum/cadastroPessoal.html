@@ -186,6 +186,11 @@
     .link-cancelar:hover {
       color: var(--cream)
     }
+    .campo textarea:focus {
+    border-color: var(--green-light);
+    background: var(--cream);
+    box-shadow: 0 0 0 3px rgba(88,129,87,0.2);
+  }
 
     .erro {
       color: #ffb3b3;
@@ -254,12 +259,12 @@
         <p class="erro" id="erroData"></p>
       </div>
     </div>
-    <div class="divisor"></div>
-
+    
+<div class="divisor"></div>
 <div class="campo">
   <label for="fotoPerfil"><i class="bi bi-camera-fill"></i> Foto de perfil</label>
   
-  <!-- Preview circular -->
+
   <div style="display:flex; align-items:center; gap:16px; margin-bottom:10px">
     <img id="previewFoto" src="../imagens/mutuoLogo.png"
       style="width:72px; height:72px; border-radius:50%; object-fit:cover;

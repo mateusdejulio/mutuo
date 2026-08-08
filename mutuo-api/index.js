@@ -69,9 +69,9 @@ const storageServico = multer.diskStorage({
     cb(null, pastaServicos);
   },
   filename: (req, file, cb) => {
-    const cnpj = req.body?.cnpj || 'sem-cnpj';
+    const id = req.body?.cnpj || req.body?.cpf || 'sem-id';
     const ext = path.extname(file.originalname);
-    cb(null, `${cnpj}-${Date.now()}${ext}`);
+    cb(null, `${id}-${Date.now()}${ext}`);
   }
 });
 
@@ -403,7 +403,19 @@ app.get('/perfil/foto/ong/:cnpj', async (req, res) => {
   const foto = await db.getFotoPerfilOng(req.params.cnpj);
   res.json({ fotoPerfil: foto ? `/uploads/fotos/${foto}` : null });
 });
+// Lista todos os serviços de ONGs ativos
+app.get('/servicos-ong', async (req, res) => {
+  const servicos = await db.getServicosOngTodos();
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+  res.json(servicos);
+});
 
+// Lista todos os serviços de usuários ativos (usado na página de busca/vitrine)
+app.get('/servicos-usuario', async (req, res) => {
+  const servicos = await db.getServicosUsuarioTodos();
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+  res.json(servicos);
+});
 
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
@@ -413,6 +425,7 @@ app.use((err, req, res, next) => {
   console.error('Erro capturado pelo middleware global:', err.message);
   res.status(400).json({ erro: err.message || 'Erro ao processar a requisição.' });
 });
+
 
 
 const PORT = process.env.PORT || 3000;

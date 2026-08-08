@@ -368,7 +368,13 @@
     }
     .botao-inscrever:hover { background: var(--verde-escuro); }
     .botao-inscrever:active { transform: scale(0.98); }
-
+    .etiqueta-pontos-cartao {
+    position: absolute; top: 11px; right: 12px;
+    background: var(--creme); color: var(--verde-escuro);
+    font-size: 0.7rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+}
     
     @keyframes descerFade {
       from { opacity: 0; transform: translateY(-8px); }
@@ -451,442 +457,136 @@
       <button class="botao-filtro"><i class="bi bi-arrow-down-up"></i> Ordenar</button>
     </div>
   </div>
-  <div class="categorias">
-    <button class="pilula-categoria" data-categoria="todos" onclick="filtrarCategoria(this)">Todos</button>
-    <button class="pilula-categoria ativa" data-categoria="animais" onclick="filtrarCategoria(this)">Animais</button>
-    <button class="pilula-categoria" data-categoria="criancas" onclick="filtrarCategoria(this)">Crianças e adolescentes</button>
-    <button class="pilula-categoria" data-categoria="idosos" onclick="filtrarCategoria(this)">Idosos</button>
-    <button class="pilula-categoria" data-categoria="ambiental" onclick="filtrarCategoria(this)">Ambientais</button>
-    <button class="pilula-categoria" data-categoria="educacao" onclick="filtrarCategoria(this)">Educação</button>
+  <div class="categorias" id="listaCategorias">
+    <button class="pilula-categoria ativa" data-categoria="todos" onclick="filtrarCategoria(this)">Todos</button>
+    
   </div>
 </div>
 
 
 <div class="area-cartoes">
   <div class="grade-cartoes" id="gradeCartoes">
-
-    <div class="cartao-servico" data-categoria="animais" data-nome="passeie com os cachorros">
-      <div class="envoltorio-imagem">
-        <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorros">
-        <span class="etiqueta-categoria">Animais</span>
-      </div>
-      <div class="corpo-cartao">
-        <h3>Passeie com os cachorros</h3>
-        <p class="descricao-cartao">Ande com os nossos cachorros e leve alegria a quem mais precisa!</p>
-        <div class="linha-ong">
-          <img src="../imagens/ongPerfil1.png" alt="Instituto cães amigos" onerror="this.style.background='var(--creme)'">
-          <div>
-            <a href="perfilOngMutuo.html"  style="text-decoration:none;" class="nome-ong">Instituto cães amigos</a>
-            
-            <div class="estrelas-ong">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <span> 5.0 (1.024)</span>
-            </div>
-          </div>
-        </div>
-        <div class="metadados">
-          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 30min</span>
-        </div>
-        <button class="botao-saiba-mais" onclick="abrirModal('modalPasseio')">
-          <i class="bi bi-info-circle"></i> Saiba mais
-        </button>
-      </div>
-    </div>
-
-    <div class="cartao-servico" data-categoria="animais" data-nome="limpeza e higienização dos animais">
-      <div class="envoltorio-imagem">
-        <img src="../imagens/banho.png" alt="Higienização dos animais">
-        <span class="etiqueta-categoria">Animais</span>
-      </div>
-      <div class="corpo-cartao">
-        <h3>Limpeza e higienização dos animais</h3>
-        <p class="descricao-cartao">Faça a diferença com suas mãos! Ajude na limpeza e higiene dos nossos peludos.</p>
-        <div class="linha-ong">
-          <img src="../imagens/ongPerfil2.png" alt="Instituto patas" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong">Instituto patas</div>
-            <div class="estrelas-ong">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-half"></i>
-              <span> 4.8 (800)</span>
-            </div>
-          </div>
-        </div>
-        <div class="metadados">
-          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 2h</span>
-        </div>
-        <button class="botao-saiba-mais" onclick="abrirModal('modalLimpeza')">
-          <i class="bi bi-info-circle"></i> Saiba mais
-        </button>
-      </div>
-    </div>
-
-    <div class="cartao-servico" data-categoria="animais" data-nome="ajuda para feira de adoções">
-      <div class="envoltorio-imagem">
-        <img src="../imagens/feira.png" alt="Feira de adoções">
-        <span class="etiqueta-categoria">Animais</span>
-      </div>
-      <div class="corpo-cartao">
-        <h3>Ajuda para feira de adoções</h3>
-        <p class="descricao-cartao">Seja voluntário na feirinha de adoções e acompanhe novas histórias de perto!</p>
-        <div class="linha-ong">
-          <img src="../imagens/ongPerfil3.png" alt="Instituto rabo de gato" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong">Instituto rabo de gato</div>
-            <div class="estrelas-ong">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <span> 5.0 (500)</span>
-            </div>
-          </div>
-        </div>
-        <div class="metadados">
-          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 3h</span>
-        </div>
-        <button class="botao-saiba-mais" onclick="abrirModal('modalFeira')">
-          <i class="bi bi-info-circle"></i> Saiba mais
-        </button>
-      </div>
-    </div>
-
-    <div class="cartao-servico" data-categoria="animais" data-nome="transporte de animais">
-      <div class="envoltorio-imagem">
-        <img src="../imagens/transporte.png" alt="Transporte de animais">
-        <span class="etiqueta-categoria">Animais</span>
-      </div>
-      <div class="corpo-cartao">
-        <h3>Transporte de animais</h3>
-        <p class="descricao-cartao">Ajude nossos amigos de quatro patas a chegarem em segurança ao seu destino.</p>
-        <div class="linha-ong">
-          <img src="../imagens/ongPerfil3.png" alt="Instituto rabo de gato" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong">Instituto rabo de gato</div>
-            <div class="estrelas-ong">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-half"></i>
-              <span> 4.3 (40)</span>
-            </div>
-          </div>
-        </div>
-        <div class="metadados">
-          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 1h</span>
-        </div>
-        <button class="botao-saiba-mais" onclick="abrirModal('modalTransporte')">
-          <i class="bi bi-info-circle"></i> Saiba mais
-        </button>
-      </div>
-    </div>
-
-    <div class="cartao-servico" data-categoria="animais" data-nome="acolhimento temporário">
-      <div class="envoltorio-imagem">
-        <img src="../imagens/lar.png" alt="Acolhimento temporário">
-        <span class="etiqueta-categoria">Animais</span>
-      </div>
-      <div class="corpo-cartao">
-        <h3>Acolhimento temporário</h3>
-        <p class="descricao-cartao">Abra seu lar e seu coração! Ofereça abrigo e amor até que o animal encontre sua família.</p>
-        <div class="linha-ong">
-          <img src="../imagens/ongPerfil4.png" alt="Instituto patinha solidária" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong">Instituto patinha solidária</div>
-            <div class="estrelas-ong">
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-half"></i>
-              <span> 4.5 (300)</span>
-            </div>
-          </div>
-        </div>
-        <div class="metadados">
-          <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-          <span class="item-metadado"><i class="bi bi-clock-fill"></i> 1 semana</span>
-        </div>
-        <button class="botao-saiba-mais" onclick="abrirModal('modalLar')">
-          <i class="bi bi-info-circle"></i> Saiba mais
-        </button>
-      </div>
-    </div>
-
+    <!-- os cards são gerados dinamicamente via JS -->
   </div>
 </div>
-
-
-<div class="sobreposicao-modal" id="modalPasseio">
-  <div class="folha-modal">
-    <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorros" class="imagem-modal" onerror="this.style.display='none'">
-    <button class="botao-fechar-modal" onclick="fecharModal('modalPasseio')"><i class="bi bi-x-lg"></i></button>
-    <div class="corpo-modal">
-      <h3>Passeie com os cachorros</h3>
-      <p class="descricao">Ande com os nossos cachorros e leve alegria a quem mais precisa! Com apenas um passeio, você oferece carinho, exercício e companhia para animais resgatados que aguardam um novo lar.</p>
-      <div class="linha-ong-modal">
-        <div class="esquerda-ong-modal">
-          <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
-          <div>
-            <a href="perfilOngMutuo.html"  style="text-decoration:none;" class="nome-ong">Instituto cães amigos</a>
-            <div class="meta-ong-modal">
-              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 5.0 (1.024) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 30min
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="etiqueta-pontos">150 pontos recebidos</span>
-          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="avaliacoes-modal">
-        <h5>Avaliações</h5>
-        <div class="caixa-avaliacao">
-          <h6>Passeio com os cachorros</h6>
-          <div class="nome-avaliador">Voluntário: Felipe Souza</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Experiência incrível!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-        <div class="caixa-avaliacao">
-          <h6>Passeio com os cachorros</h6>
-          <div class="nome-avaliador">Voluntário: João Silva</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Passeio muito divertido!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
-  </div>
-</div>
-
-
-<div class="sobreposicao-modal" id="modalLimpeza">
-  <div class="folha-modal">
-    <img src="../imagens/banho.png" alt="Limpeza dos animais" class="imagem-modal" onerror="this.style.display='none'">
-    <button class="botao-fechar-modal" onclick="fecharModal('modalLimpeza')"><i class="bi bi-x-lg"></i></button>
-    <div class="corpo-modal">
-      <h3>Limpeza e higienização dos animais</h3>
-      <p class="descricao">O instituto patas convida você a viver um momento especial com nossos peludos! Participando das atividades de banho e higiene, você ajuda a garantir bem-estar, saúde e conforto para animais resgatados.</p>
-      <div class="linha-ong-modal">
-        <div class="esquerda-ong-modal">
-          <img src="../imagens/ongPerfil2.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong-modal">Instituto patas</div>
-            <div class="meta-ong-modal">
-              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 4.8 (800) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> São Paulo, SP &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 2h
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="etiqueta-pontos">200 pontos recebidos</span>
-          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="avaliacoes-modal">
-        <h5>Avaliações</h5>
-        <div class="caixa-avaliacao">
-          <h6>Limpeza e higienização dos animais</h6>
-          <div class="nome-avaliador">Voluntário: João Silva</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Muito organizado!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
-        </div>
-        <div class="caixa-avaliacao">
-          <h6>Limpeza e higienização dos animais</h6>
-          <div class="nome-avaliador">Voluntário: Ana Lima</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Muito divertido!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
-  </div>
-</div>
-
-
-<div class="sobreposicao-modal" id="modalFeira">
-  <div class="folha-modal">
-    <img src="../imagens/feira.png" alt="Feira de adoções" class="imagem-modal" onerror="this.style.display='none'">
-    <button class="botao-fechar-modal" onclick="fecharModal('modalFeira')"><i class="bi bi-x-lg"></i></button>
-    <div class="corpo-modal">
-      <h3>Ajuda para feira de adoção</h3>
-      <p class="descricao">O Instituto rabo de gato precisa de corações solidários para ajudar nas nossas feiras de adoção! Com sua ajuda, podemos acolher visitantes, apresentar nossos animais e criar um ambiente cheio de carinho e esperança.</p>
-      <div class="linha-ong-modal">
-        <div class="esquerda-ong-modal">
-          <img src="../imagens/ongPerfil3.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong-modal">Instituto rabo de gato</div>
-            <div class="meta-ong-modal">
-              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 5.0 (500) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 3h
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="etiqueta-pontos">250 pontos recebidos</span>
-          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="avaliacoes-modal">
-        <h5>Avaliações</h5>
-        <div class="caixa-avaliacao">
-          <h6>Ajuda para feira de adoção</h6>
-          <div class="nome-avaliador">Voluntário: Bia Fernandes</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Foi muito legal ver tantos animais ganhando um lar!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-        <div class="caixa-avaliacao">
-          <h6>Ajuda para feira de adoção</h6>
-          <div class="nome-avaliador">Voluntário: João Silva</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Muito feliz em ajudar!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
-  </div>
-</div>
-
-
-<div class="sobreposicao-modal" id="modalTransporte">
-  <div class="folha-modal">
-    <img src="../imagens/transporte.png" alt="Transporte de animais" class="imagem-modal" onerror="this.style.display='none'">
-    <button class="botao-fechar-modal" onclick="fecharModal('modalTransporte')"><i class="bi bi-x-lg"></i></button>
-    <div class="corpo-modal">
-      <h3>Transporte de animais</h3>
-      <p class="descricao">Buscamos voluntários para ajudar no transporte de animais. Com sua ajuda, cães e gatos podem ir para consultas, feiras de adoção ou reencontrar uma família. Cada viagem é uma chance de mudar um destino!</p>
-      <div class="linha-ong-modal">
-        <div class="esquerda-ong-modal">
-          <img src="../imagens/ongPerfil3.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong-modal">Instituto rabo de gato</div>
-            <div class="meta-ong-modal">
-              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 4.3 (40) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> Rio de Janeiro, RJ &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 1h
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="etiqueta-pontos">250 pontos recebidos</span>
-          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="avaliacoes-modal">
-        <h5>Avaliações</h5>
-        <div class="caixa-avaliacao">
-          <h6>Transporte de animais</h6>
-          <div class="nome-avaliador">Voluntário: Bia Fernandes</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Foi muito legal ver tantos animais ganhando um lar!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-        <div class="caixa-avaliacao">
-          <h6>Transporte de animais</h6>
-          <div class="nome-avaliador">Voluntário: João Silva</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Muito feliz em ajudar!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
-  </div>
-</div>
-
-
-<div class="sobreposicao-modal" id="modalLar">
-  <div class="folha-modal">
-    <img src="../imagens/lar.png" alt="Acolhimento temporário" class="imagem-modal" onerror="this.style.display='none'">
-    <button class="botao-fechar-modal" onclick="fecharModal('modalLar')"><i class="bi bi-x-lg"></i></button>
-    <div class="corpo-modal">
-      <h3>Acolhimento temporário</h3>
-      <p class="descricao">Seja um lar temporário e ofereça abrigo e carinho a animais resgatados. Cada acolhimento é uma chance de recomeço. Transforme amor em abrigo e mude uma vida!</p>
-      <div class="linha-ong-modal">
-        <div class="esquerda-ong-modal">
-          <img src="../imagens/ongPerfil4.png" alt="Instituto" onerror="this.style.background='var(--creme)'">
-          <div>
-            <div class="nome-ong-modal">Instituto patinha solidária</div>
-            <div class="meta-ong-modal">
-              <i class="bi bi-star-fill" style="color:var(--verde-principal)"></i> 4.5 (300) &nbsp;·&nbsp;
-              <i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> São Paulo, SP &nbsp;·&nbsp;
-              <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> 1 semana
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="etiqueta-pontos">700 pontos recebidos</span>
-          <button class="botao-conversa"><i class="bi bi-chat-dots-fill"></i> Converse comigo</button>
-        </div>
-      </div>
-      <div class="avaliacoes-modal">
-        <h5>Avaliações</h5>
-        <div class="caixa-avaliacao">
-          <h6>Acolhimento temporário</h6>
-          <div class="nome-avaliador">Voluntário: Bia Fernandes</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Já quero fazer mais vezes!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 10 Mar 2025</div>
-        </div>
-        <div class="caixa-avaliacao">
-          <h6>Acolhimento temporário</h6>
-          <div class="nome-avaliador">Voluntário: João Silva</div>
-          <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-          <div class="texto-avaliacao">"Muito divertido!"</div>
-          <div class="data-avaliacao"><i class="bi bi-calendar-fill"></i> 09 Fev 2025</div>
-        </div>
-      </div>
-    </div>
-    <div class="rodape-modal"><button class="botao-inscrever">Inscrever-me</button></div>
-  </div>
-</div>
-
 <script>
-  
+  const API_URL = 'http://localhost:3000'; // ajuste para a URL da sua API em produção
+
+  let todosServicos = [];   // cache dos serviços vindos da API
+  let categoriaAtiva = 'todos';
+
+  function resolverImagem(caminho) {
+    if (!caminho) return '../imagens/mutuoLogo.png';
+    if (caminho.startsWith('http')) return caminho; // já é uma URL completa
+    return `${API_URL}${caminho}`;
+  }
+
+  async function carregarServicos() {
+    try {
+      const resp = await fetch(`${API_URL}/servicos-ong`);
+      if (!resp.ok) throw new Error('Erro ao buscar serviços');
+      todosServicos = await resp.json();
+
+      montarCategorias(todosServicos);
+      renderizarCards(todosServicos);
+    } catch (err) {
+      console.error('Erro ao carregar serviços das ONGs:', err);
+      document.getElementById('gradeCartoes').innerHTML =
+        `<p style="color:var(--texto-suave)">Não foi possível carregar os serviços agora. Tente novamente mais tarde.</p>`;
+    }
+  }
+
+  function montarCategorias(servicos) {
+    const container = document.getElementById('listaCategorias');
+    const focosUnicos = [...new Set(servicos.map(s => s.foco).filter(Boolean))];
+
+    focosUnicos.forEach(foco => {
+      const btn = document.createElement('button');
+      btn.className = 'pilula-categoria';
+      btn.dataset.categoria = foco;
+      btn.textContent = foco;
+      btn.onclick = () => filtrarCategoria(btn);
+      container.appendChild(btn);
+    });
+  }
+
   function filtrarCategoria(botao) {
     document.querySelectorAll('.pilula-categoria').forEach(p => p.classList.remove('ativa'));
     botao.classList.add('ativa');
-    const cat = botao.dataset.categoria;
-    const cartoes = document.querySelectorAll('.cartao-servico');
-    let visiveis = 0;
-    cartoes.forEach(c => {
-      const mostrar = cat === 'todos' || c.dataset.categoria === cat;
-      c.style.display = mostrar ? '' : 'none';
-      if (mostrar) visiveis++;
-    });
-    document.getElementById('labelContador').textContent = visiveis;
+    categoriaAtiva = botao.dataset.categoria;
+    aplicarFiltros();
   }
-
 
   function filtrarCartoes() {
-    const termo = document.getElementById('campoBusca').value.toLowerCase();
-    const catAtiva = document.querySelector('.pilula-categoria.ativa')?.dataset.categoria || 'todos';
-    const cartoes = document.querySelectorAll('.cartao-servico');
-    let visiveis = 0;
-    cartoes.forEach(c => {
-      const bateCat = catAtiva === 'todos' || c.dataset.categoria === catAtiva;
-      const bateTermo = c.dataset.nome.includes(termo);
-      const mostrar = bateCat && bateTermo;
-      c.style.display = mostrar ? '' : 'none';
-      if (mostrar) visiveis++;
-    });
-    document.getElementById('labelContador').textContent = visiveis;
+    aplicarFiltros();
   }
 
- 
+  function aplicarFiltros() {
+    const termo = document.getElementById('campoBusca').value.toLowerCase().trim();
+    const filtrados = todosServicos.filter(s => {
+      const bateCat = categoriaAtiva === 'todos' || s.foco === categoriaAtiva;
+      const bateTermo = !termo ||
+        s.nomeServico.toLowerCase().includes(termo) ||
+        (s.descricao || '').toLowerCase().includes(termo);
+      return bateCat && bateTermo;
+    });
+    renderizarCards(filtrados);
+  }
+
+  function renderizarCards(servicos) {
+    const grade = document.getElementById('gradeCartoes');
+    document.getElementById('labelContador').textContent = servicos.length;
+
+    if (servicos.length === 0) {
+      grade.innerHTML = `<p style="color:var(--texto-suave)">Nenhum serviço encontrado.</p>`;
+      return;
+    }
+
+    grade.innerHTML = servicos.map(s => `
+  <div class="cartao-servico">
+    <div class="envoltorio-imagem">
+      <img src="${resolverImagem(s.imagem)}" alt="${s.nomeServico}">
+      <span class="etiqueta-categoria">${s.foco || ''}</span>
+      <span class="etiqueta-pontos-cartao"><i class="bi bi-star-fill"></i> ${s.pontos || 0} pts</span>
+    </div>
+    <div class="corpo-cartao">
+      <h3>${s.nomeServico}</h3>
+      <p class="descricao-cartao">${s.descricao || ''}</p>
+      <div class="linha-ong">
+        <img src="${resolverImagem(s.fotoOng)}" alt="${s.nomeOng}">
+        <div>
+          <div class="nome-ong">${s.nomeOng}</div>
+        </div>
+      </div>
+      <div class="metadados">
+        <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''}</span>
+        <span class="item-metadado"><i class="bi bi-clock-fill"></i> ${s.horas || ''}h</span>
+      </div>
+      <button class="botao-saiba-mais" onclick="abrirModalServico(${s.id})">
+        <i class="bi bi-info-circle"></i> Saiba mais
+      </button>
+    </div>
+  </div>
+`).join('');
+  }
+
+  function abrirModalServico(id) {
+    const s = todosServicos.find(item => item.id === id);
+    if (!s) return;
+
+    document.getElementById('modalImagem').src = resolverImagem(s.imagem);
+    document.getElementById('modalTitulo').textContent = s.nomeServico;
+    document.getElementById('modalDescricao').textContent = s.descricao || '';
+    document.getElementById('modalFotoOng').src = resolverImagem(s.fotoOng);
+    document.getElementById('modalNomeOng').textContent = s.nomeOng;
+    document.getElementById('modalMetaOng').innerHTML =
+      `<i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''} &nbsp;·&nbsp;
+       <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> ${s.horas || ''}h`;
+    document.getElementById('modalPontos').textContent = `${s.pontos || 0} pontos`;
+
+    abrirModal('modalServico');
+  }
+
   function abrirModal(id) {
     document.getElementById(id).classList.add('aberto');
     document.body.style.overflow = 'hidden';
@@ -899,23 +599,17 @@
     m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
   });
 
-
   window.addEventListener('load', () => {
-    filtrarCategoria(document.querySelector('.pilula-categoria.ativa'));
+    carregarServicos();
   });
 
   const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
 
-if(usuario){
-    document.getElementById("nomeUsuario").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.getElementById("nomeBoasVindas").textContent =
-        usuario.nome || usuario.nome_usuario;
-
+  if (usuario) {
+    document.getElementById("nomeUsuario").textContent = usuario.nome || usuario.nome_usuario;
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
-}
- carregarFoto();
+  }
+  carregarFoto();
 </script>
  <script src="../funcoes.js"></script>
 </body>

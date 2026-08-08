@@ -271,7 +271,7 @@ async function cadastrarUsuario(usuario) {
   const sql = `
     INSERT INTO Mutuo_Usuario
     (cpf, nome, email, senha, telefone, cidade, bairro, cep, dataNasc, pontos, horasVoluntarias, estado, endereco, cadastro)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 20, 0, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 20, 0, ?, ?, ?, )
   `;
 
   const values = [
@@ -286,7 +286,8 @@ async function cadastrarUsuario(usuario) {
     usuario.nascimento,
     usuario.uf,
     usuario.endereco,
-    usuario.cadastro
+    usuario.cadastro,
+
   ];
 
   try {
@@ -680,6 +681,74 @@ async function alterarStatusServicoOng(id, ativo) {
   }
 }
 
+// Lista todos os serviços de ONGs ativos
+async function getServicosOngTodos() {
+  const sql = `
+    SELECT 
+      s.id,
+      s.cnpj,
+      s.nomeServico,
+      s.horas,
+      s.descricao,
+      s.foco,
+      s.imagem,
+      s.pontos,
+      o.nomeOng,
+      o.cidade,
+      o.estado,
+      o.foto_perfil AS fotoOng
+    FROM Mutuo_ServicoOng AS s
+    JOIN Mutuo_ONG AS o ON s.cnpj = o.cnpj
+    WHERE s.ativo = 1 AND o.ativo = 1
+    ORDER BY s.id DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql);
+    return rows.map(servico => ({
+      ...servico,
+      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
+      fotoOng: servico.fotoOng ? `/uploads/fotos/${servico.fotoOng}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar todos os serviços de ONGs:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Lista todos os serviços de usuários ativos
+async function getServicosUsuarioTodos() {
+  const sql = `
+    SELECT 
+      s.cod,
+      s.nome,
+      s.descricao,
+      s.foco,
+      s.qtdHoras,
+      s.imagem,
+      s.pontos,
+      s.idUsuario,
+      u.nome AS nomeUsuario,
+      u.cidade,
+      u.estado,
+      u.foto_perfil AS fotoUsuario
+    FROM Mutuo_Servico AS s
+    JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
+    WHERE s.ativo = 1 AND u.ativo = 1
+    ORDER BY s.cod DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql);
+    return rows.map(servico => ({
+      ...servico,
+      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
+      fotoUsuario: servico.fotoUsuario ? `/uploads/fotos/${servico.fotoUsuario}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar todos os serviços de usuários:', err.message);
+    return { error: err.message };
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   getUsuarioPorCpf,
@@ -732,5 +801,7 @@ module.exports = {
   atualizarDadosOng,
   getServicoOngPorId,
   atualizarServicoOng,
-  alterarStatusServicoOng
+  alterarStatusServicoOng,
+  getServicosOngTodos,
+  getServicosUsuarioTodos
 };
