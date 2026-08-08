@@ -271,7 +271,7 @@ async function cadastrarUsuario(usuario) {
   const sql = `
     INSERT INTO Mutuo_Usuario
     (cpf, nome, email, senha, telefone, cidade, bairro, cep, dataNasc, pontos, horasVoluntarias, estado, endereco, cadastro)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 20, 0, ?, ?, ?, )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 20, 0, ?, ?, ?)
   `;
 
   const values = [
@@ -287,7 +287,6 @@ async function cadastrarUsuario(usuario) {
     usuario.uf,
     usuario.endereco,
     usuario.cadastro,
-
   ];
 
   try {

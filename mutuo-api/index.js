@@ -40,8 +40,8 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, 'uploads', 'fotos'));
   },
   filename: (req, file, cb) => {
-    // Aceita tanto cpf (usuário comum) quanto cnpj (ONG) como identificador do arquivo
-    const id = req.body?.cnpj || req.body?.cpf || 'sem-id';
+    const idBruto = req.body?.cnpj || req.body?.cpf || 'sem-id';
+    const id = idBruto.replace(/\D/g, '');
     const ext = path.extname(file.originalname);
     cb(null, `${id}-${Date.now()}${ext}`);
   }
@@ -69,7 +69,8 @@ const storageServico = multer.diskStorage({
     cb(null, pastaServicos);
   },
   filename: (req, file, cb) => {
-    const id = req.body?.cnpj || req.body?.cpf || 'sem-id';
+    const idBruto = req.body?.cnpj || req.body?.cpf || 'sem-id';
+    const id = idBruto.replace(/\D/g, ''); // deixa só os números
     const ext = path.extname(file.originalname);
     cb(null, `${id}-${Date.now()}${ext}`);
   }
