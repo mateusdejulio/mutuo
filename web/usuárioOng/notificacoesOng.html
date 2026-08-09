@@ -426,234 +426,144 @@
     </div>
 
     <!-- TODAS -->
-    <div class="lista-notificacoes" id="todas">
-
-      <div class="card-notificacao nao-lida">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil4.png" alt="Mateus" onerror="this.src='https://ui-avatars.com/api/?name=MD&background=588157&color=fff'">
-          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Nova mensagem</span>
-          </div>
-          <p class="nome-notificacao">Mateus De Julio</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de matemática</p>
-          <div class="acoes-notificacao">
-            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 5 min</span>
-      </div>
-
-      <div class="card-notificacao nao-lida">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil1.png" alt="Luisa" onerror="this.src='https://ui-avatars.com/api/?name=LA&background=e08c2c&color=fff'">
-          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Solicitação recebida</span>
-            <span class="etiqueta-status pendente">Pendente</span>
-          </div>
-          <p class="nome-notificacao">Luisa Andrade</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Atividades de recreação</p>
-          <div class="acoes-notificacao">
-            <button class="btn-acao aceitar" onclick="realizarAcao(this,'aceito')"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
-            <button class="btn-acao recusar" onclick="realizarAcao(this,'recusado')"><i class="bi bi-x-circle-fill"></i> Recusar</button>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 30 min</span>
-      </div>
-
-      <div class="card-notificacao">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil2.png" alt="Marcelo" onerror="this.src='https://ui-avatars.com/api/?name=MF&background=588157&color=fff'">
-          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Nova mensagem</span>
-          </div>
-          <p class="nome-notificacao">Marcelo Fernandes</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de pintura</p>
-          <div class="acoes-notificacao">
-            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 2 h</span>
-      </div>
-
-      <div class="card-notificacao">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.src='https://ui-avatars.com/api/?name=ML&background=e08c2c&color=fff'">
-          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Solicitação recebida</span>
-            <span class="etiqueta-status aceito">Aceito</span>
-          </div>
-          <p class="nome-notificacao">Mariana Lacerda</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Atividades de recreação</p>
-          <div class="acoes-notificacao">
-            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 5 h</span>
-      </div>
-
-    </div>
-
-    <!-- RECEBIDAS -->
-    <div class="lista-notificacoes" id="recebidas" style="display:none;">
-
-      <div class="card-notificacao nao-lida">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil1.png" alt="Luisa" onerror="this.src='https://ui-avatars.com/api/?name=LA&background=e08c2c&color=fff'">
-          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Solicitação recebida</span>
-            <span class="etiqueta-status pendente">Pendente</span>
-          </div>
-          <p class="nome-notificacao">Luisa Andrade</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Atividades de recreação</p>
-          <div class="acoes-notificacao">
-            <button class="btn-acao aceitar" onclick="realizarAcao(this,'aceito')"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
-            <button class="btn-acao recusar" onclick="realizarAcao(this,'recusado')"><i class="bi bi-x-circle-fill"></i> Recusar</button>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 30 min</span>
-      </div>
-
-      <div class="card-notificacao">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.src='https://ui-avatars.com/api/?name=ML&background=e08c2c&color=fff'">
-          <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Solicitação recebida</span>
-            <span class="etiqueta-status aceito">Aceito</span>
-          </div>
-          <p class="nome-notificacao">Mariana Lacerda</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i>Atividades de recreação</p>
-          <div class="acoes-notificacao">
-            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 5 h</span>
-      </div>
-
-    </div>
-
-    <!-- MENSAGENS -->
-    <div class="lista-notificacoes" id="mensagens" style="display:none;">
-
-      <div class="card-notificacao nao-lida">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil4.png" alt="Mateus" onerror="this.src='https://ui-avatars.com/api/?name=MD&background=588157&color=fff'">
-          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Nova mensagem</span>
-          </div>
-          <p class="nome-notificacao">Mateus De Julio</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de matemática</p>
-          <div class="acoes-notificacao">
-            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 5 min</span>
-      </div>
-
-      <div class="card-notificacao">
-        <div class="avatar-notificacao">
-          <img src="../imagens/perfil2.png" alt="Marcelo" onerror="this.src='https://ui-avatars.com/api/?name=MF&background=588157&color=fff'">
-          <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
-        </div>
-        <div class="corpo-notificacao">
-          <div class="topo-notificacao">
-            <span class="tipo-notificacao">Nova mensagem</span>
-          </div>
-          <p class="nome-notificacao">Marcelo Fernandes</p>
-          <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> Aula de pintura</p>
-          <div class="acoes-notificacao">
-            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Responder</a>
-          </div>
-        </div>
-        <span class="horario-notificacao">Há 2 h</span>
-      </div>
-
-    </div>
+    <div class="lista-notificacoes" id="todas"></div>
+<div class="lista-notificacoes" id="recebidas" style="display:none;"></div>
+<div class="lista-notificacoes" id="mensagens" style="display:none;">
+  
+</div>
 
   </div>
 <script src="../funcoes.js"></script>
   <script>
     carregarNavOng();
-    // Filtros
-    document.querySelectorAll('.btn-filtro').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
-        btn.classList.add('ativo');
-        document.querySelectorAll('.lista-notificacoes').forEach(l => l.style.display = 'none');
-        document.getElementById(btn.dataset.alvo).style.display = 'flex';
-      });
-    });
 
-    // Marcar como lida ao clicar no card
-    document.querySelectorAll('.card-notificacao').forEach(card => {
-      card.addEventListener('click', function(e) {
-        if (e.target.closest('.btn-acao')) return;
-        if (this.classList.contains('nao-lida')) {
-          this.classList.remove('nao-lida');
-          atualizarContador();
-        }
-      });
-    });
+function classeStatus(status) {
+  if (status === 'Aceita') return 'aceito';
+  if (status === 'Recusada') return 'recusado';
+  return 'pendente';
+}
 
-    // Aceitar / Recusar
-    function realizarAcao(btn, status) {
-      const card = btn.closest('.card-notificacao');
-      const etiqueta = card.querySelector('.etiqueta-status');
-      if (etiqueta) {
-        etiqueta.className = 'etiqueta-status ' + status;
-        etiqueta.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-      }
-      const acoes = card.querySelector('.acoes-notificacao');
-      if (acoes) {
-        acoes.innerHTML = `<a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>`;
-      }
-      if (card.classList.contains('nao-lida')) {
-        card.classList.remove('nao-lida');
+function tempoRelativo(dataStr) {
+  const diffMs = Date.now() - new Date(dataStr).getTime();
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return 'Agora';
+  if (min < 60) return `Há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Há ${h} h`;
+  return `Há ${Math.floor(h / 24)} d`;
+}
+
+function cardSolicitacao(s) {
+  const pendente = s.statusSolicitacao === 'Pendente';
+  return `
+    <div class="card-notificacao ${pendente ? 'nao-lida' : ''}" data-id="${s.codSolicitacao}">
+      <div class="avatar-notificacao">
+        <img src="${s.fotoSolicitador || '../imagens/mutuoLogo.png'}" alt="${s.nomeSolicitador}">
+        <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
+      </div>
+      <div class="corpo-notificacao">
+        <div class="topo-notificacao">
+          <span class="tipo-notificacao">Solicitação recebida</span>
+          <span class="etiqueta-status ${classeStatus(s.statusSolicitacao)}">${s.statusSolicitacao}</span>
+        </div>
+        <p class="nome-notificacao">${s.nomeSolicitador}</p>
+        <p class="servico-notificacao"><i class="bi bi-briefcase-fill"></i> ${s.nomeServico}</p>
+        ${pendente ? `
+          <div class="acoes-notificacao">
+            <button class="btn-acao aceitar" onclick="responderSolicitacaoOng(${s.codSolicitacao}, true, ${s.pontos})"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
+            <button class="btn-acao recusar" onclick="responderSolicitacaoOng(${s.codSolicitacao}, false, ${s.pontos})"><i class="bi bi-x-circle-fill"></i> Recusar</button>
+          </div>` : `
+          <div class="acoes-notificacao">
+            <a href="chatOng.html" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>
+          </div>`}
+      </div>
+      <span class="horario-notificacao">${tempoRelativo(s.dataSolicitacao)}</span>
+    </div>`;
+}
+
+async function carregarSolicitacoesOng() {
+  const ongLogadaStr = sessionStorage.getItem('ongLogada');
+  const ongLogada = ongLogadaStr ? JSON.parse(ongLogadaStr) : null;
+  if (!ongLogada || !ongLogada.cnpj) return;
+
+  try {
+    const resp = await fetch(`${API_URL}/solicitacoes-ong/prestador/${encodeURIComponent(ongLogada.cnpj)}`);
+    const solicitacoesOng = await resp.json();
+  
+    const html = solicitacoesOng.map(cardSolicitacao).join('') ||
+      '<div class="estado-vazio"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
+
+    document.getElementById('recebidas').innerHTML = html;
+    document.getElementById('todas').innerHTML = html;
+
+    reativarCliqueLido();
+    atualizarContador();
+  } catch (err) {
+    console.error('Erro ao carregar solicitações da ONG:', err);
+  }
+}
+
+async function responderSolicitacaoOng(cod, aceitar, pontos) {
+  try {
+    const resp = await fetch(`${API_URL}/solicitacoes-ong/${cod}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        statusS: aceitar ? 'Aceita' : 'Recusada',
+        statusE: aceitar ? 'Não iniciado' : 'Cancelado',
+        pontos: pontos || 0
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    await carregarSolicitacoesOng();
+  } catch (err) {
+    console.error('Erro ao responder solicitação:', err);
+    alert('Não foi possível atualizar a solicitação.');
+  }
+}
+
+function reativarCliqueLido() {
+  document.querySelectorAll('.card-notificacao').forEach(card => {
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('.btn-acao')) return;
+      if (this.classList.contains('nao-lida')) {
+        this.classList.remove('nao-lida');
         atualizarContador();
       }
-    }
+    });
+  });
+}
 
-    // Marcar todas como lidas
-    function marcarTodasLidas() {
-      document.querySelectorAll('.card-notificacao.nao-lida').forEach(c => c.classList.remove('nao-lida'));
-      atualizarContador();
-    }
+function marcarTodasLidas() {
+  document.querySelectorAll('.card-notificacao.nao-lida').forEach(c => c.classList.remove('nao-lida'));
+  atualizarContador();
+}
 
-    // Atualizar contador
-    function atualizarContador() {
-      const total = document.querySelectorAll('.card-notificacao.nao-lida').length;
-      const badgeContador = document.getElementById('badge-contador');
-      const badgeSino = document.getElementById('badge-sino');
+function atualizarContador() {
+  const total = document.querySelectorAll('.card-notificacao.nao-lida').length;
+  const badgeContador = document.getElementById('badge-contador');
+  const badgeSino = document.getElementById('badge-sino');
+  if (total === 0) {
+    badgeContador.style.display = 'none';
+    if (badgeSino) badgeSino.style.display = 'none';
+  } else {
+    badgeContador.style.display = '';
+    badgeContador.textContent = total + (total === 1 ? ' nova' : ' novas');
+    if (badgeSino) { badgeSino.style.display = ''; badgeSino.textContent = total; }
+  }
+}
 
-      if (total === 0) {
-        badgeContador.style.display = 'none';
-        if (badgeSino) badgeSino.style.display = 'none';
-      } else {
-        badgeContador.style.display = '';
-        badgeContador.textContent = total + (total === 1 ? ' nova' : ' novas');
-        if (badgeSino) { badgeSino.style.display = ''; badgeSino.textContent = total; }
-      }
-    }
+document.querySelectorAll('.btn-filtro').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+    document.querySelectorAll('.lista-notificacoes').forEach(l => l.style.display = 'none');
+    document.getElementById(btn.dataset.alvo).style.display = 'flex';
+  });
+});
+
+window.addEventListener('load', carregarSolicitacoesOng);
   </script>
 
 </body>

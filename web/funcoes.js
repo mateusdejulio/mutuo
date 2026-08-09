@@ -65,11 +65,10 @@ function atualizarTodasFotosOng(url) {
 
 async function carregarFotoOng() {
   const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
-
   if (!ong.cnpj) return;
 
   try {
-    const res  = await fetch(`${API_URL}/perfil/fotoOng/${ong.cnpj}`);
+    const res  = await fetch(`${API_URL}/perfil/foto/ong/${ong.cnpj}`);
     const data = await res.json();
 
     if (data.fotoPerfil) {
@@ -80,7 +79,7 @@ async function carregarFotoOng() {
   }
 }
 
-if (sessionStorage.getItem('ongLogada')) carregarFotoOng();
+carregarFotoOng();
 
 async function enviarFotoOng(input) {
   const arquivo = input.files[0];
@@ -159,5 +158,43 @@ async function carregarNavOng() {
 
   } catch (erro) {
     console.error(erro);
+  }
+}
+
+// ── Inscrição em serviço (usado nas páginas de Serviços e Home) ──
+async function inscreverServico(cod, todosServicosRef) {
+  const s = todosServicosRef.find(item => item.cod === cod);
+  if (!s) return;
+
+  const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+  const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+
+  if (!usuarioLogado?.cpf) {
+    alert('Sessão expirada. Faça login novamente.');
+    return;
+  }
+
+  try {
+    const resposta = await fetch(`${API_URL}/solicitacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        codServico: s.cod,
+        codUsuario: usuarioLogado.cpf,
+        pontos: s.pontos || 0
+      })
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok || resultado.error) {
+      throw new Error(resultado.erro || resultado.error || 'Erro ao se inscrever no serviço.');
+    }
+
+    alert('Inscrição realizada com sucesso!');
+
+  } catch (erro) {
+    console.error(erro);
+    alert(erro.message || 'Não foi possível se inscrever no serviço.');
   }
 }
