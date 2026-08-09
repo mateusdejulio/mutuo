@@ -563,24 +563,24 @@
 
 <div class="stats-wrap">
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon-box"><i class="bi bi-clock-fill"></i></div>
-      <div class="stat-title">Horas de serviço</div>
-      <div class="stat-value">24h</div>
-      <div class="stat-sub">+8h este mês</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon-box"><i class="bi bi-award-fill"></i></div>
-      <div class="stat-title">Trabalhos concluídos</div>
-      <div class="stat-value">5</div>
-      <div class="stat-sub">&nbsp;</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon-box"><i class="bi bi-heart-fill"></i></div>
-      <div class="stat-title">Pontos</div>
-      <div class="stat-value">+150</div>
-      <div class="stat-sub">+50 este mês</div>
-    </div>
+   <div class="stat-card">
+  <div class="stat-icon-box"><i class="bi bi-clock-fill"></i></div>
+  <div class="stat-title">Horas de serviço</div>
+  <div class="stat-value" id="statHoras">0h</div>
+  <div class="stat-sub">&nbsp;</div>
+</div>
+<div class="stat-card">
+  <div class="stat-icon-box"><i class="bi bi-award-fill"></i></div>
+  <div class="stat-title">Trabalhos concluídos</div>
+  <div class="stat-value" id="statTrabalhos">0</div>
+  <div class="stat-sub">&nbsp;</div>
+</div>
+<div class="stat-card">
+  <div class="stat-icon-box"><i class="bi bi-heart-fill"></i></div>
+  <div class="stat-title">Pontos</div>
+  <div class="stat-value" id="statPontos">+0</div>
+  <div class="stat-sub">&nbsp;</div>
+</div>
     <div class="stat-card">
       <div class="stat-icon-box"><i class="bi bi-gem"></i></div>
       <div class="stat-title">Plano atual</div>
@@ -1064,7 +1064,7 @@
     </div>
   </div>
 </div>
-
+ <script src="../funcoes.js"></script>
 <script>
 
   const quotes = [
@@ -1118,9 +1118,37 @@
     document.getElementById('nomeBoasVindas').textContent = usuario.nome;
     document.title = 'Mútuo | ' + usuario.nome;
   }
+
+  //estatisticas dashboard
+  async function carregarDashboard() {
+  if (!usuario || !usuario.cpf) return;
+
+  try {
+    const [resUsuario, resStats] = await Promise.all([
+      fetch(`${API_URL}/usuarios/${usuario.cpf}`),
+      fetch(`${API_URL}/usuarios/${usuario.cpf}/estatisticas`)
+    ]);
+
+    const dadosUsuario = await resUsuario.json();
+    const stats = await resStats.json();
+
+    if (dadosUsuario && !dadosUsuario.erro) {
+      document.getElementById('statPontos').textContent = `+${dadosUsuario.pontos ?? 0}`;
+    }
+
+    if (stats && !stats.erro) {
+      document.getElementById('statHoras').textContent = `${stats.totalHoras}h`;
+      document.getElementById('statTrabalhos').textContent = stats.trabalhosConcluidos;
+    }
+  } catch (err) {
+    console.error('Erro ao carregar dashboard:', err);
+  }
+}
+
+carregarDashboard();
   carregarFoto();
 </script>
- <script src="../funcoes.js"></script>
+
 
 
 </body>
