@@ -448,6 +448,42 @@ app.get('/solicitacoes/usuario/:cpf', async (req, res) => {
   res.json(solicitacoes);
 });
 
+app.get('/usuarios/:cpf/estatisticas', async (req, res) => {
+  const stats = await db.getEstatisticasUsuario(req.params.cpf);
+  if (stats.error) return res.status(500).json({ erro: stats.error });
+  res.json(stats);
+});
+
+
+
+// Cria uma solicitação para um serviço de ONG
+app.post('/solicitacoes-ong', async (req, res) => {
+  try {
+    const { codServico, codUsuario, pontos } = req.body;
+    if (!codServico || !codUsuario) {
+      return res.status(400).json({ erro: 'codServico e codUsuario são obrigatórios.' });
+    }
+    const resultado = await db.cadastrarSolicitacaoOng(codServico, codUsuario, pontos || 0);
+    if (resultado.error) return res.status(500).json({ erro: resultado.error });
+    res.json(resultado);
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// Lista solicitações recebidas por uma ONG
+app.get('/solicitacoes-ong/prestador/:cnpj', async (req, res) => {
+  const solicitacoes = await db.getSolicitacoesOng(req.params.cnpj);
+  if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });
+  res.json(solicitacoes);
+});
+
+// Aceita/recusa uma solicitação de serviço de ONG
+app.put('/solicitacoes-ong/:cod', async (req, res) => {
+  const { statusS, statusE, pontos } = req.body;
+  res.json(await db.alterSolicitacaoOng(req.params.cod, statusS, statusE, pontos));
+});
+
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
 // Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.

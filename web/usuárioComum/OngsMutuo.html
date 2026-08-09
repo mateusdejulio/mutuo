@@ -375,6 +375,67 @@
     padding: 3px 10px; border-radius: 20px;
     display: flex; align-items: center; gap: 4px;
 }
+
+
+.grade-cartoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 1.1rem;
+  align-items: stretch;
+}
+
+.cartao-servico {
+  background: var(--branco);
+  border-radius: 20px;
+  border: 1.5px solid var(--creme);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(88,129,87,0.07);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex; flex-direction: column;
+  height: 100%;
+}
+
+.descricao-cartao {
+  font-size: 0.81rem; color: var(--texto-suave); line-height: 1.5; margin-bottom: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.botoes-cartao { display: flex; gap: 8px; margin-top: auto; }
+
+.botao-duvida,
+.botao-saiba-mais {
+  flex: 1;
+  border: none; cursor: pointer;
+  border-radius: 12px;
+  padding: 11px 10px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.82rem; font-weight: 700;
+  white-space: nowrap;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.2s, color 0.2s, transform 0.12s, box-shadow 0.2s;
+  margin-top: 0;
+}
+
+.botao-duvida {
+  background: var(--creme-claro);
+  color: var(--verde-escuro);
+  border: 1.5px solid var(--creme);
+}
+.botao-duvida:hover { background: var(--creme); border-color: var(--verde-principal); }
+.botao-duvida:active { transform: scale(0.97); }
+
+.botao-saiba-mais {
+  background: var(--verde-principal);
+  color: var(--creme);
+  box-shadow: 0 3px 10px rgba(88,129,87,0.3);
+}
+.botao-saiba-mais:hover { background: var(--verde-escuro); box-shadow: 0 4px 14px rgba(58,90,64,0.4); }
+.botao-saiba-mais:active { transform: scale(0.97); }
+
+.botao-duvida i, .botao-saiba-mais i { font-size: 0.85rem; }
     
     @keyframes descerFade {
       from { opacity: 0; transform: translateY(-8px); }
@@ -477,7 +538,7 @@
 
   function resolverImagem(caminho) {
     if (!caminho) return '../imagens/mutuoLogo.png';
-    if (caminho.startsWith('http')) return caminho; // já é uma URL completa
+    if (caminho.startsWith('http')) return caminho;
     return `${API_URL}${caminho}`;
   }
 
@@ -543,61 +604,75 @@
     }
 
     grade.innerHTML = servicos.map(s => `
-  <div class="cartao-servico">
-    <div class="envoltorio-imagem">
-      <img src="${resolverImagem(s.imagem)}" alt="${s.nomeServico}">
-      <span class="etiqueta-categoria">${s.foco || ''}</span>
-      <span class="etiqueta-pontos-cartao"><i class="bi bi-star-fill"></i> ${s.pontos || 0} pts</span>
-    </div>
-    <div class="corpo-cartao">
-      <h3>${s.nomeServico}</h3>
-      <p class="descricao-cartao">${s.descricao || ''}</p>
-      <div class="linha-ong">
-        <img src="${resolverImagem(s.fotoOng)}" alt="${s.nomeOng}">
-        <div>
-          <div class="nome-ong">${s.nomeOng}</div>
+      <div class="cartao-servico">
+        <div class="envoltorio-imagem">
+          <img src="${resolverImagem(s.imagem)}" alt="${s.nomeServico}">
+          <span class="etiqueta-categoria">${s.foco || ''}</span>
+          <span class="etiqueta-pontos-cartao"><i class="bi bi-star-fill"></i> ${s.pontos || 0} pts</span>
+        </div>
+        <div class="corpo-cartao">
+          <h3>${s.nomeServico}</h3>
+          <p class="descricao-cartao">${s.descricao || ''}</p>
+          <div class="linha-ong">
+            <img src="${resolverImagem(s.fotoOng)}" alt="${s.nomeOng}">
+            <div>
+              <div class="nome-ong">${s.nomeOng}</div>
+            </div>
+          </div>
+          <div class="metadados">
+            <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''}</span>
+            <span class="item-metadado"><i class="bi bi-clock-fill"></i> ${s.horas || ''}h</span>
+          </div>
+          <div class="botoes-cartao">
+            <button class="botao-duvida" onclick="tirarDuvidas(${s.id})"><i class="bi bi-chat-dots-fill"></i> Tirar dúvidas</button>
+            <button class="botao-saiba-mais" onclick="inscreverServico(${s.id})"><i class="bi bi-check-circle-fill"></i> Solicitar</button>
+          </div>
         </div>
       </div>
-      <div class="metadados">
-        <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''}</span>
-        <span class="item-metadado"><i class="bi bi-clock-fill"></i> ${s.horas || ''}h</span>
-      </div>
-      <button class="botao-saiba-mais" onclick="abrirModalServico(${s.id})">
-        <i class="bi bi-info-circle"></i> Saiba mais
-      </button>
-    </div>
-  </div>
-`).join('');
+    `).join('');
   }
 
-  function abrirModalServico(id) {
+  function tirarDuvidas(id) {
+    // TODO: quando o chat tiver lógica de conversas específicas, usar o "id" do serviço
+    window.location.href = 'chatMutuo.html';
+  }
+
+  async function inscreverServico(id) {
     const s = todosServicos.find(item => item.id === id);
     if (!s) return;
 
-    document.getElementById('modalImagem').src = resolverImagem(s.imagem);
-    document.getElementById('modalTitulo').textContent = s.nomeServico;
-    document.getElementById('modalDescricao').textContent = s.descricao || '';
-    document.getElementById('modalFotoOng').src = resolverImagem(s.fotoOng);
-    document.getElementById('modalNomeOng').textContent = s.nomeOng;
-    document.getElementById('modalMetaOng').innerHTML =
-      `<i class="bi bi-geo-alt-fill" style="color:var(--verde-principal)"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''} &nbsp;·&nbsp;
-       <i class="bi bi-clock-fill" style="color:var(--verde-principal)"></i> ${s.horas || ''}h`;
-    document.getElementById('modalPontos').textContent = `${s.pontos || 0} pontos`;
+    const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+    const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
 
-    abrirModal('modalServico');
-  }
+    if (!usuarioLogado?.cpf) {
+      alert('Sessão expirada. Faça login novamente.');
+      return;
+    }
 
-  function abrirModal(id) {
-    document.getElementById(id).classList.add('aberto');
-    document.body.style.overflow = 'hidden';
+    try {
+      const resposta = await fetch(`${API_URL}/solicitacoes-ong`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codServico: s.id,
+          codUsuario: usuarioLogado.cpf,
+          pontos: s.pontos || 0
+        })
+      });
+
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || resultado.error) {
+        throw new Error(resultado.erro || resultado.error || 'Erro ao se inscrever no serviço.');
+      }
+
+      alert('Inscrição realizada com sucesso!');
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível se inscrever no serviço.');
+    }
   }
-  function fecharModal(id) {
-    document.getElementById(id).classList.remove('aberto');
-    document.body.style.overflow = '';
-  }
-  document.querySelectorAll('.sobreposicao-modal').forEach(m => {
-    m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
-  });
 
   window.addEventListener('load', () => {
     carregarServicos();

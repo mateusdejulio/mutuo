@@ -826,6 +826,93 @@ async function getSolicitacoesUsuario(cpfUsuario) {
   }
 }
 
+async function getEstatisticasUsuario(cpf) {
+  const sql = `
+    SELECT 
+      COALESCE(SUM(horas), 0) AS totalHoras,
+      COUNT(*) AS trabalhosConcluidos
+    FROM (
+      SELECT SERV.qtdHoras AS horas
+      FROM Mutuo_Solicitacao AS SOL
+      JOIN Mutuo_Servico AS SERV ON SOL.codServico = SERV.cod
+      WHERE SERV.idUsuario = ? AND SOL.statusExecucao = 'Realizada'
+
+      UNION ALL
+
+      SELECT SO.horas AS horas
+      FROM Mutuo_SolicitacaoONG AS SOL
+      JOIN Mutuo_ServicoOng AS SO ON SOL.codServico = SO.id
+      WHERE SOL.codUsuario = ? AND SOL.statusExecucao = 'Realizada'
+    ) AS combinado
+  `;
+
+  try {
+    const [rows] = await pool.query(sql, [cpf, cpf]);
+    return rows[0];
+  } catch (err) {
+    console.error('Erro ao buscar estatísticas do usuário:', err.message);
+    return { error: err.message };
+  }
+}
+
+
+// Cria solicitação para serviço de ONG
+async function cadastrarSolicitacaoOng(codServico, codUsuario, pontos) {
+  const sql = `
+    INSERT INTO Mutuo_SolicitacaoONG
+    (codServico, codUsuario, statusSolicitacao, statusExecucao, dataSolicitacao, pontos)
+    VALUES (?, ?, 'Pendente', 'Não iniciado', NOW(), ?)
+  `;
+  try {
+    const [result] = await pool.query(sql, [codServico, codUsuario, pontos]);
+    return { success: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao cadastrar solicitação de ONG:', err.message);
+    return { error: err.message };
+  }
+}
+// Lista as solicitações RECEBIDAS por uma ONG (ela é a dona do serviço)
+async function getSolicitacoesOng(cnpj) {
+  const sql = `
+    SELECT 
+      SOL.codSolicitacao,
+      SOL.statusSolicitacao,
+      SOL.statusExecucao,
+      SOL.dataSolicitacao,
+      SOL.pontos,
+      SERV.nomeServico,
+      USOL.nome AS nomeSolicitador,
+      USOL.cpf AS cpfSolicitador,
+      USOL.foto_perfil AS fotoSolicitador
+    FROM Mutuo_SolicitacaoONG AS SOL
+    JOIN Mutuo_ServicoOng AS SERV ON SOL.codServico = SERV.id
+    JOIN Mutuo_Usuario AS USOL ON SOL.codUsuario = USOL.cpf
+    WHERE SERV.cnpj = ?
+    ORDER BY SOL.dataSolicitacao DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cnpj]);
+    return rows.map(r => ({
+      ...r,
+      fotoSolicitador: r.fotoSolicitador ? `/uploads/fotos/${r.fotoSolicitador}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar solicitações da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Aceita/recusa uma solicitação de serviço de ONG
+async function alterSolicitacaoOng(cod, statusS, statusE, pontos) {
+  const sql = 'UPDATE Mutuo_SolicitacaoONG SET statusSolicitacao = ?, statusExecucao = ?, pontos = ? WHERE codSolicitacao = ?';
+  try {
+    const [result] = await pool.query(sql, [statusS, statusE, pontos, cod]);
+    return { success: true, affectedRows: result.affectedRows };
+  } catch (err) {
+    console.error('Erro ao alterar solicitação da ONG:', err.message);
+    return { error: err.message };
+  }
+}
 module.exports = { 
   getUsuarios, 
   getUsuarioPorCpf,
@@ -883,5 +970,10 @@ module.exports = {
   getServicosUsuarioTodos,
   cadastrarSolicitacao,
   getSolicitacoesPrestador,
-  getSolicitacoesUsuario
+  getSolicitacoesUsuario,
+  getEstatisticasUsuario,
+  cadastrarSolicitacaoOng,
+  getSolicitacoesOng,
+  alterSolicitacaoOng
+
 };
