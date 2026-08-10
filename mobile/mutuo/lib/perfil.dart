@@ -5,6 +5,7 @@ import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 // ─── DATA CLASS PARA HISTÓRICO (dados de exemplo, ligue à sua API quando tiver a rota) ───
 class _ItemHistorico {
@@ -58,6 +59,8 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
   Map<String, dynamic>? _usuario;
   List<dynamic> _servicos = [];
   String? _fotoUrl;
+  bool _enviandoFoto = false;
+  final ImagePicker _picker = ImagePicker();
 
   final _nomeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
@@ -196,6 +199,43 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
       _telefoneCtrl.text = _usuario?['telefone']?.toString() ?? '';
       _editando = false;
     });
+  }
+
+  Future<void> _trocarFoto() async {
+    final XFile? imagem = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      imageQuality: 85,
+    );
+    if (imagem == null) return;
+
+    setState(() => _enviandoFoto = true);
+
+    final bytes = await imagem.readAsBytes();
+    final resultado = await _api.enviarFotoPerfil(
+      widget.cpf,
+      bytes,
+      imagem.name,
+    );
+
+    if (!mounted) return;
+    setState(() => _enviandoFoto = false);
+
+    if (resultado['sucesso'] == true) {
+      setState(() => _fotoUrl = resultado['fotoPerfil']);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foto de perfil atualizada!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            resultado['erro'] ?? 'Não foi possível atualizar a foto.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   Future<void> _excluirServico(String id, int index) async {
@@ -533,23 +573,50 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
         children: [
           Row(
             children: [
-              Stack(
-                children: [
-                  _avatarCircle(size: 68),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: _branco, width: 2),
+              GestureDetector(
+                onTap: _enviandoFoto ? null : _trocarFoto,
+                child: Stack(
+                  children: [
+                    _avatarCircle(size: 68),
+                    if (_enviandoFoto)
+                      Positioned.fill(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.black38,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: _verdeMedio,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: _branco, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          size: 11,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

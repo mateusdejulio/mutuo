@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class ApiService {
   // localhost funciona para Flutter Web no Chrome e simulador iOS
@@ -186,9 +187,8 @@ class ApiService {
     }
   }
 
-  // ─── NOVO: busca a foto de perfil do usuário ───
-  // Usa GET /perfil/foto/:cpf, que já existe no backend e retorna
-  // { fotoPerfil: '/uploads/fotos/arquivo.jpg' } ou { fotoPerfil: null }
+  // ─── Busca a foto de perfil do usuário ───
+  // Usa GET /perfil/foto/:cpf
   Future<String?> buscarFotoPerfil(String cpf) async {
     final url = Uri.parse('$baseUrl/perfil/foto/${Uri.encodeComponent(cpf)}');
     try {
@@ -200,6 +200,56 @@ class ApiService {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  // ─── NOVO: envia/troca a foto de perfil do usuário ───
+  // Usa POST /perfil/foto (multer, campo do arquivo precisa se chamar
+  // exatamente 'fotoPerfil', igual configurado no seu index.js).
+  // Recebe bytes + nome do arquivo em vez de XFile diretamente, pra não
+  // acoplar esse service ao pacote image_picker.
+  Future<Map<String, dynamic>> enviarFotoPerfil(
+    String cpf,
+    List<int> bytes,
+    String nomeArquivo,
+  ) async {
+    final url = Uri.parse('$baseUrl/perfil/foto');
+    try {
+      final request = http.MultipartRequest('POST', url);
+      request.fields['cpf'] = cpf;
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'fotoPerfil',
+          bytes,
+          filename: nomeArquivo,
+          contentType: _mimeTypeDaExtensao(nomeArquivo),
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // Detecta o mimetype certo pela extensão do arquivo, pois o Flutter Web
+  // nem sempre expõe o content-type real da imagem escolhida no seletor.
+  MediaType _mimeTypeDaExtensao(String nomeArquivo) {
+    final ext = nomeArquivo.toLowerCase().split('.').last;
+    switch (ext) {
+      case 'png':
+        return MediaType('image', 'png');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'jpg':
+      case 'jpeg':
+      default:
+        return MediaType('image', 'jpeg');
     }
   }
 }
