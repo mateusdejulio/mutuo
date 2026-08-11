@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
+import 'package:mutuo/widgets/avatar_perfil.dart';
+
 
 // ─── MODEL ────────────────────────────────────────────────
 class Ong {
@@ -185,9 +187,10 @@ class DetalheOng extends StatelessWidget {
 // ─── TELA ONGs ────────────────────────────────────────────
 class Ongs extends StatefulWidget {
   final String nome;
+  final String cpf;
   final int initialNavIndex;
 
-  const Ongs({super.key, required this.nome, this.initialNavIndex = 2});
+  const Ongs({super.key, required this.nome, required this.cpf, this.initialNavIndex = 2});
 
   @override
   State<Ongs> createState() => _OngsState();
@@ -322,7 +325,7 @@ class _OngsState extends State<Ongs> {
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 250),
           pageBuilder: (_, __, ___) =>
-              Servicos(nome: widget.nome, initialNavIndex: 1),
+              Servicos(nome: widget.nome, cpf: widget.cpf, initialNavIndex: 1),
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(opacity: animation, child: child);
           },
@@ -455,7 +458,7 @@ class _OngsState extends State<Ongs> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => QuemSomos(nome: widget.nome),
+                    builder: (_) => QuemSomos(nome: widget.nome, cpf: widget.cpf),
                   ),
                 );
               }
@@ -492,18 +495,7 @@ class _OngsState extends State<Ongs> {
                 ),
               ),
             ],
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: _bege,
-              child: Text(
-                widget.nome.isNotEmpty ? widget.nome[0].toUpperCase() : "U",
-                style: GoogleFonts.quicksand(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _verde,
-                ),
-              ),
-            ),
+            child: AvatarPerfil(cpf: widget.cpf, nome: widget.nome, radius: 20),
           ),
         ],
       ),

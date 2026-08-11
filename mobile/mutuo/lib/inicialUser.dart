@@ -5,6 +5,7 @@ import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/perfil.dart';
+import 'package:mutuo/widgets/avatar_perfil.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 class Vaga {
@@ -226,7 +227,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 250),
         pageBuilder: (_, __, ___) =>
-            Servicos(nome: widget.nome, initialNavIndex: 1),
+            Servicos(nome: widget.nome, cpf: widget.cpf, initialNavIndex: 1),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -240,7 +241,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 250),
         pageBuilder: (_, __, ___) =>
-            Ongs(nome: widget.nome, initialNavIndex: 2),
+            Ongs(nome: widget.nome, cpf: widget.cpf, initialNavIndex: 2),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -469,7 +470,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => QuemSomos(nome: widget.nome),
+                    builder: (_) => QuemSomos(nome: widget.nome, cpf: widget.cpf),
                   ),
                 );
               }
@@ -519,18 +520,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                 ),
               ),
             ],
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: _bege,
-              child: Text(
-                _inicial,
-                style: GoogleFonts.quicksand(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _verde,
-                ),
-              ),
-            ),
+            child: AvatarPerfil(cpf: widget.cpf, nome: widget.nome, radius: 20),
           ),
         ],
       ),
