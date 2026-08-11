@@ -855,6 +855,47 @@ async function getEstatisticasUsuario(cpf) {
   }
 }
 
+// Verifica se o usuário tem plano premium ativo (usado no dashboard)
+async function getPlanoUsuario(cpf) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT statusPag FROM Mutuo_UsuarioPremium WHERE cpf = ? ORDER BY id DESC LIMIT 1',
+      [cpf]
+    );
+    if (rows.length === 0) return 'Gratuito';
+    return rows[0].statusPag === 1 ? 'Premium' : 'Pendente';
+  } catch (err) {
+    console.error('Erro ao buscar plano do usuário:', err.message);
+    return 'Gratuito';
+  }
+}
+
+// Junta tudo que o dashboard da tela inicial do usuário precisa numa chamada só
+async function getDashboardUsuario(cpf) {
+  console.log('DEBUG getDashboardUsuario recebeu cpf:', cpf);
+  try {
+    const [usuarioRows] = await pool.query(
+      'SELECT pontos FROM Mutuo_Usuario WHERE cpf = ?',
+      [cpf]
+    );
+    console.log('DEBUG usuarioRows encontrado:', usuarioRows);
+    if (usuarioRows.length === 0) return { error: 'Usuário não encontrado' };
+
+    const estatisticas = await getEstatisticasUsuario(cpf);
+    const plano = await getPlanoUsuario(cpf);
+
+    return {
+      horasServico: Number(estatisticas.totalHoras) || 0,
+      trabalhosConcluidos: Number(estatisticas.trabalhosConcluidos) || 0,
+      pontos: usuarioRows[0].pontos || 0,
+      plano,
+    };
+  } catch (err) {
+    console.error('Erro ao montar dashboard do usuário:', err.message);
+    return { error: err.message };
+  }
+}
+
 
 // Cria solicitação para serviço de ONG
 async function cadastrarSolicitacaoOng(codServico, codUsuario, pontos) {
@@ -974,6 +1015,8 @@ module.exports = {
   getEstatisticasUsuario,
   cadastrarSolicitacaoOng,
   getSolicitacoesOng,
-  alterSolicitacaoOng
+  alterSolicitacaoOng,
+  getPlanoUsuario,
+  getDashboardUsuario
 
 };
