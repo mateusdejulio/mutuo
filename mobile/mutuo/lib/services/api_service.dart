@@ -126,6 +126,24 @@ class ApiService {
     }
   }
 
+  // ─── Busca os dados do dashboard (horas, trabalhos, pontos, plano) ───
+  // Usa GET /usuarios/:cpf/dashboard
+  Future<Map<String, dynamic>?> buscarDashboardUsuario(String cpf) async {
+    final url = Uri.parse(
+      '$baseUrl/usuarios/${Uri.encodeComponent(cpf)}/dashboard',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+
   // ─── Atualiza nome/email/telefone do usuário ───
   // Usa PUT /usuarios/:cpf/perfil
   Future<Map<String, dynamic>> atualizarUsuario(

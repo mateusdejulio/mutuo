@@ -6,6 +6,7 @@ import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/perfil.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
+import 'package:mutuo/services/api_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 class Vaga {
@@ -164,6 +165,38 @@ class InicialUsuario extends StatefulWidget {
 class _InicialUsuarioState extends State<InicialUsuario> {
   int _fraseIndex = 0;
   int _bottomNavIndex = 0;
+
+  final ApiService _apiService = ApiService();
+  int _horasServico = 0;
+  int _trabalhosConcluidos = 0;
+  int _pontos = 0;
+  String _plano = "Gratuito";
+  bool _carregandoStats = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarEstatisticas();
+  }
+
+  Future<void> _carregarEstatisticas() async {
+    final dashboard = await _apiService.buscarDashboardUsuario(widget.cpf);
+    if (!mounted) return;
+
+    if (dashboard != null && dashboard['error'] == null) {
+      setState(() {
+        _horasServico =
+            int.tryParse('${dashboard['horasServico'] ?? 0}') ?? 0;
+        _trabalhosConcluidos =
+            int.tryParse('${dashboard['trabalhosConcluidos'] ?? 0}') ?? 0;
+        _pontos = int.tryParse('${dashboard['pontos'] ?? 0}') ?? 0;
+        _plano = dashboard['plano']?.toString() ?? "Gratuito";
+        _carregandoStats = false;
+      });
+    } else {
+      setState(() => _carregandoStats = false);
+    }
+  }
 
   // ── helper seguro para inicial do nome ──
   String get _inicial =>
@@ -609,34 +642,32 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         iconeBg: const Color(0xFFD8F3DC),
         iconeColor: const Color(0xFF2D6A4F),
         titulo: "Horas de serviço",
-        valor: "24h",
-        sub: "+8h este mês",
-        subPositivo: true,
+        valor: _carregandoStats ? "…" : "${_horasServico}h",
       ),
       _StatData(
         icone: Icons.check_circle_rounded,
         iconeBg: const Color(0xFFD0E8FF),
         iconeColor: const Color(0xFF1A73E8),
         titulo: "Trabalhos concluídos",
-        valor: "5",
+        valor: _carregandoStats ? "…" : "$_trabalhosConcluidos",
       ),
       _StatData(
         icone: Icons.star_rounded,
         iconeBg: const Color(0xFFFFF3B0),
         iconeColor: const Color(0xFFF4A261),
         titulo: "Pontos",
-        valor: "+150",
-        sub: "+50 este mês",
-        subPositivo: true,
+        valor: _carregandoStats ? "…" : "+$_pontos",
       ),
       _StatData(
         icone: Icons.workspace_premium_rounded,
         iconeBg: const Color(0xFFEDE7F6),
         iconeColor: const Color(0xFF7B52AB),
         titulo: "Plano atual",
-        valor: "Gratuito",
-        sub: "melhore seu plano",
-        subLink: true,
+        valor: _carregandoStats ? "…" : _plano,
+        sub: !_carregandoStats && _plano == "Gratuito"
+            ? "melhore seu plano"
+            : null,
+        subLink: !_carregandoStats && _plano == "Gratuito",
       ),
     ];
 
