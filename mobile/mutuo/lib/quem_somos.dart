@@ -4,10 +4,12 @@ import 'package:mutuo/inicialUser.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
+import 'package:mutuo/widgets/avatar_perfil.dart';
 
 class QuemSomos extends StatefulWidget {
   final String nome;
-  const QuemSomos({super.key, required this.nome});
+  final String cpf;
+  const QuemSomos({super.key, required this.nome, required this.cpf});
 
   @override
   State<QuemSomos> createState() => _QuemSomosState();
@@ -51,7 +53,7 @@ class _QuemSomosState extends State<QuemSomos> {
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 250),
           pageBuilder: (_, __, ___) =>
-              InicialUsuario(nome: widget.nome, cpf: ''),
+            InicialUsuario(nome: widget.nome, cpf: widget.cpf),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
@@ -62,7 +64,7 @@ class _QuemSomosState extends State<QuemSomos> {
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 250),
           pageBuilder: (_, __, ___) =>
-              Servicos(nome: widget.nome, initialNavIndex: 1),
+            Servicos(nome: widget.nome, cpf: widget.cpf, initialNavIndex: 1),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
@@ -73,7 +75,7 @@ class _QuemSomosState extends State<QuemSomos> {
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 250),
           pageBuilder: (_, __, ___) =>
-              Ongs(nome: widget.nome, initialNavIndex: 2),
+            Ongs(nome: widget.nome, cpf: widget.cpf, initialNavIndex: 2),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
@@ -291,18 +293,7 @@ class _QuemSomosState extends State<QuemSomos> {
                 ),
               ),
             ],
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: _bege,
-              child: Text(
-                _inicial,
-                style: GoogleFonts.quicksand(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _verde,
-                ),
-              ),
-            ),
+            child: AvatarPerfil(cpf: widget.cpf, nome: widget.nome, radius: 20),
           ),
         ],
       ),

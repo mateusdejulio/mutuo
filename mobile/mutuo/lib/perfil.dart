@@ -335,6 +335,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
         transitionDuration: const Duration(milliseconds: 250),
         pageBuilder: (_, __, ___) => Servicos(
           nome: _usuario?['nome'] ?? widget.nomeInicial,
+          cpf: widget.cpf,
           initialNavIndex: 1,
         ),
         transitionsBuilder: (_, animation, __, child) =>
@@ -350,6 +351,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
         transitionDuration: const Duration(milliseconds: 250),
         pageBuilder: (_, __, ___) => Ongs(
           nome: _usuario?['nome'] ?? widget.nomeInicial,
+          cpf: widget.cpf,
           initialNavIndex: 2,
         ),
         transitionsBuilder: (_, animation, __, child) =>
@@ -504,6 +506,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                   MaterialPageRoute(
                     builder: (_) => QuemSomos(
                       nome: _usuario?['nome'] ?? widget.nomeInicial,
+                      cpf: widget.cpf,
                     ),
                   ),
                 );

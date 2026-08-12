@@ -208,6 +208,18 @@
             letter-spacing: 0.5px;
         }
         .btn-enviar:hover { background-color: var(--verde-escuro); transform: translateY(-2px); }
+        .btn-enviar:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .form-msg {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .form-msg.sucesso { background: #e6f4ea; color: #2f6b3a; display: block; }
+        .form-msg.erro { background: #fdecea; color: #b23b3b; display: block; }
 
         /* Responsividade básica */
         @media (max-width: 850px) {
@@ -263,7 +275,7 @@
             
             <div class="contato-item">
                 <i class="bi bi-envelope-at-fill"></i>
-                <span>mutuo@gmail.com</span>
+                <span>mutuo.pi@gmail.com</span>
             </div>
 
             <div class="contato-item">
@@ -279,22 +291,23 @@
 
         <div class="form-side">
             <h4>Envie sua mensagem</h4>
-            <form>
+            <form id="formContato">
                 <div class="mb-1">
                     <label class="form-label small fw-bold">Nome completo</label>
-                    <input type="text" class="form-control" placeholder="Digite seu nome">
+                    <input type="text" name="nome" class="form-control" placeholder="Digite seu nome" required>
                 </div>
                 <div class="mb-1">
                     <label class="form-label small fw-bold">E-mail corporativo</label>
-                    <input type="email" class="form-control" placeholder="exemplo@gmail.com">
+                    <input type="email" name="email" class="form-control" placeholder="exemplo@gmail.com" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Mensagem</label>
-                    <textarea class="form-control" rows="3" placeholder="Como podemos ajudar?"></textarea>
+                    <textarea name="mensagem" class="form-control" rows="3" placeholder="Como podemos ajudar?" required></textarea>
                 </div>
-                <button type="submit" class="btn-enviar shadow-sm">
+                <button type="submit" id="btnEnviar" class="btn-enviar shadow-sm">
                     <i class="bi bi-send-fill me-2"></i> Enviar Agora
                 </button>
+                <div id="formMsg" class="form-msg"></div>
             </form>
         </div>
     </div>
@@ -312,9 +325,54 @@ if(usuario){
         usuario.nome || usuario.nome_usuario;
 
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
+
+    const campoNome = document.querySelector('#formContato [name="nome"]');
+    if (campoNome) campoNome.value = usuario.nome || usuario.nome_usuario || "";
 }
  carregarFoto();
 </script>
  <script src="../funcoes.js"></script>
+
+ <script>
+  const formContato = document.getElementById("formContato");
+  const btnEnviar = document.getElementById("btnEnviar");
+  const formMsg = document.getElementById("formMsg");
+
+  formContato.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    formMsg.className = "form-msg";
+    formMsg.style.display = "none";
+    btnEnviar.disabled = true;
+    btnEnviar.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> Enviando...';
+
+    const dados = {
+      nome: formContato.nome.value,
+      email: formContato.email.value,
+      mensagem: formContato.mensagem.value
+    };
+
+    try {
+      const resposta = await fetch("http://localhost:3000/contato", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+      });
+
+      const resultado = await resposta.json();
+      if (!resposta.ok || !resultado.sucesso) throw new Error(resultado.erro || "Falha no envio");
+
+      formMsg.textContent = "Mensagem enviada com sucesso! Em breve entraremos em contato.";
+      formMsg.className = "form-msg sucesso";
+      formContato.reset();
+    } catch (erro) {
+      formMsg.textContent = "Não foi possível enviar sua mensagem agora. Tente novamente em instantes.";
+      formMsg.className = "form-msg erro";
+    } finally {
+      btnEnviar.disabled = false;
+      btnEnviar.innerHTML = '<i class="bi bi-send-fill me-2"></i> Enviar Agora';
+    }
+  });
+</script>
 </body>
 </html>

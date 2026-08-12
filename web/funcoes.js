@@ -10,17 +10,21 @@ function atualizarTodasFotos(url) {
 async function carregarFoto() {
   const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
 
-  if (!usuario.cpf) return;
+  if (!usuario.cpf) {
+    atualizarTodasFotos('../imagens/mutuoLogo.png');
+    return;
+  }
 
   try {
     const res  = await fetch(`${API_URL}/perfil/foto/${usuario.cpf}`);
     const data = await res.json();
 
-    if (data.fotoPerfil) {
-      atualizarTodasFotos(API_URL + data.fotoPerfil);
-    }
+    atualizarTodasFotos(
+      data.fotoPerfil ? API_URL + data.fotoPerfil : '../imagens/mutuoLogo.png'
+    );
   } catch (e) {
     console.error('Erro ao carregar foto:', e);
+    atualizarTodasFotos('../imagens/mutuoLogo.png');
   }
 }
 
