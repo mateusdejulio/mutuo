@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo — Verificar Certificado</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-principal: #588157;
+      --verde-escuro: #3a5a40;
+      --verde-palido: #eaf2e6;
+      --verde-badge: #b7ce8f;
+      --creme: #E1DCD0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #f2f5f1;
+      color: #1a2e1b;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── CABEÇALHO ── */
+    header {
+      background-color: var(--verde-principal);
+      padding: 0 2rem;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+
+    .marca-topo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--creme);
+    }
+    .marca-topo img { width: 36px; height: 36px; border-radius: 8px; }
+
+    .btn-voltar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--creme);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(225,220,208,0.25);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: background 0.18s;
+    }
+    .btn-voltar:hover { background: rgba(255,255,255,0.22); }
+
+    /* ── CONTEÚDO ── */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .caixa {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 8px 30px rgba(58,90,64,0.1);
+      animation: subirSuave 0.4s ease both;
+    }
+
+    .icone-topo {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: var(--verde-palido);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      color: var(--verde-principal);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      color: var(--verde-escuro);
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    p.subtitulo {
+      color: #7a8c76;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 26px;
+      line-height: 1.5;
+    }
+
+    form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    input {
+      flex: 1;
+      border: 1px solid #e4ebe2;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.9rem;
+      color: #1a2e1b;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    input:focus { border-color: var(--verde-principal); }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--verde-principal);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0 20px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.15s;
+    }
+    button:hover { background: var(--verde-escuro); }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    #resultado { font-size: 0.86rem; line-height: 1.7; }
+
+    .cartao-resultado {
+      border-radius: 14px;
+      padding: 18px 20px;
+      animation: subirSuave 0.3s ease both;
+    }
+
+    .cartao-resultado.valido {
+      background: var(--verde-palido);
+      border: 1px solid var(--verde-badge);
+    }
+    .cartao-resultado.invalido {
+      background: #fdeeee;
+      border: 1px solid #f0b8b8;
+    }
+
+    .titulo-resultado {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+    .titulo-resultado.valido { color: var(--verde-escuro); }
+    .titulo-resultado.invalido { color: #8c3a3a; }
+
+    .linha-dado {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px dashed rgba(88,129,87,0.2);
+    }
+    .linha-dado:last-child { border-bottom: none; }
+    .linha-dado span:first-child {
+      color: #7a8c76;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .linha-dado span:last-child {
+      color: #1a2e1b;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .texto-invalido {
+      color: #8c3a3a;
+      font-weight: 500;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.75rem;
+      color: #9aab96;
+      font-weight: 500;
+    }
+    footer a {
+      color: #7a8c76;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    footer a:hover { color: var(--verde-principal); }
+
+    @keyframes subirSuave {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      header { padding: 0 1rem; }
+      form { flex-direction: column; }
+      button { padding: 12px; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <a class="marca-topo" href="login.html">
+      <img src="imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+      Mútuo
+    </a>
+    <a class="btn-voltar" href="InicialMutuo.html">
+      <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <main>
+    <div class="caixa">
+      <div class="icone-topo"><i class="bi bi-patch-check-fill"></i></div>
+      <h1>Verificar certificado</h1>
+      <p class="subtitulo">Insira o código de verificação impresso no rodapé do certificado para confirmar sua autenticidade.</p>
+
+      <form id="formVerificar">
+        <input type="text" id="inputCodigo" placeholder="Ex: 3f2a9b4c-88d1-4e2a-9c31-..." required autocomplete="off">
+        <button type="submit" id="btnVerificar">
+          <i class="bi bi-search"></i> Verificar
+        </button>
+      </form>
+
+      <div id="resultado"></div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 Mútuo. Todos os direitos reservados.
+    &nbsp;·&nbsp;
+  </footer>
+
+  <script>
+    const form = document.getElementById('formVerificar');
+    const btn = document.getElementById('btnVerificar');
+    const resultado = document.getElementById('resultado');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const codigo = document.getElementById('inputCodigo').value.trim();
+      if (!codigo) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Verificando...';
+      resultado.innerHTML = '';
+
+      try {
+        const resposta = await fetch(`http://localhost:3000/verificar/${encodeURIComponent(codigo)}`);
+        const dados = await resposta.json();
+
+        if (!dados.valido) {
+          resultado.innerHTML = `
+            <div class="cartao-resultado invalido">
+              <div class="titulo-resultado invalido"><i class="bi bi-x-circle-fill"></i> Certificado não encontrado</div>
+              <p class="texto-invalido">Verifique se o código foi digitado corretamente e tente novamente.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const data = new Date(dados.dataConclusao).toLocaleDateString('pt-BR');
+        resultado.innerHTML = `
+          <div class="cartao-resultado valido">
+            <div class="titulo-resultado valido"><i class="bi bi-check-circle-fill"></i> Certificado válido</div>
+            <div class="linha-dado"><span>Voluntário</span><span>${dados.nomeUsuario}</span></div>
+            <div class="linha-dado"><span>Serviço</span><span>${dados.nomeServico}</span></div>
+            <div class="linha-dado"><span>ONG</span><span>${dados.nomeOng}</span></div>
+            <div class="linha-dado"><span>Carga horária</span><span>${dados.horas}h</span></div>
+            <div class="linha-dado"><span>Concluído em</span><span>${data}</span></div>
+          </div>
+        `;
+      } catch (err) {
+        resultado.innerHTML = `
+          <div class="cartao-resultado invalido">
+            <div class="titulo-resultado invalido"><i class="bi bi-exclamation-triangle-fill"></i> Erro ao verificar</div>
+            <p class="texto-invalido">Não foi possível conectar ao servidor. Tente novamente.</p>
+          </div>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-search"></i> Verificar';
+      }
+    });
+  </script>
+</body>
+</html>

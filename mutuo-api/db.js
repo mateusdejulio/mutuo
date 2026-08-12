@@ -913,6 +913,85 @@ async function alterSolicitacaoOng(cod, statusS, statusE, pontos) {
     return { error: err.message };
   }
 }
+
+async function buscarCertificadosPorUsuario(cpf) {
+  const [servicos] = await pool.query(
+    `SELECT 
+       sol.codSolicitacao,
+       sol.pontos          AS pontosSolicitacao,
+       sol.dataSolicitacao,
+       sol.dataConclusao,
+       sol.statusExecucao,
+       s.nomeServico,
+       s.horas,
+       s.imagem,
+       o.nomeOng,
+       o.foto_perfil       AS fotoOng
+     FROM Mutuo_SolicitacaoONG sol
+     JOIN Mutuo_ServicoOng s ON sol.codServico = s.id
+     JOIN Mutuo_ONG o        ON s.cnpj = o.cnpj
+     WHERE sol.codUsuario = ?
+       AND sol.statusExecucao = 'Realizada'
+     ORDER BY COALESCE(sol.dataConclusao, sol.dataSolicitacao) DESC`,
+    [cpf]
+  );
+
+  const [[usuario]] = await pool.query(
+    `SELECT pontos FROM Mutuo_Usuario WHERE cpf = ?`,
+    [cpf]
+  );
+
+  const ongsAjudadas = new Set(servicos.map(s => s.nomeOng)).size;
+
+  return {
+    resumo: {
+      servicosConcluidos: servicos.length,
+      ongsAjudadas,
+      pontos: usuario?.pontos ?? 0
+    },
+    servicos
+  };
+}
+
+const { randomUUID } = require('crypto');
+
+async function buscarDadosCertificado(cpf, codSolicitacao) {
+  const [[dados]] = await pool.query(
+    `SELECT sol.codSolicitacao, sol.dataConclusao, sol.dataSolicitacao, sol.codigoVerificacao,
+            s.nomeServico, s.horas, o.nomeOng, u.nome AS nomeUsuario
+     FROM Mutuo_SolicitacaoONG sol
+     JOIN Mutuo_ServicoOng s ON sol.codServico = s.id
+     JOIN Mutuo_ONG o        ON s.cnpj = o.cnpj
+     JOIN Mutuo_Usuario u    ON sol.codUsuario = u.cpf
+     WHERE sol.codUsuario = ? AND sol.codSolicitacao = ? AND sol.statusExecucao = 'Realizada'`,
+    [cpf, codSolicitacao]
+  );
+
+  if (!dados) return null;
+
+  // gera o código só na primeira vez que o certificado é emitido
+  if (!dados.codigoVerificacao) {
+    const codigo = randomUUID();
+    await pool.query('UPDATE Mutuo_SolicitacaoONG SET codigoVerificacao = ? WHERE codSolicitacao = ?', [codigo, codSolicitacao]);
+    dados.codigoVerificacao = codigo;
+  }
+
+  return dados;
+}
+
+async function verificarCertificado(codigo) {
+  const [[dados]] = await pool.query(
+    `SELECT sol.dataConclusao, s.nomeServico, s.horas, o.nomeOng, u.nome AS nomeUsuario
+     FROM Mutuo_SolicitacaoONG sol
+     JOIN Mutuo_ServicoOng s ON sol.codServico = s.id
+     JOIN Mutuo_ONG o        ON s.cnpj = o.cnpj
+     JOIN Mutuo_Usuario u    ON sol.codUsuario = u.cpf
+     WHERE sol.codigoVerificacao = ?`,
+    [codigo]
+  );
+  return dados || null;
+}
+
 module.exports = { 
   getUsuarios, 
   getUsuarioPorCpf,
@@ -974,6 +1053,8 @@ module.exports = {
   getEstatisticasUsuario,
   cadastrarSolicitacaoOng,
   getSolicitacoesOng,
-  alterSolicitacaoOng
-
+  alterSolicitacaoOng,
+  buscarCertificadosPorUsuario,
+  buscarDadosCertificado,
+  verificarCertificado
 };

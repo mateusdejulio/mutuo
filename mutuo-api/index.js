@@ -471,6 +471,68 @@ app.post('/solicitacoes-ong', async (req, res) => {
   }
 });
 
+
+// ROTAS CERTIFICADO
+app.get('/certificados/:cpf', async (req, res) => {
+  try {
+    const dados = await db.buscarCertificadosPorUsuario(req.params.cpf);
+    res.json(dados);
+  } catch (e) {
+    console.error('Erro ao buscar certificados:', e);
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
+const puppeteer = require('puppeteer');
+//const fs = require('fs');
+
+app.get('/certificados/:cpf/:codSolicitacao/pdf', async (req, res) => {
+  try {
+    const dados = await db.buscarDadosCertificado(req.params.cpf, req.params.codSolicitacao);
+
+    if (!dados) {
+      return res.status(404).json({ erro: 'Certificado não encontrado.' });
+    }
+
+    let html = fs.readFileSync(path.join(__dirname, 'templates', 'certificado.html'), 'utf8');
+
+    const dataFormatada = new Date(dados.dataConclusao || dados.dataSolicitacao).toLocaleDateString('pt-BR');
+
+    html = html
+      .replaceAll('{{nomeUsuario}}', dados.nomeUsuario)
+      .replaceAll('{{nomeServico}}', dados.nomeServico)
+      .replaceAll('{{nomeOng}}', dados.nomeOng)
+      .replaceAll('{{horas}}', dados.horas)
+      .replaceAll('{{dataConclusao}}', dataFormatada)
+      .replaceAll('{{codigoVerificacao}}', dados.codigoVerificacao); 
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    const pdfBuffer = await page.pdf({
+      width: '297mm',
+      height: '210mm',
+      printBackground: true
+    });
+    await browser.close();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=certificado-${dados.codSolicitacao}.pdf`
+    });
+    res.send(pdfBuffer);
+  } catch (e) {
+    console.error('Erro ao gerar certificado:', e);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+app.get('/verificar/:codigo', async (req, res) => {
+  const dados = await db.verificarCertificado(req.params.codigo);
+  if (!dados) return res.status(404).json({ valido: false });
+  res.json({ valido: true, ...dados });
+});
+
 // Lista solicitações recebidas por uma ONG
 app.get('/solicitacoes-ong/prestador/:cnpj', async (req, res) => {
   const solicitacoes = await db.getSolicitacoesOng(req.params.cnpj);
@@ -491,7 +553,6 @@ app.use((err, req, res, next) => {
   console.error('Erro capturado pelo middleware global:', err.message);
   res.status(400).json({ erro: err.message || 'Erro ao processar a requisição.' });
 });
-
 
 
 const PORT = process.env.PORT || 3000;
