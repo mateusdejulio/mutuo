@@ -454,6 +454,12 @@ app.get('/usuarios/:cpf/estatisticas', async (req, res) => {
   res.json(stats);
 });
 
+app.get('/usuarios/:cpf/dashboard', async (req, res) => {
+  const dashboard = await db.getDashboardUsuario(req.params.cpf);
+  if (dashboard.error) return res.status(500).json({ erro: dashboard.error });
+  res.json(dashboard);
+});
+
 
 
 // Cria uma solicitação para um serviço de ONG
