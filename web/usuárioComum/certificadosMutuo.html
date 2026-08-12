@@ -361,108 +361,138 @@
         <div class="icone-resumo"><i class="bi bi-briefcase-fill"></i></div>
         <div class="texto-resumo">
           <p>Serviços concluídos</p>
-          <strong>3</strong>
+          <strong id="qtdServicosConcluidos">--</strong>
         </div>
       </div>
-      <div class="card-resumo">
+      <!--<div class="card-resumo">
         <div class="icone-resumo estrela"><i class="bi bi-star-fill"></i></div>
         <div class="texto-resumo">
           <p>Avaliação média</p>
-          <strong>4.8</strong>
+          <strong id="mediaAvaliacao">--</strong>
         </div>
-      </div>
+      </div>-->
       <div class="card-resumo">
-        <div class="icone-resumo"><i class="bi bi-award-fill"></i></div>
+        <div class="icone-resumo"><i class="bi bi-people-fill"></i></div>
         <div class="texto-resumo">
-          <p>Certificados gerados</p>
-          <strong>2</strong>
+          <p>ONGs ajudadas</p>
+          <strong id="qtdOngsAjudadas">--</strong>
         </div>
       </div>
       <div class="card-resumo">
         <div class="icone-resumo"><i class="bi bi-lightning-charge-fill"></i></div>
         <div class="texto-resumo">
           <p>Pontos acumulados</p>
-          <strong>370</strong>
+          <strong id="pontosAcumulados">--</strong>
         </div>
       </div>
     </div>
 
-    <!-- LISTA -->
     <p class="secao-titulo">Serviços concluídos</p>
-
-    <div class="lista-certificados">
-
-      <p class="divisor-mes">Abril 2025</p>
-
-      <div class="card-servico">
-        <img class="foto-ong" src="../imagens/ongPerfil1.png" alt="Instituto Cães Amigos" onerror="this.outerHTML='<div class=\'foto-ong-placeholder\'><i class=\'bi bi-building\'></i></div>'">
-        <div class="info-servico">
-          <p class="nome-servico">Passeio com cachorros</p>
-          <p class="nome-ong">Instituto Cães Amigos</p>
-          <div class="detalhes-servico">
-            <span class="detalhe-item"><i class="bi bi-clock-history"></i> 1 hora</span>
-            <span class="detalhe-item avaliacao"><i class="bi bi-star-fill"></i> 4.9</span>
-            <span class="detalhe-item pontos"><i class="bi bi-lightning-charge-fill"></i> 120 pts</span>
-          </div>
-        </div>
-        <div class="lado-direito">
-          <a href="#" class="btn-certificado"><i class="bi bi-download"></i> Gerar certificado</a>
-          <span class="data-conclusao"><i class="bi bi-calendar3"></i> 25/04/2025</span>
-        </div>
-      </div>
-
-      <div class="card-servico">
-        <img class="foto-ong" src="../imagens/ongPerfil1.png" alt="Instituto Cães Amigos" onerror="this.outerHTML='<div class=\'foto-ong-placeholder\'><i class=\'bi bi-building\'></i></div>'">
-        <div class="info-servico">
-          <p class="nome-servico">Banho e tosa solidária</p>
-          <p class="nome-ong">Instituto Cães Amigos</p>
-          <div class="detalhes-servico">
-            <span class="detalhe-item"><i class="bi bi-clock-history"></i> 2 horas</span>
-            <span class="detalhe-item avaliacao"><i class="bi bi-star-fill"></i> 4.7</span>
-            <span class="detalhe-item pontos"><i class="bi bi-lightning-charge-fill"></i> 150 pts</span>
-          </div>
-        </div>
-        <div class="lado-direito">
-          <a href="#" class="btn-certificado"><i class="bi bi-download"></i> Gerar certificado</a>
-          <span class="data-conclusao"><i class="bi bi-calendar3"></i> 10/04/2025</span>
-        </div>
-      </div>
-
-      <p class="divisor-mes">Março 2025</p>
-
-      <div class="card-servico">
-       <img class="foto-ong" src="../imagens/ongPerfil5.png" alt="Instituto Cães Amigos" onerror="this.outerHTML='<div class=\'foto-ong-placeholder\'><i class=\'bi bi-building\'></i></div>'">
-        <div class="info-servico">
-          <p class="nome-servico">Aula de ciências</p>
-          <p class="nome-ong">Instituto Infância Viva</p>
-          <div class="detalhes-servico">
-            <span class="detalhe-item"><i class="bi bi-clock-history"></i> 1h 30min</span>
-            <span class="detalhe-item avaliacao"><i class="bi bi-star-fill"></i> 4.8</span>
-            <span class="detalhe-item pontos"><i class="bi bi-lightning-charge-fill"></i> 100 pts</span>
-          </div>
-        </div>
-        <div class="lado-direito">
-          <a href="#" class="btn-certificado"><i class="bi bi-download"></i> Gerar certificado</a>
-          <span class="data-conclusao"><i class="bi bi-calendar3"></i> 18/03/2025</span>
-        </div>
-      </div>
+    <div class="lista-certificados" id="listaCertificados">
+      <!-- preenchido via JS -->
+    </div>
 
     </div>
   </div>
+<script src="../funcoes.js"></script>
 <script>
   const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
 
-if(usuario){
-    document.getElementById("nomeUsuario").textContent =
-        usuario.nome || usuario.nome_usuario;
+  if(usuario){
+      document.getElementById("nomeUsuario").textContent =
+          usuario.nome || usuario.nome_usuario;
 
-    document.getElementById("nomeBoasVindas").textContent =
-        usuario.nome || usuario.nome_usuario;
+      /*document.getElementById("nomeBoasVindas").textContent =
+          usuario.nome || usuario.nome_usuario;*/
 
-    document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
+      document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
+
+      carregarCertificados(usuario.cpf);
+  }
+  carregarFoto();
+
+async function carregarCertificados(cpf) {
+  try {
+    const resposta = await fetch(`http://localhost:3000/certificados/${cpf}`);
+    if (!resposta.ok) throw new Error("Falha ao buscar certificados");
+    const dados = await resposta.json();
+
+    preencherResumo(dados.resumo);
+    preencherLista(dados.servicos);
+  } catch (erro) {
+    console.error(erro);
+    document.getElementById("listaCertificados").innerHTML =
+      `<p style="color:#9aab96;font-size:0.85rem;">Não foi possível carregar seus certificados.</p>`;
+  }
 }
- carregarFoto();
+
+function preencherResumo(resumo) {
+  document.getElementById("qtdServicosConcluidos").textContent = resumo.servicosConcluidos;
+  document.getElementById("qtdOngsAjudadas").textContent = resumo.ongsAjudadas;
+  document.getElementById("pontosAcumulados").textContent = resumo.pontos;
+}
+
+function preencherLista(servicos) {
+  const container = document.getElementById("listaCertificados");
+  container.innerHTML = "";
+
+  if (!servicos.length) {
+    container.innerHTML = `<p style="color:#9aab96;font-size:0.85rem;">Você ainda não concluiu nenhum serviço.</p>`;
+    return;
+  }
+
+  const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+    "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+  let mesAtual = null;
+
+  servicos.forEach(servico => {
+    const data = new Date(servico.dataConclusao || servico.dataSolicitacao);
+    const chaveMes = `${nomesMeses[data.getMonth()]} ${data.getFullYear()}`;
+
+    if (chaveMes !== mesAtual) {
+      mesAtual = chaveMes;
+      const divisor = document.createElement("p");
+      divisor.className = "divisor-mes";
+      divisor.textContent = chaveMes;
+      container.appendChild(divisor);
+    }
+
+    container.appendChild(criarCardServico(servico, data));
+  });
+}
+
+function criarCardServico(servico, data) {
+  const card = document.createElement("div");
+  card.className = "card-servico";
+
+  const dataFormatada = data.toLocaleDateString("pt-BR");
+  const fotoOng = servico.fotoOng
+    ? `<img class="foto-ong" src="${servico.fotoOng}" alt="${servico.nomeOng}" onerror="this.outerHTML='<div class=\\'foto-ong-placeholder\\'><i class=\\'bi bi-building\\'></i></div>'">`
+    : `<div class="foto-ong-placeholder"><i class="bi bi-building"></i></div>`;
+
+  card.innerHTML = `
+    ${fotoOng}
+    <div class="info-servico">
+      <p class="nome-servico">${servico.nomeServico}</p>
+      <p class="nome-ong">${servico.nomeOng}</p>
+      <div class="detalhes-servico">
+        <span class="detalhe-item"><i class="bi bi-clock-history"></i> ${servico.horas}h</span>
+        <span class="detalhe-item pontos"><i class="bi bi-lightning-charge-fill"></i> ${servico.pontosSolicitacao} pts</span>
+      </div>
+    </div>
+    <div class="lado-direito">
+      <a href="http://localhost:3000/certificados/${usuario.cpf}/${servico.codSolicitacao}/pdf" 
+        class="btn-certificado" target="_blank">
+        <i class="bi bi-download"></i> Gerar certificado
+      </a>
+      <span class="data-conclusao"><i class="bi bi-calendar3"></i> ${dataFormatada}</span>
+    </div>
+  `;
+
+  return card;
+}
+
 </script>
- <script src="../funcoes.js"></script>
 </body>
 </html>
