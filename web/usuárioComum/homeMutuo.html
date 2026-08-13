@@ -303,6 +303,8 @@
       transition: transform 0.25s ease, box-shadow 0.25s ease;
       flex: 0 0 calc(33.333% - 12px);
       min-width: 270px;
+      display: flex;
+      flex-direction: column;
     }
     .act-card:hover {
       transform: translateY(-5px);
@@ -323,9 +325,21 @@
       text-transform: uppercase; letter-spacing: 0.4px;
     }
 
-    .act-body { padding: 1.1rem 1.2rem 1.2rem; }
+    .act-body {
+      padding: 1.1rem 1.2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
     .act-body h3 { font-size: 1.05rem; color: var(--green-dark); margin-bottom: 0.3rem; }
-    .act-desc { font-size: 0.81rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.9rem; }
+    .act-desc {
+      font-size: 0.81rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.9rem;
+      min-height: calc(0.81rem * 1.5 * 2);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
     .act-ong {
       display: flex; align-items: center; gap: 9px;
@@ -339,6 +353,7 @@
     .act-stars span { color: var(--text-muted); font-size: 0.73rem; }
 
     .act-meta { display: flex; gap: 1rem; margin-bottom: 0.95rem; flex-wrap: wrap; }
+    .act-body > *:last-child { margin-top: auto; }
     .act-meta-i { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--text-muted); }
     .act-meta-i i { color: var(--green-main); }
 
@@ -646,131 +661,7 @@
     <button class="carousel-arrow left" id="prev1"><i class="bi bi-chevron-left"></i></button>
     <div class="cards-track-wrap">
       <div class="cards-track" id="track1">
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/aula.png" alt="Aulas de culinária">
-            <span class="act-tag">Culinária</span>
-          </div>
-          <div class="act-body">
-            <h3>Aulas de culinária</h3>
-            <p class="act-desc">Aprenda e ensine pratos deliciosos. Aulas práticas e divertidas para todos os níveis.</p>
-            <div class="act-ong">
-              <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Mariana Lopes</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.024)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalAula')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorro">
-            <span class="act-tag">Animais</span>
-          </div>
-          <div class="act-body">
-            <h3>Passeio com cachorro</h3>
-            <p class="act-desc">Ofereça carinho e exercício para animais resgatados que aguardam um novo lar.</p>
-            <div class="act-ong">
-              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Instituto Animais Amigos</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.024)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/aulaCiencia.png" alt="Aula de ciência">
-            <span class="act-tag">Educação</span>
-          </div>
-          <div class="act-body">
-            <h3>Aula de ciências</h3>
-            <p class="act-desc">Inspire mentes curiosas! Aulas de ciências para crianças de 6 a 12 anos.</p>
-            <div class="act-ong">
-              <img src="../imagens/perfilOngI.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Instituto Infância Viva</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.000)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 2h por semana</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalCiencia')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/passeioCachorro.png" alt="Passeio com cachorro">
-            <span class="act-tag">Animais</span>
-          </div>
-          <div class="act-body">
-            <h3>Passeio com cachorro 2</h3>
-            <p class="act-desc">Mais uma oportunidade de ajudar animais resgatados com passeios e carinho.</p>
-            <div class="act-ong">
-              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Instituto Animais Amigos</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.024)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
+        <p style="padding:1rem;color:var(--text-muted);font-size:0.85rem;">Carregando vagas em destaque...</p>
       </div>
     </div>
     <button class="carousel-arrow right" id="next1"><i class="bi bi-chevron-right"></i></button>
@@ -787,131 +678,7 @@
     <button class="carousel-arrow left" id="prev2"><i class="bi bi-chevron-left"></i></button>
     <div class="cards-track-wrap">
       <div class="cards-track" id="track2">
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/aula.png" alt="Aulas de culinária">
-            <span class="act-tag">Culinária</span>
-          </div>
-          <div class="act-body">
-            <h3>Aulas de culinária</h3>
-            <p class="act-desc">Aprenda e ensine pratos deliciosos. Aulas práticas e divertidas para todos os níveis.</p>
-            <div class="act-ong">
-              <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Mariana Lopes</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.024)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 1h 30min</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalAula')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/passeioCachorro.png" alt="Passeio">
-            <span class="act-tag">Animais</span>
-          </div>
-          <div class="act-body">
-            <h3>Passeio com cachorro 2</h3>
-            <p class="act-desc">Ofereça carinho e exercício para animais resgatados que aguardam um novo lar.</p>
-            <div class="act-ong">
-              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Instituto Animais Amigos</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.024)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/aulaCiencia.png" alt="Ciência">
-            <span class="act-tag">Educação</span>
-          </div>
-          <div class="act-body">
-            <h3>Aula de ciências</h3>
-            <p class="act-desc">Inspire mentes curiosas! Aulas de ciências para crianças de 6 a 12 anos.</p>
-            <div class="act-ong">
-              <img src="../imagens/perfilOngI.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Instituto Infância Viva</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.000)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 2h por semana</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalCiencia')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="act-card">
-          <div class="act-img-wrap">
-            <img src="../imagens/passeioCachorro.png" alt="Passeio">
-            <span class="act-tag">Animais</span>
-          </div>
-          <div class="act-body">
-            <h3>Passeio com cachorro 2</h3>
-            <p class="act-desc">Mais uma oportunidade de ajudar animais resgatados com passeios e carinho.</p>
-            <div class="act-ong">
-              <img src="../imagens/ongPerfil1.png" alt="Instituto" onerror="this.style.background='var(--cream)'">
-              <div>
-                <div class="act-ong-name">Instituto Animais Amigos</div>
-                <div class="act-stars">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                  <i class="bi bi-star-fill"></i>
-                  <span> 5.0 (1.024)</span>
-                </div>
-              </div>
-            </div>
-            <div class="act-meta">
-              <span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP</span>
-              <span class="act-meta-i"><i class="bi bi-clock-fill"></i> 30min</span>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-saiba" onclick="openModal('modalPasseio')" style="flex:1"><i class="bi bi-info-circle"></i> Saiba mais</button>
-              <button class="btn-saiba btn-outline" style="flex:1"><i class="bi bi-chat-dots"></i> Dúvidas</button>
-            </div>
-          </div>
-        </div>
-
+        <p style="padding:1rem;color:var(--text-muted);font-size:0.85rem;">Carregando serviços perto de você...</p>
       </div>
     </div>
     <button class="carousel-arrow right" id="next2"><i class="bi bi-chevron-right"></i></button>
@@ -1094,12 +861,21 @@
       const card = track.children[0];
       return card ? card.offsetWidth + 16 : 300;
     }
+    function getMaxIdx() {
+      const visible = Math.floor(track.parentElement.offsetWidth / getCardW());
+      return Math.max(track.children.length - visible, 0);
+    }
     function update() { track.style.transform = `translateX(-${getCardW() * idx}px)`; }
     next.addEventListener('click', () => {
-      const visible = Math.floor(track.parentElement.offsetWidth / getCardW());
-      if (idx < track.children.length - visible) { idx++; update(); }
+      const maxIdx = getMaxIdx();
+      idx = idx < maxIdx ? idx + 1 : 0;
+      update();
     });
-    prev.addEventListener('click', () => { if (idx > 0) { idx--; update(); } });
+    prev.addEventListener('click', () => {
+      const maxIdx = getMaxIdx();
+      idx = idx > 0 ? idx - 1 : maxIdx;
+      update();
+    });
   }
   makeCarousel('track1', 'prev1', 'next1');
   makeCarousel('track2', 'prev2', 'next2');
@@ -1145,8 +921,101 @@
   }
 }
 
+  // ── Vagas em destaque (usuários premium) ──
+  function criarCardDestaque(servico) {
+    const div = document.createElement('div');
+    div.className = 'act-card';
+
+    const imagem   = servico.imagem ? `${API_URL}${servico.imagem}` : '../imagens/aula.png';
+    const foto     = servico.fotoUsuario ? `${API_URL}${servico.fotoUsuario}` : '../imagens/mutuoLogo.png';
+    const local    = [servico.cidade, servico.estado].filter(Boolean).join(', ');
+    const duracao  = servico.qtdHoras ? `${servico.qtdHoras}h` : '';
+
+    div.innerHTML = `
+      <div class="act-img-wrap">
+        <img src="${imagem}" alt="${servico.nome}">
+        <span class="act-tag">${servico.foco || 'Destaque'}</span>
+      </div>
+      <div class="act-body">
+        <h3>${servico.nome}</h3>
+        <p class="act-desc">${servico.descricao || ''}</p>
+        <div class="act-ong">
+          <img src="${foto}" alt="${servico.nomeUsuario || ''}" onerror="this.style.background='var(--cream)'">
+          <div>
+            <div class="act-ong-name">${servico.nomeUsuario || ''}</div>
+          </div>
+        </div>
+        <div class="act-meta">
+          ${local ? `<span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> ${local}</span>` : ''}
+          ${duracao ? `<span class="act-meta-i"><i class="bi bi-clock-fill"></i> ${duracao}</span>` : ''}
+        </div>
+        <a href="serviçosMutuo.html" class="btn-saiba"><i class="bi bi-info-circle"></i> Saiba mais</a>
+      </div>
+    `;
+
+    return div;
+  }
+
+  async function carregarVagasDestaque() {
+    const track = document.getElementById('track1');
+    if (!track) return;
+
+    try {
+      const resposta = await fetch(`${API_URL}/servicos-destaque`);
+      if (!resposta.ok) throw new Error('Erro ao carregar vagas em destaque.');
+
+      const servicos = await resposta.json();
+      track.innerHTML = '';
+
+      if (!Array.isArray(servicos) || servicos.length === 0) {
+        track.innerHTML = `<p style="padding:1rem;color:var(--text-muted);font-size:0.85rem;">Nenhuma vaga em destaque no momento.</p>`;
+        return;
+      }
+
+      servicos.forEach(servico => track.appendChild(criarCardDestaque(servico)));
+
+    } catch (erro) {
+      console.error(erro);
+      track.innerHTML = `<p style="padding:1rem;color:#b00020;font-size:0.85rem;">Não foi possível carregar as vagas em destaque.</p>`;
+    }
+  }
+
+  // ── Perto de você (usuários premium na mesma cidade) ──
+  async function carregarPertoDeVoce() {
+    const track = document.getElementById('track2');
+    if (!track) return;
+
+    const cidadeUsuario = (usuario && usuario.cidade || '').trim();
+
+    if (!cidadeUsuario) {
+      track.innerHTML = `<p style="padding:1rem;color:var(--text-muted);font-size:0.85rem;">Não possui serviços premium nessa região.</p>`;
+      return;
+    }
+
+    try {
+      const resposta = await fetch(`${API_URL}/servicos-perto/${encodeURIComponent(cidadeUsuario)}`);
+      if (!resposta.ok) throw new Error('Erro ao carregar serviços perto de você.');
+
+      const servicos = await resposta.json();
+      track.innerHTML = '';
+
+      if (!Array.isArray(servicos) || servicos.length === 0) {
+        track.innerHTML = `<p style="padding:1rem;color:var(--text-muted);font-size:0.85rem;">Não possui serviços premium nessa região.</p>`;
+        return;
+      }
+
+      servicos.forEach(servico => track.appendChild(criarCardDestaque(servico)));
+
+    } catch (erro) {
+      console.error(erro);
+      track.innerHTML = `<p style="padding:1rem;color:#b00020;font-size:0.85rem;">Não foi possível carregar os serviços perto de você.</p>`;
+    }
+  }
+
 carregarDashboard();
-  carregarFoto();
+carregarVagasDestaque();
+carregarPertoDeVoce();
+carregarFoto();
 </script>
 
 

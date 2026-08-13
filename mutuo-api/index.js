@@ -591,6 +591,19 @@ app.post('/contato', async (req, res) => {
   }
 });
 
+// Lista os serviços em destaque (de usuários premium)
+app.get('/servicos-destaque', async (req, res) => {
+  const servicos = await db.getServicosDestaque();
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+  res.json(servicos);
+});
+
+// Lista serviços perto de você (mesma cidade, usuários premium)
+app.get('/servicos-perto/:cidade', async (req, res) => {
+  const servicos = await db.getServicosPertoDeVoce(req.params.cidade);
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+  res.json(servicos);
+});
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
 // Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.

@@ -33,7 +33,7 @@ async function validarLogin(login, senha) {
 async function validarLoginUsuario(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cpf, nome, email, telefone, pontos, horasVoluntarias, cadastro FROM Mutuo_Usuario WHERE email = ? AND senha = ? AND ativo = 1',
+      'SELECT cpf, nome, email, telefone, cidade, estado, pontos, horasVoluntarias, cadastro FROM Mutuo_Usuario WHERE email = ? AND senha = ? AND ativo = 1',
       [email, senha]
     );
 
@@ -48,7 +48,6 @@ async function validarLoginUsuario(email, senha) {
     return { sucesso: false, mensagem: 'Erro interno ao validar login.' };
   }
 }
-
 
 async function validarLoginOng(email, senha) {
   try {
@@ -1033,6 +1032,74 @@ async function verificarCertificado(codigo) {
   return dados || null;
 }
 
+// Lista serviços em destaque — apenas de usuários premium
+async function getServicosDestaque() {
+  const sql = `
+    SELECT 
+      s.cod,
+      s.nome,
+      s.descricao,
+      s.foco,
+      s.qtdHoras,
+      s.imagem,
+      s.pontos,
+      s.idUsuario,
+      u.nome AS nomeUsuario,
+      u.cidade,
+      u.estado,
+      u.foto_perfil AS fotoUsuario
+    FROM Mutuo_Servico AS s
+    JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
+    WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1
+    ORDER BY s.cod DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql);
+    return rows.map(servico => ({
+      ...servico,
+      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
+      fotoUsuario: servico.fotoUsuario ? `/uploads/fotos/${servico.fotoUsuario}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar serviços em destaque:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Lista serviços de usuários premium na mesma cidade do usuário logado
+async function getServicosPertoDeVoce(cidade) {
+  const sql = `
+    SELECT 
+      s.cod,
+      s.nome,
+      s.descricao,
+      s.foco,
+      s.qtdHoras,
+      s.imagem,
+      s.pontos,
+      s.idUsuario,
+      u.nome AS nomeUsuario,
+      u.cidade,
+      u.estado,
+      u.foto_perfil AS fotoUsuario
+    FROM Mutuo_Servico AS s
+    JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
+    WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1 AND u.cidade = ?
+    ORDER BY s.cod DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cidade]);
+    return rows.map(servico => ({
+      ...servico,
+      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
+      fotoUsuario: servico.fotoUsuario ? `/uploads/fotos/${servico.fotoUsuario}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar serviços perto de você:', err.message);
+    return { error: err.message };
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   getUsuarioPorCpf,
@@ -1099,5 +1166,7 @@ module.exports = {
   buscarDadosCertificado,
   verificarCertificado,
   getPlanoUsuario,
-  getDashboardUsuario
+  getDashboardUsuario,
+  getServicosDestaque,
+  getServicosPertoDeVoce
 };
