@@ -218,8 +218,32 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
-        .form-msg.sucesso { background: #e6f4ea; color: #2f6b3a; display: block; }
         .form-msg.erro { background: #fdecea; color: #b23b3b; display: block; }
+
+        .mensagem-salva {
+          position: fixed;
+          bottom: 24px; left: 50%;
+          transform: translateX(-50%) translateY(20px);
+          background: var(--verde-escuro);
+          color: #fff;
+          padding: 12px 22px;
+          border-radius: 14px;
+          font-family: 'Quicksand', sans-serif;
+          font-size: 0.86rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.25s ease, transform 0.25s ease;
+          z-index: 500;
+        }
+        .mensagem-salva.visivel {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
 
         /* Responsividade básica */
         @media (max-width: 850px) {
@@ -313,6 +337,11 @@
     </div>
 </div>
 
+<div class="mensagem-salva" id="mensagemSalva">
+  <i class="bi bi-check-circle-fill"></i>
+  <span id="mensagemSalvaTexto">Mensagem enviada com sucesso!</span>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
@@ -362,9 +391,12 @@ if(usuario){
       const resultado = await resposta.json();
       if (!resposta.ok || !resultado.sucesso) throw new Error(resultado.erro || "Falha no envio");
 
-      formMsg.textContent = "Mensagem enviada com sucesso! Em breve entraremos em contato.";
-      formMsg.className = "form-msg sucesso";
+      mostrarMensagemSalva("Mensagem enviada com sucesso!");
       formContato.reset();
+      if (usuario) {
+        const campoNome = document.querySelector('#formContato [name="nome"]');
+        if (campoNome) campoNome.value = usuario.nome || usuario.nome_usuario || "";
+      }
     } catch (erro) {
       formMsg.textContent = "Não foi possível enviar sua mensagem agora. Tente novamente em instantes.";
       formMsg.className = "form-msg erro";
@@ -373,6 +405,14 @@ if(usuario){
       btnEnviar.innerHTML = '<i class="bi bi-send-fill me-2"></i> Enviar Agora';
     }
   });
+
+  function mostrarMensagemSalva(texto) {
+    const mensagem = document.getElementById('mensagemSalva');
+    document.getElementById('mensagemSalvaTexto').textContent = texto;
+    mensagem.classList.add('visivel');
+    clearTimeout(mensagem._timeout);
+    mensagem._timeout = setTimeout(() => mensagem.classList.remove('visivel'), 3000);
+  }
 </script>
 </body>
 </html>

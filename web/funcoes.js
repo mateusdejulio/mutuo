@@ -16,7 +16,7 @@ async function carregarFoto() {
   }
 
   try {
-    const res  = await fetch(`${API_URL}/perfil/foto/${usuario.cpf}`);
+    const res  = await fetch(`${API_URL}/perfil/foto/${usuario.cpf}`, { cache: 'no-store' });
     const data = await res.json();
 
     atualizarTodasFotos(
@@ -28,20 +28,21 @@ async function carregarFoto() {
   }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const _usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+  if (_usuario.nome) {
+    const elNome = document.getElementById('nomeUsuario');
+    if (elNome) elNome.textContent = _usuario.nome;
+  }
+  if (sessionStorage.getItem('usuarioLogado')) carregarFoto();
+});
 
-const _usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
-if (_usuario.nome) {
-  const elNome = document.getElementById('nomeUsuario');
-  if (elNome) elNome.textContent = _usuario.nome;
-}
-if (sessionStorage.getItem('usuarioLogado')) carregarFoto();
 
-
-  async function enviarFoto(input) {
+async function enviarFoto(input) {
   const arquivo = input.files[0];
   if (!arquivo) return;
 
-  atualizarTodasFotos(URL.createObjectURL(arquivo)); 
+  atualizarTodasFotos(URL.createObjectURL(arquivo));
 
   const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
   if (!usuario.cpf) return alert('Sessão expirada.');
@@ -69,17 +70,21 @@ function atualizarTodasFotosOng(url) {
 
 async function carregarFotoOng() {
   const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
-  if (!ong.cnpj) return;
+  if (!ong.cnpj) {
+    atualizarTodasFotosOng('../imagens/mutuoLogo.png');
+    return;
+  }
 
   try {
-    const res  = await fetch(`${API_URL}/perfil/foto/ong/${ong.cnpj}`);
+    const res  = await fetch(`${API_URL}/perfil/foto/ong/${ong.cnpj}`, { cache: 'no-store' });
     const data = await res.json();
 
-    if (data.fotoPerfil) {
-      atualizarTodasFotosOng(API_URL + data.fotoPerfil);
-    }
+    atualizarTodasFotosOng(
+      data.fotoPerfil ? API_URL + data.fotoPerfil : '../imagens/mutuoLogo.png'
+    );
   } catch (e) {
     console.error('Erro ao carregar foto:', e);
+    atualizarTodasFotosOng('../imagens/mutuoLogo.png');
   }
 }
 
@@ -89,7 +94,7 @@ async function enviarFotoOng(input) {
   const arquivo = input.files[0];
   if (!arquivo) return;
 
-  atualizarTodasFotosOng(URL.createObjectURL(arquivo)); 
+  atualizarTodasFotosOng(URL.createObjectURL(arquivo));
 
   const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
   if (!ong.cnpj) return alert('Sessão expirada.');
