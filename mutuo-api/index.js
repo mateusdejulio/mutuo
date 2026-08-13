@@ -4,6 +4,15 @@ const path    = require('path');
 const multer  = require('multer');
 const fs      = require('fs');
 const db      = require('./db');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 require('dotenv').config();
 
 const app = express();
@@ -550,6 +559,36 @@ app.get('/solicitacoes-ong/prestador/:cnpj', async (req, res) => {
 app.put('/solicitacoes-ong/:cod', async (req, res) => {
   const { statusS, statusE, pontos } = req.body;
   res.json(await db.alterSolicitacaoOng(req.params.cod, statusS, statusE, pontos));
+});
+
+// ── Rota de Contato ──
+app.post('/contato', async (req, res) => {
+  const { nome, email, mensagem } = req.body;
+
+  if (!nome || !email || !mensagem) {
+    return res.status(400).json({ sucesso: false, erro: 'Preencha todos os campos.' });
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"Site Mútuo" <${process.env.EMAIL_USER}>`,
+      to: 'mutuo.pi@gmail.com',
+      replyTo: email,
+      subject: 'Nova mensagem - Contato Mútuo',
+      html: `
+        <h3>Nova mensagem pelo formulário de contato</h3>
+        <p><strong>Nome:</strong> ${nome}</p>
+        <p><strong>E-mail:</strong> ${email}</p>
+        <p><strong>Mensagem:</strong></p>
+        <p>${mensagem.replace(/\n/g, '<br>')}</p>
+      `
+    });
+
+    res.json({ sucesso: true });
+  } catch (erro) {
+    console.error('Erro ao enviar e-mail:', erro.message);
+    res.status(500).json({ sucesso: false, erro: 'Não foi possível enviar o e-mail.' });
+  }
 });
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
