@@ -604,6 +604,56 @@ app.get('/servicos-perto/:cidade', async (req, res) => {
   if (servicos.error) return res.status(500).json({ erro: servicos.error });
   res.json(servicos);
 });
+
+// ── Cadastro de Serviço do Usuário ──
+app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
+  try {
+    const { nomeServico, descricao, foco, duracao, cpf } = req.body;
+
+    if (!nomeServico || !descricao || !foco || !duracao || !cpf) {
+      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+    }
+
+    // ── Checagem do limite de serviços por plano ──
+    const premium = await db.isUsuarioPremium(cpf);
+    const limite = premium ? 8 : 3;
+    const totalAtual = await db.contarServicosAtivosUsuario(cpf);
+
+    if (totalAtual >= limite) {
+      return res.status(403).json({
+        erro: premium
+          ? `Você atingiu o limite de ${limite} serviços do plano Premium.`
+          : `Você atingiu o limite de ${limite} serviços do plano gratuito. Assine o Premium para cadastrar até 8 serviços.`
+      });
+    }
+
+    const imagem = req.file ? req.file.filename : null;
+
+    const id = await db.cadastrarServico({
+      nomeServico,
+      descricao,
+      foco,
+      duracao,
+      cpf,
+      imagem
+    });
+
+    res.json({
+      sucesso: true,
+      id,
+      imagem: imagem ? `/uploads/servicos/${imagem}` : null
+    });
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+// Simula a assinatura do plano Premium (checkout fake)
+app.put('/usuarios/:cpf/premium', async (req, res) => {
+  const resultado = await db.ativarPremiumUsuario(req.params.cpf);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  if (!resultado.success) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+  res.json({ sucesso: true, premium: true });
+});
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
 // Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.
