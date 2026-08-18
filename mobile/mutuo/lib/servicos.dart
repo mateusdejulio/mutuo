@@ -4,30 +4,54 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
+import 'package:mutuo/services/api_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
+// Agora representa um serviço vindo do banco (rota /servicos-usuario)
 class Servico {
+  final int id;
   final String titulo;
   final String descricao;
   final String local;
   final String tempo;
-  final String imagem;
+  final String? imagemUrl;
   final String categoria;
   final String autor;
-  final double avaliacao;
-  final int totalAvaliacoes;
 
   Servico({
+    required this.id,
     required this.titulo,
     required this.descricao,
     required this.local,
     required this.tempo,
-    required this.imagem,
+    this.imagemUrl,
     this.categoria = "Geral",
     this.autor = "Voluntário",
-    this.avaliacao = 4.0,
-    this.totalAvaliacoes = 0,
   });
+
+  factory Servico.fromJson(Map<String, dynamic> json) {
+    final cidade = json['cidade']?.toString() ?? '';
+    final estado = json['estado']?.toString() ?? '';
+    final localMontado = [
+      cidade,
+      estado,
+    ].where((parte) => parte.isNotEmpty).join(', ');
+
+    final imagem = json['imagem']?.toString();
+
+    return Servico(
+      id: int.tryParse('${json['cod'] ?? 0}') ?? 0,
+      titulo: json['nome']?.toString() ?? 'Serviço',
+      descricao: json['descricao']?.toString() ?? '',
+      local: localMontado.isEmpty ? 'Não informado' : localMontado,
+      tempo: '${json['qtdHoras'] ?? '-'}h',
+      imagemUrl: (imagem != null && imagem.isNotEmpty)
+          ? '${ApiService.baseUrl}$imagem'
+          : null,
+      categoria: json['foco']?.toString() ?? 'Geral',
+      autor: json['nomeUsuario']?.toString() ?? 'Voluntário',
+    );
+  }
 }
 
 // ─── DETALHE SERVIÇO ──────────────────────────────────────
@@ -55,25 +79,36 @@ class DetalheServico extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Hero(
-              tag: 'servico_${servico.titulo}',
-              child: Image.asset(
-                servico.imagem,
-                height: 220,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 220,
-                    width: double.infinity,
-                    color: const Color(0xFFB7D5B0),
-                    child: const Icon(
-                      Icons.broken_image,
-                      color: Colors.white,
-                      size: 50,
+              tag: 'servico_${servico.id}',
+              child: servico.imagemUrl != null
+                  ? Image.network(
+                      servico.imagemUrl!,
+                      height: 220,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 220,
+                          width: double.infinity,
+                          color: const Color(0xFFB7D5B0),
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      height: 220,
+                      width: double.infinity,
+                      color: const Color(0xFFB7D5B0),
+                      child: const Icon(
+                        Icons.image_not_supported_outlined,
+                        color: Colors.white,
+                        size: 50,
+                      ),
                     ),
-                  );
-                },
-              ),
             ),
             Padding(
               padding: const EdgeInsets.all(20),
@@ -206,6 +241,10 @@ class _ServicosState extends State<Servicos> {
   final TextEditingController _buscaController = TextEditingController();
   String _busca = "";
 
+  final ApiService _apiService = ApiService();
+  List<Servico> _todosServicos = [];
+  bool _carregando = true;
+
   static const _verde = Color(0xFF3A5A40);
   static const _verdeMedio = Color(0xFF588157);
   static const _bege = Color(0xFFDAD7CD);
@@ -219,45 +258,6 @@ class _ServicosState extends State<Servicos> {
     "Música",
     "Tecnologia",
     "Educação",
-  ];
-
-  final List<Servico> _todosServicos = [
-    Servico(
-      titulo: "Aula de culinária",
-      descricao:
-          "Aprenda a fazer pratos deliciosos e saudáveis com ingredientes simples do dia a dia.",
-      local: "Rio de Janeiro, RJ",
-      tempo: "1h 30min",
-      imagem: "assets/images/imagemcomida.png",
-      categoria: "Culinária",
-      autor: "Mariana Lopes",
-      avaliacao: 5.0,
-      totalAvaliacoes: 1024,
-    ),
-    Servico(
-      titulo: "Jardinagem urbana",
-      descricao:
-          "Transforme seu espaço com plantas e hortas. Aprenda técnicas de cultivo urbano.",
-      local: "São Paulo, SP",
-      tempo: "2h",
-      imagem: "assets/images/imagemjardineiro.png",
-      categoria: "Jardinagem",
-      autor: "Carlos Mendes",
-      avaliacao: 4.5,
-      totalAvaliacoes: 312,
-    ),
-    Servico(
-      titulo: "Aula de violão",
-      descricao:
-          "Aprenda músicas populares e técnicas básicas para tocar violão do zero.",
-      local: "Belo Horizonte, MG",
-      tempo: "1h",
-      imagem: "assets/images/violao.png",
-      categoria: "Música",
-      autor: "Ana Costa",
-      avaliacao: 4.8,
-      totalAvaliacoes: 87,
-    ),
   ];
 
   List<Servico> get _servicosFiltrados {
@@ -277,6 +277,21 @@ class _ServicosState extends State<Servicos> {
   void initState() {
     super.initState();
     _bottomNavIndex = widget.initialNavIndex;
+    _carregarServicos();
+  }
+
+  // ─── NOVO: busca os serviços reais na API ───
+  Future<void> _carregarServicos() async {
+    final dados = await _apiService.buscarTodosServicos();
+    if (!mounted) return;
+
+    setState(() {
+      _todosServicos = dados
+          .whereType<Map<String, dynamic>>()
+          .map((json) => Servico.fromJson(json))
+          .toList();
+      _carregando = false;
+    });
   }
 
   @override
@@ -330,7 +345,9 @@ class _ServicosState extends State<Servicos> {
                       child: Row(
                         children: [
                           Text(
-                            "${filtrados.length} serviços encontrados",
+                            _carregando
+                                ? "Carregando serviços..."
+                                : "${filtrados.length} serviços encontrados",
                             style: GoogleFonts.quicksand(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -357,14 +374,57 @@ class _ServicosState extends State<Servicos> {
                     _chipsCategorias(),
                     const SizedBox(height: 20),
 
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: filtrados.length,
-                      itemBuilder: (context, index) =>
-                          _servicoCard(filtrados[index]),
-                    ),
+                    if (_carregando)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 60),
+                        child: Center(
+                          child: CircularProgressIndicator(color: _verde),
+                        ),
+                      )
+                    else if (filtrados.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 40,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: _branco,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: const Color(0xFFE0DDD8)),
+                          ),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.search_off_rounded,
+                                color: _verdeMedio,
+                                size: 32,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Nenhum serviço encontrado",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF6B705C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: filtrados.length,
+                        itemBuilder: (context, index) =>
+                            _servicoCard(filtrados[index]),
+                      ),
 
                     const SizedBox(height: 24),
                   ],
@@ -688,25 +748,36 @@ class _ServicosState extends State<Servicos> {
               child: Stack(
                 children: [
                   Hero(
-                    tag: 'servico_${servico.titulo}',
-                    child: Image.asset(
-                      servico.imagem,
-                      height: 170,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 170,
-                          width: double.infinity,
-                          color: const Color(0xFFB7D5B0),
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: Colors.white54,
-                            size: 56,
+                    tag: 'servico_${servico.id}',
+                    child: servico.imagemUrl != null
+                        ? Image.network(
+                            servico.imagemUrl!,
+                            height: 170,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 170,
+                                width: double.infinity,
+                                color: const Color(0xFFB7D5B0),
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.white54,
+                                  size: 56,
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            height: 170,
+                            width: double.infinity,
+                            color: const Color(0xFFB7D5B0),
+                            child: const Icon(
+                              Icons.image_not_supported_outlined,
+                              color: Colors.white54,
+                              size: 56,
+                            ),
                           ),
-                        );
-                      },
-                    ),
                   ),
                   Positioned(
                     top: 12,
@@ -763,7 +834,7 @@ class _ServicosState extends State<Servicos> {
 
                   const SizedBox(height: 12),
 
-                  // Autor + avaliação
+                  // Autor
                   Row(
                     children: [
                       Container(
@@ -784,51 +855,15 @@ class _ServicosState extends State<Servicos> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            servico.autor,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF344E41),
-                            ),
+                      Expanded(
+                        child: Text(
+                          servico.autor,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF344E41),
                           ),
-                          Row(
-                            children: [
-                              ...List.generate(5, (i) {
-                                if (i < servico.avaliacao.floor()) {
-                                  return const Icon(
-                                    Icons.star_rounded,
-                                    size: 13,
-                                    color: Color(0xFFF4A261),
-                                  );
-                                } else if (i < servico.avaliacao) {
-                                  return const Icon(
-                                    Icons.star_half_rounded,
-                                    size: 13,
-                                    color: Color(0xFFF4A261),
-                                  );
-                                } else {
-                                  return const Icon(
-                                    Icons.star_border_rounded,
-                                    size: 13,
-                                    color: Color(0xFFCCCCCC),
-                                  );
-                                }
-                              }),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${servico.avaliacao.toStringAsFixed(1)} (${servico.totalAvaliacoes})",
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 11,
-                                  color: const Color(0xFF6B705C),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),

@@ -9,28 +9,51 @@ import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
+// Agora representa um serviço vindo do banco (rota /servicos-destaque)
 class Vaga {
+  final int id;
   final String titulo;
   final String descricao;
   final String local;
   final String tempo;
-  final String imagem;
+  final String? imagemUrl;
   final String categoria;
   final String autor;
-  final double avaliacao;
-  final int totalAvaliacoes;
 
   Vaga({
+    required this.id,
     required this.titulo,
     required this.descricao,
     required this.local,
     required this.tempo,
-    required this.imagem,
+    this.imagemUrl,
     this.categoria = "Geral",
     this.autor = "Voluntário",
-    this.avaliacao = 4.0,
-    this.totalAvaliacoes = 0,
   });
+
+  factory Vaga.fromJson(Map<String, dynamic> json) {
+    final cidade = json['cidade']?.toString() ?? '';
+    final estado = json['estado']?.toString() ?? '';
+    final localMontado = [
+      cidade,
+      estado,
+    ].where((parte) => parte.isNotEmpty).join(', ');
+
+    final imagem = json['imagem']?.toString();
+
+    return Vaga(
+      id: int.tryParse('${json['cod'] ?? 0}') ?? 0,
+      titulo: json['nome']?.toString() ?? 'Serviço',
+      descricao: json['descricao']?.toString() ?? '',
+      local: localMontado.isEmpty ? 'Não informado' : localMontado,
+      tempo: '${json['qtdHoras'] ?? '-'}h',
+      imagemUrl: (imagem != null && imagem.isNotEmpty)
+          ? '${ApiService.baseUrl}$imagem'
+          : null,
+      categoria: json['foco']?.toString() ?? 'Geral',
+      autor: json['nomeUsuario']?.toString() ?? 'Voluntário',
+    );
+  }
 }
 
 // ─── DETALHE VAGA ─────────────────────────────────────────
@@ -51,13 +74,34 @@ class DetalheVaga extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Hero(
-            tag: vaga.titulo,
-            child: Image.asset(
-              vaga.imagem,
-              height: 220,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            tag: 'vaga_${vaga.id}',
+            child: vaga.imagemUrl != null
+                ? Image.network(
+                    vaga.imagemUrl!,
+                    height: 220,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 220,
+                      width: double.infinity,
+                      color: const Color(0xFFB7D5B0),
+                      child: const Icon(
+                        Icons.broken_image,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                    ),
+                  )
+                : Container(
+                    height: 220,
+                    width: double.infinity,
+                    color: const Color(0xFFB7D5B0),
+                    child: const Icon(
+                      Icons.image_not_supported_outlined,
+                      color: Colors.white,
+                      size: 50,
+                    ),
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(20),
@@ -173,10 +217,15 @@ class _InicialUsuarioState extends State<InicialUsuario> {
   String _plano = "Gratuito";
   bool _carregandoStats = true;
 
+  // ─── NOVO: serviços em destaque vindos do banco ───
+  List<Vaga> _vagas = [];
+  bool _carregandoVagas = true;
+
   @override
   void initState() {
     super.initState();
     _carregarEstatisticas();
+    _carregarVagasDestaque();
   }
 
   Future<void> _carregarEstatisticas() async {
@@ -198,6 +247,20 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     }
   }
 
+  // ─── NOVO: busca os serviços em destaque na API e monta a lista de Vaga ───
+  Future<void> _carregarVagasDestaque() async {
+    final dados = await _apiService.buscarServicosDestaque();
+    if (!mounted) return;
+
+    setState(() {
+      _vagas = dados
+          .whereType<Map<String, dynamic>>()
+          .map((json) => Vaga.fromJson(json))
+          .toList();
+      _carregandoVagas = false;
+    });
+  }
+
   // ── helper seguro para inicial do nome ──
   String get _inicial =>
       widget.nome.isNotEmpty ? widget.nome[0].toUpperCase() : "U";
@@ -206,44 +269,6 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     "Juntos, podemos construir um futuro mais humano.",
     "Pequenos gestos transformam grandes realidades.",
     "Voluntariar é dar o melhor de si ao próximo.",
-  ];
-
-  final List<Vaga> vagas = [
-    Vaga(
-      titulo: "Aulas de culinária",
-      descricao:
-          "Aprenda e ensine pratos deliciosos. Aulas práticas e divertidas para todos os níveis.",
-      local: "São Paulo, SP",
-      tempo: "1h 30min",
-      imagem: "assets/images/imagemcomida.png",
-      categoria: "Culinária",
-      autor: "Mariana Lopes",
-      avaliacao: 3.0,
-      totalAvaliacoes: 1024,
-    ),
-    Vaga(
-      titulo: "Passeio com cachorro",
-      descricao:
-          "Ajude a passear com cães resgatados e faça a diferença na vida deles.",
-      local: "Campinas, SP",
-      tempo: "1h",
-      imagem: "assets/images/imagemcachorro.png",
-      categoria: "Animais",
-      autor: "João Silva",
-      avaliacao: 4.5,
-      totalAvaliacoes: 312,
-    ),
-    Vaga(
-      titulo: "Apoio em evento",
-      descricao: "Auxilie na organização de eventos sociais e conecte pessoas.",
-      local: "Valinhos, SP",
-      tempo: "3h",
-      imagem: "assets/images/evento.png",
-      categoria: "Eventos",
-      autor: "Ana Costa",
-      avaliacao: 4.0,
-      totalAvaliacoes: 87,
-    ),
   ];
 
   // ─── Paleta ───────────────────────────────────────────────
@@ -929,16 +954,53 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     );
   }
 
-  // ─── CARROSSEL DE VAGAS ───────────────────────────────────
+  // ─── CARROSSEL DE VAGAS (agora vindo do banco) ─────────────
   Widget _carrosselVagas() {
+    if (_carregandoVagas) {
+      return const SizedBox(
+        height: 310,
+        child: Center(child: CircularProgressIndicator(color: _verde)),
+      );
+    }
+
+    if (_vagas.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: _branco,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFE0DDD8)),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.work_off_outlined, color: _verdeMedio, size: 32),
+              const SizedBox(height: 8),
+              Text(
+                "Nenhuma vaga em destaque no momento",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.quicksand(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF6B705C),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return SizedBox(
       height: 310,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: vagas.length,
+        itemCount: _vagas.length,
         itemBuilder: (context, index) {
-          final vaga = vagas[index];
+          final vaga = _vagas[index];
           return _vagaCard(vaga);
         },
       ),
@@ -976,22 +1038,32 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               child: Stack(
                 children: [
                   Hero(
-                    tag: vaga.titulo,
-                    child: Image.asset(
-                      vaga.imagem,
-                      height: 140,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        height: 140,
-                        color: const Color(0xFFB7D5B0),
-                        child: const Icon(
-                          Icons.image_not_supported_outlined,
-                          color: Colors.white54,
-                          size: 40,
-                        ),
-                      ),
-                    ),
+                    tag: 'vaga_${vaga.id}',
+                    child: vaga.imagemUrl != null
+                        ? Image.network(
+                            vaga.imagemUrl!,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 140,
+                              color: const Color(0xFFB7D5B0),
+                              child: const Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Colors.white54,
+                                size: 40,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            height: 140,
+                            color: const Color(0xFFB7D5B0),
+                            child: const Icon(
+                              Icons.image_not_supported_outlined,
+                              color: Colors.white54,
+                              size: 40,
+                            ),
+                          ),
                   ),
                   Positioned(
                     top: 12,
@@ -1070,53 +1142,15 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                vaga.autor,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF344E41),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  ...List.generate(5, (i) {
-                                    if (i < vaga.avaliacao.floor()) {
-                                      return const Icon(
-                                        Icons.star_rounded,
-                                        size: 12,
-                                        color: Color(0xFFF4A261),
-                                      );
-                                    } else if (i < vaga.avaliacao) {
-                                      return const Icon(
-                                        Icons.star_half_rounded,
-                                        size: 12,
-                                        color: Color(0xFFF4A261),
-                                      );
-                                    } else {
-                                      return const Icon(
-                                        Icons.star_border_rounded,
-                                        size: 12,
-                                        color: Color(0xFFCCCCCC),
-                                      );
-                                    }
-                                  }),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    "${vaga.avaliacao.toStringAsFixed(1)} (${vaga.totalAvaliacoes})",
-                                    style: GoogleFonts.quicksand(
-                                      fontSize: 10,
-                                      color: const Color(0xFF6B705C),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          child: Text(
+                            vaga.autor,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF344E41),
+                            ),
                           ),
                         ),
                       ],

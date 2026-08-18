@@ -143,6 +143,39 @@ class ApiService {
     }
   }
 
+  // ─── NOVO: busca os serviços em destaque (usuários premium) pro carrossel da tela inicial ───
+  // Usa GET /servicos-destaque
+  Future<List<dynamic>> buscarServicosDestaque() async {
+    final url = Uri.parse('$baseUrl/servicos-destaque');
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+    // ─── NOVO: busca TODOS os serviços ativos de usuários (tela de Serviços / busca) ───
+  // Usa GET /servicos-usuario
+  Future<List<dynamic>> buscarTodosServicos() async {
+    final url = Uri.parse('$baseUrl/servicos-usuario');
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
 
   // ─── Atualiza nome/email/telefone do usuário ───
   // Usa PUT /usuarios/:cpf/perfil
