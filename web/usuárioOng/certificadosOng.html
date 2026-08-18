@@ -557,28 +557,28 @@
         <div class="icone-resumo"><i class="bi bi-people-fill"></i></div>
         <div class="texto-resumo">
           <p>Total de voluntários</p>
-          <strong>1.000</strong>
+          <strong id="totalVoluntarios">--</strong>
         </div>
       </div>
       <div class="card-resumo">
         <div class="icone-resumo"><i class="bi bi-award-fill"></i></div>
         <div class="texto-resumo">
           <p>Certificados emitidos</p>
-          <strong>700</strong>
+          <strong id="certificadosEmitidos">--</strong>
         </div>
       </div>
       <div class="card-resumo">
         <div class="icone-resumo"><i class="bi bi-briefcase-fill"></i></div>
         <div class="texto-resumo">
           <p>Serviços concluídos</p>
-          <strong>900</strong>
+          <strong id="servicosConcluidos">--</strong>
         </div>
       </div>
       <div class="card-resumo">
         <div class="icone-resumo"><i class="bi bi-star-fill"></i></div>
         <div class="texto-resumo">
           <p>Pontos distribuídos</p>
-          <strong>4.850</strong>
+          <strong id="pontosDistribuidos">--</strong>
         </div>
       </div>
     </div>
@@ -603,124 +603,7 @@
               <th>Pontos recebidos</th>
             </tr>
           </thead>
-          <tbody id="corpo-tabela">
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <img class="avatar-tabela" src="../imagens/perfil1.png" alt="Mariana"
-                    onerror="this.outerHTML='<div class=\'avatar-iniciais\'>ML</div>'">
-                  <span class="nome-completo">Mariana Lacerda</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-emoji-smile"></i></i> Atividades de recreação</span>
-              </td>
-              <td class="celula-data">15/04/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 120 pts</div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <img class="avatar-tabela" src="../imagens/perfil2.png" alt="Lucas"
-                    onerror="this.outerHTML='<div class=\'avatar-iniciais\'>LO</div>'">
-                  <span class="nome-completo">Marcelo Fernandes</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-brush-fill"></i> Aula de pintura</span></td>
-              <td class="celula-data">10/04/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 200 pts</div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <div class="avatar-iniciais">FC</div>
-                  <span class="nome-completo">Fernanda Costa</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-calculator-fill"></i> Aula de matemática</span></td>
-              <td class="celula-data">08/04/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 90 pts</div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <div class="avatar-iniciais">RA</div>
-                  <span class="nome-completo">Rafael Andrade</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-activity"></i> Aula de esportes</span></td>
-              <td class="celula-data">03/04/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 150 pts</div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <div class="avatar-iniciais">JS</div>
-                  <span class="nome-completo">Julia Souza</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-music-note-beamed"></i> Aula de música</span></td>
-              <td class="celula-data">28/03/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 110 pts</div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <div class="avatar-iniciais">PM</div>
-                  <span class="nome-completo">Pedro Mendes</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-emoji-smile"></i> Atividades de recreação</span></td>
-              <td class="celula-data">22/03/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 120 pts</div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <div class="avatar-iniciais">BF</div>
-                  <span class="nome-completo">Beatriz Ferreira</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-camera-fill"></i> Oficina de artesanato</span></td>
-              <td class="celula-data">18/03/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 80 pts</div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="celula-nome">
-                  <div class="avatar-iniciais">TL</div>
-                  <span class="nome-completo">Thiago Lima</span>
-                </div>
-              </td>
-              <td><span class="etiqueta-servico"><i class="bi bi-calculator-fill"></i>Aula de matemática</span></td>
-              <td class="celula-data">12/03/2025</td>
-              <td>
-                <div class="celula-pontos"><i class="bi bi-star-fill"></i> 200 pts</div>
-              </td>
-            </tr>
-
-          </tbody>
+          <tbody id="corpo-tabela"></tbody>
         </table>
       </div>
 
@@ -732,22 +615,88 @@
   </div>
   <script src="../funcoes.js"></script>
   <script>
-    function filtrarTabela() {
-      const busca = document.getElementById('campo-busca').value.toLowerCase();
-      const linhas = document.querySelectorAll('#corpo-tabela tr');
-      let visiveis = 0;
+    carregarNavOng();
+    carregarCertificadosOng();
 
-      linhas.forEach(linha => {
-        const nome = linha.querySelector('.nome-completo').textContent.toLowerCase();
-        const visivel = nome.includes(busca);
-        linha.style.display = visivel ? '' : 'none';
-        if (visivel) visiveis++;
+    let listaCompleta = [];
+
+    async function carregarCertificadosOng() {
+      const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
+      if (!ong.cnpj) return;
+
+      try {
+        const resposta = await fetch(`http://localhost:3000/certificados/ong/${encodeURIComponent(ong.cnpj)}`);
+        if (!resposta.ok) throw new Error("Falha ao buscar certificados");
+        const dados = await resposta.json();
+
+        listaCompleta = dados.servicos;
+        preencherResumo(dados.resumo);
+        renderizarTabela(listaCompleta);
+      } catch (erro) {
+        console.error(erro);
+        document.getElementById('corpo-tabela').innerHTML =
+          `<tr><td colspan="4" style="text-align:center; color:#9aab96;">Não foi possível carregar os certificados.</td></tr>`;
+      }
+    }
+
+    function preencherResumo(resumo) {
+      document.getElementById('totalVoluntarios').textContent = resumo.totalVoluntarios;
+      document.getElementById('certificadosEmitidos').textContent = resumo.certificadosEmitidos;
+      document.getElementById('servicosConcluidos').textContent = resumo.servicosConcluidos;
+      document.getElementById('pontosDistribuidos').textContent = resumo.pontosDistribuidos;
+    }
+
+    function obterIniciais(nome) {
+      const partes = nome.trim().split(' ').filter(Boolean);
+      const primeira = partes[0]?.[0] || '';
+      const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
+      return (primeira + ultima).toUpperCase();
+    }
+
+    function renderizarTabela(lista) {
+      const corpo = document.getElementById('corpo-tabela');
+      corpo.innerHTML = '';
+
+      if (!lista.length) {
+        corpo.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#9aab96;">Nenhum certificado emitido ainda.</td></tr>`;
+        atualizarContagem(0, 0);
+        return;
+      }
+
+      lista.forEach(item => {
+        const data = new Date(item.dataConclusao || item.dataSolicitacao).toLocaleDateString('pt-BR');
+        const iniciais = obterIniciais(item.nomeUsuario);
+
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+          <td>
+            <div class="celula-nome">
+              <div class="avatar-iniciais">${iniciais}</div>
+              <span class="nome-completo">${item.nomeUsuario}</span>
+            </div>
+          </td>
+          <td><span class="etiqueta-servico"><i class="bi bi-award"></i> ${item.foco || item.nomeServico}</span></td>
+          <td class="celula-data">${data}</td>
+          <td><div class="celula-pontos"><i class="bi bi-star-fill"></i> ${item.pontosSolicitacao} pts</div></td>
+        `;
+        corpo.appendChild(linha);
       });
 
-      document.getElementById('contagem-resultados').textContent =
-        `Exibindo ${visiveis} de 190 certificados`;
+      atualizarContagem(lista.length, listaCompleta.length);
     }
-    carregarNavOng();
+
+    function atualizarContagem(visiveis, total) {
+      document.getElementById('contagem-resultados').textContent =
+        `Exibindo ${visiveis} de ${total} certificados`;
+    }
+
+    function filtrarTabela() {
+      const busca = document.getElementById('campo-busca').value.toLowerCase();
+      const filtrada = listaCompleta.filter(item =>
+        item.nomeUsuario.toLowerCase().includes(busca)
+      );
+      renderizarTabela(filtrada);
+    }
   </script>
 
 
