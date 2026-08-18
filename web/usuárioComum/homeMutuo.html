@@ -369,7 +369,30 @@
     }
     .btn-saiba:hover { background: var(--green-dark); color: var(--cream); }
     .btn-saiba:active { transform: scale(0.98); }
+    .act-btns { display: flex; gap: 8px; margin-top: auto; }
 
+.act-btns .btn-saiba {
+  flex: 0.5;
+  width: auto;
+  margin-top: 0;
+}
+
+.btn-duvida {
+  background: var(--cream-light);
+  color: var(--green-dark);
+  border: 1.5px solid var(--cream);
+  border-radius: 12px;
+  padding: 11px 10px;
+  flex: 0.5;
+  height: 40px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.82rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.12s;
+}
+.btn-duvida:hover { background: var(--cream); border-color: var(--green-main); }
+.btn-duvida:active { transform: scale(0.97); }
     .btn-outline {
       background: transparent;
       border: 1.5px solid var(--green-main);
@@ -949,7 +972,10 @@
           ${local ? `<span class="act-meta-i"><i class="bi bi-geo-alt-fill"></i> ${local}</span>` : ''}
           ${duracao ? `<span class="act-meta-i"><i class="bi bi-clock-fill"></i> ${duracao}</span>` : ''}
         </div>
-        <a href="serviçosMutuo.html" class="btn-saiba"><i class="bi bi-info-circle"></i> Saiba mais</a>
+        <div class="act-btns">
+        <button class="btn-duvida" onclick="tirarDuvidasHome(${servico.cod})"><i class="bi bi-chat-dots-fill"></i> Tirar dúvidas</button>
+        <button class="btn-saiba" onclick="inscreverServicoHome(${servico.cod})"><i class="bi bi-check-circle-fill"></i> Solicitar</button>
+        </div>
       </div>
     `;
 
@@ -1011,6 +1037,38 @@
       track.innerHTML = `<p style="padding:1rem;color:#b00020;font-size:0.85rem;">Não foi possível carregar os serviços perto de você.</p>`;
     }
   }
+  function tirarDuvidasHome(cod) {
+  window.location.href = 'chatMutuo.html';
+}
+
+async function inscreverServicoHome(cod) {
+  const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+  const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+
+  if (!usuarioLogado || !usuarioLogado.cpf) {
+    alert('Você precisa estar logado para se inscrever em um serviço.');
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${API_URL}/solicitacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        codServico: cod,
+        codUsuario: usuarioLogado.cpf
+      })
+    });
+
+    const data = await resp.json();
+    if (!resp.ok || data.error) throw new Error(data.error || 'Erro ao enviar solicitação.');
+
+    alert('Solicitação enviada! Aguarde a aprovação do prestador do serviço.');
+  } catch (err) {
+    console.error('Erro ao se inscrever no serviço:', err);
+    alert('Não foi possível enviar a solicitação. Tente novamente.');
+  }
+}
 
 carregarDashboard();
 carregarVagasDestaque();
