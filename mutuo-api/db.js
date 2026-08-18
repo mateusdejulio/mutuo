@@ -1099,6 +1099,47 @@ async function getServicosPertoDeVoce(cidade) {
     return { error: err.message };
   }
 }
+// Conta quantos serviços ATIVOS um usuário já tem cadastrados
+async function contarServicosAtivosUsuario(cpf) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT COUNT(*) AS total FROM Mutuo_Servico WHERE idUsuario = ? AND ativo = 1',
+      [cpf]
+    );
+    return rows[0].total;
+  } catch (err) {
+    console.error('Erro ao contar serviços do usuário:', err.message);
+    throw err;
+  }
+}
+
+// Verifica se o usuário é premium (usa a coluna Mutuo_Usuario.premium)
+async function isUsuarioPremium(cpf) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT premium FROM Mutuo_Usuario WHERE cpf = ?',
+      [cpf]
+    );
+    if (rows.length === 0) return false;
+    return rows[0].premium === 1;
+  } catch (err) {
+    console.error('Erro ao verificar premium do usuário:', err.message);
+    throw err;
+  }
+}
+// Ativa o plano Premium do usuário (usado no checkout simulado)
+async function ativarPremiumUsuario(cpf) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_Usuario SET premium = 1 WHERE cpf = ?',
+      [cpf]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Erro ao ativar premium do usuário:', err.message);
+    return { error: err.message };
+  }
+}
 
 module.exports = { 
   getUsuarios, 
@@ -1168,5 +1209,8 @@ module.exports = {
   getPlanoUsuario,
   getDashboardUsuario,
   getServicosDestaque,
-  getServicosPertoDeVoce
+  getServicosPertoDeVoce,
+  contarServicosAtivosUsuario,
+  isUsuarioPremium,
+  ativarPremiumUsuario
 };

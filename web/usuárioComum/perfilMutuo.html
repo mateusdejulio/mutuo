@@ -420,6 +420,32 @@
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+.badge-limite-servicos {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--verde-palido);
+  color: var(--verde-escuro);
+  margin-top: 6px;
+}
+.badge-limite-servicos.limite-atingido {
+  background: #fdeeda;
+  color: #b3690a;
+}
+.badge-limite-servicos a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 700;
+}
+.btn-adicionar.desabilitado {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
     @keyframes subirSuave {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -635,17 +661,21 @@
       </div>
     </div>
 
-    <!-- SERVIÇOS -->
-    <div class="bloco">
-      <div class="cabecalho-bloco">
-        <div><h3>Meus serviços</h3><p>Serviços que você oferece na plataforma</p></div>
-        <a href="adicionarServicoMutuo.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
-      </div>
-      <div id="listaServicosMutuo">
-        
-      </div>
+  
+   <!-- SERVIÇOS -->
+<div class="bloco">
+  <div class="cabecalho-bloco">
+    <div>
+      <h3>Meus serviços</h3>
+      <p>Serviços que você oferece na plataforma</p>
+      <span class="badge-limite-servicos" id="badgeLimiteServicos" style="display:none;"></span>
     </div>
-
+    <a href="adicionarServicoMutuo.html" class="btn-adicionar" id="btnAdicionarServico"><i class="bi bi-plus-lg"></i> Adicionar</a>
+  </div>
+  <div id="listaServicosMutuo">
+    
+  </div>
+</div>
     <!-- HISTÓRICO -->
     <div class="bloco">
       <div class="cabecalho-bloco">
@@ -938,42 +968,81 @@ mostrarMensagemSalva('Perfil atualizado com sucesso!');
     }
 
     async function carregarServicosUsuario() {
-      if (!containerServicosMutuo || !usuario.cpf) return;
+  if (!containerServicosMutuo || !usuario.cpf) return;
 
+  containerServicosMutuo.innerHTML = `
+    <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+      Carregando seus serviços...
+    </p>`;
+
+  try {
+    const resposta = await fetch(`${API_BASE}/servicos/usuario/${encodeURIComponent(usuario.cpf)}`);
+    if (!resposta.ok) throw new Error('Não foi possível carregar seus serviços.');
+
+    const servicos = await resposta.json();
+    const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
+
+    containerServicosMutuo.innerHTML = '';
+
+    if (lista.length === 0) {
       containerServicosMutuo.innerHTML = `
         <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
-          Carregando seus serviços...
+          Você ainda não cadastrou nenhum serviço.
         </p>`;
-
-      try {
-        const resposta = await fetch(`${API_BASE}/servicos/usuario/${encodeURIComponent(usuario.cpf)}`);
-        if (!resposta.ok) throw new Error('Não foi possível carregar seus serviços.');
-
-        const servicos = await resposta.json();
-        const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
-
-        containerServicosMutuo.innerHTML = '';
-
-        if (lista.length === 0) {
-          containerServicosMutuo.innerHTML = `
-            <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
-              Você ainda não cadastrou nenhum serviço.
-            </p>`;
-          return;
-        }
-
-        lista.forEach(servico => {
-          containerServicosMutuo.appendChild(criarCardServicoUsuario(servico));
-        });
-
-      } catch (erro) {
-        console.error(erro);
-        containerServicosMutuo.innerHTML = `
-          <p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">
-            Erro ao carregar seus serviços.
-          </p>`;
-      }
+    } else {
+      lista.forEach(servico => {
+        containerServicosMutuo.appendChild(criarCardServicoUsuario(servico));
+      });
     }
+
+    atualizarBadgeLimiteServicos(lista.length);
+
+  } catch (erro) {
+    console.error(erro);
+    containerServicosMutuo.innerHTML = `
+      <p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">
+        Erro ao carregar seus serviços.
+      </p>`;
+  }
+}
+
+async function atualizarBadgeLimiteServicos(totalAtual) {
+  const badge = document.getElementById('badgeLimiteServicos');
+  const btnAdicionar = document.getElementById('btnAdicionarServico');
+  if (!badge) return;
+
+  let premium = false;
+  try {
+    const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}`);
+    if (resposta.ok) {
+      const dados = await resposta.json();
+      premium = dados.premium === 1 || dados.premium === true;
+    }
+  } catch (erro) {
+    console.error('Erro ao verificar plano do usuário:', erro);
+  }
+
+  const limite = premium ? 8 : 3;
+  const atingiuLimite = totalAtual >= limite;
+
+  badge.style.display = 'inline-flex';
+  badge.classList.toggle('limite-atingido', atingiuLimite);
+
+  if (atingiuLimite && !premium) {
+    badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados — <a href="planosMutuo.html">vire Premium</a> para cadastrar até 8`;
+  } else if (atingiuLimite && premium) {
+    badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados (limite Premium atingido)`;
+  } else {
+    badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados`;
+  }
+
+  if (btnAdicionar) {
+    btnAdicionar.classList.toggle('desabilitado', atingiuLimite);
+    btnAdicionar.title = atingiuLimite
+      ? (premium ? 'Limite de serviços Premium atingido.' : 'Limite atingido. Vire Premium para cadastrar mais.')
+      : '';
+  }
+}
     function mostrarMensagemSalva(texto) {
       const mensagem = document.getElementById('mensagemSalva');
       document.getElementById('mensagemSalvaTexto').textContent = texto;
