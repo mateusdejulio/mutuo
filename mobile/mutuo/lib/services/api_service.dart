@@ -238,6 +238,50 @@ class ApiService {
     }
   }
 
+  // ─── NOVO: cadastra um serviço oferecido pelo usuário ───
+// Usa POST /servicos (multer, campo do arquivo precisa se chamar
+// exatamente 'imagem', igual configurado no seu index.js -> uploadServico).
+// A imagem é opcional: se não vier, o serviço é criado sem foto.
+Future<Map<String, dynamic>> cadastrarServico({
+  required String cpf,
+  required String nomeServico,
+  required String descricao,
+  required String foco,
+  required String duracao,
+  List<int>? imagemBytes,
+  String? imagemNome,
+}) async {
+  final url = Uri.parse('$baseUrl/servicos');
+  try {
+    final request = http.MultipartRequest('POST', url);
+    request.fields['cpf'] = cpf;
+    request.fields['nomeServico'] = nomeServico;
+    request.fields['descricao'] = descricao;
+    request.fields['foco'] = foco;
+    request.fields['duracao'] = duracao;
+
+    if (imagemBytes != null && imagemNome != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'imagem',
+          imagemBytes,
+          filename: imagemNome,
+          contentType: _mimeTypeDaExtensao(imagemNome),
+        ),
+      );
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return jsonDecode(response.body);
+  } catch (e) {
+    return {
+      'sucesso': false,
+      'erro': 'Não foi possível conectar ao servidor: $e',
+    };
+  }
+}
+
   // ─── Busca a foto de perfil do usuário ───
   // Usa GET /perfil/foto/:cpf
   Future<String?> buscarFotoPerfil(String cpf) async {

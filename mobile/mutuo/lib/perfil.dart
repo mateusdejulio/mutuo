@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
@@ -68,6 +70,19 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
 
   int _bottomNavIndex = -1; // perfil não faz parte das 4 abas fixas
   String _filtroHistorico = 'prestados';
+
+  // ─── Opções de foco disponíveis no cadastro de serviço ─────
+  static const List<String> _focosServico = [
+    'Culinária',
+    'Jardinagem',
+    'Música',
+    'Tecnologia',
+    'Educação',
+    'Animais',
+    'Idosos',
+    'Ambiental',
+    'Outro',
+  ];
 
   final List<_ItemHistorico> _prestados = [
     _ItemHistorico(
@@ -286,6 +301,457 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
     }
 
     setState(() => _servicos.removeAt(index));
+  }
+
+  // ─── NOVO: modal de "Adicionar serviço" (bottom sheet) ─────
+  void _abrirModalAdicionarServico() {
+    final nomeCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    final duracaoCtrl = TextEditingController();
+    String? focoSelecionado;
+    XFile? imagemSelecionada;
+    bool enviando = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        return StatefulBuilder(
+          builder: (modalContext, setModalState) {
+            Future<void> escolherImagem() async {
+              final XFile? imagem = await _picker.pickImage(
+                source: ImageSource.gallery,
+                maxWidth: 1024,
+                imageQuality: 85,
+              );
+              if (imagem != null) {
+                setModalState(() => imagemSelecionada = imagem);
+              }
+            }
+
+            Future<void> confirmarCadastro() async {
+              if (nomeCtrl.text.trim().isEmpty ||
+                  descCtrl.text.trim().isEmpty ||
+                  focoSelecionado == null ||
+                  duracaoCtrl.text.trim().isEmpty) {
+                ScaffoldMessenger.of(modalContext).showSnackBar(
+                  const SnackBar(
+                    content: Text('Preencha todos os campos obrigatórios.'),
+                  ),
+                );
+                return;
+              }
+
+              setModalState(() => enviando = true);
+
+              List<int>? bytes;
+              String? nomeArquivo;
+              if (imagemSelecionada != null) {
+                bytes = await imagemSelecionada!.readAsBytes();
+                nomeArquivo = imagemSelecionada!.name;
+              }
+
+              final resultado = await _api.cadastrarServico(
+                cpf: widget.cpf,
+                nomeServico: nomeCtrl.text.trim(),
+                descricao: descCtrl.text.trim(),
+                foco: focoSelecionado!,
+                duracao: duracaoCtrl.text.trim(),
+                imagemBytes: bytes,
+                imagemNome: nomeArquivo,
+              );
+
+              setModalState(() => enviando = false);
+
+              if (resultado['sucesso'] == true) {
+                if (!mounted) return;
+                Navigator.pop(modalContext);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Serviço cadastrado com sucesso!'),
+                  ),
+                );
+                _carregarServicos();
+              } else {
+                ScaffoldMessenger.of(modalContext).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      resultado['erro']?.toString() ??
+                          'Não foi possível cadastrar o serviço.',
+                    ),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(modalContext).viewInsets.bottom,
+              ),
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(modalContext).size.height * 0.9,
+                ),
+                decoration: const BoxDecoration(
+                  color: _verde,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(22, 14, 22, 26),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 18),
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFFE5E2D8),
+                            ),
+                            child: ClipOval(
+                              child: Image.asset('assets/images/logo.png'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Cadastro de serviço',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+
+                      _modalLabel('Nome do serviço', Icons.badge_outlined),
+                      _modalInput(
+                        controller: nomeCtrl,
+                        hint: 'Ex: Aula de matemática',
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _modalLabel('Descrição', Icons.notes_rounded),
+                      Container(
+                        margin: const EdgeInsets.only(top: 5),
+                        child: TextField(
+                          controller: descCtrl,
+                          maxLines: 4,
+                          maxLength: 150,
+                          onChanged: (_) => setModalState(() {}),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            color: const Color(0xFF344E41),
+                          ),
+                          decoration: InputDecoration(
+                            hintText:
+                                'Descreva o serviço, público-alvo e objetivos...',
+                            hintStyle: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              color: const Color(0xFF9E9E9E),
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFE5E2D8),
+                            counterStyle: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              color: Colors.white70,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _modalLabel('Foco', Icons.label_outline_rounded),
+                                Container(
+                                  margin: const EdgeInsets.only(top: 5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE5E2D8),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: focoSelecionado,
+                                      isExpanded: true,
+                                      hint: Text(
+                                        'Selecionar',
+                                        style: GoogleFonts.quicksand(
+                                          fontSize: 13,
+                                          color: const Color(0xFF6B705C),
+                                        ),
+                                      ),
+                                      items: _focosServico
+                                          .map(
+                                            (f) => DropdownMenuItem(
+                                              value: f,
+                                              child: Text(
+                                                f,
+                                                style: GoogleFonts.quicksand(
+                                                  fontSize: 13,
+                                                  color: const Color(0xFF344E41),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (v) =>
+                                          setModalState(() => focoSelecionado = v),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _modalLabel(
+                                  'Duração',
+                                  Icons.access_time_rounded,
+                                ),
+                                _modalInput(
+                                  controller: duracaoCtrl,
+                                  hint: 'Ex: 2 horas',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 18),
+                      const Divider(color: Colors.white24, height: 1),
+                      const SizedBox(height: 18),
+
+                      _modalLabel('Imagem do serviço', Icons.image_outlined),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: escolherImagem,
+                              child: Container(
+                                height: 90,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white54,
+                                    width: 1.4,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.file_upload_outlined,
+                                        color: Colors.white70,
+                                        size: 26,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'Clique para enviar',
+                                        style: GoogleFonts.quicksand(
+                                          fontSize: 12,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (imagemSelecionada != null) ...[
+                            const SizedBox(width: 12),
+                            Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: kIsWeb
+                                      ? Image.network(
+                                          imagemSelecionada!.path,
+                                          width: 76,
+                                          height: 76,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.file(
+                                          File(imagemSelecionada!.path),
+                                          width: 76,
+                                          height: 76,
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
+                                Positioned(
+                                  bottom: 2,
+                                  right: 2,
+                                  child: GestureDetector(
+                                    onTap: escolherImagem,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: _verdeMedio,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        size: 12,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+
+                      const SizedBox(height: 26),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: enviando ? null : confirmarCadastro,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _verdeMedio,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          icon: enviando
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.check_circle_outline_rounded),
+                          label: Text(
+                            'Confirmar cadastro',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Center(
+                        child: TextButton(
+                          onPressed: enviando
+                              ? null
+                              : () => Navigator.pop(modalContext),
+                          child: Text(
+                            'Cancelar',
+                            style: GoogleFonts.quicksand(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _modalLabel(String texto, IconData icone) {
+    return Row(
+      children: [
+        Icon(icone, color: Colors.white70, size: 16),
+        const SizedBox(width: 8),
+        Text(
+          texto,
+          style: GoogleFonts.quicksand(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _modalInput({
+    required TextEditingController controller,
+    required String hint,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: 5),
+      child: TextField(
+        controller: controller,
+        style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF344E41)),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.quicksand(
+            fontSize: 12,
+            color: const Color(0xFF9E9E9E),
+          ),
+          filled: true,
+          fillColor: const Color(0xFFE5E2D8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
   }
 
   // ─── formata "membro desde" sem depender de pacote intl ───
@@ -1125,13 +1591,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 ),
               ),
               GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em breve: adicionar serviço'),
-                    ),
-                  );
-                },
+                onTap: _abrirModalAdicionarServico,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
