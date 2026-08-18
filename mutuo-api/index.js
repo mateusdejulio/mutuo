@@ -548,6 +548,16 @@ app.get('/verificar/:codigo', async (req, res) => {
   res.json({ valido: true, ...dados });
 });
 
+app.get('/certificados/ong/:cnpj', async (req, res) => {
+  try {
+    const dados = await db.buscarCertificadosPorOng(req.params.cnpj);
+    res.json(dados);
+  } catch (e) {
+    console.error('Erro ao buscar certificados da ONG:', e);
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
 // Lista solicitações recebidas por uma ONG
 app.get('/solicitacoes-ong/prestador/:cnpj', async (req, res) => {
   const solicitacoes = await db.getSolicitacoesOng(req.params.cnpj);

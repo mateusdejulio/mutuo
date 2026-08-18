@@ -76,7 +76,7 @@ async function carregarFotoOng() {
   }
 
   try {
-    const res  = await fetch(`${API_URL}/perfil/foto/ong/${ong.cnpj}`, { cache: 'no-store' });
+    const res  = await fetch(`${API_URL}/perfil/foto/ong/${encodeURIComponent(ong.cnpj)}`, { cache: 'no-store' });
     const data = await res.json();
 
     atualizarTodasFotosOng(

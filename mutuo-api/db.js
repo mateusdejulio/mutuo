@@ -1032,6 +1032,41 @@ async function verificarCertificado(codigo) {
   return dados || null;
 }
 
+async function buscarCertificadosPorOng(cnpj) {
+  const [servicos] = await pool.query(
+    `SELECT 
+       sol.codSolicitacao,
+       sol.pontos          AS pontosSolicitacao,
+       sol.dataSolicitacao,
+       sol.dataConclusao,
+       sol.codigoVerificacao,
+       s.nomeServico,
+       s.foco,
+       u.nome               AS nomeUsuario
+     FROM Mutuo_SolicitacaoONG sol
+     JOIN Mutuo_ServicoOng s ON sol.codServico = s.id
+     JOIN Mutuo_Usuario u    ON sol.codUsuario = u.cpf
+     WHERE s.cnpj = ?
+       AND sol.statusExecucao = 'Realizada'
+     ORDER BY COALESCE(sol.dataConclusao, sol.dataSolicitacao) DESC`,
+    [cnpj]
+  );
+
+  const totalVoluntarios = new Set(servicos.map(s => s.nomeUsuario)).size;
+  const certificadosEmitidos = servicos.filter(s => s.codigoVerificacao != null).length;
+  const pontosDistribuidos = servicos.reduce((acc, s) => acc + Number(s.pontosSolicitacao || 0), 0);
+
+  return {
+    resumo: {
+      totalVoluntarios,
+      certificadosEmitidos,
+      servicosConcluidos: servicos.length,
+      pontosDistribuidos
+    },
+    servicos
+  };
+}
+
 // Lista serviços em destaque — apenas de usuários premium
 async function getServicosDestaque() {
   const sql = `
@@ -1206,6 +1241,7 @@ module.exports = {
   buscarCertificadosPorUsuario,
   buscarDadosCertificado,
   verificarCertificado,
+  buscarCertificadosPorOng,
   getPlanoUsuario,
   getDashboardUsuario,
   getServicosDestaque,
