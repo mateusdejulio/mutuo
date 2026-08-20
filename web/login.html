@@ -550,9 +550,9 @@
     const email = document.getElementById('login').value.trim();
     const senha = document.getElementById('senha').value.trim();
 
-    const endpoint = tipoSelecionado === 'ong'
-      ? 'http://localhost:3000/loginOng'
-      : 'http://localhost:3000/loginUsuario';
+    const endpoint = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://mutuo-api.onrender.com'; // Coloque a sua URL exata do Render
 
     fetch(endpoint, {
       method: 'POST',
