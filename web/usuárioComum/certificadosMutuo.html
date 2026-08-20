@@ -413,7 +413,7 @@
 
 async function carregarCertificados(cpf) {
   try {
-    const resposta = await fetch(`http://localhost:3000/certificados/${cpf}`);
+    const resposta = await fetch(`https://mutuo-api.onrender.com/certificados/${cpf}`);
     if (!resposta.ok) throw new Error("Falha ao buscar certificados");
     const dados = await resposta.json();
 
@@ -482,7 +482,7 @@ function criarCardServico(servico, data) {
       </div>
     </div>
     <div class="lado-direito">
-      <a href="http://localhost:3000/certificados/${usuario.cpf}/${servico.codSolicitacao}/pdf" 
+      <a href="https://mutuo-api.onrender.com/certificados/${usuario.cpf}/${servico.codSolicitacao}/pdf" 
         class="btn-certificado" target="_blank">
         <i class="bi bi-download"></i> Gerar certificado
       </a>

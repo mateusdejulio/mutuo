@@ -404,7 +404,7 @@ document.getElementById('finalizar').addEventListener('click', async () => {
 
   try {
     // 1. Cadastra o usuário
-    const resp = await fetch('http://localhost:3000/usuarios', {
+    const resp = await fetch('https://mutuo-api.onrender.com/usuarios', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados)
@@ -433,7 +433,7 @@ document.getElementById('finalizar').addEventListener('click', async () => {
       formData.append('cpf', dados.cpf);
       formData.append('fotoPerfil', blob, 'foto.jpg');
 
-      await fetch('http://localhost:3000/perfil/foto', {
+      await fetch('https://mutuo-api.onrender.com/perfil/foto', {
         method: 'POST',
         body: formData
       });
