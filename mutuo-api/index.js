@@ -213,35 +213,6 @@ app.put('/ongs/:cnpj/perfil', async (req, res) => {
 
 app.get('/servicos', async (req, res) => res.json(await db.getServicos()));
 
-// ── Cadastro de Serviço do Usuário ──
-app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
-  try {
-    const { nomeServico, descricao, foco, duracao, cpf } = req.body;
-
-    if (!nomeServico || !descricao || !foco || !duracao || !cpf) {
-      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
-    }
-
-    const imagem = req.file ? req.file.filename : null;
-
-    const id = await db.cadastrarServico({
-      nomeServico,
-      descricao,
-      foco,
-      duracao,
-      cpf,
-      imagem
-    });
-
-    res.json({
-      sucesso: true,
-      id,
-      imagem: imagem ? `/uploads/servicos/${imagem}` : null
-    });
-  } catch (e) {
-    res.status(500).json({ sucesso: false, erro: e.message });
-  }
-});
 
 // ── Cadastro de Serviço da ONG ──
 app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
@@ -676,12 +647,16 @@ app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
     res.status(500).json({ sucesso: false, erro: e.message });
   }
 });
-// Simula a assinatura do plano Premium (checkout fake)
+
+// Ativa/desativa o plano premium do usuário (usado no checkout simulado)
 app.put('/usuarios/:cpf/premium', async (req, res) => {
-  const resultado = await db.ativarPremiumUsuario(req.params.cpf);
+  const { premium } = req.body;
+  if (premium === undefined) {
+    return res.status(400).json({ erro: 'Campo "premium" não informado.' });
+  }
+  const resultado = await db.atualizarPremiumUsuario(req.params.cpf, premium);
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
-  if (!resultado.success) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-  res.json({ sucesso: true, premium: true });
+  res.json(resultado);
 });
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
