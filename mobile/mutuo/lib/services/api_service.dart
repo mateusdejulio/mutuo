@@ -8,7 +8,7 @@ class ApiService {
   // Para emulador Android: use 'http://10.0.2.2:3000'
   // Para celular físico: use o IP da sua máquina ex: 'http://143.106.241.23:3000' (certo)
   
-  final String baseUrl = kReleaseMode
+  static final String baseUrl = kReleaseMode
     ? 'https://mutuo-api.onrender.com' // URL do Render em produção[cite: 1]
     : 'http://localhost:3000';         // IP da máquina local durante desenvolvimento
 
