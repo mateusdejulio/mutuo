@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   // localhost funciona para Flutter Web no Chrome e simulador iOS
   // Para emulador Android: use 'http://10.0.2.2:3000'
   // Para celular físico: use o IP da sua máquina ex: 'http://143.106.241.23:3000' (certo)
-  static const String baseUrl = 'http://localhost:3000';
+  
+  final String baseUrl = kReleaseMode
+    ? 'https://mutuo-api.onrender.com' // URL do Render em produção[cite: 1]
+    : 'http://localhost:3000';         // IP da máquina local durante desenvolvimento
 
   final Map<String, String> _headers = {'Content-Type': 'application/json'};
 
