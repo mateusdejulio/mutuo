@@ -278,7 +278,7 @@
       resultado.innerHTML = '';
 
       try {
-        const resposta = await fetch(`http://localhost:3000/verificar/${encodeURIComponent(codigo)}`);
+        const resposta = await fetch(`https://mutuo-api.onrender.com/verificar/${encodeURIComponent(codigo)}`);
         const dados = await resposta.json();
 
         if (!dados.valido) {

@@ -362,7 +362,7 @@
       btnConfirmar.textContent = 'Enviando...';
 
       try {
-        const resposta = await fetch('http://localhost:3000/servicos', {
+        const resposta = await fetch('https://mutuo-api.onrender.com/servicos', {
           method: 'POST',
           body: dados
         });

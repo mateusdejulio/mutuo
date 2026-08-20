@@ -625,7 +625,7 @@
       if (!ong.cnpj) return;
 
       try {
-        const resposta = await fetch(`http://localhost:3000/certificados/ong/${encodeURIComponent(ong.cnpj)}`);
+        const resposta = await fetch(`https://mutuo-api.onrender.com/certificados/ong/${encodeURIComponent(ong.cnpj)}`);
         if (!resposta.ok) throw new Error("Falha ao buscar certificados");
         const dados = await resposta.json();
 
