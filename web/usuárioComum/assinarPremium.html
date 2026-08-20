@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Assinar Premium</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-escuro: #3a5a40;
+      --verde-medio:  #588157;
+      --verde-claro:  #b7ce8f;
+      --bege:         #E1DCD0;
+      --altura-nav:   72px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #f9fbf9;
+      min-height: 100vh;
+      padding-top: var(--altura-nav);
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background-color: var(--verde-medio);
+      height: var(--altura-nav);
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem;
+      color: var(--bege);
+      letter-spacing: 0.4px;
+    }
+    .nav-brand img { width: 38px; height: 38px; border-radius: 8px; }
+
+    .pagina-checkout {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 16px 80px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .voltar-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--verde-escuro);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 18px;
+      grid-column: 1 / -1;
+    }
+    .voltar-link:hover { text-decoration: underline; }
+
+    /* ── FORM ── */
+    .card-checkout {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 22px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(58,90,64,0.06);
+    }
+    .card-checkout h2 {
+      color: var(--verde-escuro);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .card-checkout > p {
+      color: #8a9a86;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    .aviso-simulacao {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #fff8e1;
+      border: 1px solid #ffe58f;
+      color: #8a6d00;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 22px;
+    }
+    .aviso-simulacao i { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+
+    .campo { margin-bottom: 18px; }
+    .campo label {
+      display: block;
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--verde-escuro);
+      margin-bottom: 6px;
+    }
+    .campo input {
+      width: 100%;
+      border: 1.5px solid #dde5da;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #1a2e1b;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .campo input:focus {
+      border-color: var(--verde-medio);
+      box-shadow: 0 0 0 3px rgba(88,129,87,0.15);
+    }
+    .campo input.invalido { border-color: #d9534f; }
+
+    .campos-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .campos-row-3 { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 14px; }
+
+    .cartao-visual {
+      background: linear-gradient(135deg, var(--verde-medio) 0%, var(--verde-escuro) 100%);
+      border-radius: 16px;
+      padding: 22px 24px;
+      color: #fff;
+      margin-bottom: 24px;
+      position: relative;
+      min-height: 140px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 8px 24px rgba(58,90,64,0.25);
+    }
+    .cartao-visual .chip { font-size: 1.6rem; opacity: 0.85; }
+    .cartao-visual .numero {
+      font-size: 1.15rem; letter-spacing: 2px; font-weight: 600;
+      font-family: 'Courier New', monospace;
+    }
+    .cartao-visual .rodape-cartao {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      font-size: 0.7rem; text-transform: uppercase; opacity: 0.85;
+    }
+    .cartao-visual .rodape-cartao span:last-child { font-size: 0.95rem; letter-spacing: 1px; }
+
+    .btn-pagar {
+      width: 100%;
+      background: var(--verde-escuro);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-pagar:hover { background: var(--verde-medio); }
+    .btn-pagar:active { transform: scale(0.98); }
+    .btn-pagar:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .mensagem-erro-checkout {
+      display: none;
+      background: #fdecea;
+      color: #b00020;
+      border: 1px solid #f5c6cb;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .mensagem-erro-checkout.visivel { display: block; }
+
+    /* ── RESUMO ── */
+    .card-resumo {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 22px;
+      padding: 28px;
+      position: sticky;
+      top: 92px;
+    }
+    .card-resumo h3 {
+      color: var(--verde-escuro);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+    .linha-resumo {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.88rem;
+      color: #3a4a3b;
+      margin-bottom: 12px;
+    }
+    .linha-resumo span:first-child { color: #8a9a86; font-weight: 600; }
+    .divisor-resumo { height: 1px; background: #eef3ec; margin: 16px 0; }
+    .total-resumo {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 20px;
+    }
+    .total-resumo span:first-child { font-weight: 700; color: var(--verde-escuro); font-size: 0.95rem; }
+    .total-resumo span:last-child { font-weight: 700; color: var(--verde-escuro); font-size: 1.6rem; }
+
+    .beneficios-resumo { list-style: none; }
+    .beneficios-resumo li {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 0.82rem; color: #3a4a3b; font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .beneficios-resumo i { color: var(--verde-medio); margin-top: 2px; }
+
+    /* ── OVERLAY DE SUCESSO ── */
+    .overlay-sucesso {
+      display: none;
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(26,46,27,0.55);
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .overlay-sucesso.visivel { display: flex; }
+    .modal-sucesso {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px 32px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      animation: popIn 0.35s ease both;
+    }
+    .modal-sucesso .icone-check {
+      width: 72px; height: 72px;
+      background: var(--verde-palido, #eaf2e6);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 2.2rem;
+      color: var(--verde-medio);
+    }
+    .modal-sucesso h3 { color: var(--verde-escuro); font-weight: 700; margin-bottom: 8px; }
+    .modal-sucesso p { color: #8a9a86; font-size: 0.88rem; margin-bottom: 22px; }
+    .modal-sucesso .spinner-redirect {
+      font-size: 0.76rem; color: #b0bfac; font-weight: 600;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @media (max-width: 760px) {
+      .pagina-checkout { grid-template-columns: 1fr; }
+      .card-resumo { position: static; }
+      .campos-row-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="homeMutuo.html">
+      <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+      Mútuo
+    </a>
+  </nav>
+
+  <div class="pagina-checkout">
+    <a href="planosMutuo.html" class="voltar-link"><i class="bi bi-arrow-left"></i> Voltar para planos</a>
+
+    <!-- FORMULÁRIO -->
+    <div class="card-checkout">
+      <h2>Assinar Premium</h2>
+      <p>Preencha os dados de pagamento para concluir sua assinatura</p>
+
+      <div class="aviso-simulacao">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Ambiente de simulação — nenhuma cobrança real será feita e nenhum dado de cartão é armazenado. Você pode preencher com qualquer número.</span>
+      </div>
+
+      <div class="mensagem-erro-checkout" id="mensagemErroCheckout"></div>
+
+      <div class="cartao-visual">
+        <span class="chip"><i class="bi bi-cpu-fill"></i></span>
+        <span class="numero" id="cartaoVisualNumero">•••• •••• •••• ••••</span>
+        <div class="rodape-cartao">
+          <span id="cartaoVisualNome">NOME NO CARTÃO</span>
+          <span id="cartaoVisualValidade">MM/AA</span>
+        </div>
+      </div>
+
+      <form id="formCheckout" novalidate>
+        <div class="campo">
+          <label for="nomeCartao">Nome impresso no cartão</label>
+          <input type="text" id="nomeCartao" placeholder="Ex: MARIA S SILVA" autocomplete="cc-name" required>
+        </div>
+
+        <div class="campo">
+          <label for="numeroCartao">Número do cartão</label>
+          <input type="text" id="numeroCartao" placeholder="0000 0000 0000 0000" inputmode="numeric" maxlength="19" autocomplete="cc-number" required>
+        </div>
+
+        <div class="campos-row-3">
+          <div class="campo">
+            <label for="validadeCartao">Validade</label>
+            <input type="text" id="validadeCartao" placeholder="MM/AA" inputmode="numeric" maxlength="5" autocomplete="cc-exp" required>
+          </div>
+          <div class="campo">
+            <label for="cvvCartao">CVV</label>
+            <input type="text" id="cvvCartao" placeholder="123" inputmode="numeric" maxlength="4" autocomplete="cc-csc" required>
+          </div>
+          <div class="campo">
+            <label for="cpfCartao">CPF do titular</label>
+            <input type="text" id="cpfCartao" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-pagar" id="btnPagar">
+          <i class="bi bi-lock-fill"></i> Confirmar assinatura — R$ 19,90/mês
+        </button>
+      </form>
+    </div>
+
+    <!-- RESUMO -->
+    <div class="card-resumo">
+      <h3>Resumo do pedido</h3>
+      <div class="linha-resumo">
+        <span>Plano</span>
+        <span>Premium</span>
+      </div>
+      <div class="linha-resumo">
+        <span>Cobrança</span>
+        <span>Mensal</span>
+      </div>
+      <div class="divisor-resumo"></div>
+      <div class="total-resumo">
+        <span>Total</span>
+        <span>R$ 19,90</span>
+      </div>
+      <ul class="beneficios-resumo">
+        <li><i class="bi bi-check-circle-fill"></i> Serviços ilimitados</li>
+        <li><i class="bi bi-check-circle-fill"></i> Maior visibilidade nos resultados</li>
+        <li><i class="bi bi-check-circle-fill"></i> Prioridade nas solicitações</li>
+        <li><i class="bi bi-check-circle-fill"></i> Suporte prioritário 24h</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- OVERLAY DE SUCESSO -->
+  <div class="overlay-sucesso" id="overlaySucesso">
+    <div class="modal-sucesso">
+      <div class="icone-check"><i class="bi bi-check-lg"></i></div>
+      <h3>Assinatura confirmada!</h3>
+      <p>Sua conta agora é Premium. Aproveite os novos benefícios.</p>
+      <span class="spinner-redirect">Redirecionando para o seu perfil...</span>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000';
+    const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+
+    if (!usuario.cpf) {
+      // sem sessão ativa, manda pro login
+      window.location.href = '../login.html';
+    }
+
+    const form            = document.getElementById('formCheckout');
+    const btnPagar         = document.getElementById('btnPagar');
+    const mensagemErro      = document.getElementById('mensagemErroCheckout');
+    const overlaySucesso    = document.getElementById('overlaySucesso');
+
+    const inputNome      = document.getElementById('nomeCartao');
+    const inputNumero    = document.getElementById('numeroCartao');
+    const inputValidade  = document.getElementById('validadeCartao');
+    const inputCvv       = document.getElementById('cvvCartao');
+    const inputCpf       = document.getElementById('cpfCartao');
+
+    const visualNumero   = document.getElementById('cartaoVisualNumero');
+    const visualNome     = document.getElementById('cartaoVisualNome');
+    const visualValidade = document.getElementById('cartaoVisualValidade');
+
+    // ── Formatação em tempo real ──
+    inputNumero.addEventListener('input', function () {
+      let v = this.value.replace(/\D/g, '').slice(0, 16);
+      this.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+      visualNumero.textContent = v.length
+        ? this.value.padEnd(19, '•').replace(/(.{4})(?=.)/g, '$1 ').slice(0, 19)
+        : '•••• •••• •••• ••••';
+    });
+
+    inputNome.addEventListener('input', function () {
+      this.value = this.value.toUpperCase();
+      visualNome.textContent = this.value || 'NOME NO CARTÃO';
+    });
+
+    inputValidade.addEventListener('input', function () {
+      let v = this.value.replace(/\D/g, '').slice(0, 4);
+      if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+      this.value = v;
+      visualValidade.textContent = v || 'MM/AA';
+    });
+
+    inputCvv.addEventListener('input', function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    inputCpf.addEventListener('input', function () {
+      let v = this.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2')
+           .replace(/(\d{3})(\d)/, '$1.$2')
+           .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      this.value = v;
+    });
+
+    function mostrarErro(texto) {
+      mensagemErro.textContent = texto;
+      mensagemErro.classList.add('visivel');
+    }
+    function limparErro() {
+      mensagemErro.classList.remove('visivel');
+      mensagemErro.textContent = '';
+    }
+
+    function validarFormulario() {
+      const numero = inputNumero.value.replace(/\s/g, '');
+      const validade = inputValidade.value;
+
+      if (inputNome.value.trim().length < 3) {
+        return 'Informe o nome impresso no cartão.';
+      }
+      if (numero.length < 13 || numero.length > 16) {
+        return 'Número de cartão inválido.';
+      }
+      const validadeMatch = validade.match(/^(\d{2})\/(\d{2})$/);
+      if (!validadeMatch) {
+        return 'Informe a validade no formato MM/AA.';
+      }
+      const mes = parseInt(validadeMatch[1], 10);
+      if (mes < 1 || mes > 12) {
+        return 'Mês de validade inválido.';
+      }
+      if (inputCvv.value.length < 3) {
+        return 'CVV inválido.';
+      }
+      if (inputCpf.value.replace(/\D/g, '').length !== 11) {
+        return 'Informe um CPF válido.';
+      }
+      return null;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      limparErro();
+
+      const erroValidacao = validarFormulario();
+      if (erroValidacao) {
+        mostrarErro(erroValidacao);
+        return;
+      }
+
+      btnPagar.disabled = true;
+      btnPagar.innerHTML = '<i class="bi bi-arrow-repeat"></i> Processando pagamento...';
+
+      // Simula um pequeno delay de processamento de pagamento
+      await new Promise(resolve => setTimeout(resolve, 1400));
+
+      try {
+        const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}/premium`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ premium: 1 })
+        });
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok || resultado.error) {
+          throw new Error(resultado.erro || resultado.error || 'Não foi possível confirmar a assinatura.');
+        }
+
+        // atualiza sessão local
+        usuario.premium = 1;
+        sessionStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+
+        overlaySucesso.classList.add('visivel');
+        setTimeout(() => {
+          window.location.href = 'perfilMutuo.html';
+        }, 2200);
+
+      } catch (erro) {
+        console.error(erro);
+        mostrarErro(erro.message || 'Não foi possível processar o pagamento. Tente novamente.');
+        btnPagar.disabled = false;
+        btnPagar.innerHTML = '<i class="bi bi-lock-fill"></i> Confirmar assinatura — R$ 19,90/mês';
+      }
+    });
+  </script>
+  <script src="../funcoes.js"></script>
+</body>
+</html>

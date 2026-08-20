@@ -1162,16 +1162,17 @@ async function isUsuarioPremium(cpf) {
     throw err;
   }
 }
-// Ativa o plano Premium do usuário (usado no checkout simulado)
-async function ativarPremiumUsuario(cpf) {
+
+// Ativa/desativa o plano premium do usuário
+async function atualizarPremiumUsuario(cpf, premium) {
   try {
     const [result] = await pool.query(
-      'UPDATE Mutuo_Usuario SET premium = 1 WHERE cpf = ?',
-      [cpf]
+      'UPDATE Mutuo_Usuario SET premium = ? WHERE cpf = ?',
+      [premium ? 1 : 0, cpf]
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {
-    console.error('Erro ao ativar premium do usuário:', err.message);
+    console.error('Erro ao atualizar premium do usuário:', err.message);
     return { error: err.message };
   }
 }
@@ -1248,5 +1249,5 @@ module.exports = {
   getServicosPertoDeVoce,
   contarServicosAtivosUsuario,
   isUsuarioPremium,
-  ativarPremiumUsuario
+  atualizarPremiumUsuario
 };
