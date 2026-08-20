@@ -1,6 +1,6 @@
-const API_URL = process.env.NODE_ENV === 'production'
-? 'https://mutuo-api.onrender.com'
-: 'http://localhost:3000';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://mutuo-api.onrender.com';
 
 function atualizarTodasFotos(url) {
   ['fotoTopo','fotoNavbarTopo', 'fotoPerfil', 'fotoDrawer'].forEach(id => {
