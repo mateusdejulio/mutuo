@@ -95,6 +95,25 @@ const uploadServico = multer({
   }
 });
 
+// Rotas de checagem
+app.get('/health', (req, res) => res.status(200).send('API está ativada!'));
+
+const https = require('https');
+
+// Altere para a sua URL real do Render
+const API_URL = 'https://mutuo-api.onrender.com/health';
+
+// Dispara um ping a cada 10 minutos (600.000 milissegundos)
+setInterval(() => {
+  https.get(API_URL, (res) => {
+    console.log(`Auto-ping realizado. Status: ${res.statusCode}`);
+  }).on('error', (err) => {
+    console.error('Erro no auto-ping:', err.message);
+  });
+}, 600000);
+
+
+
 // ── Rotas de Autenticação ──
 app.post('/login', async (req, res) => {
     const { login, senha } = req.body;
