@@ -607,7 +607,7 @@
           </div>
           <div class="item-info readonly">
             <i class="bi bi-gem"></i>
-            <span class="label-readonly">Plano gratuito</span>
+            <span class="label-readonly" id="labelPlano">Plano gratuito</span>
           </div>
         </div>
 
@@ -632,7 +632,7 @@
           </div>
           <div class="item-info readonly">
             <i class="bi bi-gem"></i>
-            <span class="label-readonly">Plano gratuito</span>
+            <span class="label-readonly" id="labelPlanoEdit">Plano gratuito</span>
             <span class="badge-readonly">Fixo</span>
           </div>
         </div>
@@ -800,6 +800,26 @@
       document.title = 'Mútuo | ' + usuario.nome;
     }
 
+    // ── PLANO (gratuito/premium) ──
+    async function atualizarLabelPlano() {
+      const labelPlano = document.getElementById('labelPlano');
+      const labelPlanoEdit = document.getElementById('labelPlanoEdit');
+      if (!usuario.cpf) return;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}`);
+        if (!resposta.ok) throw new Error('Erro ao verificar plano do usuário.');
+        const dados = await resposta.json();
+        const premium = dados.premium === 1 || dados.premium === true;
+        const texto = premium ? 'Plano Premium' : 'Plano Gratuito';
+
+        if (labelPlano) labelPlano.textContent = texto;
+        if (labelPlanoEdit) labelPlanoEdit.textContent = texto;
+      } catch (erro) {
+        console.error('Erro ao carregar plano do usuário:', erro);
+      }
+    }
+
     // ── EDIÇÃO ──
    function ativarEdicao() {
   document.getElementById('modoLeitura').style.display = 'none';
@@ -901,6 +921,9 @@ mostrarMensagemSalva('Perfil atualizado com sucesso!');
     // ── SERVIÇOS DO USUÁRIO ──
     const API_BASE = 'https://mutuo-api.onrender.com';
     const containerServicosMutuo = document.getElementById('listaServicosMutuo');
+
+    // plano (gratuito/premium)
+    if (usuario.cpf) atualizarLabelPlano();
 
     function criarCardServicoUsuario(servico) {
       const div = document.createElement('div');
