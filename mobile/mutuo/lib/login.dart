@@ -75,6 +75,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -93,154 +94,164 @@ class _LoginState extends State<Login> {
             fit: BoxFit.cover,
           ),
         ),
-        child: Column(
-          children: [
-            const SizedBox(height: 120),
-
-            // Cabeça
-            Transform.translate(
-              offset: const Offset(0, 40),
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color.fromARGB(255, 225, 220, 208),
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
             ),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  const SizedBox(height: 120),
 
-            const SizedBox(height: 50),
-
-            // Corpo
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(30, 80, 30, 30),
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 225, 220, 208),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(175),
-                    topRight: Radius.circular(175),
+                  // Cabeça
+                  Transform.translate(
+                    offset: const Offset(0, 40),
+                    child: Container(
+                      width: 140,
+                      height: 140,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color.fromARGB(255, 225, 220, 208),
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          "assets/images/logo.png",
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      "Bem-vindo de volta!",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: _verde,
-                      ),
-                    ),
 
-                    const SizedBox(height: 30),
+                  const SizedBox(height: 50),
 
-                    // Email
-                    TextField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: "Email",
-                        labelStyle: const TextStyle(color: _verde),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: _verde, width: 2),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Senha
-                    TextField(
-                      controller: senhaController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: "Senha",
-                        labelStyle: const TextStyle(color: _verde),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: _verde, width: 2),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    // Botão Entrar
-                    SizedBox(
+                  // Corpo
+                  Expanded(
+                    child: Container(
                       width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _verde,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
+                      padding: const EdgeInsets.fromLTRB(30, 80, 30, 30),
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 225, 220, 208),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(175),
+                          topRight: Radius.circular(175),
                         ),
-                        onPressed: _carregando ? null : _fazerLogin,
-                        child: _carregando
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
-                              )
-                            : const Text(
-                                "Entrar",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            "Bem-vindo de volta!",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: _verde,
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          // Email
+                          TextField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: "Email",
+                              labelStyle: const TextStyle(color: _verde),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: const BorderSide(color: Colors.grey),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: const BorderSide(color: _verde, width: 2),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Senha
+                          TextField(
+                            controller: senhaController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: "Senha",
+                              labelStyle: const TextStyle(color: _verde),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: const BorderSide(color: Colors.grey),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: const BorderSide(color: _verde, width: 2),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          // Botão Entrar
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _verde,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
+                              onPressed: _carregando ? null : _fazerLogin,
+                              child: _carregando
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    )
+                                  : const Text(
+                                      "Entrar",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              "Esqueci minha senha",
+                              style: TextStyle(color: _verde),
+                            ),
+                          ),
+
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const Cadastro()),
+                              );
+                            },
+                            child: const Text(
+                              "Não possui cadastro? Clique aqui!",
+                              style: TextStyle(color: _verde),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-
-                    const SizedBox(height: 15),
-
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "Esqueci minha senha",
-                        style: TextStyle(color: _verde),
-                      ),
-                    ),
-
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const Cadastro()),
-                        );
-                      },
-                      child: const Text(
-                        "Não possui cadastro? Clique aqui!",
-                        style: TextStyle(color: _verde),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

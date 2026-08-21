@@ -10,48 +10,58 @@ import 'package:mutuo/services/api_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 // Agora representa um serviço vindo do banco (rota /servicos-destaque)
+// ─── MODEL ────────────────────────────────────────────────
 class Vaga {
-  final int id;
+  final String? id;
   final String titulo;
   final String descricao;
   final String local;
   final String tempo;
+  final String imagem;
   final String? imagemUrl;
   final String categoria;
   final String autor;
+  final double avaliacao;
+  final int totalAvaliacoes;
+  final int pontos;
 
   Vaga({
-    required this.id,
+    this.id,
     required this.titulo,
     required this.descricao,
     required this.local,
     required this.tempo,
+    required this.imagem,
     this.imagemUrl,
     this.categoria = "Geral",
     this.autor = "Voluntário",
+    this.avaliacao = 4.0,
+    this.totalAvaliacoes = 0,
+    this.pontos = 0,
   });
 
   factory Vaga.fromJson(Map<String, dynamic> json) {
-    final cidade = json['cidade']?.toString() ?? '';
-    final estado = json['estado']?.toString() ?? '';
-    final localMontado = [
-      cidade,
-      estado,
-    ].where((parte) => parte.isNotEmpty).join(', ');
-
-    final imagem = json['imagem']?.toString();
-
+    final horas = json['qtdHoras'];
+    final caminhoImagem = json['imagem']?.toString();
     return Vaga(
-      id: int.tryParse('${json['cod'] ?? 0}') ?? 0,
-      titulo: json['nome']?.toString() ?? 'Serviço',
+      id: json['cod']?.toString(),
+      titulo: json['nome']?.toString() ?? '',
       descricao: json['descricao']?.toString() ?? '',
-      local: localMontado.isEmpty ? 'Não informado' : localMontado,
-      tempo: '${json['qtdHoras'] ?? '-'}h',
-      imagemUrl: (imagem != null && imagem.isNotEmpty)
-          ? '${ApiService.baseUrl}$imagem'
+      local: [json['cidade'], json['estado']]
+          .where((v) => v != null && v.toString().isNotEmpty)
+          .join(', '),
+      tempo: horas != null ? '${horas}h' : '',
+      imagem: caminhoImagem ?? '',
+      imagemUrl: (caminhoImagem != null && caminhoImagem.isNotEmpty)
+          ? '${ApiService.baseUrl}$caminhoImagem'
           : null,
-      categoria: json['foco']?.toString() ?? 'Geral',
-      autor: json['nomeUsuario']?.toString() ?? 'Voluntário',
+      categoria: (json['foco']?.toString().isNotEmpty ?? false)
+          ? json['foco'].toString()
+          : 'Geral',
+      autor: (json['nomeUsuario']?.toString().isNotEmpty ?? false)
+          ? json['nomeUsuario'].toString()
+          : 'Voluntário',
+      pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
     );
   }
 }
@@ -62,96 +72,278 @@ class DetalheVaga extends StatelessWidget {
 
   const DetalheVaga({super.key, required this.vaga});
 
+  static const _verde = Color(0xFF3A5A40);
+  static const _verdeMedio = Color(0xFF588157);
+  static const _fundo = Color(0xFFEDEAE5);
+  static const _branco = Colors.white;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(vaga.titulo),
-        backgroundColor: const Color(0xFF3A5A40),
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Hero(
-            tag: 'vaga_${vaga.id}',
-            child: vaga.imagemUrl != null
-                ? Image.network(
-                    vaga.imagemUrl!,
-                    height: 220,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 220,
-                      width: double.infinity,
-                      color: const Color(0xFFB7D5B0),
-                      child: const Icon(
-                        Icons.broken_image,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                    ),
-                  )
-                : Container(
-                    height: 220,
-                    width: double.infinity,
-                    color: const Color(0xFFB7D5B0),
-                    child: const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: Colors.white,
-                      size: 50,
-                    ),
-                  ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: _fundo,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Text(
-                  vaga.titulo,
-                  style: GoogleFonts.quicksand(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                                Hero(
+                  tag: 'vaga_${vaga.id}',
+                  child: vaga.imagemUrl != null
+                      ? Image.network(
+                          vaga.imagemUrl!,
+                          height: 280,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 280,
+                              width: double.infinity,
+                              color: const Color(0xFFB7D5B0),
+                              child: const Icon(
+                                Icons.broken_image,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          height: 280,
+                          width: double.infinity,
+                          color: const Color(0xFFB7D5B0),
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                        ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  "${vaga.local} • ${vaga.tempo}",
-                  style: GoogleFonts.quicksand(fontSize: 14),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  vaga.descricao,
-                  style: GoogleFonts.quicksand(fontSize: 14),
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF588157),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: SafeArea(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: Color(0xFF344E41),
+                          size: 20,
+                        ),
                       ),
                     ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Inscrição realizada!")),
-                      );
-                    },
+                  ),
+                ),
+                Positioned(
+                  top: 50,
+                  left: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _verde,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Text(
-                      "Participar",
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w700),
+                      vaga.categoria.toUpperCase(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 50,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star_rounded, size: 15, color: Color(0xFFF4A261)),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${vaga.pontos} pts",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF344E41),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            Transform.translate(
+              offset: const Offset(0, -24),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+                decoration: const BoxDecoration(
+                  color: _branco,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      vaga.titulo,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2D3319),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _verde.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: _verde.withOpacity(0.3), width: 1.5),
+                          ),
+                          child: const Icon(Icons.person_rounded, color: _verde, size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          vaga.autor,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF344E41),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined, size: 16, color: _verdeMedio),
+                        const SizedBox(width: 4),
+                        Text(
+                          vaga.local,
+                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                        ),
+                        const SizedBox(width: 16),
+                        const Icon(Icons.access_time_rounded, size: 16, color: _verdeMedio),
+                        const SizedBox(width: 4),
+                        Text(
+                          vaga.tempo,
+                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    Container(height: 1, color: const Color(0xFFEDEAE5)),
+                    const SizedBox(height: 22),
+                    Text(
+                      "Sobre a vaga",
+                      style: GoogleFonts.quicksand(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF344E41),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      vaga.descricao,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: const Color(0xFF6B705C),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _verde,
+                              side: BorderSide(color: _verde.withOpacity(0.4), width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Em breve: chat de dúvidas!")),
+                              );
+                            },
+                            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                            label: Text(
+                              "Tirar dúvidas",
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 13),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _verde,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Inscrição realizada!")),
+                              );
+                            },
+                            icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                            label: Text(
+                              "Participar",
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1037,25 +1229,15 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               ),
               child: Stack(
                 children: [
-                  Hero(
-                    tag: 'vaga_${vaga.id}',
-                    child: vaga.imagemUrl != null
-                        ? Image.network(
-                            vaga.imagemUrl!,
-                            height: 140,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              height: 140,
-                              color: const Color(0xFFB7D5B0),
-                              child: const Icon(
-                                Icons.image_not_supported_outlined,
-                                color: Colors.white54,
-                                size: 40,
-                              ),
-                            ),
-                          )
-                        : Container(
+                                Hero(
+                  tag: 'vaga_${vaga.id}',
+                  child: vaga.imagemUrl != null
+                      ? Image.network(
+                          vaga.imagemUrl!,
+                          height: 140,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
                             height: 140,
                             color: const Color(0xFFB7D5B0),
                             child: const Icon(
@@ -1064,7 +1246,17 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                               size: 40,
                             ),
                           ),
-                  ),
+                        )
+                      : Container(
+                          height: 140,
+                          color: const Color(0xFFB7D5B0),
+                          child: const Icon(
+                            Icons.image_not_supported_outlined,
+                            color: Colors.white54,
+                            size: 40,
+                          ),
+                        ),
+                ),
                   Positioned(
                     top: 12,
                     left: 12,
@@ -1124,7 +1316,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                         ),
                       ],
                     ),
-                    Row(
+                                        Row(
                       children: [
                         CircleAvatar(
                           radius: 14,
@@ -1142,15 +1334,53 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            vaga.autor,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF344E41),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                vaga.autor,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF344E41),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  ...List.generate(5, (i) {
+                                    if (i < vaga.avaliacao.floor()) {
+                                      return const Icon(
+                                        Icons.star_rounded,
+                                        size: 12,
+                                        color: Color(0xFFF4A261),
+                                      );
+                                    } else if (i < vaga.avaliacao) {
+                                      return const Icon(
+                                        Icons.star_half_rounded,
+                                        size: 12,
+                                        color: Color(0xFFF4A261),
+                                      );
+                                    } else {
+                                      return const Icon(
+                                        Icons.star_border_rounded,
+                                        size: 12,
+                                        color: Color(0xFFCCCCCC),
+                                      );
+                                    }
+                                  }),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "${vaga.avaliacao.toStringAsFixed(1)} (${vaga.totalAvaliacoes})",
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 10,
+                                      color: const Color(0xFF6B705C),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ],

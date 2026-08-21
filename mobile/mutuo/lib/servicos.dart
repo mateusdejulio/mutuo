@@ -5,51 +5,62 @@ import 'package:mutuo/ongs.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/services/api_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
-// Agora representa um serviço vindo do banco (rota /servicos-usuario)
+// Representa um serviço vindo do banco (rota /servicos-usuario)
+// ─── MODEL ────────────────────────────────────────────────
 class Servico {
-  final int id;
+  final String? id;
   final String titulo;
   final String descricao;
   final String local;
   final String tempo;
+  final String imagem;
   final String? imagemUrl;
   final String categoria;
   final String autor;
+  final double avaliacao;
+  final int totalAvaliacoes;
+  final int pontos;
 
   Servico({
-    required this.id,
+    this.id,
     required this.titulo,
     required this.descricao,
     required this.local,
     required this.tempo,
+    required this.imagem,
     this.imagemUrl,
     this.categoria = "Geral",
     this.autor = "Voluntário",
+    this.avaliacao = 4.0,
+    this.totalAvaliacoes = 0,
+    this.pontos = 0,
   });
 
   factory Servico.fromJson(Map<String, dynamic> json) {
-    final cidade = json['cidade']?.toString() ?? '';
-    final estado = json['estado']?.toString() ?? '';
-    final localMontado = [
-      cidade,
-      estado,
-    ].where((parte) => parte.isNotEmpty).join(', ');
-
-    final imagem = json['imagem']?.toString();
-
+    final horas = json['qtdHoras'];
+    final caminhoImagem = json['imagem']?.toString();
     return Servico(
-      id: int.tryParse('${json['cod'] ?? 0}') ?? 0,
-      titulo: json['nome']?.toString() ?? 'Serviço',
+      id: json['cod']?.toString(),
+      titulo: json['nome']?.toString() ?? '',
       descricao: json['descricao']?.toString() ?? '',
-      local: localMontado.isEmpty ? 'Não informado' : localMontado,
-      tempo: '${json['qtdHoras'] ?? '-'}h',
-      imagemUrl: (imagem != null && imagem.isNotEmpty)
-          ? '${ApiService.baseUrl}$imagem'
+      local: [json['cidade'], json['estado']]
+          .where((v) => v != null && v.toString().isNotEmpty)
+          .join(', '),
+      tempo: horas != null ? '${horas}h' : '',
+      imagem: caminhoImagem ?? '',
+      imagemUrl: (caminhoImagem != null && caminhoImagem.isNotEmpty)
+          ? '${ApiService.baseUrl}$caminhoImagem'
           : null,
-      categoria: json['foco']?.toString() ?? 'Geral',
-      autor: json['nomeUsuario']?.toString() ?? 'Voluntário',
+      categoria: (json['foco']?.toString().isNotEmpty ?? false)
+          ? json['foco'].toString()
+          : 'Geral',
+      autor: (json['nomeUsuario']?.toString().isNotEmpty ?? false)
+          ? json['nomeUsuario'].toString()
+          : 'Voluntário',
+      pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
     );
   }
 }
@@ -62,33 +73,42 @@ class DetalheServico extends StatelessWidget {
 
   static const _verde = Color(0xFF3A5A40);
   static const _verdeMedio = Color(0xFF588157);
+  static const _fundo = Color(0xFFEDEAE5);
+  static const _branco = Colors.white;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          servico.titulo,
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.w700),
-        ),
-        backgroundColor: _verde,
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: _fundo,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Hero(
-              tag: 'servico_${servico.id}',
-              child: servico.imagemUrl != null
-                  ? Image.network(
-                      servico.imagemUrl!,
-                      height: 220,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 220,
+            Stack(
+              children: [
+                 Hero(
+                  tag: 'servico_${servico.id}',
+                  child: servico.imagemUrl != null
+                      ? Image.network(
+                          servico.imagemUrl!,
+                          height: 280,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 280,
+                              width: double.infinity,
+                              color: const Color(0xFFB7D5B0),
+                              child: const Icon(
+                                Icons.broken_image,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          height: 280,
                           width: double.infinity,
                           color: const Color(0xFFB7D5B0),
                           child: const Icon(
@@ -96,30 +116,41 @@ class DetalheServico extends StatelessWidget {
                             color: Colors.white,
                             size: 50,
                           ),
-                        );
-                      },
-                    )
-                  : Container(
-                      height: 220,
-                      width: double.infinity,
-                      color: const Color(0xFFB7D5B0),
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        color: Colors.white,
-                        size: 50,
+                        ),
+                ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: SafeArea(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: Color(0xFF344E41),
+                          size: 20,
+                        ),
                       ),
                     ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 50,
+                  left: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: _verde,
                       borderRadius: BorderRadius.circular(20),
@@ -127,93 +158,187 @@ class DetalheServico extends StatelessWidget {
                     child: Text(
                       servico.categoria.toUpperCase(),
                       style: GoogleFonts.quicksand(
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                         letterSpacing: 0.5,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    servico.titulo,
-                    style: GoogleFonts.quicksand(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2D3319),
+                ),
+                Positioned(
+                  top: 50,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: _verdeMedio,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        servico.local,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 13,
-                          color: const Color(0xFF6B705C),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(
-                        Icons.access_time_rounded,
-                        size: 14,
-                        color: _verdeMedio,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        servico.tempo,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 13,
-                          color: const Color(0xFF6B705C),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    servico.descricao,
-                    style: GoogleFonts.quicksand(
-                      fontSize: 14,
-                      height: 1.6,
-                      color: const Color(0xFF344E41),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _verde,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      icon: const Icon(Icons.info_outline, size: 18),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Interesse registrado!"),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star_rounded, size: 15, color: Color(0xFFF4A261)),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${servico.pontos} pts",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF344E41),
                           ),
-                        );
-                      },
-                      label: Text(
-                        "Saiba mais",
-                        style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+            Transform.translate(
+              offset: const Offset(0, -24),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+                decoration: const BoxDecoration(
+                  color: _branco,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      servico.titulo,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2D3319),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _verde.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: _verde.withOpacity(0.3), width: 1.5),
+                          ),
+                          child: const Icon(Icons.person_rounded, color: _verde, size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          servico.autor,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF344E41),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined, size: 16, color: _verdeMedio),
+                        const SizedBox(width: 4),
+                        Text(
+                          servico.local,
+                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                        ),
+                        const SizedBox(width: 16),
+                        const Icon(Icons.access_time_rounded, size: 16, color: _verdeMedio),
+                        const SizedBox(width: 4),
+                        Text(
+                          servico.tempo,
+                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    Container(height: 1, color: const Color(0xFFEDEAE5)),
+                    const SizedBox(height: 22),
+                    Text(
+                      "Sobre o serviço",
+                      style: GoogleFonts.quicksand(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF344E41),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      servico.descricao,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: const Color(0xFF6B705C),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _verde,
+                              side: BorderSide(color: _verde.withOpacity(0.4), width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Em breve: chat de dúvidas!")),
+                              );
+                            },
+                            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                            label: Text(
+                              "Tirar dúvidas",
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 13),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _verde,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Interesse registrado!")),
+                              );
+                            },
+                            icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                            label: Text(
+                              "Solicitar",
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -251,14 +376,17 @@ class _ServicosState extends State<Servicos> {
   static const _fundo = Color(0xFFEDEAE5);
   static const _branco = Colors.white;
 
-  final List<String> _categorias = [
-    "Todos",
-    "Culinária",
-    "Jardinagem",
-    "Música",
-    "Tecnologia",
-    "Educação",
-  ];
+  // ─── NOVO: categorias montadas dinamicamente a partir dos serviços cadastrados ───
+  List<String> get _categorias {
+    final focosUnicos = _todosServicos
+        .map((s) => s.categoria)
+        .where((f) => f.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    return ["Todos", ...focosUnicos];
+  }
 
   List<Servico> get _servicosFiltrados {
     return _todosServicos.where((s) {
@@ -280,7 +408,7 @@ class _ServicosState extends State<Servicos> {
     _carregarServicos();
   }
 
-  // ─── NOVO: busca os serviços reais na API ───
+  // ─── Busca os serviços reais na API ───
   Future<void> _carregarServicos() async {
     final dados = await _apiService.buscarTodosServicos();
     if (!mounted) return;
@@ -291,6 +419,11 @@ class _ServicosState extends State<Servicos> {
           .map((json) => Servico.fromJson(json))
           .toList();
       _carregando = false;
+
+      // Se a categoria selecionada não existe mais na lista atual, volta pra "Todos"
+      if (!_categorias.contains(_categoriaSelecionada)) {
+        _categoriaSelecionada = "Todos";
+      }
     });
   }
 
@@ -371,7 +504,7 @@ class _ServicosState extends State<Servicos> {
                     ),
 
                     const SizedBox(height: 14),
-                    _chipsCategorias(),
+                    if (!_carregando) _chipsCategorias(),
                     const SizedBox(height: 20),
 
                     if (_carregando)
@@ -667,16 +800,18 @@ class _ServicosState extends State<Servicos> {
     );
   }
 
-  // ─── CHIPS CATEGORIAS ─────────────────────────────────────
+  // ─── CHIPS CATEGORIAS (agora dinâmicas, vindas do banco) ───
   Widget _chipsCategorias() {
+    final categorias = _categorias;
+
     return SizedBox(
       height: 38,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _categorias.length,
+        itemCount: categorias.length,
         itemBuilder: (context, index) {
-          final cat = _categorias[index];
+          final cat = categorias[index];
           final selecionado = cat == _categoriaSelecionada;
           return GestureDetector(
             onTap: () => setState(() => _categoriaSelecionada = cat),
