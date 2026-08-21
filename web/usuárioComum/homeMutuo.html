@@ -622,8 +622,8 @@
     <div class="stat-card">
       <div class="stat-icon-box"><i class="bi bi-gem"></i></div>
       <div class="stat-title">Plano atual</div>
-      <div class="stat-value">Gratuito</div>
-      <div class="stat-sub">melhore seu plano</div>
+      <div class="stat-value" id="statPlano">Gratuito</div>
+      <div class="stat-sub" id="statPlanoSub">melhore seu plano</div>
     </div>
   </div>
 </div>
@@ -918,31 +918,43 @@
     document.title = 'Mútuo | ' + usuario.nome;
   }
 
-  //estatisticas dashboard
+  // ── Estatísticas do dashboard (horas, trabalhos, pontos e plano) ──
   async function carregarDashboard() {
-  if (!usuario || !usuario.cpf) return;
+    if (!usuario || !usuario.cpf) return;
 
-  try {
-    const [resUsuario, resStats] = await Promise.all([
-      fetch(`${API_URL}/usuarios/${usuario.cpf}`),
-      fetch(`${API_URL}/usuarios/${usuario.cpf}/estatisticas`)
-    ]);
+    try {
+      const [resUsuario, resStats] = await Promise.all([
+        fetch(`${API_URL}/usuarios/${usuario.cpf}`),
+        fetch(`${API_URL}/usuarios/${usuario.cpf}/estatisticas`)
+      ]);
 
-    const dadosUsuario = await resUsuario.json();
-    const stats = await resStats.json();
+      const dadosUsuario = await resUsuario.json();
+      const stats = await resStats.json();
 
-    if (dadosUsuario && !dadosUsuario.erro) {
-      document.getElementById('statPontos').textContent = `+${dadosUsuario.pontos ?? 0}`;
+      if (dadosUsuario && !dadosUsuario.erro) {
+        // pontos
+        document.getElementById('statPontos').textContent = `+${dadosUsuario.pontos ?? 0}`;
+
+        // plano (premium ou gratuito)
+        const ehPremium = dadosUsuario.premium === 1 || dadosUsuario.premium === true;
+        document.getElementById('statPlano').textContent = ehPremium ? 'Premium' : 'Gratuito';
+        document.getElementById('statPlanoSub').textContent = ehPremium
+          ? 'aproveite os benefícios'
+          : 'melhore seu plano';
+
+        // guarda no sessionStorage pra outras páginas reaproveitarem sem precisar buscar de novo
+        usuario.premium = ehPremium ? 1 : 0;
+        sessionStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+      }
+
+      if (stats && !stats.erro) {
+        document.getElementById('statHoras').textContent = `${stats.totalHoras}h`;
+        document.getElementById('statTrabalhos').textContent = stats.trabalhosConcluidos;
+      }
+    } catch (err) {
+      console.error('Erro ao carregar dashboard:', err);
     }
-
-    if (stats && !stats.erro) {
-      document.getElementById('statHoras').textContent = `${stats.totalHoras}h`;
-      document.getElementById('statTrabalhos').textContent = stats.trabalhosConcluidos;
-    }
-  } catch (err) {
-    console.error('Erro ao carregar dashboard:', err);
   }
-}
 
   // ── Vagas em destaque (usuários premium) ──
   function criarCardDestaque(servico) {
@@ -982,12 +994,13 @@
     return div;
   }
 
+  // ── Vagas em destaque (usuários premium, exceto o próprio usuário) ──
   async function carregarVagasDestaque() {
     const track = document.getElementById('track1');
     if (!track) return;
 
     try {
-      const resposta = await fetch(`${API_URL}/servicos-destaque`);
+      const resposta = await fetch(`${API_URL}/servicos-destaque?cpf=${encodeURIComponent(usuario.cpf)}`);
       if (!resposta.ok) throw new Error('Erro ao carregar vagas em destaque.');
 
       const servicos = await resposta.json();
@@ -1006,7 +1019,7 @@
     }
   }
 
-  // ── Perto de você (usuários premium na mesma cidade) ──
+  // ── Perto de você (usuários premium na mesma cidade, exceto o próprio usuário) ──
   async function carregarPertoDeVoce() {
     const track = document.getElementById('track2');
     if (!track) return;
@@ -1019,7 +1032,7 @@
     }
 
     try {
-      const resposta = await fetch(`${API_URL}/servicos-perto/${encodeURIComponent(cidadeUsuario)}`);
+      const resposta = await fetch(`${API_URL}/servicos-perto/${encodeURIComponent(cidadeUsuario)}?cpf=${encodeURIComponent(usuario.cpf)}`);
       if (!resposta.ok) throw new Error('Erro ao carregar serviços perto de você.');
 
       const servicos = await resposta.json();
