@@ -591,16 +591,18 @@ app.post('/contato', async (req, res) => {
   }
 });
 
-// Lista os serviços em destaque (de usuários premium)
+/// Lista os serviços em destaque (de usuários premium), exceto os do próprio usuário
 app.get('/servicos-destaque', async (req, res) => {
-  const servicos = await db.getServicosDestaque();
+  const { cpf } = req.query;
+  const servicos = await db.getServicosDestaque(cpf);
   if (servicos.error) return res.status(500).json({ erro: servicos.error });
   res.json(servicos);
 });
 
-// Lista serviços perto de você (mesma cidade, usuários premium)
+// Lista serviços perto de você (mesma cidade, usuários premium), exceto os do próprio usuário
 app.get('/servicos-perto/:cidade', async (req, res) => {
-  const servicos = await db.getServicosPertoDeVoce(req.params.cidade);
+  const { cpf } = req.query;
+  const servicos = await db.getServicosPertoDeVoce(req.params.cidade, cpf);
   if (servicos.error) return res.status(500).json({ erro: servicos.error });
   res.json(servicos);
 });

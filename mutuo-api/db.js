@@ -1067,8 +1067,8 @@ async function buscarCertificadosPorOng(cnpj) {
   };
 }
 
-// Lista serviços em destaque — apenas de usuários premium
-async function getServicosDestaque() {
+// Lista serviços em destaque — apenas de usuários premium, excluindo o próprio usuário
+async function getServicosDestaque(cpfExcluir) {
   const sql = `
     SELECT 
       s.cod,
@@ -1086,10 +1086,12 @@ async function getServicosDestaque() {
     FROM Mutuo_Servico AS s
     JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
     WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1
+      ${cpfExcluir ? 'AND s.idUsuario != ?' : ''}
     ORDER BY s.cod DESC
   `;
   try {
-    const [rows] = await pool.query(sql);
+    const params = cpfExcluir ? [cpfExcluir] : [];
+    const [rows] = await pool.query(sql, params);
     return rows.map(servico => ({
       ...servico,
       imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
@@ -1101,8 +1103,8 @@ async function getServicosDestaque() {
   }
 }
 
-// Lista serviços de usuários premium na mesma cidade do usuário logado
-async function getServicosPertoDeVoce(cidade) {
+// Lista serviços de usuários premium na mesma cidade, excluindo o próprio usuário
+async function getServicosPertoDeVoce(cidade, cpfExcluir) {
   const sql = `
     SELECT 
       s.cod,
@@ -1120,10 +1122,12 @@ async function getServicosPertoDeVoce(cidade) {
     FROM Mutuo_Servico AS s
     JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
     WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1 AND u.cidade = ?
+      ${cpfExcluir ? 'AND s.idUsuario != ?' : ''}
     ORDER BY s.cod DESC
   `;
   try {
-    const [rows] = await pool.query(sql, [cidade]);
+    const params = cpfExcluir ? [cidade, cpfExcluir] : [cidade];
+    const [rows] = await pool.query(sql, params);
     return rows.map(servico => ({
       ...servico,
       imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
