@@ -42,6 +42,11 @@ dependencies:
   http: ^1.6.0
   image_picker: ^1.2.3
 
+  # Máscaras de input (número do cartão, validade, CVV, CPF)
+  mask_text_input_formatter: ^2.9.0
+  # Renderização do ícone da bandeira Hipercard (.svg)
+  flutter_svg: ^2.0.10
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -88,6 +93,12 @@ flutter:
     - assets/images/deJulio.png
     - assets/images/manuela.png
     - assets/images/elis.png
+    - assets/bandeiras/amex.png
+    - assets/bandeiras/elo.png
+    - assets/bandeiras/generico.png
+    - assets/bandeiras/hipercard.svg
+    - assets/bandeiras/mastercard.png
+    - assets/bandeiras/visa.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
