@@ -49,14 +49,16 @@ class _LoginState extends State<Login> {
     }
 
     // Se não for usuário, tenta como ONG
-    final resOng = await api.fazerLoginOng(email, senha);
+        final resOng = await api.fazerLoginOng(email, senha);
 
     if (resOng['sucesso'] == true) {
-      final nome = resOng['usuario']['nomeOng'] ?? email;
+      final dadosOng = resOng['usuario'] ?? {};
+      final nome = dadosOng['nomeOng'] ?? email;
+      final cnpj = dadosOng['cnpj']?.toString() ?? '';
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => InicialOng(nome: nome)),
+        MaterialPageRoute(builder: (_) => InicialOng(nome: nome, cnpj: cnpj)),
       );
       return;
     }

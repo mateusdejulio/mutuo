@@ -168,10 +168,15 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
     if (resultado['sucesso'] == true) {
       if (!mounted) return;
 
-      if (_isOng) {
+            if (_isOng) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => InicialOng(nome: widget.nomeOng)),
+          MaterialPageRoute(
+            builder: (_) => InicialOng(
+              nome: widget.nomeOng,
+              cnpj: widget.cnpj.replaceAll(RegExp(r'[^0-9]'), ''),
+            ),
+          ),
           (route) => false,
         );
       } else {

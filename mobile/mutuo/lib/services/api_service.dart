@@ -145,6 +145,196 @@ class ApiService {
     }
   }
 
+  // ══════════════════════════════════════════════════════════
+  // NOVO: bloco de dados da ONG (tela inicial da ONG)
+  // ══════════════════════════════════════════════════════════
+
+  // ─── Busca os dados completos da ONG + pontos ───
+  // Usa GET /ongs/:cnpj
+  Future<Map<String, dynamic>?> buscarOngPorCnpj(String cnpj) async {
+    final url = Uri.parse('$baseUrl/ongs/${Uri.encodeComponent(cnpj)}');
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ─── Busca os serviços (atividades) cadastrados pela ONG ───
+  // Usa GET /servicos/ong/:cnpj
+  Future<List<dynamic>> buscarServicosOng(String cnpj) async {
+    final url = Uri.parse('$baseUrl/servicos/ong/${Uri.encodeComponent(cnpj)}');
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ─── Busca as solicitações recebidas pela ONG (usada pra contar voluntários) ───
+  // Usa GET /solicitacoes-ong/prestador/:cnpj
+  Future<List<dynamic>> buscarSolicitacoesOng(String cnpj) async {
+    final url = Uri.parse(
+      '$baseUrl/solicitacoes-ong/prestador/${Uri.encodeComponent(cnpj)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ─── Busca a foto de perfil da ONG ───
+  // Usa GET /perfil/foto/ong/:cnpj
+  Future<String?> buscarFotoPerfilOng(String cnpj) async {
+    final url = Uri.parse(
+      '$baseUrl/perfil/foto/ong/${Uri.encodeComponent(cnpj)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['fotoPerfil'];
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  
+  // ─── Atualiza nome/email/telefone da ONG ───
+  // Usa PUT /ongs/:cnpj/perfil
+  Future<Map<String, dynamic>> atualizarOng(
+    String cnpj,
+    Map<String, dynamic> dados,
+  ) async {
+    final url = Uri.parse('$baseUrl/ongs/${Uri.encodeComponent(cnpj)}/perfil');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode(dados),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // ─── Cadastra uma atividade/serviço oferecido pela ONG ───
+  // Usa POST /servicos/ong (multer, campo do arquivo precisa se chamar
+  // exatamente 'imagem', igual configurado no index.js -> uploadServico).
+  Future<Map<String, dynamic>> cadastrarServicoOng({
+    required String cnpj,
+    required String nomeServico,
+    required String descricao,
+    required String foco,
+    required String duracao,
+    List<int>? imagemBytes,
+    String? imagemNome,
+  }) async {
+    final url = Uri.parse('$baseUrl/servicos/ong');
+    try {
+      final request = http.MultipartRequest('POST', url);
+      request.fields['cnpj'] = cnpj;
+      request.fields['nomeServico'] = nomeServico;
+      request.fields['descricao'] = descricao;
+      request.fields['foco'] = foco;
+      request.fields['duracao'] = duracao;
+
+      if (imagemBytes != null && imagemNome != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'imagem',
+            imagemBytes,
+            filename: imagemNome,
+            contentType: _mimeTypeDaExtensao(imagemNome),
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // ─── Excluir (desativar) uma atividade da ONG ───
+  // Usa PATCH /servicos/ong/:id/status
+  Future<Map<String, dynamic>> excluirServicoOng(String id) async {
+    final url = Uri.parse('$baseUrl/servicos/ong/$id/status');
+    try {
+      final response = await http.patch(
+        url,
+        headers: _headers,
+        body: jsonEncode({'ativo': 0}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // ─── Envia/troca a foto de perfil da ONG ───
+  // Usa POST /perfil/foto/ong (multer, campo do arquivo precisa se chamar
+  // exatamente 'fotoPerfil', igual configurado no index.js).
+  Future<Map<String, dynamic>> enviarFotoPerfilOng(
+    String cnpj,
+    List<int> bytes,
+    String nomeArquivo,
+  ) async {
+    final url = Uri.parse('$baseUrl/perfil/foto/ong');
+    try {
+      final request = http.MultipartRequest('POST', url);
+      request.fields['cnpj'] = cnpj;
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'fotoPerfil',
+          bytes,
+          filename: nomeArquivo,
+          contentType: _mimeTypeDaExtensao(nomeArquivo),
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
   // ─── NOVO: busca os serviços em destaque (usuários premium) pro carrossel da tela inicial ───
   // Usa GET /servicos-destaque
   Future<List<dynamic>> buscarServicosDestaque() async {
