@@ -1,9 +1,14 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mutuo/inicialOng.dart';
+import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/login.dart';
+import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/widgets/modal_atividade_ong.dart';
 
 class PerfilOng extends StatefulWidget {
   final String cnpj;
@@ -69,10 +74,14 @@ class _PerfilOngState extends State<PerfilOng> {
     super.dispose();
   }
 
-  String get _inicial {
+    String get _inicial {
     final nome = _ong?['nomeOng']?.toString() ?? widget.nomeInicial;
     return nome.isNotEmpty ? nome[0].toUpperCase() : 'O';
   }
+
+  // Plano gratuito: até 3 atividades ativas. ONGs premium (campo `premium`
+  // vindo do banco) não têm esse limite.
+  bool get _limiteAtingido => (_ong?['premium'] != 1) && _atividades.length >= 3;
 
   // handle "@..." só pra exibição — não existe campo de usuário/handle
   // no banco pra ONG, então derivo a partir do nome.
@@ -164,7 +173,9 @@ class _PerfilOngState extends State<PerfilOng> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            resultado['erro'] ?? resultado['mensagem'] ?? 'Não foi possível salvar as alterações.',
+            resultado['erro'] ??
+                resultado['mensagem'] ??
+                'Não foi possível salvar as alterações.',
           ),
           backgroundColor: Colors.redAccent,
         ),
@@ -191,7 +202,11 @@ class _PerfilOngState extends State<PerfilOng> {
 
     setState(() => _enviandoFoto = true);
     final bytes = await imagem.readAsBytes();
-    final resultado = await _api.enviarFotoPerfilOng(widget.cnpj, bytes, imagem.name);
+    final resultado = await _api.enviarFotoPerfilOng(
+      widget.cnpj,
+      bytes,
+      imagem.name,
+    );
     if (!mounted) return;
     setState(() => _enviandoFoto = false);
 
@@ -200,7 +215,10 @@ class _PerfilOngState extends State<PerfilOng> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(resultado['erro']?.toString() ?? 'Não foi possível atualizar a foto.'),
+          content: Text(
+            resultado['erro']?.toString() ??
+                'Não foi possível atualizar a foto.',
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -212,16 +230,31 @@ class _PerfilOngState extends State<PerfilOng> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Excluir atividade', style: GoogleFonts.quicksand(fontWeight: FontWeight.w800)),
-        content: Text('Tem certeza que deseja excluir esta atividade?', style: GoogleFonts.quicksand()),
+        title: Text(
+          'Excluir atividade',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'Tem certeza que deseja excluir esta atividade?',
+          style: GoogleFonts.quicksand(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancelar', style: GoogleFonts.quicksand(color: _cinzaTexto)),
+            child: Text(
+              'Cancelar',
+              style: GoogleFonts.quicksand(color: _cinzaTexto),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Excluir', style: GoogleFonts.quicksand(color: Colors.redAccent, fontWeight: FontWeight.w700)),
+            child: Text(
+              'Excluir',
+              style: GoogleFonts.quicksand(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -233,181 +266,13 @@ class _PerfilOngState extends State<PerfilOng> {
     if (!mounted) return;
 
     if (resultado['sucesso'] == false && resultado['erro'] != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(resultado['erro'])));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(resultado['erro'])));
       return;
     }
 
     setState(() => _atividades.removeAt(index));
-  }
-
-  void _abrirModalAdicionarAtividade() {
-    final nomeCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
-    final duracaoCtrl = TextEditingController();
-    String? focoSelecionado;
-    XFile? imagemSelecionada;
-    bool enviando = false;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) {
-        return StatefulBuilder(
-          builder: (modalContext, setModalState) {
-            Future<void> escolherImagem() async {
-              final imagem = await _picker.pickImage(
-                source: ImageSource.gallery,
-                maxWidth: 1024,
-                imageQuality: 85,
-              );
-              if (imagem != null) setModalState(() => imagemSelecionada = imagem);
-            }
-
-            Future<void> confirmarCadastro() async {
-              if (nomeCtrl.text.trim().isEmpty ||
-                  descCtrl.text.trim().isEmpty ||
-                  focoSelecionado == null ||
-                  duracaoCtrl.text.trim().isEmpty) {
-                ScaffoldMessenger.of(modalContext).showSnackBar(
-                  const SnackBar(content: Text('Preencha todos os campos obrigatórios.')),
-                );
-                return;
-              }
-
-              setModalState(() => enviando = true);
-
-              List<int>? bytes;
-              String? nomeArquivo;
-              if (imagemSelecionada != null) {
-                bytes = await imagemSelecionada!.readAsBytes();
-                nomeArquivo = imagemSelecionada!.name;
-              }
-
-              final resultado = await _api.cadastrarServicoOng(
-                cnpj: widget.cnpj,
-                nomeServico: nomeCtrl.text.trim(),
-                descricao: descCtrl.text.trim(),
-                foco: focoSelecionado!,
-                duracao: duracaoCtrl.text.trim(),
-                imagemBytes: bytes,
-                imagemNome: nomeArquivo,
-              );
-
-              setModalState(() => enviando = false);
-
-              if (resultado['sucesso'] == true) {
-                if (!mounted) return;
-                Navigator.pop(modalContext);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Atividade cadastrada com sucesso!')),
-                );
-                _carregarAtividades();
-              } else {
-                ScaffoldMessenger.of(modalContext).showSnackBar(
-                  SnackBar(
-                    content: Text(resultado['erro']?.toString() ?? 'Não foi possível cadastrar a atividade.'),
-                    backgroundColor: Colors.redAccent,
-                  ),
-                );
-              }
-            }
-
-            return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(modalContext).viewInsets.bottom),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(22, 14, 22, 26),
-                decoration: const BoxDecoration(
-                  color: _branco,
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(26), topRight: Radius.circular(26)),
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 18),
-                          decoration: BoxDecoration(color: const Color(0xFFE0DDD8), borderRadius: BorderRadius.circular(4)),
-                        ),
-                      ),
-                      Text('Nova atividade', style: GoogleFonts.quicksand(fontSize: 18, fontWeight: FontWeight.w800, color: _verde)),
-                      const SizedBox(height: 18),
-                      GestureDetector(
-                        onTap: escolherImagem,
-                        child: Container(
-                          width: double.infinity,
-                          height: 120,
-                          decoration: BoxDecoration(color: _fundo, borderRadius: BorderRadius.circular(14)),
-                          alignment: Alignment.center,
-                          child: imagemSelecionada == null
-                              ? const Icon(Icons.add_photo_alternate_outlined, size: 32, color: Color(0xFFB9C4B4))
-                                                            : ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Text(
-                                    imagemSelecionada!.name,
-                                    style: GoogleFonts.quicksand(fontSize: 12, color: _cinzaTexto),
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: nomeCtrl,
-                        decoration: const InputDecoration(labelText: 'Nome da atividade'),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: descCtrl,
-                        maxLines: 3,
-                        decoration: const InputDecoration(labelText: 'Descrição'),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: focoSelecionado,
-                        decoration: const InputDecoration(labelText: 'Foco'),
-                        items: _focosServico
-                            .map((f) => DropdownMenuItem(value: f, child: Text(f)))
-                            .toList(),
-                        onChanged: (v) => setModalState(() => focoSelecionado = v),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: duracaoCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: 'Duração (horas)'),
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _verde,
-                            foregroundColor: _branco,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          ),
-                          onPressed: enviando ? null : confirmarCadastro,
-                          child: enviando
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(color: _branco, strokeWidth: 2),
-                                )
-                              : Text('Cadastrar', style: GoogleFonts.quicksand(fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   Widget _avatarCircle({required double size}) {
@@ -419,7 +284,8 @@ class _PerfilOngState extends State<PerfilOng> {
         width: size,
         height: size,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) => progress == null ? child : _avatarIniciais(size: size),
+        loadingBuilder: (context, child, progress) =>
+            progress == null ? child : _avatarIniciais(size: size),
         errorBuilder: (context, error, stack) => _avatarIniciais(size: size),
       ),
     );
@@ -433,7 +299,11 @@ class _PerfilOngState extends State<PerfilOng> {
       alignment: Alignment.center,
       child: Text(
         _inicial,
-        style: GoogleFonts.quicksand(fontSize: size * 0.42, fontWeight: FontWeight.bold, color: _verde),
+        style: GoogleFonts.quicksand(
+          fontSize: size * 0.42,
+          fontWeight: FontWeight.bold,
+          color: _verde,
+        ),
       ),
     );
   }
@@ -487,7 +357,10 @@ class _PerfilOngState extends State<PerfilOng> {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: _verde,
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
       ),
       padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
       child: Row(
@@ -502,15 +375,25 @@ class _PerfilOngState extends State<PerfilOng> {
                     nome: _ong?['nomeOng'] ?? widget.nomeInicial,
                     cnpj: widget.cnpj,
                   ),
-                  transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
+                  transitionsBuilder: (_, animation, __, child) =>
+                      FadeTransition(opacity: animation, child: child),
                 ),
               );
             },
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _branco, size: 18),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: _branco,
+              size: 18,
+            ),
           ),
           Text(
             'Meu Perfil',
-            style: GoogleFonts.quicksand(fontSize: 22, fontWeight: FontWeight.w800, color: _branco, letterSpacing: 0.5),
+            style: GoogleFonts.quicksand(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: _branco,
+              letterSpacing: 0.5,
+            ),
           ),
           const Spacer(),
           PopupMenuButton<String>(
@@ -524,7 +407,9 @@ class _PerfilOngState extends State<PerfilOng> {
               }
             },
             offset: const Offset(0, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
             itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'logout',
@@ -532,7 +417,10 @@ class _PerfilOngState extends State<PerfilOng> {
                   children: [
                     const Icon(Icons.logout, size: 18, color: _verde),
                     const SizedBox(width: 8),
-                    Text('Sair', style: GoogleFonts.quicksand(fontWeight: FontWeight.w600)),
+                    Text(
+                      'Sair',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                    ),
                   ],
                 ),
               ),
@@ -553,7 +441,13 @@ class _PerfilOngState extends State<PerfilOng> {
         color: _branco,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: const Color(0xFFE0DDD8)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,11 +465,25 @@ class _PerfilOngState extends State<PerfilOng> {
                       child: Container(
                         width: 24,
                         height: 24,
-                        decoration: const BoxDecoration(color: _verde, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(
+                          color: _verde,
+                          shape: BoxShape.circle,
+                        ),
                         alignment: Alignment.center,
                         child: _enviandoFoto
-                            ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: _branco))
-                            : const Icon(Icons.camera_alt_outlined, size: 13, color: _branco),
+                            ? const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: _branco,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.camera_alt_outlined,
+                                size: 13,
+                                color: _branco,
+                              ),
                       ),
                     ),
                   ),
@@ -588,12 +496,20 @@ class _PerfilOngState extends State<PerfilOng> {
                   children: [
                     Text(
                       nome.isNotEmpty ? nome : 'ONG',
-                      style: GoogleFonts.quicksand(fontSize: 17, fontWeight: FontWeight.w800, color: const Color(0xFF1A2E1B)),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1A2E1B),
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       _handle,
-                      style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF9AAB96)),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF9AAB96),
+                      ),
                     ),
                   ],
                 ),
@@ -610,7 +526,10 @@ class _PerfilOngState extends State<PerfilOng> {
               // Sem coluna de avaliação positiva/negativa pra ONG no banco ainda.
               _statTopo('—', 'Avaliações positivas'),
               _divisorVertical(),
-              _statTopo(_tempoNoMutuo(_ong?['cadastro']?.toString()), 'No Mútuo'),
+              _statTopo(
+                _tempoNoMutuo(_ong?['cadastro']?.toString()),
+                'No Mútuo',
+              ),
             ],
           ),
         ],
@@ -618,18 +537,30 @@ class _PerfilOngState extends State<PerfilOng> {
     );
   }
 
-  Widget _divisorVertical() => Container(width: 1, height: 30, color: const Color(0xFFF0F4EF));
+  Widget _divisorVertical() =>
+      Container(width: 1, height: 30, color: const Color(0xFFF0F4EF));
 
   Widget _statTopo(String valor, String texto) {
     return Expanded(
       child: Column(
         children: [
-          Text(valor, style: GoogleFonts.quicksand(fontSize: 15, fontWeight: FontWeight.w800, color: _verde)),
+          Text(
+            valor,
+            style: GoogleFonts.quicksand(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: _verde,
+            ),
+          ),
           const SizedBox(height: 2),
           Text(
             texto,
             textAlign: TextAlign.center,
-            style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.w700, color: const Color(0xFF9AAB96)),
+            style: GoogleFonts.quicksand(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF9AAB96),
+            ),
           ),
         ],
       ),
@@ -644,7 +575,13 @@ class _PerfilOngState extends State<PerfilOng> {
         color: _branco,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: const Color(0xFFE0DDD8)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -655,11 +592,22 @@ class _PerfilOngState extends State<PerfilOng> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Dados do usuário', style: GoogleFonts.quicksand(fontSize: 15, fontWeight: FontWeight.w800, color: _verde)),
+                    Text(
+                      'Dados do usuário',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: _verde,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       'Informações pessoais e preferências',
-                      style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF9AAB96)),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF9AAB96),
+                      ),
                     ),
                   ],
                 ),
@@ -667,16 +615,30 @@ class _PerfilOngState extends State<PerfilOng> {
               GestureDetector(
                 onTap: () => setState(() => _editando = !_editando),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                  decoration: BoxDecoration(color: _bege, borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _bege,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(_editando ? Icons.close : Icons.edit_outlined, size: 14, color: _verde),
+                      Icon(
+                        _editando ? Icons.close : Icons.edit_outlined,
+                        size: 14,
+                        color: _verde,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         _editando ? 'Cancelar' : 'Editar perfil',
-                        style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w700, color: _verde),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: _verde,
+                        ),
                       ),
                     ],
                   ),
@@ -699,20 +661,43 @@ class _PerfilOngState extends State<PerfilOng> {
                   backgroundColor: _verde,
                   foregroundColor: _branco,
                   padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 onPressed: _salvando ? null : _salvarEdicao,
                 child: _salvando
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: _branco))
-                    : Text('Salvar alterações', style: GoogleFonts.quicksand(fontWeight: FontWeight.w700)),
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: _branco,
+                        ),
+                      )
+                    : Text(
+                        'Salvar alterações',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
               ),
             ),
           ] else ...[
-            _linhaInfo(Icons.mail_outline_rounded, _ong?['email']?.toString() ?? '-'),
+            _linhaInfo(
+              Icons.mail_outline_rounded,
+              _ong?['email']?.toString() ?? '-',
+            ),
             const SizedBox(height: 12),
-            _linhaInfo(Icons.phone_outlined, _ong?['telefone']?.toString() ?? '-'),
+            _linhaInfo(
+              Icons.phone_outlined,
+              _ong?['telefone']?.toString() ?? '-',
+            ),
             const SizedBox(height: 12),
-            _linhaInfo(Icons.calendar_today_outlined, 'Membro desde ${_dataFormatada(_ong?['cadastro']?.toString())}'),
+            _linhaInfo(
+              Icons.calendar_today_outlined,
+              'Membro desde ${_dataFormatada(_ong?['cadastro']?.toString())}',
+            ),
             const SizedBox(height: 12),
             _linhaInfo(
               Icons.diamond_outlined,
@@ -740,12 +725,22 @@ class _PerfilOngState extends State<PerfilOng> {
         Container(
           width: 34,
           height: 34,
-          decoration: BoxDecoration(color: _verde.withOpacity(0.08), borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(
+            color: _verde.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Icon(icone, size: 16, color: _verde),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(texto, style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF344E41))),
+          child: Text(
+            texto,
+            style: GoogleFonts.quicksand(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF344E41),
+            ),
+          ),
         ),
       ],
     );
@@ -756,14 +751,27 @@ class _PerfilOngState extends State<PerfilOng> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: _verde, borderRadius: BorderRadius.circular(22)),
+      decoration: BoxDecoration(
+        color: _verde,
+        borderRadius: BorderRadius.circular(22),
+      ),
       child: Column(
         children: [
           Text(
             pontos != null ? '$pontos' : '0',
-            style: GoogleFonts.quicksand(fontSize: 38, fontWeight: FontWeight.w800, color: _branco),
+            style: GoogleFonts.quicksand(
+              fontSize: 38,
+              fontWeight: FontWeight.w800,
+              color: _branco,
+            ),
           ),
-          Text('Pontos disponíveis', style: GoogleFonts.quicksand(fontSize: 12, color: _branco.withOpacity(0.7))),
+          Text(
+            'Pontos disponíveis',
+            style: GoogleFonts.quicksand(
+              fontSize: 12,
+              color: _branco.withOpacity(0.7),
+            ),
+          ),
         ],
       ),
     );
@@ -777,7 +785,13 @@ class _PerfilOngState extends State<PerfilOng> {
         color: _branco,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: const Color(0xFFE0DDD8)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -788,48 +802,109 @@ class _PerfilOngState extends State<PerfilOng> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Minhas atividades', style: GoogleFonts.quicksand(fontSize: 15, fontWeight: FontWeight.w800, color: _verde)),
+                    Text(
+                      'Minhas atividades',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: _verde,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       'Atividades que sua ONG oferece',
-                      style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF9AAB96)),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF9AAB96),
+                      ),
                     ),
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: _abrirModalAdicionarAtividade,
+                            GestureDetector(
+                onTap: _limiteAtingido
+                    ? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => PlanosOng(cnpj: widget.cnpj, nomeInicial: widget.nomeInicial)),
+                        )
+                    : () => abrirModalAtividadeOng(
+                          context: context,
+                          cnpj: widget.cnpj,
+                          onSucesso: _carregarAtividades,
+                        ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                  decoration: BoxDecoration(color: _verde, borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(
+                    color: _limiteAtingido ? Colors.redAccent : _verde,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.add, size: 14, color: _branco),
+                      Icon(_limiteAtingido ? Icons.workspace_premium_outlined : Icons.add, size: 14, color: _branco),
                       const SizedBox(width: 4),
-                      Text('Adicionar', style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w700, color: _branco)),
+                      Text(
+                        _limiteAtingido ? 'Ver planos' : 'Adicionar',
+                        style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w700, color: _branco),
+                      ),
                     ],
                   ),
                 ),
               ),
             ],
           ),
+                    if (_limiteAtingido) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.redAccent.withOpacity(0.25)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline_rounded, size: 16, color: Colors.redAccent),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Limite de 3 atividades do plano gratuito consumido. Faça upgrade pra cadastrar mais.',
+                      style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.redAccent),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (_carregandoAtividades)
-            const Padding(padding: EdgeInsets.only(top: 20), child: Center(child: CircularProgressIndicator(color: _verde)))
+            const Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Center(child: CircularProgressIndicator(color: _verde)),
+            )
           else if (_atividades.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 20),
               child: Text(
                 'Você ainda não cadastrou nenhuma atividade.',
-                style: GoogleFonts.quicksand(fontSize: 12, color: const Color(0xFF9AAB96)),
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  color: const Color(0xFF9AAB96),
+                ),
               ),
             )
           else
-            ..._atividades.whereType<Map<String, dynamic>>().toList().asMap().entries.map((entry) {
-              final index = entry.key;
-              final atividade = entry.value;
-              return _linhaAtividade(atividade, index);
-            }),
+            ..._atividades
+                .whereType<Map<String, dynamic>>()
+                .toList()
+                .asMap()
+                .entries
+                .map((entry) {
+                  final index = entry.key;
+                  final atividade = entry.value;
+                  return _linhaAtividade(atividade, index);
+                }),
         ],
       ),
     );
@@ -843,27 +918,53 @@ class _PerfilOngState extends State<PerfilOng> {
     return Container(
       margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(border: Border.all(color: const Color(0xFFE4EBE2)), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFE4EBE2)),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(nome, style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFF1A2E1B))),
+                Text(
+                  nome,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1A2E1B),
+                  ),
+                ),
                 const SizedBox(height: 3),
                 Text(
                   descricao,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.quicksand(fontSize: 12, color: const Color(0xFF6B705C)),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    color: const Color(0xFF6B705C),
+                  ),
                 ),
               ],
             ),
           ),
           IconButton(
+            onPressed: () => abrirModalAtividadeOng(
+              context: context,
+              cnpj: widget.cnpj,
+              atividade: atividade,
+              onSucesso: _carregarAtividades,
+            ),
+            icon: const Icon(Icons.edit_outlined, color: _verdeMedio, size: 20),
+          ),
+          IconButton(
             onPressed: () => _excluirAtividade(id, index),
-            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: Colors.redAccent,
+              size: 20,
+            ),
           ),
         ],
       ),
@@ -878,27 +979,49 @@ class _PerfilOngState extends State<PerfilOng> {
         color: _branco,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: const Color(0xFFE0DDD8)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Solicitações recebidas', style: GoogleFonts.quicksand(fontSize: 15, fontWeight: FontWeight.w800, color: _verde)),
+          Text(
+            'Solicitações recebidas',
+            style: GoogleFonts.quicksand(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: _verde,
+            ),
+          ),
           const SizedBox(height: 2),
           Text(
             'Voluntários interessados nas suas atividades',
-            style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF9AAB96)),
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF9AAB96),
+            ),
           ),
           if (_solicitacoes.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 20),
               child: Text(
                 'Nenhuma solicitação recebida ainda.',
-                style: GoogleFonts.quicksand(fontSize: 12, color: const Color(0xFF9AAB96)),
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  color: const Color(0xFF9AAB96),
+                ),
               ),
             )
           else
-            ..._solicitacoes.whereType<Map<String, dynamic>>().map((s) => _linhaSolicitacao(s)),
+            ..._solicitacoes.whereType<Map<String, dynamic>>().map(
+              (s) => _linhaSolicitacao(s),
+            ),
         ],
       ),
     );
@@ -912,23 +1035,49 @@ class _PerfilOngState extends State<PerfilOng> {
     return Container(
       margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(border: Border.all(color: const Color(0xFFE4EBE2)), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFE4EBE2)),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(nomeSolicitador, style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFF1A2E1B))),
+                Text(
+                  nomeSolicitador,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1A2E1B),
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(nomeServico, style: GoogleFonts.quicksand(fontSize: 12, color: const Color(0xFF6B705C))),
+                Text(
+                  nomeServico,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    color: const Color(0xFF6B705C),
+                  ),
+                ),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: _bege, borderRadius: BorderRadius.circular(20)),
-            child: Text(status, style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.w800, color: _verde)),
+            decoration: BoxDecoration(
+              color: _bege,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              status,
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: _verde,
+              ),
+            ),
           ),
         ],
       ),
@@ -946,25 +1095,56 @@ class _PerfilOngState extends State<PerfilOng> {
             context,
             PageRouteBuilder(
               transitionDuration: const Duration(milliseconds: 250),
-              pageBuilder: (_, __, ___) => InicialOng(nome: _ong?['nomeOng'] ?? widget.nomeInicial, cnpj: widget.cnpj),
-              transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
+              pageBuilder: (_, __, ___) => InicialOng(
+                nome: _ong?['nomeOng'] ?? widget.nomeInicial,
+                cnpj: widget.cnpj,
+              ),
+              transitionsBuilder: (_, animation, __, child) =>
+                  FadeTransition(opacity: animation, child: child),
             ),
           );
         },
       ),
-      _NavItemPerfilOng(icon: Icons.volunteer_activism_rounded, outlinedIcon: Icons.volunteer_activism_outlined, label: 'Atividades', onTap: null),
-      _NavItemPerfilOng(icon: Icons.assignment_turned_in_rounded, outlinedIcon: Icons.assignment_turned_in_outlined, label: 'Solicitações', onTap: null),
-      _NavItemPerfilOng(icon: Icons.chat_bubble_rounded, outlinedIcon: Icons.chat_bubble_outline_rounded, label: 'Chat', onTap: null),
+      _NavItemPerfilOng(
+        icon: Icons.volunteer_activism_rounded,
+        outlinedIcon: Icons.volunteer_activism_outlined,
+        label: 'Atividades',
+        onTap: null,
+      ),
+      _NavItemPerfilOng(
+        icon: Icons.assignment_turned_in_rounded,
+        outlinedIcon: Icons.assignment_turned_in_outlined,
+        label: 'Solicitações',
+        onTap: null,
+      ),
+      _NavItemPerfilOng(
+        icon: Icons.chat_bubble_rounded,
+        outlinedIcon: Icons.chat_bubble_outline_rounded,
+        label: 'Chat',
+        onTap: null,
+      ),
     ];
 
     return Container(
       decoration: BoxDecoration(
         color: _branco,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, -4))],
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
       ),
       child: ClipRRect(
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
         child: BottomNavigationBar(
           currentIndex: _bottomNavIndex < 0 ? 0 : _bottomNavIndex,
           onTap: (index) {
@@ -978,17 +1158,28 @@ class _PerfilOngState extends State<PerfilOng> {
           backgroundColor: _branco,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          selectedItemColor: _bottomNavIndex < 0 ? const Color(0xFF9AAB96) : _verde,
+          selectedItemColor: _bottomNavIndex < 0
+              ? const Color(0xFF9AAB96)
+              : _verde,
           unselectedItemColor: const Color(0xFF9AAB96),
-          selectedLabelStyle: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w700),
-          unselectedLabelStyle: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w600),
+          selectedLabelStyle: GoogleFonts.quicksand(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+          unselectedLabelStyle: GoogleFonts.quicksand(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
           items: List.generate(navItems.length, (index) {
             final item = navItems[index];
             final isSelected = _bottomNavIndex == index;
             return BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(isSelected ? item.icon : item.outlinedIcon, size: 22),
+                child: Icon(
+                  isSelected ? item.icon : item.outlinedIcon,
+                  size: 22,
+                ),
               ),
               label: item.label,
             );
@@ -1005,5 +1196,10 @@ class _NavItemPerfilOng {
   final String label;
   final VoidCallback? onTap;
 
-  _NavItemPerfilOng({required this.icon, required this.outlinedIcon, required this.label, this.onTap});
+  _NavItemPerfilOng({
+    required this.icon,
+    required this.outlinedIcon,
+    required this.label,
+    this.onTap,
+  });
 }
