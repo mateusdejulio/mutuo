@@ -46,8 +46,6 @@
       background: #f9fbf9;
     }
 
-    /* Navegação */
-
     nav {
       position: fixed;
       top: 0;
@@ -78,8 +76,6 @@
       border-radius: 8px;
     }
 
-    /* Estrutura da página */
-
     .pagina-checkout {
       display: grid;
       grid-template-columns: 1.1fr 0.9fr;
@@ -105,8 +101,6 @@
     .voltar-link:hover {
       text-decoration: underline;
     }
-
-    /* Formulário */
 
     .card-checkout {
       padding: 32px;
@@ -194,8 +188,6 @@
       gap: 14px;
     }
 
-    /* Cartão visual */
-
     .cartao-visual {
       position: relative;
       display: flex;
@@ -263,8 +255,6 @@
       letter-spacing: 1px;
     }
 
-    /* Mensagem de erro */
-
     .mensagem-erro-checkout {
       display: none;
       align-items: center;
@@ -282,8 +272,6 @@
     .mensagem-erro-checkout.visivel {
       display: flex;
     }
-
-    /* Botão */
 
     .btn-pagar {
       display: flex;
@@ -332,8 +320,6 @@
         transform: rotate(360deg);
       }
     }
-
-    /* Resumo */
 
     .card-resumo {
       position: sticky;
@@ -422,8 +408,6 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
-
-    /* Modal de sucesso */
 
     .overlay-sucesso {
       position: fixed;
@@ -561,8 +545,6 @@
       Voltar para os planos
     </a>
 
-    <!-- Formulário -->
-
     <section class="card-checkout">
       <h2>Assinar Premium para ONG</h2>
 
@@ -575,8 +557,7 @@
 
         <span>
           Ambiente de simulação: nenhuma cobrança real será feita
-          e nenhum dado de cartão será armazenado. Você pode
-          preencher com números de teste.
+          e nenhum dado de cartão será armazenado.
         </span>
       </div>
 
@@ -701,8 +682,6 @@
       </form>
     </section>
 
-    <!-- Resumo -->
-
     <aside class="card-resumo">
       <h3>Resumo do pedido</h3>
 
@@ -762,8 +741,6 @@
     </aside>
   </main>
 
-  <!-- Mensagem de sucesso -->
-
   <div
     class="overlay-sucesso"
     id="overlaySucesso"
@@ -792,7 +769,10 @@
   </div>
 
   <script>
-    const API_BASE = "https://mutuo-api.onrender.com";
+    /*
+     * API local. O index.js precisa estar rodando na porta 3000.
+     */
+    const API_BASE = "http://localhost:3000";
 
     let ong = {};
 
@@ -810,17 +790,21 @@
     }
 
     /*
-     * Remove pontos, barras e traços.
-     * Exemplo:
-     * 13.987.236/0086-14 -> 13987236008614
+     * Mantém o CNPJ exatamente como está na sessão.
+     * Exemplo: 13.987.236/0086-14
      */
-    const cnpjSemMascara = String(
+    const cnpjDaOng = String(
       ong.cnpj || ""
-    ).replace(/\D/g, "");
+    ).trim();
 
-    if (cnpjSemMascara.length !== 14) {
+    if (!cnpjDaOng) {
       window.location.replace("../login.html");
     }
+
+    console.log(
+      "CNPJ da ONG usado no pagamento:",
+      cnpjDaOng
+    );
 
     const form =
       document.getElementById("formCheckout");
@@ -861,8 +845,6 @@
     const visualValidade =
       document.getElementById("cartaoVisualValidade");
 
-    // Formatação do número do cartão
-
     inputNumero.addEventListener("input", function () {
       const numeros = this.value
         .replace(/\D/g, "")
@@ -877,8 +859,6 @@
         criarNumeroVisualCartao(numeros);
     });
 
-    // Nome no cartão
-
     inputNome.addEventListener("input", function () {
       this.value = this.value
         .toUpperCase()
@@ -888,8 +868,6 @@
       visualNome.textContent =
         this.value.trim() || "NOME NO CARTÃO";
     });
-
-    // Validade
 
     inputValidade.addEventListener("input", function () {
       let numeros = this.value
@@ -909,15 +887,11 @@
         numeros || "MM/AA";
     });
 
-    // CVV
-
     inputCvv.addEventListener("input", function () {
       this.value = this.value
         .replace(/\D/g, "")
         .slice(0, 4);
     });
-
-    // CPF
 
     inputCpf.addEventListener("input", function () {
       let numeros = this.value
@@ -1100,9 +1074,9 @@
       evento.preventDefault();
       limparErro();
 
-      if (cnpjSemMascara.length !== 14) {
+      if (!cnpjDaOng) {
         mostrarErro(
-          "O CNPJ da ONG conectada é inválido."
+          "Não foi possível identificar o CNPJ da ONG."
         );
 
         return;
@@ -1117,21 +1091,30 @@
       await esperar(1200);
 
       try {
-        const resposta = await fetch(
-          `${API_BASE}/ongs/${encodeURIComponent(cnpjSemMascara)}/premium`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              premium: 1
-            })
-          }
+        const endereco = `${API_BASE}/ongs/${encodeURIComponent(cnpjDaOng)}/premium`;
+
+        console.log(
+          "Enviando assinatura para:",
+          endereco
         );
+
+        const resposta = await fetch(endereco, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            premium: 1
+          })
+        });
 
         const resultado =
           await lerRespostaJson(resposta);
+
+        console.log(
+          "Resposta da assinatura:",
+          resultado
+        );
 
         if (!resposta.ok) {
           throw new Error(
@@ -1153,11 +1136,6 @@
         }
 
         ong.premium = 1;
-
-        /*
-         * Mantém o CNPJ no formato que já estava na sessão.
-         * Apenas o endereço da API utiliza o CNPJ sem máscara.
-         */
         delete ong.senha;
 
         sessionStorage.setItem(
@@ -1222,12 +1200,6 @@
       try {
         return JSON.parse(texto);
       } catch (erro) {
-        if (resposta.status === 404) {
-          throw new Error(
-            "A rota Premium da ONG não foi encontrada. Publique novamente a API no Render."
-          );
-        }
-
         throw new Error(
           `A API devolveu uma resposta inválida. Status: ${resposta.status}.`
         );
