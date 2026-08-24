@@ -9,6 +9,7 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/widgets/modal_atividade_ong.dart';
+import 'package:mutuo/servicosOng.dart';
 
 class PerfilOng extends StatefulWidget {
   final String cnpj;
@@ -74,14 +75,15 @@ class _PerfilOngState extends State<PerfilOng> {
     super.dispose();
   }
 
-    String get _inicial {
+  String get _inicial {
     final nome = _ong?['nomeOng']?.toString() ?? widget.nomeInicial;
     return nome.isNotEmpty ? nome[0].toUpperCase() : 'O';
   }
 
   // Plano gratuito: até 3 atividades ativas. ONGs premium (campo `premium`
   // vindo do banco) não têm esse limite.
-  bool get _limiteAtingido => (_ong?['premium'] != 1) && _atividades.length >= 3;
+  bool get _limiteAtingido =>
+      (_ong?['premium'] != 1) && _atividades.length >= 3;
 
   // handle "@..." só pra exibição — não existe campo de usuário/handle
   // no banco pra ONG, então derivo a partir do nome.
@@ -822,19 +824,29 @@ class _PerfilOngState extends State<PerfilOng> {
                   ],
                 ),
               ),
-                            GestureDetector(
+              GestureDetector(
                 onTap: _limiteAtingido
                     ? () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => PlanosOng(cnpj: widget.cnpj, nomeInicial: widget.nomeInicial)),
-                        )
-                    : () => abrirModalAtividadeOng(
-                          context: context,
-                          cnpj: widget.cnpj,
-                          onSucesso: _carregarAtividades,
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PlanosOng(
+                            cnpj: widget.cnpj,
+                            nomeInicial: widget.nomeInicial,
+                          ),
                         ),
+                      )
+                    : () => abrirModalAtividadeOng(
+                        context: context,
+                        cnpj: widget.cnpj,
+                        onSucesso: _carregarAtividades,
+                        totalAtividades: _atividades.length,
+                        ongPremium: _ong?['premium'] == 1,
+                      ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 9,
+                  ),
                   decoration: BoxDecoration(
                     color: _limiteAtingido ? Colors.redAccent : _verde,
                     borderRadius: BorderRadius.circular(20),
@@ -842,11 +854,21 @@ class _PerfilOngState extends State<PerfilOng> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(_limiteAtingido ? Icons.workspace_premium_outlined : Icons.add, size: 14, color: _branco),
+                      Icon(
+                        _limiteAtingido
+                            ? Icons.workspace_premium_outlined
+                            : Icons.add,
+                        size: 14,
+                        color: _branco,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         _limiteAtingido ? 'Ver planos' : 'Adicionar',
-                        style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w700, color: _branco),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: _branco,
+                        ),
                       ),
                     ],
                   ),
@@ -854,7 +876,7 @@ class _PerfilOngState extends State<PerfilOng> {
               ),
             ],
           ),
-                    if (_limiteAtingido) ...[
+          if (_limiteAtingido) ...[
             const SizedBox(height: 14),
             Container(
               width: double.infinity,
@@ -866,12 +888,20 @@ class _PerfilOngState extends State<PerfilOng> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, size: 16, color: Colors.redAccent),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: Colors.redAccent,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Limite de 3 atividades do plano gratuito consumido. Faça upgrade pra cadastrar mais.',
-                      style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.redAccent),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.redAccent,
+                      ),
                     ),
                   ),
                 ],
@@ -955,6 +985,8 @@ class _PerfilOngState extends State<PerfilOng> {
               cnpj: widget.cnpj,
               atividade: atividade,
               onSucesso: _carregarAtividades,
+              totalAtividades: _atividades.length,
+              ongPremium: _ong?['premium'] == 1,
             ),
             icon: const Icon(Icons.edit_outlined, color: _verdeMedio, size: 20),
           ),
@@ -1109,7 +1141,17 @@ class _PerfilOngState extends State<PerfilOng> {
         icon: Icons.volunteer_activism_rounded,
         outlinedIcon: Icons.volunteer_activism_outlined,
         label: 'Atividades',
-        onTap: null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ServicosOng(
+                nome: _ong?['nomeOng'] ?? widget.nomeInicial,
+                cnpj: widget.cnpj,
+              ),
+            ),
+          );
+        },
       ),
       _NavItemPerfilOng(
         icon: Icons.assignment_turned_in_rounded,

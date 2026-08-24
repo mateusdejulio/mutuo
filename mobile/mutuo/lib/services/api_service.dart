@@ -7,7 +7,7 @@ class ApiService {
   // localhost funciona para Flutter Web no Chrome e simulador iOS
   // Para emulador Android: use 'http://10.0.2.2:3000'
   // Para celular físico: use o IP da sua máquina ex: 'http://143.106.241.23:3000' (certo)
-  
+
   static const String baseUrl = 'https://mutuo-api.onrender.com';
 
   final Map<String, String> _headers = {'Content-Type': 'application/json'};
@@ -218,7 +218,6 @@ class ApiService {
     }
   }
 
-  
   // ─── Atualiza nome/email/telefone da ONG ───
   // Usa PUT /ongs/:cnpj/perfil
   Future<Map<String, dynamic>> atualizarOng(
@@ -231,6 +230,25 @@ class ApiService {
         url,
         headers: _headers,
         body: jsonEncode(dados),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // ─── Ativa o plano Premium da ONG (simulação de assinatura) ───
+  // Usa PUT /ongs/:cnpj/premium
+  Future<Map<String, dynamic>> ativarPremiumOng(String cnpj) async {
+    final url = Uri.parse('$baseUrl/ongs/${Uri.encodeComponent(cnpj)}/premium');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode({'premium': 1}),
       );
       return jsonDecode(response.body);
     } catch (e) {
@@ -335,7 +353,6 @@ class ApiService {
     }
   }
 
-  
   // ─── Atualiza uma atividade existente da ONG ───
   // Usa PUT /servicos/ong/:id (multer, campo 'imagem' opcional — só
   // manda se o usuário trocar a foto na edição)
@@ -395,7 +412,7 @@ class ApiService {
     }
   }
 
-    // ─── NOVO: busca TODOS os serviços ativos de usuários (tela de Serviços / busca) ───
+  // ─── NOVO: busca TODOS os serviços ativos de usuários (tela de Serviços / busca) ───
   // Usa GET /servicos-usuario
   Future<List<dynamic>> buscarTodosServicos() async {
     final url = Uri.parse('$baseUrl/servicos-usuario');
@@ -474,48 +491,48 @@ class ApiService {
   }
 
   // ─── NOVO: cadastra um serviço oferecido pelo usuário ───
-// Usa POST /servicos (multer, campo do arquivo precisa se chamar
-// exatamente 'imagem', igual configurado no seu index.js -> uploadServico).
-// A imagem é opcional: se não vier, o serviço é criado sem foto.
-Future<Map<String, dynamic>> cadastrarServico({
-  required String cpf,
-  required String nomeServico,
-  required String descricao,
-  required String foco,
-  required String duracao,
-  List<int>? imagemBytes,
-  String? imagemNome,
-}) async {
-  final url = Uri.parse('$baseUrl/servicos');
-  try {
-    final request = http.MultipartRequest('POST', url);
-    request.fields['cpf'] = cpf;
-    request.fields['nomeServico'] = nomeServico;
-    request.fields['descricao'] = descricao;
-    request.fields['foco'] = foco;
-    request.fields['duracao'] = duracao;
+  // Usa POST /servicos (multer, campo do arquivo precisa se chamar
+  // exatamente 'imagem', igual configurado no seu index.js -> uploadServico).
+  // A imagem é opcional: se não vier, o serviço é criado sem foto.
+  Future<Map<String, dynamic>> cadastrarServico({
+    required String cpf,
+    required String nomeServico,
+    required String descricao,
+    required String foco,
+    required String duracao,
+    List<int>? imagemBytes,
+    String? imagemNome,
+  }) async {
+    final url = Uri.parse('$baseUrl/servicos');
+    try {
+      final request = http.MultipartRequest('POST', url);
+      request.fields['cpf'] = cpf;
+      request.fields['nomeServico'] = nomeServico;
+      request.fields['descricao'] = descricao;
+      request.fields['foco'] = foco;
+      request.fields['duracao'] = duracao;
 
-    if (imagemBytes != null && imagemNome != null) {
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'imagem',
-          imagemBytes,
-          filename: imagemNome,
-          contentType: _mimeTypeDaExtensao(imagemNome),
-        ),
-      );
+      if (imagemBytes != null && imagemNome != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'imagem',
+            imagemBytes,
+            filename: imagemNome,
+            contentType: _mimeTypeDaExtensao(imagemNome),
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
     }
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-    return jsonDecode(response.body);
-  } catch (e) {
-    return {
-      'sucesso': false,
-      'erro': 'Não foi possível conectar ao servidor: $e',
-    };
   }
-}
 
   // ─── Busca a foto de perfil do usuário ───
   // Usa GET /perfil/foto/:cpf

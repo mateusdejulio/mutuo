@@ -5,6 +5,7 @@ import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/widgets/modal_atividade_ong.dart';
+import 'package:mutuo/servicosOng.dart';
 
 class InicialOng extends StatefulWidget {
   final String nome;
@@ -85,9 +86,10 @@ class _InicialOngState extends State<InicialOng> {
 
   String get _inicial => _nomeOng.isNotEmpty ? _nomeOng[0].toUpperCase() : "O";
 
-    // Plano gratuito: até 3 atividades ativas. ONGs premium (campo `premium`
+  // Plano gratuito: até 3 atividades ativas. ONGs premium (campo `premium`
   // vindo do banco) não têm esse limite.
-  bool get _limiteAtingido => (_ong?['premium'] != 1) && _atividades.length >= 3;
+  bool get _limiteAtingido =>
+      (_ong?['premium'] != 1) && _atividades.length >= 3;
 
   String get _localizacao {
     final cidade = _ong?['cidade']?.toString() ?? '';
@@ -196,7 +198,17 @@ class _InicialOngState extends State<InicialOng> {
         icon: Icons.volunteer_activism_rounded,
         outlinedIcon: Icons.volunteer_activism_outlined,
         label: 'Atividades',
-        onTap: null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ServicosOng(
+                nome: _ong?['nomeOng'] ?? widget.nome,
+                cnpj: widget.cnpj,
+              ),
+            ),
+          );
+        },
       ),
       _NavItemOng(
         icon: Icons.assignment_turned_in_rounded,
@@ -756,13 +768,16 @@ class _InicialOngState extends State<InicialOng> {
           const SnackBar(content: Text("Em breve: central de notificações")),
         ),
       ),
-            _AcessoOngData(
+      _AcessoOngData(
         icone: Icons.diamond_outlined,
         label: "Nossos Planos",
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => PlanosOng(cnpj: widget.cnpj, nomeInicial: widget.nome)),
+            MaterialPageRoute(
+              builder: (_) =>
+                  PlanosOng(cnpj: widget.cnpj, nomeInicial: widget.nome),
+            ),
           );
         },
       ),
@@ -944,7 +959,7 @@ class _InicialOngState extends State<InicialOng> {
   }
 
   // ─── CARD "ADICIONAR NOVA ATIVIDADE" ───────────────────────
-    Widget _cardAdicionarAtividade() {
+  Widget _cardAdicionarAtividade() {
     final limiteAtingido = _limiteAtingido;
     return Container(
       width: double.infinity,
@@ -952,7 +967,11 @@ class _InicialOngState extends State<InicialOng> {
       decoration: BoxDecoration(
         color: _branco,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: limiteAtingido ? Colors.redAccent.withOpacity(0.3) : const Color(0xFFE0DDD8)),
+        border: Border.all(
+          color: limiteAtingido
+              ? Colors.redAccent.withOpacity(0.3)
+              : const Color(0xFFE0DDD8),
+        ),
       ),
       child: Column(
         children: [
@@ -960,21 +979,31 @@ class _InicialOngState extends State<InicialOng> {
             width: double.infinity,
             height: 90,
             decoration: BoxDecoration(
-              color: limiteAtingido ? Colors.redAccent.withOpacity(0.08) : _fundo,
+              color: limiteAtingido
+                  ? Colors.redAccent.withOpacity(0.08)
+                  : _fundo,
               borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,
             child: Icon(
               limiteAtingido ? Icons.lock_outline_rounded : Icons.add,
               size: 30,
-              color: limiteAtingido ? Colors.redAccent : const Color(0xFFB9C4B4),
+              color: limiteAtingido
+                  ? Colors.redAccent
+                  : const Color(0xFFB9C4B4),
             ),
           ),
           const SizedBox(height: 14),
           Text(
-            limiteAtingido ? "Limite de atividades atingido" : "Adicionar nova atividade",
+            limiteAtingido
+                ? "Limite de atividades atingido"
+                : "Adicionar nova atividade",
             textAlign: TextAlign.center,
-            style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFF1A2E1B)),
+            style: GoogleFonts.quicksand(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1A2E1B),
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -982,7 +1011,10 @@ class _InicialOngState extends State<InicialOng> {
                 ? "Seu plano gratuito permite até 3 atividades ativas. Faça upgrade pra cadastrar mais."
                 : "Crie uma nova oportunidade de voluntariado para engajar mais pessoas na sua causa.",
             textAlign: TextAlign.center,
-            style: GoogleFonts.quicksand(fontSize: 12, color: const Color(0xFF6B705C)),
+            style: GoogleFonts.quicksand(
+              fontSize: 12,
+              color: const Color(0xFF6B705C),
+            ),
           ),
           const SizedBox(height: 10),
           Text(
@@ -990,7 +1022,9 @@ class _InicialOngState extends State<InicialOng> {
             style: GoogleFonts.quicksand(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: limiteAtingido ? Colors.redAccent : const Color(0xFF9AAB96),
+              color: limiteAtingido
+                  ? Colors.redAccent
+                  : const Color(0xFF9AAB96),
             ),
           ),
           const SizedBox(height: 14),
@@ -1002,22 +1036,39 @@ class _InicialOngState extends State<InicialOng> {
                 foregroundColor: _branco,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               onPressed: limiteAtingido
                   ? () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => PlanosOng(cnpj: widget.cnpj, nomeInicial: widget.nome)),
-                      )
-                  : () => abrirModalAtividadeOng(
-                        context: context,
-                        cnpj: widget.cnpj,
-                        onSucesso: _carregarDados,
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PlanosOng(
+                          cnpj: widget.cnpj,
+                          nomeInicial: widget.nome,
+                        ),
                       ),
-              icon: Icon(limiteAtingido ? Icons.workspace_premium_outlined : Icons.add_circle_outline_rounded, size: 18),
+                    )
+                  : () => abrirModalAtividadeOng(
+                      context: context,
+                      cnpj: widget.cnpj,
+                      onSucesso: _carregarDados,
+                      totalAtividades: _atividades.length,
+                      ongPremium: _ong?['premium'] == 1,
+                    ),
+              icon: Icon(
+                limiteAtingido
+                    ? Icons.workspace_premium_outlined
+                    : Icons.add_circle_outline_rounded,
+                size: 18,
+              ),
               label: Text(
                 limiteAtingido ? "Ver planos" : "Criar atividade",
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 14),
+                style: GoogleFonts.quicksand(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
