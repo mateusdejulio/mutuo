@@ -652,13 +652,38 @@ app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
 
 // Ativa/desativa o plano premium do usuário (usado no checkout simulado)
 app.put('/usuarios/:cpf/premium', async (req, res) => {
-  const { premium } = req.body;
-  if (premium === undefined) {
-    return res.status(400).json({ erro: 'Campo "premium" não informado.' });
+  const premium = Number(req.body.premium);
+
+  if (![0, 1].includes(premium)) {
+    return res.status(400).json({
+      sucesso: false,
+      erro: 'O campo "premium" deve ser 0 ou 1.'
+    });
   }
-  const resultado = await db.atualizarPremiumUsuario(req.params.cpf, premium);
-  if (resultado.error) return res.status(500).json({ erro: resultado.error });
-  res.json(resultado);
+
+  const resultado = await db.atualizarPremiumUsuario(
+    req.params.cpf,
+    premium
+  );
+
+  if (resultado.error) {
+    return res.status(500).json({
+      sucesso: false,
+      erro: resultado.error
+    });
+  }
+
+  if (!resultado.success) {
+    return res.status(404).json({
+      sucesso: false,
+      erro: 'Usuário não encontrado.'
+    });
+  }
+
+  res.json({
+    sucesso: true,
+    premium
+  });
 });
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.

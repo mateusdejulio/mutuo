@@ -1172,9 +1172,12 @@ async function atualizarPremiumUsuario(cpf, premium) {
   try {
     const [result] = await pool.query(
       'UPDATE Mutuo_Usuario SET premium = ? WHERE cpf = ?',
-      [premium ? 1 : 0, cpf]
+      [premium, cpf]
     );
-    return { success: result.affectedRows > 0 };
+
+    return {
+      success: result.affectedRows > 0
+    };
   } catch (err) {
     console.error('Erro ao atualizar premium do usuário:', err.message);
     return { error: err.message };
