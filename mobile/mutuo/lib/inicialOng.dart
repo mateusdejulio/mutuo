@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/perfilOng.dart';
+import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/widgets/modal_atividade_ong.dart';
 
 class InicialOng extends StatefulWidget {
   final String nome;
@@ -83,6 +85,10 @@ class _InicialOngState extends State<InicialOng> {
 
   String get _inicial => _nomeOng.isNotEmpty ? _nomeOng[0].toUpperCase() : "O";
 
+    // Plano gratuito: até 3 atividades ativas. ONGs premium (campo `premium`
+  // vindo do banco) não têm esse limite.
+  bool get _limiteAtingido => (_ong?['premium'] != 1) && _atividades.length >= 3;
+
   String get _localizacao {
     final cidade = _ong?['cidade']?.toString() ?? '';
     final estado = _ong?['estado']?.toString() ?? '';
@@ -126,14 +132,12 @@ class _InicialOngState extends State<InicialOng> {
                             _gridAcessoRapido(),
                             const SizedBox(height: 28),
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _sectionTitle("Adicionados recentemente"),
                                 GestureDetector(
                                   onTap: () {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
                                           "Em breve: lista completa de atividades",
@@ -175,27 +179,59 @@ class _InicialOngState extends State<InicialOng> {
     );
   }
 
-    // ─── BOTTOM NAV (mesmo padrão visual do resto do app) ──────
+  // ─── BOTTOM NAV (mesmo padrão visual do resto do app) ──────
   // "Atividades", "Solicitações" e "Chat" ainda não têm tela própria
   // pra ONG — ficam com onTap: null por enquanto, igual o "Chat" já
   // funciona hoje em inicialUser.dart (só realça a aba, sem navegar
   // pra lugar nenhum e sem quebrar nada).
   Widget _buildBottomNav() {
     final navItems = [
-      _NavItemOng(icon: Icons.home_rounded, outlinedIcon: Icons.home_outlined, label: 'Início', onTap: null),
-      _NavItemOng(icon: Icons.volunteer_activism_rounded, outlinedIcon: Icons.volunteer_activism_outlined, label: 'Atividades', onTap: null),
-      _NavItemOng(icon: Icons.assignment_turned_in_rounded, outlinedIcon: Icons.assignment_turned_in_outlined, label: 'Solicitações', onTap: null),
-      _NavItemOng(icon: Icons.chat_bubble_rounded, outlinedIcon: Icons.chat_bubble_outline_rounded, label: 'Chat', onTap: null),
+      _NavItemOng(
+        icon: Icons.home_rounded,
+        outlinedIcon: Icons.home_outlined,
+        label: 'Início',
+        onTap: null,
+      ),
+      _NavItemOng(
+        icon: Icons.volunteer_activism_rounded,
+        outlinedIcon: Icons.volunteer_activism_outlined,
+        label: 'Atividades',
+        onTap: null,
+      ),
+      _NavItemOng(
+        icon: Icons.assignment_turned_in_rounded,
+        outlinedIcon: Icons.assignment_turned_in_outlined,
+        label: 'Solicitações',
+        onTap: null,
+      ),
+      _NavItemOng(
+        icon: Icons.chat_bubble_rounded,
+        outlinedIcon: Icons.chat_bubble_outline_rounded,
+        label: 'Chat',
+        onTap: null,
+      ),
     ];
 
     return Container(
       decoration: BoxDecoration(
         color: _branco,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, -4))],
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
       ),
       child: ClipRRect(
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
         child: BottomNavigationBar(
           currentIndex: _bottomNavIndex,
           onTap: (index) {
@@ -211,15 +247,24 @@ class _InicialOngState extends State<InicialOng> {
           elevation: 0,
           selectedItemColor: _verde,
           unselectedItemColor: const Color(0xFF9AAB96),
-          selectedLabelStyle: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w700),
-          unselectedLabelStyle: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.w600),
+          selectedLabelStyle: GoogleFonts.quicksand(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+          unselectedLabelStyle: GoogleFonts.quicksand(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
           items: List.generate(navItems.length, (index) {
             final item = navItems[index];
             final isSelected = index == _bottomNavIndex;
             return BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(isSelected ? item.icon : item.outlinedIcon, size: 22),
+                child: Icon(
+                  isSelected ? item.icon : item.outlinedIcon,
+                  size: 22,
+                ),
               ),
               label: item.label,
             );
@@ -228,7 +273,6 @@ class _InicialOngState extends State<InicialOng> {
       ),
     );
   }
-
 
   // ─── HEADER ───────────────────────────────────────────────
   Widget _header(BuildContext context) {
@@ -277,12 +321,34 @@ class _InicialOngState extends State<InicialOng> {
                   MaterialPageRoute(builder: (_) => const Login()),
                   (route) => false,
                 );
+              } else if (value == 'meu_perfil') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        PerfilOng(cnpj: widget.cnpj, nomeInicial: widget.nome),
+                  ),
+                );
               }
             },
             offset: const Offset(0, 50),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'meu_perfil',
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline, size: 18, color: _verde),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Meu Perfil",
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'logout',
                 child: Row(
@@ -470,7 +536,10 @@ class _InicialOngState extends State<InicialOng> {
                   texto: _localizacao,
                 ),
               // "ONG verificada" ainda não existe como campo no banco — visual fixo por enquanto.
-              _badgeClaro(icone: Icons.verified_outlined, texto: "ONG verificada"),
+              _badgeClaro(
+                icone: Icons.verified_outlined,
+                texto: "ONG verificada",
+              ),
             ],
           ),
           const SizedBox(height: 22),
@@ -507,8 +576,10 @@ class _InicialOngState extends State<InicialOng> {
                 child: Container(
                   width: 24,
                   height: 24,
-                  decoration:
-                      const BoxDecoration(color: _branco, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: _branco,
+                    shape: BoxShape.circle,
+                  ),
                   child: const Icon(Icons.check, size: 16, color: _verde),
                 ),
               ),
@@ -607,7 +678,10 @@ class _InicialOngState extends State<InicialOng> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: _bege, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: _bege,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(
         children: [
           Text(
@@ -661,14 +735,15 @@ class _InicialOngState extends State<InicialOng> {
   // ─── ACESSO RÁPIDO ────────────────────────────────────────
   Widget _gridAcessoRapido() {
     final itens = [
-            _AcessoOngData(
+      _AcessoOngData(
         icone: Icons.person_outline_rounded,
         label: "Meu Perfil",
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => PerfilOng(cnpj: widget.cnpj, nomeInicial: widget.nome),
+              builder: (_) =>
+                  PerfilOng(cnpj: widget.cnpj, nomeInicial: widget.nome),
             ),
           );
         },
@@ -681,12 +756,15 @@ class _InicialOngState extends State<InicialOng> {
           const SnackBar(content: Text("Em breve: central de notificações")),
         ),
       ),
-      _AcessoOngData(
+            _AcessoOngData(
         icone: Icons.diamond_outlined,
         label: "Nossos Planos",
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Em breve: planos premium para ONGs")),
-        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => PlanosOng(cnpj: widget.cnpj, nomeInicial: widget.nome)),
+          );
+        },
       ),
       _AcessoOngData(
         icone: Icons.person_outline_rounded,
@@ -749,7 +827,10 @@ class _InicialOngState extends State<InicialOng> {
                 top: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.redAccent,
                     borderRadius: BorderRadius.circular(10),
@@ -798,8 +879,9 @@ class _InicialOngState extends State<InicialOng> {
     final nome = atividade['nomeServico']?.toString() ?? 'Atividade sem nome';
     final descricao = atividade['descricao']?.toString() ?? '';
     final imagem = atividade['imagem']?.toString();
-    final imagemUrl =
-        (imagem != null && imagem.isNotEmpty) ? '${ApiService.baseUrl}$imagem' : null;
+    final imagemUrl = (imagem != null && imagem.isNotEmpty)
+        ? '${ApiService.baseUrl}$imagem'
+        : null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -814,12 +896,20 @@ class _InicialOngState extends State<InicialOng> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: imagemUrl != null
-                ? Image.network(imagemUrl, width: 56, height: 56, fit: BoxFit.cover)
+                ? Image.network(
+                    imagemUrl,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                  )
                 : Container(
                     width: 56,
                     height: 56,
                     color: _bege,
-                    child: const Icon(Icons.volunteer_activism_outlined, color: _verde),
+                    child: const Icon(
+                      Icons.volunteer_activism_outlined,
+                      color: _verde,
+                    ),
                   ),
           ),
           const SizedBox(width: 12),
@@ -854,36 +944,43 @@ class _InicialOngState extends State<InicialOng> {
   }
 
   // ─── CARD "ADICIONAR NOVA ATIVIDADE" ───────────────────────
-  Widget _cardAdicionarAtividade() {
+    Widget _cardAdicionarAtividade() {
+    final limiteAtingido = _limiteAtingido;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: _branco,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE0DDD8)),
+        border: Border.all(color: limiteAtingido ? Colors.redAccent.withOpacity(0.3) : const Color(0xFFE0DDD8)),
       ),
       child: Column(
         children: [
           Container(
             width: double.infinity,
             height: 90,
-            decoration: BoxDecoration(color: _fundo, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(
+              color: limiteAtingido ? Colors.redAccent.withOpacity(0.08) : _fundo,
+              borderRadius: BorderRadius.circular(14),
+            ),
             alignment: Alignment.center,
-            child: const Icon(Icons.add, size: 30, color: Color(0xFFB9C4B4)),
+            child: Icon(
+              limiteAtingido ? Icons.lock_outline_rounded : Icons.add,
+              size: 30,
+              color: limiteAtingido ? Colors.redAccent : const Color(0xFFB9C4B4),
+            ),
           ),
           const SizedBox(height: 14),
           Text(
-            "Adicionar nova atividade",
-            style: GoogleFonts.quicksand(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF1A2E1B),
-            ),
+            limiteAtingido ? "Limite de atividades atingido" : "Adicionar nova atividade",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFF1A2E1B)),
           ),
           const SizedBox(height: 4),
           Text(
-            "Crie uma nova oportunidade de voluntariado para engajar mais pessoas na sua causa.",
+            limiteAtingido
+                ? "Seu plano gratuito permite até 3 atividades ativas. Faça upgrade pra cadastrar mais."
+                : "Crie uma nova oportunidade de voluntariado para engajar mais pessoas na sua causa.",
             textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(fontSize: 12, color: const Color(0xFF6B705C)),
           ),
@@ -893,7 +990,7 @@ class _InicialOngState extends State<InicialOng> {
             style: GoogleFonts.quicksand(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF9AAB96),
+              color: limiteAtingido ? Colors.redAccent : const Color(0xFF9AAB96),
             ),
           ),
           const SizedBox(height: 14),
@@ -901,22 +998,25 @@ class _InicialOngState extends State<InicialOng> {
             width: double.infinity,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _verde,
+                backgroundColor: limiteAtingido ? Colors.redAccent : _verde,
                 foregroundColor: _branco,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
-              onPressed: () {
-                // TODO: ainda não existe tela de cadastro de atividade da ONG no app —
-                // ligue aqui quando ela for criada (o backend já tem POST /servicos/ong pronto).
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Em breve: cadastro de atividade")),
-                );
-              },
-              icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+              onPressed: limiteAtingido
+                  ? () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => PlanosOng(cnpj: widget.cnpj, nomeInicial: widget.nome)),
+                      )
+                  : () => abrirModalAtividadeOng(
+                        context: context,
+                        cnpj: widget.cnpj,
+                        onSucesso: _carregarDados,
+                      ),
+              icon: Icon(limiteAtingido ? Icons.workspace_premium_outlined : Icons.add_circle_outline_rounded, size: 18),
               label: Text(
-                "Criar atividade",
+                limiteAtingido ? "Ver planos" : "Criar atividade",
                 style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 14),
               ),
             ),
@@ -933,9 +1033,13 @@ class _NavItemOng {
   final String label;
   final VoidCallback? onTap;
 
-  _NavItemOng({required this.icon, required this.outlinedIcon, required this.label, this.onTap});
+  _NavItemOng({
+    required this.icon,
+    required this.outlinedIcon,
+    required this.label,
+    this.onTap,
+  });
 }
-
 
 // ─── DATA CLASS AUXILIAR ──────────────────────────────────
 class _AcessoOngData {
@@ -944,5 +1048,10 @@ class _AcessoOngData {
   final int? badge;
   final VoidCallback? onTap;
 
-  _AcessoOngData({required this.icone, required this.label, this.badge, this.onTap});
+  _AcessoOngData({
+    required this.icone,
+    required this.label,
+    this.badge,
+    this.onTap,
+  });
 }

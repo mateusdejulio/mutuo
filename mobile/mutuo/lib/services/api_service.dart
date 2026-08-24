@@ -335,6 +335,49 @@ class ApiService {
     }
   }
 
+  
+  // ─── Atualiza uma atividade existente da ONG ───
+  // Usa PUT /servicos/ong/:id (multer, campo 'imagem' opcional — só
+  // manda se o usuário trocar a foto na edição)
+  Future<Map<String, dynamic>> atualizarServicoOng({
+    required String id,
+    required String nomeServico,
+    required String descricao,
+    required String foco,
+    required String duracao,
+    List<int>? imagemBytes,
+    String? imagemNome,
+  }) async {
+    final url = Uri.parse('$baseUrl/servicos/ong/$id');
+    try {
+      final request = http.MultipartRequest('PUT', url);
+      request.fields['nomeServico'] = nomeServico;
+      request.fields['descricao'] = descricao;
+      request.fields['foco'] = foco;
+      request.fields['duracao'] = duracao;
+
+      if (imagemBytes != null && imagemNome != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'imagem',
+            imagemBytes,
+            filename: imagemNome,
+            contentType: _mimeTypeDaExtensao(imagemNome),
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
   // ─── NOVO: busca os serviços em destaque (usuários premium) pro carrossel da tela inicial ───
   // Usa GET /servicos-destaque
   Future<List<dynamic>> buscarServicosDestaque() async {
