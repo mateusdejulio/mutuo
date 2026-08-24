@@ -589,16 +589,27 @@ async function atualizarFotoPerfil(cpf, nomeArquivo) {
 // Buscar dados completos da ONG pelo CNPJ (perfil)
 async function getOngPorCnpj(cnpj) {
   try {
-    const [rows] = await pool.query('SELECT * FROM Mutuo_ONG WHERE cnpj = ?', [cnpj]);
+    const [rows] = await pool.query(
+      'SELECT * FROM Mutuo_ONG WHERE cnpj = ?',
+      [cnpj]
+    );
+
     if (rows.length === 0) return null;
- 
-    // nunca devolve a senha pro front-end
+
+    // Nunca devolve a senha para o front-end
     const ong = rows[0];
     delete ong.senha;
+
     return ong;
   } catch (err) {
-    console.error('Erro ao buscar ONG por cnpj:', err.message);
-    return { error: err.message };
+    console.error(
+      'Erro ao buscar ONG por CNPJ:',
+      err.message
+    );
+
+    return {
+      error: err.message
+    };
   }
 }
  
@@ -1183,6 +1194,28 @@ async function atualizarPremiumUsuario(cpf, premium) {
     return { error: err.message };
   }
 }
+async function atualizarPremiumOng(cnpj, premium) {
+  try {
+    const [result] = await pool.query(
+      'UPDATE Mutuo_ONG SET premium = ? WHERE cnpj = ?',
+      [premium, cnpj]
+    );
+
+    return {
+      success: result.affectedRows > 0,
+      premium
+    };
+  } catch (err) {
+    console.error(
+      'Erro ao atualizar Premium da ONG:',
+      err.message
+    );
+
+    return {
+      error: err.message
+    };
+  }
+}
 
 module.exports = { 
   getUsuarios, 
@@ -1256,5 +1289,6 @@ module.exports = {
   getServicosPertoDeVoce,
   contarServicosAtivosUsuario,
   isUsuarioPremium,
-  atualizarPremiumUsuario
+  atualizarPremiumUsuario,
+  atualizarPremiumOng
 };

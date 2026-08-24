@@ -685,6 +685,41 @@ app.put('/usuarios/:cpf/premium', async (req, res) => {
     premium
   });
 });
+
+app.put('/ongs/:cnpj/premium', async (req, res) => {
+  const premium = Number(req.body.premium);
+
+  if (![0, 1].includes(premium)) {
+    return res.status(400).json({
+      sucesso: false,
+      erro: 'O campo "premium" deve ser 0 ou 1.'
+    });
+  }
+
+  const resultado = await db.atualizarPremiumOng(
+    req.params.cnpj,
+    premium
+  );
+
+  if (resultado.error) {
+    return res.status(500).json({
+      sucesso: false,
+      erro: resultado.error
+    });
+  }
+
+  if (!resultado.success) {
+    return res.status(404).json({
+      sucesso: false,
+      erro: 'ONG não encontrada.'
+    });
+  }
+
+  res.json({
+    sucesso: true,
+    premium
+  });
+});
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
 // Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.
