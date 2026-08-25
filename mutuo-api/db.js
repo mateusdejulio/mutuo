@@ -953,6 +953,25 @@ async function getSolicitacoesOng(cnpj) {
   }
 }
 
+// Conta usuários distintos que concluíram serviços pertencentes a uma ONG.
+async function contarVoluntariosOng(cnpj) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT COUNT(DISTINCT SOL.codUsuario) AS totalVoluntarios
+       FROM Mutuo_SolicitacaoONG AS SOL
+       JOIN Mutuo_ServicoOng AS SERV ON SOL.codServico = SERV.id
+       WHERE SERV.cnpj = ?
+         AND SOL.statusExecucao = 'Realizada'`,
+      [cnpj]
+    );
+
+    return Number(rows[0]?.totalVoluntarios || 0);
+  } catch (err) {
+    console.error('Erro ao contar voluntários da ONG:', err.message);
+    throw err;
+  }
+}
+
 // Aceita/recusa uma solicitação de serviço de ONG
 async function alterSolicitacaoOng(cod, statusS, statusE, pontos) {
   const sql = 'UPDATE Mutuo_SolicitacaoONG SET statusSolicitacao = ?, statusExecucao = ?, pontos = ? WHERE codSolicitacao = ?';
@@ -1171,7 +1190,9 @@ async function isUsuarioPremium(cpf) {
       [cpf]
     );
     if (rows.length === 0) return false;
-    return rows[0].premium === 1;
+    const valor = rows[0].premium;
+    return valor === true || Number(valor) === 1 ||
+      (Buffer.isBuffer(valor) && valor[0] === 1);
   } catch (err) {
     console.error('Erro ao verificar premium do usuário:', err.message);
     throw err;
@@ -1238,8 +1259,14 @@ async function isOngPremium(cnpj) {
       'SELECT premium FROM Mutuo_ONG WHERE cnpj = ?',
       [cnpj]
     );
+
     if (rows.length === 0) return false;
-    return rows[0].premium === 1;
+
+    const valor = rows[0].premium;
+
+    return valor === true ||
+      Number(valor) === 1 ||
+      (Buffer.isBuffer(valor) && valor[0] === 1);
   } catch (err) {
     console.error('Erro ao verificar premium da ONG:', err.message);
     throw err;
@@ -1364,6 +1391,28 @@ async function avaliarSolicitacao(cod, notaNova) {
   } finally {
     conexao.release();
   }
+// Conta usuários distintos que concluíram serviços pertencentes a uma ONG
+async function contarVoluntariosOng(cnpj) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT COUNT(DISTINCT SOL.codUsuario) AS totalVoluntarios
+       FROM Mutuo_SolicitacaoONG AS SOL
+       JOIN Mutuo_ServicoOng AS SERV
+         ON SOL.codServico = SERV.id
+       WHERE SERV.cnpj = ?
+         AND SOL.statusExecucao = 'Realizada'`,
+      [cnpj]
+    );
+
+    return Number(rows[0]?.totalVoluntarios || 0);
+  } catch (err) {
+    console.error(
+      'Erro ao contar voluntários da ONG:',
+      err.message
+    );
+
+    throw err;
+  }
 }
 
 module.exports = { 
@@ -1427,6 +1476,7 @@ module.exports = {
   getEstatisticasUsuario,
   cadastrarSolicitacaoOng,
   getSolicitacoesOng,
+  contarVoluntariosOng,
   alterSolicitacaoOng,
   buscarCertificadosPorUsuario,
   buscarDadosCertificado,
@@ -1445,5 +1495,7 @@ module.exports = {
   responderSolicitacao,
   getSolicitacoesParaConfirmar,
   confirmarSolicitacao,
-  avaliarSolicitacao
+  avaliarSolicitacao,
+contarVoluntariosOng
 };
+  }

@@ -195,6 +195,16 @@ app.get('/ongs/:cnpj', async (req, res) => {
   res.json({ ...ong, pontos });
 });
 
+// Total de CPFs distintos que já realizaram serviços para a ONG.
+app.get('/ongs/:cnpj/voluntarios-realizados', async (req, res) => {
+  try {
+    const totalVoluntarios = await db.contarVoluntariosOng(req.params.cnpj);
+    res.json({ totalVoluntarios });
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
 app.put('/ongs/:cnpj', async (req, res) => {
     const { ativo, responsavel, foco } = req.body;
     res.json(await db.alterONG(req.params.cnpj, ativo, responsavel, foco));
@@ -225,14 +235,14 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
 
     // ── Checagem do limite de serviços por plano ──
     const premium = await db.isOngPremium(cnpj);
-    const limite = premium ? 8 : 5;
+    const limite = premium ? 10 : 5;
     const totalAtual = await db.contarServicosAtivosOng(cnpj);
 
     if (totalAtual >= limite) {
       return res.status(403).json({
         erro: premium
           ? `Você atingiu o limite de ${limite} serviços do plano Premium.`
-          : `Você atingiu o limite de ${limite} serviços do plano gratuito. Assine o Premium para cadastrar até 8 serviços.`
+          : `Você atingiu o limite de ${limite} serviços do plano gratuito. Assine o Premium para cadastrar até 10 serviços.`
       });
     }
 
@@ -732,6 +742,28 @@ app.put('/ongs/:cnpj/premium', async (req, res) => {
     premium
   });
 });
+// Total de CPFs distintos que já realizaram serviços para a ONG
+app.get(
+  '/ongs/:cnpj/voluntarios-realizados',
+  async (req, res) => {
+    try {
+      const totalVoluntarios =
+        await db.contarVoluntariosOng(req.params.cnpj);
+          res.json({
+        totalVoluntarios
+      });
+    } catch (erro) {
+      console.error(
+        'Erro ao carregar voluntários da ONG:',
+        erro.message
+      );
+
+      res.status(500).json({
+        erro: 'Não foi possível carregar os voluntários.'
+      });
+    }
+  }
+);
 
 // confirmação e avaliação
 
@@ -761,6 +793,7 @@ app.post('/solicitacoes/:cod/avaliar', async (req, res) => {
   res.json(resultado);
 });
 
+    
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
