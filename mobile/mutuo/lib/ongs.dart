@@ -4,31 +4,71 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
-
+import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/perfil.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
+// Representa uma atividade de ONG vinda do banco (rota /servicos-ong)
 class Ong {
+  final String? id;
   final String titulo;
   final String descricao;
   final String local;
   final String tempo;
+  final String imagem;
+  final String? imagemUrl;
   final String categoria;
   final String nomeOng;
+  final String? fotoOngUrl;
   final double avaliacao;
   final int totalAvaliacoes;
-  final String imagem;
+  final int pontos;
 
   Ong({
+    this.id,
     required this.titulo,
     required this.descricao,
     required this.local,
     required this.tempo,
     required this.imagem,
+    this.imagemUrl,
     this.categoria = "Geral",
     this.nomeOng = "ONG",
+    this.fotoOngUrl,
     this.avaliacao = 4.0,
     this.totalAvaliacoes = 0,
+    this.pontos = 0,
   });
+
+  factory Ong.fromJson(Map<String, dynamic> json) {
+    final horas = json['horas'];
+    final caminhoImagem = json['imagem']?.toString();
+    final caminhoFoto = json['fotoOng']?.toString();
+    return Ong(
+      id: json['id']?.toString(),
+      titulo: json['nomeServico']?.toString() ?? '',
+      descricao: json['descricao']?.toString() ?? '',
+      local: [
+        json['cidade'],
+        json['estado'],
+      ].where((v) => v != null && v.toString().isNotEmpty).join(', '),
+      tempo: horas != null ? '${horas}h' : '',
+      imagem: caminhoImagem ?? '',
+      imagemUrl: (caminhoImagem != null && caminhoImagem.isNotEmpty)
+          ? '${ApiService.baseUrl}$caminhoImagem'
+          : null,
+      categoria: (json['foco']?.toString().isNotEmpty ?? false)
+          ? json['foco'].toString()
+          : 'Geral',
+      nomeOng: (json['nomeOng']?.toString().isNotEmpty ?? false)
+          ? json['nomeOng'].toString()
+          : 'ONG',
+      fotoOngUrl: (caminhoFoto != null && caminhoFoto.isNotEmpty)
+          ? '${ApiService.baseUrl}$caminhoFoto'
+          : null,
+      pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
+    );
+  }
 }
 
 // ─── DETALHE ONG ──────────────────────────────────────────
@@ -39,142 +79,301 @@ class DetalheOng extends StatelessWidget {
 
   static const _verde = Color(0xFF3A5A40);
   static const _verdeMedio = Color(0xFF588157);
+  static const _fundo = Color(0xFFEDEAE5);
+  static const _branco = Colors.white;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          ong.titulo,
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.w700),
-        ),
-        backgroundColor: _verde,
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: _fundo,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Hero(
-              tag: 'ong_${ong.titulo}',
-              child: Image.asset(
-                ong.imagem,
-                height: 220,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) {
-                  return Container(
-                    height: 220,
-                    width: double.infinity,
-                    color: const Color(0xFFB7D5B0),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _verde,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      ong.categoria.toUpperCase(),
-                      style: GoogleFonts.quicksand(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    ong.titulo,
-                    style: GoogleFonts.quicksand(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2D3319),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: _verdeMedio,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        ong.local,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 13,
-                          color: const Color(0xFF6B705C),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(
-                        Icons.access_time_rounded,
-                        size: 14,
-                        color: _verdeMedio,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        ong.tempo,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 13,
-                          color: const Color(0xFF6B705C),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    ong.descricao,
-                    style: GoogleFonts.quicksand(
-                      fontSize: 14,
-                      height: 1.6,
-                      color: const Color(0xFF344E41),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _verde,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      icon: const Icon(Icons.info_outline, size: 18),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Interesse registrado!"),
+            Stack(
+              children: [
+                Hero(
+                  tag: 'ong_${ong.id}',
+                  child: ong.imagemUrl != null
+                      ? Image.network(
+                          ong.imagemUrl!,
+                          height: 280,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 280,
+                              width: double.infinity,
+                              color: const Color(0xFFB7D5B0),
+                              child: const Icon(
+                                Icons.broken_image,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          height: 280,
+                          width: double.infinity,
+                          color: const Color(0xFFB7D5B0),
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.white,
+                            size: 50,
                           ),
-                        );
-                      },
-                      label: Text(
-                        "Saiba mais",
-                        style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                        ),
+                ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: SafeArea(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 18,
+                          color: Color(0xFF344E41),
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: SafeArea(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 15,
+                            color: Color(0xFFF4A261),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${ong.pontos} pts",
+                            style: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF344E41),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Transform.translate(
+              offset: const Offset(0, -24),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+                decoration: const BoxDecoration(
+                  color: _branco,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ong.titulo,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2D3319),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _verde.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _verde.withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.volunteer_activism_rounded,
+                            color: _verde,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          ong.nomeOng,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF344E41),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: _verdeMedio,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          ong.local,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            color: const Color(0xFF6B705C),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 16,
+                          color: _verdeMedio,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          ong.tempo,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            color: const Color(0xFF6B705C),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    Container(height: 1, color: const Color(0xFFEDEAE5)),
+                    const SizedBox(height: 22),
+                    Text(
+                      "Sobre a atividade",
+                      style: GoogleFonts.quicksand(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF344E41),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      ong.descricao,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: const Color(0xFF6B705C),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _verde,
+                              side: BorderSide(
+                                color: _verde.withOpacity(0.4),
+                                width: 1.5,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Em breve: chat de dúvidas!"),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 18,
+                            ),
+                            label: Text(
+                              "Tirar dúvidas",
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _verde,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Interesse registrado!"),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.check_circle_outline_rounded,
+                              size: 18,
+                            ),
+                            label: Text(
+                              "Quero participar",
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -190,7 +389,12 @@ class Ongs extends StatefulWidget {
   final String cpf;
   final int initialNavIndex;
 
-  const Ongs({super.key, required this.nome, required this.cpf, this.initialNavIndex = 2});
+  const Ongs({
+    super.key,
+    required this.nome,
+    required this.cpf,
+    this.initialNavIndex = 2,
+  });
 
   @override
   State<Ongs> createState() => _OngsState();
@@ -202,6 +406,10 @@ class _OngsState extends State<Ongs> {
   final TextEditingController _buscaController = TextEditingController();
   String _busca = "";
 
+  final ApiService _apiService = ApiService();
+  List<Ong> _todasOngs = [];
+  bool _carregando = true;
+
   // ─── Paleta ───────────────────────────────────────────────
   static const _verde = Color(0xFF3A5A40);
   static const _verdeMedio = Color(0xFF588157);
@@ -209,86 +417,18 @@ class _OngsState extends State<Ongs> {
   static const _fundo = Color(0xFFEDEAE5);
   static const _branco = Colors.white;
 
-  final List<String> _categorias = [
-    "Todos",
-    "Animais",
-    "Crianças e adolescentes",
-    "Idosos",
-    "Ambientais",
-    "Educação",
-  ];
+  // ─── categorias montadas dinamicamente a partir das atividades cadastradas ───
+  List<String> get _categorias {
+    final focosUnicos =
+        _todasOngs
+            .map((o) => o.categoria)
+            .where((f) => f.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
-  final List<Ong> _todasOngs = [
-    Ong(
-      titulo: "Passeie com os cachorros",
-      descricao: "...",
-      local: "Rio de Janeiro, RJ",
-      tempo: "30min",
-      imagem: "assets/images/passeioCachorro.png",
-      categoria: "Animais",
-      nomeOng: "Instituto Cães Amigos",
-    ),
-    Ong(
-      titulo: "Aulas de reforço para crianças",
-      descricao:
-          "Apoie crianças em situação de vulnerabilidade com aulas de reforço escolar. Faça a diferença na educação.",
-      local: "São Paulo, SP",
-      tempo: "2h",
-      imagem: "assets/images/aulaOng.png",
-      categoria: "Crianças e adolescentes",
-      nomeOng: "ONG Crescer Juntos",
-      avaliacao: 4.8,
-      totalAvaliacoes: 312,
-    ),
-    Ong(
-      titulo: "Visita a idosos",
-      descricao:
-          "Leve companhia e carinho a idosos em asilos. Uma hora do seu tempo transforma o dia de alguém.",
-      local: "Curitiba, PR",
-      tempo: "1h",
-      imagem: "assets/images/imagemensino.jpg",
-      categoria: "Idosos",
-      nomeOng: "Instituto Viver Bem",
-      avaliacao: 4.9,
-      totalAvaliacoes: 542,
-    ),
-    Ong(
-      titulo: "Plantio de árvores",
-      descricao:
-          "Participe do nosso mutirão de reflorestamento urbano. Juntos podemos recuperar áreas degradadas.",
-      local: "Belo Horizonte, MG",
-      tempo: "3h",
-      imagem: "assets/images/imagemjardineiro.png",
-      categoria: "Ambientais",
-      nomeOng: "Verde Vivo",
-      avaliacao: 4.6,
-      totalAvaliacoes: 189,
-    ),
-    Ong(
-      titulo: "Tutoria para jovens",
-      descricao:
-          "Oriente jovens em fase escolar com mentoria de carreira e apoio emocional. Seja um tutor voluntário.",
-      local: "Online",
-      tempo: "1h 30min",
-      imagem: "assets/images/evento.png",
-      categoria: "Educação",
-      nomeOng: "Conecta Jovem",
-      avaliacao: 4.7,
-      totalAvaliacoes: 78,
-    ),
-    Ong(
-      titulo: "Adoção responsável",
-      descricao:
-          "Ajude a encontrar lares para animais resgatados. Faça triagem, fotos e divulgação para adoção.",
-      local: "Porto Alegre, RS",
-      tempo: "2h",
-      imagem: "feira.png",
-      categoria: "Animais",
-      nomeOng: "Patinhas Felizes",
-      avaliacao: 4.4,
-      totalAvaliacoes: 260,
-    ),
-  ];
+    return ["Todos", ...focosUnicos];
+  }
 
   List<Ong> get _ongsFiltradas {
     return _todasOngs.where((o) {
@@ -307,6 +447,25 @@ class _OngsState extends State<Ongs> {
   void initState() {
     super.initState();
     _bottomNavIndex = widget.initialNavIndex;
+    _carregarOngs();
+  }
+
+  // ─── Busca as atividades reais das ONGs na API ───
+  Future<void> _carregarOngs() async {
+    final dados = await _apiService.buscarTodosServicosOng();
+    if (!mounted) return;
+
+    setState(() {
+      _todasOngs = dados
+          .whereType<Map<String, dynamic>>()
+          .map((json) => Ong.fromJson(json))
+          .toList();
+      _carregando = false;
+
+      if (!_categorias.contains(_categoriaSelecionada)) {
+        _categoriaSelecionada = "Todos";
+      }
+    });
   }
 
   @override
@@ -361,7 +520,9 @@ class _OngsState extends State<Ongs> {
                       child: Row(
                         children: [
                           Text(
-                            "${filtradas.length} serviços encontrados",
+                            _carregando
+                                ? "Carregando atividades..."
+                                : "${filtradas.length} atividades encontradas",
                             style: GoogleFonts.quicksand(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -385,17 +546,60 @@ class _OngsState extends State<Ongs> {
                     ),
 
                     const SizedBox(height: 14),
-                    _chipsCategorias(),
+                    if (!_carregando) _chipsCategorias(),
                     const SizedBox(height: 20),
 
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: filtradas.length,
-                      itemBuilder: (context, index) =>
-                          _ongCard(filtradas[index]),
-                    ),
+                    if (_carregando)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 60),
+                        child: Center(
+                          child: CircularProgressIndicator(color: _verde),
+                        ),
+                      )
+                    else if (filtradas.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 40,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: _branco,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: const Color(0xFFE0DDD8)),
+                          ),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.search_off_rounded,
+                                color: _verdeMedio,
+                                size: 32,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Nenhuma atividade encontrada",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF6B705C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: filtradas.length,
+                        itemBuilder: (context, index) =>
+                            _ongCard(filtradas[index]),
+                      ),
 
                     const SizedBox(height: 24),
                   ],
@@ -454,11 +658,22 @@ class _OngsState extends State<Ongs> {
                   MaterialPageRoute(builder: (_) => Login()),
                   (route) => false,
                 );
+              } else if (value == 'meu_perfil') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PerfilUsuario(
+                      cpf: widget.cpf,
+                      nomeInicial: widget.nome,
+                    ),
+                  ),
+                );
               } else if (value == 'quem_somos') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => QuemSomos(nome: widget.nome, cpf: widget.cpf),
+                    builder: (_) =>
+                        QuemSomos(nome: widget.nome, cpf: widget.cpf),
                   ),
                 );
               }
@@ -468,6 +683,19 @@ class _OngsState extends State<Ongs> {
               borderRadius: BorderRadius.circular(14),
             ),
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'meu_perfil',
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline, size: 18, color: _verde),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Meu Perfil",
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'quem_somos',
                 child: Row(
@@ -557,7 +785,7 @@ class _OngsState extends State<Ongs> {
                       color: const Color(0xFF344E41),
                     ),
                     decoration: InputDecoration(
-                      hintText: "Buscar serviços...",
+                      hintText: "Buscar atividades de ONGs...",
                       hintStyle: GoogleFonts.quicksand(
                         fontSize: 14,
                         color: const Color(0xFF9E9E9E),
@@ -638,16 +866,18 @@ class _OngsState extends State<Ongs> {
     );
   }
 
-  // ─── CHIPS CATEGORIAS ─────────────────────────────────────
+  // ─── CHIPS CATEGORIAS (dinâmicas, vindas do banco) ─────────
   Widget _chipsCategorias() {
+    final categorias = _categorias;
+
     return SizedBox(
       height: 38,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _categorias.length,
+        itemCount: categorias.length,
         itemBuilder: (context, index) {
-          final cat = _categorias[index];
+          final cat = categorias[index];
           final selecionado = cat == _categoriaSelecionada;
           return GestureDetector(
             onTap: () => setState(() => _categoriaSelecionada = cat),
@@ -710,7 +940,7 @@ class _OngsState extends State<Ongs> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Imagem placeholder + tag
+            // Imagem + tag
             ClipRRect(
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(22),
@@ -719,20 +949,36 @@ class _OngsState extends State<Ongs> {
               child: Stack(
                 children: [
                   Hero(
-                    tag: 'ong_${ong.titulo}',
-                    child: Image.asset(
-                      ong.imagem,
-                      height: 170,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return Container(
-                          height: 170,
-                          width: double.infinity,
-                          color: const Color(0xFFB7D5B0),
-                        );
-                      },
-                    ),
+                    tag: 'ong_${ong.id}',
+                    child: ong.imagemUrl != null
+                        ? Image.network(
+                            ong.imagemUrl!,
+                            height: 170,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 170,
+                                width: double.infinity,
+                                color: const Color(0xFFB7D5B0),
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.white54,
+                                  size: 56,
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            height: 170,
+                            width: double.infinity,
+                            color: const Color(0xFFB7D5B0),
+                            child: const Icon(
+                              Icons.image_not_supported_outlined,
+                              color: Colors.white54,
+                              size: 56,
+                            ),
+                          ),
                   ),
                   Positioned(
                     top: 12,
@@ -789,7 +1035,7 @@ class _OngsState extends State<Ongs> {
 
                   const SizedBox(height: 12),
 
-                  // ONG + avaliação
+                  // ONG responsável
                   Row(
                     children: [
                       Container(
@@ -804,57 +1050,21 @@ class _OngsState extends State<Ongs> {
                           ),
                         ),
                         child: const Icon(
-                          Icons.favorite_rounded,
+                          Icons.volunteer_activism_rounded,
                           color: _verde,
                           size: 16,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            ong.nomeOng,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF344E41),
-                            ),
+                      Expanded(
+                        child: Text(
+                          ong.nomeOng,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF344E41),
                           ),
-                          Row(
-                            children: [
-                              ...List.generate(5, (i) {
-                                if (i < ong.avaliacao.floor()) {
-                                  return const Icon(
-                                    Icons.star_rounded,
-                                    size: 13,
-                                    color: Color(0xFFF4A261),
-                                  );
-                                } else if (i < ong.avaliacao) {
-                                  return const Icon(
-                                    Icons.star_half_rounded,
-                                    size: 13,
-                                    color: Color(0xFFF4A261),
-                                  );
-                                } else {
-                                  return const Icon(
-                                    Icons.star_border_rounded,
-                                    size: 13,
-                                    color: Color(0xFFCCCCCC),
-                                  );
-                                }
-                              }),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${ong.avaliacao.toStringAsFixed(1)} (${ong.totalAvaliacoes})",
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 11,
-                                  color: const Color(0xFF6B705C),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
