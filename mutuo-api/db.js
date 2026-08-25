@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
@@ -33,15 +34,23 @@ async function validarLogin(login, senha) {
 async function validarLoginUsuario(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cpf, nome, email, telefone, cidade, estado, pontos, horasVoluntarias, cadastro FROM Mutuo_Usuario WHERE email = ? AND senha = ? AND ativo = 1',
-      [email, senha]
+      'SELECT cpf, nome, email, telefone, cidade, estado, pontos, horasVoluntarias, cadastro, senha FROM Mutuo_Usuario WHERE email = ? AND ativo = 1',
+      [email]
     );
 
-    if (rows.length > 0) {
-      return { sucesso: true, usuario: rows[0] };
-    } else {
+    if (rows.length === 0) {
       return { sucesso: false, mensagem: 'Email ou senha incorretos, ou conta inativa.' };
     }
+
+    const usuario = rows[0];
+    const senhaValida = await verificarSenha(senha, usuario.senha, 'Mutuo_Usuario', 'cpf', usuario.cpf);
+
+    if (!senhaValida) {
+      return { sucesso: false, mensagem: 'Email ou senha incorretos, ou conta inativa.' };
+    }
+
+    delete usuario.senha; // nunca devolve a senha/hash pro front-end
+    return { sucesso: true, usuario };
 
   } catch (error) {
     console.error('Erro ao validar usuário:', error);
@@ -52,19 +61,47 @@ async function validarLoginUsuario(email, senha) {
 async function validarLoginOng(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cnpj, nomeOng, nomeResponsavel, email, telefone, cidade, estado, foco, premium, cadastro FROM Mutuo_ONG WHERE email = ? AND senha = ? AND ativo = 1',
-      [email, senha]
+      'SELECT cnpj, nomeOng, nomeResponsavel, email, telefone, cidade, estado, foco, premium, cadastro, senha FROM Mutuo_ONG WHERE email = ? AND ativo = 1',
+      [email]
     );
 
-    if (rows.length > 0) {
-      return { sucesso: true, usuario: rows[0] };
-    } else {
+    if (rows.length === 0) {
       return { sucesso: false, mensagem: 'Email ou senha incorretos, ou conta inativa.' };
     }
+
+    const ong = rows[0];
+    const senhaValida = await verificarSenha(senha, ong.senha, 'Mutuo_ONG', 'cnpj', ong.cnpj);
+
+    if (!senhaValida) {
+      return { sucesso: false, mensagem: 'Email ou senha incorretos, ou conta inativa.' };
+    }
+
+    delete ong.senha; // nunca devolve a senha/hash pro front-end
+    return { sucesso: true, usuario: ong };
   } catch (error) {
     console.error('Erro ao validar ONG:', error);
     return { sucesso: false, mensagem: 'Erro interno ao validar login.' };
   }
+}
+
+// Compara a senha digitada com a armazenada. Se a senha no banco ainda
+// estiver em texto puro (usuários antigos), compara direto e já migra
+// para hash bcrypt automaticamente, sem precisar de script manual.
+async function verificarSenha(senhaDigitada, senhaArmazenada, tabela, colunaId, idValor) {
+  const pareceHash = typeof senhaArmazenada === 'string' && senhaArmazenada.startsWith('$2');
+
+  if (pareceHash) {
+    return bcrypt.compare(senhaDigitada, senhaArmazenada);
+  }
+
+  // Senha antiga em texto puro
+  if (senhaDigitada === senhaArmazenada) {
+    const novoHash = await bcrypt.hash(senhaDigitada, 10);
+    await pool.query(`UPDATE ${tabela} SET senha = ? WHERE ${colunaId} = ?`, [novoHash, idValor]);
+    return true;
+  }
+
+  return false;
 }
 
 
@@ -142,7 +179,7 @@ async function getSolicitacoes() {
     JOIN Mutuo_Usuario AS UPRES 
       ON SERV.idUsuario = UPRES.cpf
   `;
-  
+
   try {
     const [rows] = await pool.query(sql);
     return rows;
@@ -216,24 +253,24 @@ async function alterUsuario(cpf, ativo, pontos, horas) {
   const sql = 'UPDATE Mutuo_Usuario SET ativo = ?, pontos = ?, horasVoluntarias = ? WHERE cpf = ?';
 
   try {
-      const [result] = await pool.query(sql, [ativo, pontos, horas, cpf]);
-      return { success: true, affectedRows: result.affectedRows };
-    } catch (err) {
-      console.error("Erro no db.js/alterUsuario:", err.message);
-      return { error: err.message };
-    } 
+    const [result] = await pool.query(sql, [ativo, pontos, horas, cpf]);
+    return { success: true, affectedRows: result.affectedRows };
+  } catch (err) {
+    console.error("Erro no db.js/alterUsuario:", err.message);
+    return { error: err.message };
+  }
 }
 
 async function alterONG(cnpj, ativo, responsavel, foco) {
   const sql = 'UPDATE Mutuo_ONG SET ativo = ?, nomeResponsavel = ?, foco = ? WHERE cnpj = ?';
 
   try {
-      const [result] = await pool.query(sql, [ativo, responsavel, foco, cnpj]);
-      return { success: true, affectedRows: result.affectedRows };
-    } catch (err) {
-      console.error("Erro no db.js/alterONG:", err.message);
-      return { error: err.message };
-    } 
+    const [result] = await pool.query(sql, [ativo, responsavel, foco, cnpj]);
+    return { success: true, affectedRows: result.affectedRows };
+  } catch (err) {
+    console.error("Erro no db.js/alterONG:", err.message);
+    return { error: err.message };
+  }
 }
 
 async function mediaNotas() {
@@ -245,24 +282,24 @@ async function alterServico(cod, ativo, horas, foco, nota) {
   const sql = 'UPDATE Mutuo_Servico SET ativo = ?, qtdHoras = ?, foco = ?, avaliacao = ? WHERE cod = ?';
 
   try {
-      const [result] = await pool.query(sql, [ativo, horas, foco, nota, cod]);
-      return { success: true, affectedRows: result.affectedRows };
-    } catch (err) {
-      console.error("Erro no db.js/alterServico:", err.message);
-      return { error: err.message };
-    } 
+    const [result] = await pool.query(sql, [ativo, horas, foco, nota, cod]);
+    return { success: true, affectedRows: result.affectedRows };
+  } catch (err) {
+    console.error("Erro no db.js/alterServico:", err.message);
+    return { error: err.message };
+  }
 }
 
 async function alterSolicitacao(cod, statusS, statusE, pontos) {
   const sql = 'UPDATE Mutuo_Solicitacao SET statusSolicitacao = ?, statusExecucao = ?, pontos = ? WHERE codSolicitacao = ?';
 
   try {
-      const [result] = await pool.query(sql, [statusS, statusE, pontos, cod]);
-      return { success: true, affectedRows: result.affectedRows };
-    } catch (err) {
-      console.error("Erro no db.js/alterServico:", err.message);
-      return { error: err.message };
-    } 
+    const [result] = await pool.query(sql, [statusS, statusE, pontos, cod]);
+    return { success: true, affectedRows: result.affectedRows };
+  } catch (err) {
+    console.error("Erro no db.js/alterServico:", err.message);
+    return { error: err.message };
+  }
 }
 //cadastros
 
@@ -273,11 +310,13 @@ async function cadastrarUsuario(usuario) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 20, 0, ?, ?, ?)
   `;
 
+  const senhaHash = await bcrypt.hash(usuario.senha, 10);
+
   const values = [
     usuario.cpf,
     usuario.nome,
     usuario.email,
-    usuario.senha,
+    senhaHash,
     usuario.telefone,
     usuario.cidade,
     usuario.bairro,
@@ -304,6 +343,8 @@ async function cadastrarOng(ong) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,0)
   `;
 
+  const senhaHash = await bcrypt.hash(ong.senha, 10);
+
   const values = [
     ong.nomeOng,
     ong.cnpj,
@@ -314,7 +355,7 @@ async function cadastrarOng(ong) {
     ong.bairro,
     ong.endereco,
     ong.uf,
-    ong.senha,
+    senhaHash,
     ong.foco,
     ong.descricao,
     ong.foto_perfil,
@@ -612,7 +653,7 @@ async function getOngPorCnpj(cnpj) {
     };
   }
 }
- 
+
 async function getFotoPerfilOng(cnpj) {
   try {
     const [rows] = await pool.query('SELECT foto_perfil FROM Mutuo_ONG WHERE cnpj = ?', [cnpj]);
@@ -622,7 +663,7 @@ async function getFotoPerfilOng(cnpj) {
     return null;
   }
 }
- 
+
 async function atualizarFotoPerfilOng(cnpj, nomeArquivo) {
   try {
     const [result] = await pool.query(
@@ -635,7 +676,7 @@ async function atualizarFotoPerfilOng(cnpj, nomeArquivo) {
     return { error: err.message };
   }
 }
- 
+
 // Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone)
 async function atualizarDadosOng(cnpj, { nomeOng, email, telefone }) {
   try {
@@ -1419,36 +1460,36 @@ async function contarVoluntariosOng(cnpj) {
   }
 }
 
-module.exports = { 
-  getUsuarios, 
+module.exports = {
+  getUsuarios,
   getUsuarioPorCpf,
   atualizarDadosUsuario,
-  validarLogin, 
+  validarLogin,
   validarLoginUsuario,
-   validarLoginOng,
-  countUsuarios, 
-  countONGs, 
-  countServicos, 
+  validarLoginOng,
+  countUsuarios,
+  countONGs,
+  countServicos,
   countHoras,
-  countUsuariosInativos, 
-  countPontos, 
-  countONGsInativas, 
+  countUsuariosInativos,
+  countPontos,
+  countONGsInativas,
   countPremium,
-  countServicosCadastrados, 
-  countSolicitacoesAceitas, 
+  countServicosCadastrados,
+  countSolicitacoesAceitas,
   countSolicitacoesPendentes,
-  countSolicitacoesRecusadas, 
+  countSolicitacoesRecusadas,
   countPontosOng,
-  alterUsuario, 
-  getONGs, 
-  alterONG, 
+  alterUsuario,
+  getONGs,
+  alterONG,
   mediaNotas,
   getFotoPerfil,
   atualizarFotoPerfil,
-  getServicos, 
-  alterServico, 
-  getSolicitacoes, 
-  alterSolicitacao, 
+  getServicos,
+  alterServico,
+  getSolicitacoes,
+  alterSolicitacao,
   cadastrarUsuario,
   cadastrarOng,
   cadastrarServico,
@@ -1500,7 +1541,6 @@ module.exports = {
   getSolicitacoesParaConfirmar,
   confirmarSolicitacao,
   avaliarSolicitacao,
-contarVoluntariosOng,
+  contarVoluntariosOng,
   isOngPremium
 };
-  
