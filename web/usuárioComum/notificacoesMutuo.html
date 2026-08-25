@@ -398,7 +398,7 @@ function tempoRelativo(dataStr) {
 
 function cardRecebida(s) {
   return `
-    <div class="notif-card unread" data-id="${s.codSolicitacao}">
+    <div class="notif-card ${s.lida ? '' : 'unread'}" data-id="${s.codSolicitacao}">
       <div class="notif-avatar">
         <img src="${resolverImagem(s.fotoSolicitador)}" alt="${s.nomeSolicitador}">
         <span class="type-icon req"><i class="bi bi-person-fill"></i></span>
@@ -414,13 +414,13 @@ function cardRecebida(s) {
           <div class="notif-actions">
             <button class="action-btn accept" onclick="responderSolicitacao(${s.codSolicitacao}, true, ${s.pontos})"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
             <button class="action-btn decline" onclick="responderSolicitacao(${s.codSolicitacao}, false, ${s.pontos})"><i class="bi bi-x-circle-fill"></i> Recusar</button>
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+            <a href="#" class="action-btn message" onclick="marcarComoLida(${s.codSolicitacao}); return true;" href="chatMutuo.html"><i class="bi bi-chat-fill"></i> Mensagem</a>
           </div>` : `
           <div class="notif-actions">
-            <a href="chatMutuo.html" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+            <a href="chatMutuo.html" class="action-btn message" onclick="marcarComoLida(${s.codSolicitacao})"><i class="bi bi-chat-fill"></i> Mensagem</a>
           </div>`}
       </div>
-      <span class="notif-time">${tempoRelativo(s.dataSolicitacao)}</span>
+      <span class="notif-time" title="${new Date(s.dataSolicitacao).toLocaleString('pt-BR')}">${tempoRelativo(s.dataSolicitacao)}</span>
     </div>`;
 }
 function cardEnviada(s) {
@@ -512,6 +512,29 @@ function resolverImagem(caminho) {
   if (!caminho) return '../imagens/mutuoLogo.png';
   if (caminho.startsWith('http')) return caminho;
   return `${API_URL}${caminho}`;
+}
+
+async function marcarComoLida(cod) {
+  try {
+    await fetch(`${API_URL}/solicitacoes/${cod}/lida`, { method: 'PUT' });
+  } catch (err) {
+    console.error('Erro ao marcar como lida:', err);
+  }
+}
+
+function tempoRelativo(dataStr) {
+  const data = new Date(dataStr);
+  const diffMs = Date.now() - data.getTime();
+  const min = Math.floor(diffMs / 60000);
+
+  if (min < 1) return 'Agora';
+  if (min < 60) return `Há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Há ${h} h`;
+
+  // depois de 24h, mostra a data certa em vez de "há X dias"
+  return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    + ' às ' + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
 document.querySelectorAll('.filter-btn').forEach(btn => {

@@ -824,7 +824,10 @@ async function getSolicitacoesPrestador(cpfPrestador) {
       SOL.statusExecucao,
       SOL.dataSolicitacao,
       SOL.pontos,
+      SOL.nota,
+      SOL.lida,
       SERV.nome AS nomeServico,
+      SERV.qtdHoras,
       USOL.nome AS nomeSolicitador,
       USOL.cpf AS cpfSolicitador,
       USOL.foto_perfil AS fotoSolicitador
@@ -846,7 +849,6 @@ async function getSolicitacoesPrestador(cpfPrestador) {
   }
 }
 
-// Solicitações que ESTE usuário enviou (ele é quem pediu o serviço)
 async function getSolicitacoesUsuario(cpfUsuario) {
   const sql = `
     SELECT 
@@ -855,7 +857,9 @@ async function getSolicitacoesUsuario(cpfUsuario) {
       SOL.statusExecucao,
       SOL.dataSolicitacao,
       SOL.pontos,
+      SOL.nota,
       SERV.nome AS nomeServico,
+      SERV.qtdHoras,
       UPRES.nome AS nomePrestador,
       UPRES.cpf AS cpfPrestador,
       UPRES.foto_perfil AS fotoPrestador
@@ -1323,7 +1327,7 @@ async function isOngPremium(cnpj) {
 async function responderSolicitacao(cod, statusS, statusE) {
   try {
     await pool.query(
-      `UPDATE Mutuo_Solicitacao SET statusSolicitacao = ?, statusExecucao = ? WHERE codSolicitacao = ?`,
+      `UPDATE Mutuo_Solicitacao SET statusSolicitacao = ?, statusExecucao = ?, lida = 1 WHERE codSolicitacao = ?`,
       [statusS, statusE, cod]
     );
     return { sucesso: true };
@@ -1420,11 +1424,8 @@ async function avaliarSolicitacao(cod, notaNova) {
       ? notaNova
       : ((servico.nota * servico.avaliacoes) + notaNova) / novaQtd;
 
-    await conexao.query(
-      `UPDATE Mutuo_Servico SET nota = ?, avaliacoes = ? WHERE cod = ?`,
-      [novaMedia.toFixed(1), novaQtd, solicitacao.codServico]
-    );
-    await conexao.query(`UPDATE Mutuo_Solicitacao SET avaliado = 1 WHERE codSolicitacao = ?`, [cod]);
+    await conexao.query(`UPDATE Mutuo_Servico SET nota = ?, avaliacoes = ? WHERE cod = ?`, [novaMedia.toFixed(1), novaQtd, solicitacao.codServico]);
+    await conexao.query(`UPDATE Mutuo_Solicitacao SET avaliado = 1, nota = ? WHERE codSolicitacao = ?`, [notaNova, cod]); // ← salva a nota individual
 
     await conexao.commit();
     return { sucesso: true };
@@ -1436,6 +1437,7 @@ async function avaliarSolicitacao(cod, notaNova) {
     conexao.release();
   }
 }
+
 // Conta usuários distintos que concluíram serviços pertencentes a uma ONG
 async function contarVoluntariosOng(cnpj) {
   try {
@@ -1460,8 +1462,19 @@ async function contarVoluntariosOng(cnpj) {
   }
 }
 
-module.exports = {
-  getUsuarios,
+//marcar mensagem das notificações como lida
+async function marcarSolicitacaoLida(cod) {
+  try {
+    await pool.query(`UPDATE Mutuo_Solicitacao SET lida = 1 WHERE codSolicitacao = ?`, [cod]);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao marcar como lida:', err.message);
+    return { error: err.message };
+  }
+}
+
+module.exports = { 
+  getUsuarios, 
   getUsuarioPorCpf,
   atualizarDadosUsuario,
   validarLogin,
@@ -1542,5 +1555,6 @@ module.exports = {
   confirmarSolicitacao,
   avaliarSolicitacao,
   contarVoluntariosOng,
-  isOngPremium
+  isOngPremium,
+  marcarSolicitacaoLida
 };
