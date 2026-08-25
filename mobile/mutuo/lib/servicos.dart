@@ -21,6 +21,7 @@ class Servico {
   final String? imagemUrl;
   final String categoria;
   final String autor;
+  final String? fotoAutorUrl;
   final double avaliacao;
   final int totalAvaliacoes;
   final int pontos;
@@ -35,6 +36,7 @@ class Servico {
     this.imagemUrl,
     this.categoria = "Geral",
     this.autor = "Voluntário",
+    this.fotoAutorUrl,
     this.avaliacao = 4.0,
     this.totalAvaliacoes = 0,
     this.pontos = 0,
@@ -62,6 +64,9 @@ class Servico {
       autor: (json['nomeUsuario']?.toString().isNotEmpty ?? false)
           ? json['nomeUsuario'].toString()
           : 'Voluntário',
+      fotoAutorUrl: (json['fotoUsuario']?.toString().isNotEmpty ?? false)
+          ? '${ApiService.baseUrl}${json['fotoUsuario']}'
+          : null,
       pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
     );
   }
@@ -250,10 +255,26 @@ class DetalheServico extends StatelessWidget {
                               width: 1.5,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            color: _verde,
-                            size: 20,
+                          child: ClipOval(
+                            child: servico.fotoAutorUrl != null
+                                ? Image.network(
+                                    servico.fotoAutorUrl!,
+                                    width: 40,
+                                    height: 40,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.person_rounded,
+                                              color: _verde,
+                                              size: 20,
+                                            ),
+                                  )
+                                : const Icon(
+                                    Icons.person_rounded,
+                                    color: _verde,
+                                    size: 20,
+                                  ),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -1065,10 +1086,25 @@ class _ServicosState extends State<Servicos> {
                             width: 1.5,
                           ),
                         ),
-                        child: const Icon(
-                          Icons.person_rounded,
-                          color: _verde,
-                          size: 16,
+                        child: ClipOval(
+                          child: servico.fotoAutorUrl != null
+                              ? Image.network(
+                                  servico.fotoAutorUrl!,
+                                  width: 32,
+                                  height: 32,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                        Icons.person_rounded,
+                                        color: _verde,
+                                        size: 16,
+                                      ),
+                                )
+                              : const Icon(
+                                  Icons.person_rounded,
+                                  color: _verde,
+                                  size: 16,
+                                ),
                         ),
                       ),
                       const SizedBox(width: 8),
