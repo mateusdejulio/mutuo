@@ -8,6 +8,7 @@ import 'package:mutuo/perfil.dart';
 import 'package:mutuo/certificadosUsuario.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/planosUsuario.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 // Agora representa um serviço vindo do banco (rota /servicos-destaque)
@@ -411,6 +412,7 @@ class _StatData {
   final String? sub;
   final bool subPositivo;
   final bool subLink;
+  final VoidCallback? onTap;
 
   _StatData({
     required this.icone,
@@ -421,6 +423,7 @@ class _StatData {
     this.sub,
     this.subPositivo = false,
     this.subLink = false,
+    this.onTap,
   });
 }
 
@@ -927,16 +930,27 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         titulo: "Pontos",
         valor: _carregandoStats ? "…" : "+$_pontos",
       ),
-      _StatData(
+            _StatData(
         icone: Icons.workspace_premium_rounded,
         iconeBg: const Color(0xFFEDE7F6),
         iconeColor: const Color(0xFF7B52AB),
         titulo: "Plano atual",
         valor: _carregandoStats ? "…" : _plano,
-        sub: !_carregandoStats && _plano == "Gratuito"
-            ? "melhore seu plano"
-            : null,
-        subLink: !_carregandoStats && _plano == "Gratuito",
+        sub: _carregandoStats
+            ? null
+            : (_plano == "Gratuito" ? "melhore seu plano" : "gerenciar assinatura"),
+        subLink: !_carregandoStats,
+        onTap: _carregandoStats
+            ? null
+            : () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlanosUsuario(
+                    cpf: widget.cpf,
+                    nomeInicial: widget.nome,
+                  ),
+                ),
+              ),
       ),
     ];
 
@@ -947,7 +961,9 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: 1.1,
-      children: stats.map((s) => _statCard(s)).toList(),
+      children: stats
+          .map((s) => GestureDetector(onTap: s.onTap, child: _statCard(s)))
+          .toList(),
     );
   }
 
