@@ -865,15 +865,18 @@ async function getEstatisticasUsuario(cpf) {
   }
 }
 
-// Verifica se o usuário tem plano premium ativo (usado no dashboard)
+// Verifica se o usuário tem plano premium ativo (usado no dashboard).
+// Lê direto de Mutuo_Usuario.premium — a mesma coluna usada pelo limite
+// de serviços e pela tela de planos — pra dashboard sempre bater com a
+// assinatura real (antes lia de uma tabela separada e desatualizada).
 async function getPlanoUsuario(cpf) {
   try {
     const [rows] = await pool.query(
-      'SELECT statusPag FROM Mutuo_UsuarioPremium WHERE cpf = ? ORDER BY id DESC LIMIT 1',
+      'SELECT premium FROM Mutuo_Usuario WHERE cpf = ?',
       [cpf]
     );
     if (rows.length === 0) return 'Gratuito';
-    return rows[0].statusPag === 1 ? 'Premium' : 'Pendente';
+    return rows[0].premium === 1 ? 'Premium' : 'Gratuito';
   } catch (err) {
     console.error('Erro ao buscar plano do usuário:', err.message);
     return 'Gratuito';
