@@ -1391,6 +1391,7 @@ async function avaliarSolicitacao(cod, notaNova) {
   } finally {
     conexao.release();
   }
+}
 // Conta usuários distintos que concluíram serviços pertencentes a uma ONG
 async function contarVoluntariosOng(cnpj) {
   try {
@@ -1499,4 +1500,4 @@ module.exports = {
 contarVoluntariosOng,
   isOngPremium
 };
-  }
+  
