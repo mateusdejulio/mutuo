@@ -6,6 +6,7 @@ import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/perfil.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 // Representa um serviço vindo do banco (rota /servicos-usuario)
@@ -46,9 +47,10 @@ class Servico {
       id: json['cod']?.toString(),
       titulo: json['nome']?.toString() ?? '',
       descricao: json['descricao']?.toString() ?? '',
-      local: [json['cidade'], json['estado']]
-          .where((v) => v != null && v.toString().isNotEmpty)
-          .join(', '),
+      local: [
+        json['cidade'],
+        json['estado'],
+      ].where((v) => v != null && v.toString().isNotEmpty).join(', '),
       tempo: horas != null ? '${horas}h' : '',
       imagem: caminhoImagem ?? '',
       imagemUrl: (caminhoImagem != null && caminhoImagem.isNotEmpty)
@@ -86,7 +88,7 @@ class DetalheServico extends StatelessWidget {
           children: [
             Stack(
               children: [
-                 Hero(
+                Hero(
                   tag: 'servico_${servico.id}',
                   child: servico.imagemUrl != null
                       ? Image.network(
@@ -150,7 +152,10 @@ class DetalheServico extends StatelessWidget {
                   top: 50,
                   left: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: _verde,
                       borderRadius: BorderRadius.circular(20),
@@ -170,7 +175,10 @@ class DetalheServico extends StatelessWidget {
                   top: 50,
                   right: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -185,7 +193,11 @@ class DetalheServico extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star_rounded, size: 15, color: Color(0xFFF4A261)),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 15,
+                          color: Color(0xFFF4A261),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           "${servico.pontos} pts",
@@ -233,9 +245,16 @@ class DetalheServico extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _verde.withOpacity(0.12),
                             shape: BoxShape.circle,
-                            border: Border.all(color: _verde.withOpacity(0.3), width: 1.5),
+                            border: Border.all(
+                              color: _verde.withOpacity(0.3),
+                              width: 1.5,
+                            ),
                           ),
-                          child: const Icon(Icons.person_rounded, color: _verde, size: 20),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            color: _verde,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Text(
@@ -251,18 +270,32 @@ class DetalheServico extends StatelessWidget {
                     const SizedBox(height: 18),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined, size: 16, color: _verdeMedio),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: _verdeMedio,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           servico.local,
-                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            color: const Color(0xFF6B705C),
+                          ),
                         ),
                         const SizedBox(width: 16),
-                        const Icon(Icons.access_time_rounded, size: 16, color: _verdeMedio),
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 16,
+                          color: _verdeMedio,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           servico.tempo,
-                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            color: const Color(0xFF6B705C),
+                          ),
                         ),
                       ],
                     ),
@@ -293,7 +326,10 @@ class DetalheServico extends StatelessWidget {
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: _verde,
-                              side: BorderSide(color: _verde.withOpacity(0.4), width: 1.5),
+                              side: BorderSide(
+                                color: _verde.withOpacity(0.4),
+                                width: 1.5,
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -301,13 +337,21 @@ class DetalheServico extends StatelessWidget {
                             ),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Em breve: chat de dúvidas!")),
+                                const SnackBar(
+                                  content: Text("Em breve: chat de dúvidas!"),
+                                ),
                               );
                             },
-                            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 18,
+                            ),
                             label: Text(
                               "Tirar dúvidas",
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 13),
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
@@ -325,13 +369,21 @@ class DetalheServico extends StatelessWidget {
                             ),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Interesse registrado!")),
+                                const SnackBar(
+                                  content: Text("Interesse registrado!"),
+                                ),
                               );
                             },
-                            icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.check_circle_outline_rounded,
+                              size: 18,
+                            ),
                             label: Text(
                               "Solicitar",
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 14),
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ),
@@ -354,7 +406,12 @@ class Servicos extends StatefulWidget {
   final String cpf;
   final int initialNavIndex;
 
-  const Servicos({super.key, required this.nome, required this.cpf, this.initialNavIndex = 1});
+  const Servicos({
+    super.key,
+    required this.nome,
+    required this.cpf,
+    this.initialNavIndex = 1,
+  });
 
   @override
   State<Servicos> createState() => _ServicosState();
@@ -378,12 +435,13 @@ class _ServicosState extends State<Servicos> {
 
   // ─── NOVO: categorias montadas dinamicamente a partir dos serviços cadastrados ───
   List<String> get _categorias {
-    final focosUnicos = _todosServicos
-        .map((s) => s.categoria)
-        .where((f) => f.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final focosUnicos =
+        _todosServicos
+            .map((s) => s.categoria)
+            .where((f) => f.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
     return ["Todos", ...focosUnicos];
   }
@@ -616,11 +674,22 @@ class _ServicosState extends State<Servicos> {
                   MaterialPageRoute(builder: (_) => Login()),
                   (route) => false,
                 );
+              } else if (value == 'meu_perfil') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PerfilUsuario(
+                      cpf: widget.cpf,
+                      nomeInicial: widget.nome,
+                    ),
+                  ),
+                );
               } else if (value == 'quem_somos') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => QuemSomos(nome: widget.nome, cpf: widget.cpf),
+                    builder: (_) =>
+                        QuemSomos(nome: widget.nome, cpf: widget.cpf),
                   ),
                 );
               }
@@ -630,6 +699,19 @@ class _ServicosState extends State<Servicos> {
               borderRadius: BorderRadius.circular(14),
             ),
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'meu_perfil',
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline, size: 18, color: _verde),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Meu Perfil",
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'quem_somos',
                 child: Row(

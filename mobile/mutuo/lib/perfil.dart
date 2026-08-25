@@ -303,12 +303,40 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
     setState(() => _servicos.removeAt(index));
   }
 
-  // ─── NOVO: modal de "Adicionar serviço" (bottom sheet) ─────
-  void _abrirModalAdicionarServico() {
-    final nomeCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
-    final duracaoCtrl = TextEditingController();
-    String? focoSelecionado;
+  // ─── Modal de "Adicionar/Editar serviço" (bottom sheet) ─────
+  // Se `servico` for passado, o modal abre em modo de edição, com os
+  // campos já preenchidos. Se for null, abre em modo de cadastro novo.
+  void _abrirModalServico({Map<String, dynamic>? servico}) {
+    final editando = servico != null;
+
+    final nomeCtrl = TextEditingController(
+      text: servico?['nomeServico']?.toString() ?? '',
+    );
+    final descCtrl = TextEditingController(
+      text: servico?['descricao']?.toString() ?? '',
+    );
+    final duracaoCtrl = TextEditingController(
+      text:
+          servico?['horas']?.toString() ??
+          servico?['duracao']?.toString() ??
+          '',
+    );
+
+    // Normaliza o foco vindo do banco (evita mismatch de maiúscula/acento
+    // com a lista fixa) e garante que o valor atual sempre exista na lista.
+    String? focoSelecionado = servico?['foco']?.toString();
+    if (focoSelecionado != null) {
+      focoSelecionado = _focosServico.firstWhere(
+        (f) => f.toLowerCase() == focoSelecionado!.toLowerCase(),
+        orElse: () => focoSelecionado!,
+      );
+    }
+    final focosDisponiveis = List<String>.from(_focosServico);
+    if (focoSelecionado != null &&
+        !focosDisponiveis.contains(focoSelecionado)) {
+      focosDisponiveis.add(focoSelecionado);
+    }
+
     XFile? imagemSelecionada;
     bool enviando = false;
 
@@ -330,7 +358,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               }
             }
 
-            Future<void> confirmarCadastro() async {
+            Future<void> confirmar() async {
               if (nomeCtrl.text.trim().isEmpty ||
                   descCtrl.text.trim().isEmpty ||
                   focoSelecionado == null ||
@@ -352,15 +380,25 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 nomeArquivo = imagemSelecionada!.name;
               }
 
-              final resultado = await _api.cadastrarServico(
-                cpf: widget.cpf,
-                nomeServico: nomeCtrl.text.trim(),
-                descricao: descCtrl.text.trim(),
-                foco: focoSelecionado!,
-                duracao: duracaoCtrl.text.trim(),
-                imagemBytes: bytes,
-                imagemNome: nomeArquivo,
-              );
+              final resultado = editando
+                  ? await _api.atualizarServico(
+                      id: servico!['id'].toString(),
+                      nomeServico: nomeCtrl.text.trim(),
+                      descricao: descCtrl.text.trim(),
+                      foco: focoSelecionado!,
+                      duracao: duracaoCtrl.text.trim(),
+                      imagemBytes: bytes,
+                      imagemNome: nomeArquivo,
+                    )
+                  : await _api.cadastrarServico(
+                      cpf: widget.cpf,
+                      nomeServico: nomeCtrl.text.trim(),
+                      descricao: descCtrl.text.trim(),
+                      foco: focoSelecionado!,
+                      duracao: duracaoCtrl.text.trim(),
+                      imagemBytes: bytes,
+                      imagemNome: nomeArquivo,
+                    );
 
               setModalState(() => enviando = false);
 
@@ -368,8 +406,12 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 if (!mounted) return;
                 Navigator.pop(modalContext);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Serviço cadastrado com sucesso!'),
+                  SnackBar(
+                    content: Text(
+                      editando
+                          ? 'Serviço atualizado com sucesso!'
+                          : 'Serviço cadastrado com sucesso!',
+                    ),
                   ),
                 );
                 _carregarServicos();
@@ -378,7 +420,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                   SnackBar(
                     content: Text(
                       resultado['erro']?.toString() ??
-                          'Não foi possível cadastrar o serviço.',
+                          (editando
+                              ? 'Não foi possível atualizar o serviço.'
+                              : 'Não foi possível cadastrar o serviço.'),
                     ),
                     backgroundColor: Colors.redAccent,
                   ),
@@ -433,7 +477,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Cadastro de serviço',
+                              editando
+                                  ? 'Editar serviço'
+                                  : 'Cadastro de serviço',
                               style: GoogleFonts.quicksand(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
@@ -495,7 +541,10 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _modalLabel('Foco', Icons.label_outline_rounded),
+                                _modalLabel(
+                                  'Foco',
+                                  Icons.label_outline_rounded,
+                                ),
                                 Container(
                                   margin: const EdgeInsets.only(top: 5),
                                   padding: const EdgeInsets.symmetric(
@@ -516,7 +565,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                           color: const Color(0xFF6B705C),
                                         ),
                                       ),
-                                      items: _focosServico
+                                      items: focosDisponiveis
                                           .map(
                                             (f) => DropdownMenuItem(
                                               value: f,
@@ -524,14 +573,17 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                                 f,
                                                 style: GoogleFonts.quicksand(
                                                   fontSize: 13,
-                                                  color: const Color(0xFF344E41),
+                                                  color: const Color(
+                                                    0xFF344E41,
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           )
                                           .toList(),
-                                      onChanged: (v) =>
-                                          setModalState(() => focoSelecionado = v),
+                                      onChanged: (v) => setModalState(
+                                        () => focoSelecionado = v,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -588,7 +640,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        'Clique para enviar',
+                                        editando && imagemSelecionada == null
+                                            ? 'Trocar imagem'
+                                            : 'Clique para enviar',
                                         style: GoogleFonts.quicksand(
                                           fontSize: 12,
                                           color: Colors.white70,
@@ -645,6 +699,46 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                 ),
                               ],
                             ),
+                          ] else if (editando &&
+                              (servico['imagem']?.toString().isNotEmpty ??
+                                  false)) ...[
+                            const SizedBox(width: 12),
+                            Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Image.network(
+                                    '${ApiService.baseUrl}${servico['imagem']}',
+                                    width: 76,
+                                    height: 76,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 2,
+                                  right: 2,
+                                  child: GestureDetector(
+                                    onTap: escolherImagem,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: _verdeMedio,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        size: 12,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ],
                       ),
@@ -655,7 +749,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                         width: double.infinity,
                         height: 52,
                         child: ElevatedButton.icon(
-                          onPressed: enviando ? null : confirmarCadastro,
+                          onPressed: enviando ? null : confirmar,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _verdeMedio,
                             foregroundColor: Colors.white,
@@ -674,7 +768,11 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                 )
                               : const Icon(Icons.check_circle_outline_rounded),
                           label: Text(
-                            'Confirmar cadastro',
+                            enviando
+                                ? 'Enviando...'
+                                : (editando
+                                      ? 'Salvar alterações'
+                                      : 'Confirmar cadastro'),
                             style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
@@ -732,7 +830,10 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
       margin: const EdgeInsets.only(top: 5),
       child: TextField(
         controller: controller,
-        style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF344E41)),
+        style: GoogleFonts.quicksand(
+          fontSize: 13,
+          color: const Color(0xFF344E41),
+        ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.quicksand(
@@ -1591,7 +1692,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 ),
               ),
               GestureDetector(
-                onTap: _abrirModalAdicionarServico,
+                onTap: () => _abrirModalServico(),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -1766,11 +1867,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
           Row(
             children: [
               TextButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Em breve: editar serviço')),
-                  );
-                },
+                onPressed: () => _abrirModalServico(
+                  servico: servico as Map<String, dynamic>,
+                ),
                 icon: const Icon(Icons.edit_rounded, size: 15, color: _verde),
                 label: Text(
                   'Editar',
