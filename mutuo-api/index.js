@@ -1,9 +1,9 @@
 const express = require('express');
-const cors    = require('cors');
-const path    = require('path');
-const multer  = require('multer');
-const fs      = require('fs');
-const db      = require('./db');
+const cors = require('cors');
+const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
+const db = require('./db');
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
@@ -116,8 +116,8 @@ setInterval(() => {
 
 // ── Rotas de Autenticação ──
 app.post('/login', async (req, res) => {
-    const { login, senha } = req.body;
-    res.json(await db.validarLogin(login, senha));
+  const { login, senha } = req.body;
+  res.json(await db.validarLogin(login, senha));
 });
 
 app.post('/loginUsuario', async (req, res) => {
@@ -145,10 +145,10 @@ app.post('/loginOng', async (req, res) => {
 // ── Rotas de Usuários ──
 app.get('/usuarios', async (req, res) => res.json(await db.getUsuarios()));
 app.post('/usuarios', async (req, res) => {
-    try {
-        const id = await db.cadastrarUsuario(req.body);
-        res.json({ sucesso: true, id });
-    } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
+  try {
+    const id = await db.cadastrarUsuario(req.body);
+    res.json({ sucesso: true, id });
+  } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
 });
 
 // Busca os dados completos de UM usuário específico (usado na tela de perfil)
@@ -160,8 +160,8 @@ app.get('/usuarios/:cpf', async (req, res) => {
 });
 
 app.put('/usuarios/:cpf', async (req, res) => {
-    const { ativo, pontos, horas } = req.body;
-    res.json(await db.alterUsuario(req.params.cpf, ativo, pontos, horas));
+  const { ativo, pontos, horas } = req.body;
+  res.json(await db.alterUsuario(req.params.cpf, ativo, pontos, horas));
 });
 
 // Atualiza os campos editáveis do perfil do usuário (nome, email, telefone)
@@ -176,12 +176,12 @@ app.put('/usuarios/:cpf/perfil', async (req, res) => {
 });
 
 // ── Rotas de ONGs e Serviços ──
-app.get('/ongs',  async (req, res) => res.json(await db.getONGs()));
+app.get('/ongs', async (req, res) => res.json(await db.getONGs()));
 app.post('/ongs', async (req, res) => {
-    try {
-        const id = await db.cadastrarOng(req.body);
-        res.json({ sucesso: true, id });
-    } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
+  try {
+    const id = await db.cadastrarOng(req.body);
+    res.json({ sucesso: true, id });
+  } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
 });
 
 // Busca os dados completos de UMA ong específica (usado na tela de perfil)
@@ -206,8 +206,8 @@ app.get('/ongs/:cnpj/voluntarios-realizados', async (req, res) => {
 });
 
 app.put('/ongs/:cnpj', async (req, res) => {
-    const { ativo, responsavel, foco } = req.body;
-    res.json(await db.alterONG(req.params.cnpj, ativo, responsavel, foco));
+  const { ativo, responsavel, foco } = req.body;
+  res.json(await db.alterONG(req.params.cnpj, ativo, responsavel, foco));
 });
 
 // Atualiza os campos editáveis do perfil da ONG (nome, email, telefone)
@@ -354,34 +354,34 @@ app.patch('/servicos/ong/:id/status', async (req, res) => {
 // ── Rotas de Solicitações ──
 app.get('/solicitacoes', async (req, res) => res.json(await db.getSolicitacoes()));
 app.put('/solicitacoes/:cod', async (req, res) => {
-    const { statusS, statusE, pontos } = req.body;
-    res.json(await db.alterSolicitacao(req.params.cod, statusS, statusE, pontos));
+  const { statusS, statusE, pontos } = req.body;
+  res.json(await db.alterSolicitacao(req.params.cod, statusS, statusE, pontos));
 });
 
 // ── Rotas Premium ──
-app.get('/premium',            async (req, res) => res.json(await db.getPremium()));
-app.get('/stats/premium-total',async (req, res) => res.json(await db.countPremiumTotal()));
-app.get('/stats/atrasadas',    async (req, res) => res.json(await db.countAtrasadas()));
-app.get('/stats/receita',      async (req, res) => res.json(await db.countReceita()));
+app.get('/premium', async (req, res) => res.json(await db.getPremium()));
+app.get('/stats/premium-total', async (req, res) => res.json(await db.countPremiumTotal()));
+app.get('/stats/atrasadas', async (req, res) => res.json(await db.countAtrasadas()));
+app.get('/stats/receita', async (req, res) => res.json(await db.countReceita()));
 
 // ── Rotas de Administrador ──
-app.put('/adm/login',    async (req, res) => { const { loginAntigo, novoLogin } = req.body; res.json(await db.alterarLoginAdm(loginAntigo, novoLogin)); });
-app.put('/adm/senha',    async (req, res) => { const { login, senhaAtual, novaSenha } = req.body; res.json(await db.alterarSenhaAdm(login, senhaAtual, novaSenha)); });
-app.post('/adm/cadastrar',async (req, res) => { const { novoLogin, novaSenha } = req.body; res.json(await db.cadastrarAdm(novoLogin, novaSenha)); });
+app.put('/adm/login', async (req, res) => { const { loginAntigo, novoLogin } = req.body; res.json(await db.alterarLoginAdm(loginAntigo, novoLogin)); });
+app.put('/adm/senha', async (req, res) => { const { login, senhaAtual, novaSenha } = req.body; res.json(await db.alterarSenhaAdm(login, senhaAtual, novaSenha)); });
+app.post('/adm/cadastrar', async (req, res) => { const { novoLogin, novaSenha } = req.body; res.json(await db.cadastrarAdm(novoLogin, novaSenha)); });
 
 // ── Rotas de Estatísticas ──
 app.get('/stats/:tipo', async (req, res) => {
-    const tipo = req.params.tipo;
-    const mapeamento = {
-        'usuarios': db.countUsuarios, 'ongs': db.countONGs, 'servicos': db.countServicos,
-        'horas': db.countHoras, 'usuarios-inativos': db.countUsuariosInativos,
-        'pontos': db.countPontos, 'ongs-inativas': db.countONGsInativas,
-        'premium': db.countPremium, 'servicos-cadastrados': db.countServicosCadastrados,
-        'aceitas': db.countSolicitacoesAceitas, 'pendentes': db.countSolicitacoesPendentes,
-        'recusadas': db.countSolicitacoesRecusadas, 'media-notas': db.mediaNotas
-    };
-    if (mapeamento[tipo]) res.json(await mapeamento[tipo]());
-    else res.status(404).send('Não encontrado');
+  const tipo = req.params.tipo;
+  const mapeamento = {
+    'usuarios': db.countUsuarios, 'ongs': db.countONGs, 'servicos': db.countServicos,
+    'horas': db.countHoras, 'usuarios-inativos': db.countUsuariosInativos,
+    'pontos': db.countPontos, 'ongs-inativas': db.countONGsInativas,
+    'premium': db.countPremium, 'servicos-cadastrados': db.countServicosCadastrados,
+    'aceitas': db.countSolicitacoesAceitas, 'pendentes': db.countSolicitacoesPendentes,
+    'recusadas': db.countSolicitacoesRecusadas, 'media-notas': db.mediaNotas
+  };
+  if (mapeamento[tipo]) res.json(await mapeamento[tipo]());
+  else res.status(404).send('Não encontrado');
 });
 
 // ── Foto de Perfil (Usuário comum) ──
@@ -390,7 +390,7 @@ app.post('/perfil/foto', upload.single('fotoPerfil'), async (req, res) => {
   console.log(' Arquivo recebido:', req.file);
 
   const cpf = req.body.cpf;
-  if (!cpf)      return res.status(400).json({ erro: 'CPF não informado' });
+  if (!cpf) return res.status(400).json({ erro: 'CPF não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
   const resultado = await db.atualizarFotoPerfil(cpf, req.file.filename);
@@ -411,7 +411,7 @@ app.post('/perfil/foto/ong', upload.single('fotoPerfil'), async (req, res) => {
   console.log(' Arquivo recebido:', req.file);
 
   const cnpj = req.body.cnpj;
-  if (!cnpj)     return res.status(400).json({ erro: 'CNPJ não informado' });
+  if (!cnpj) return res.status(400).json({ erro: 'CNPJ não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
   const resultado = await db.atualizarFotoPerfilOng(cnpj, req.file.filename);
@@ -531,9 +531,16 @@ app.get('/certificados/:cpf/:codSolicitacao/pdf', async (req, res) => {
       .replaceAll('{{nomeOng}}', dados.nomeOng)
       .replaceAll('{{horas}}', dados.horas)
       .replaceAll('{{dataConclusao}}', dataFormatada)
-      .replaceAll('{{codigoVerificacao}}', dados.codigoVerificacao); 
+      .replaceAll('{{codigoVerificacao}}', dados.codigoVerificacao);
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ]
+    });
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
     const pdfBuffer = await page.pdf({
@@ -749,7 +756,7 @@ app.get(
     try {
       const totalVoluntarios =
         await db.contarVoluntariosOng(req.params.cnpj);
-          res.json({
+      res.json({
         totalVoluntarios
       });
     } catch (erro) {
@@ -793,7 +800,7 @@ app.post('/solicitacoes/:cod/avaliar', async (req, res) => {
   res.json(resultado);
 });
 
-    
+
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
