@@ -164,6 +164,23 @@ class ApiService {
     }
   }
 
+  // ─── NOVO: busca o resumo + lista de certificados emitidos pela ONG ───
+  // Usa GET /certificados/ong/:cnpj
+  Future<Map<String, dynamic>?> buscarCertificadosOng(String cnpj) async {
+    final url = Uri.parse(
+      '$baseUrl/certificados/ong/${Uri.encodeComponent(cnpj)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ─── Busca os serviços (atividades) cadastrados pela ONG ───
   // Usa GET /servicos/ong/:cnpj
   Future<List<dynamic>> buscarServicosOng(String cnpj) async {
@@ -590,6 +607,21 @@ class ApiService {
         'sucesso': false,
         'erro': 'Não foi possível conectar ao servidor: $e',
       };
+    }
+  }
+
+  // ─── NOVO: busca o resumo + lista de certificados do usuário ───
+  // Usa GET /certificados/:cpf
+  Future<Map<String, dynamic>?> buscarCertificadosUsuario(String cpf) async {
+    final url = Uri.parse('$baseUrl/certificados/${Uri.encodeComponent(cpf)}');
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
   }
 

@@ -41,6 +41,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.6.0
   image_picker: ^1.2.3
+  url_launcher: ^6.3.1
 
   # Máscaras de input (número do cartão, validade, CVV, CPF)
   mask_text_input_formatter: ^2.9.0

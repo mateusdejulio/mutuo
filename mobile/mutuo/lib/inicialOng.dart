@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/planosOng.dart';
+import 'package:mutuo/certificadosOng.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/widgets/modal_atividade_ong.dart';
 import 'package:mutuo/servicosOng.dart';
@@ -787,6 +788,19 @@ class _InicialOngState extends State<InicialOng> {
         onTap: () => ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Em breve: tela de perfil da ONG")),
         ),
+      ),
+      _AcessoOngData(
+        icone: Icons.workspace_premium_outlined,
+        label: "Certificados",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  CertificadosOng(cnpj: widget.cnpj, nomeInicial: widget.nome),
+            ),
+          );
+        },
       ),
     ];
 

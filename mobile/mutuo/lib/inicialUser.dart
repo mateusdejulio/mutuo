@@ -5,6 +5,7 @@ import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/perfil.dart';
+import 'package:mutuo/certificadosUsuario.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 
@@ -47,9 +48,10 @@ class Vaga {
       id: json['cod']?.toString(),
       titulo: json['nome']?.toString() ?? '',
       descricao: json['descricao']?.toString() ?? '',
-      local: [json['cidade'], json['estado']]
-          .where((v) => v != null && v.toString().isNotEmpty)
-          .join(', '),
+      local: [
+        json['cidade'],
+        json['estado'],
+      ].where((v) => v != null && v.toString().isNotEmpty).join(', '),
       tempo: horas != null ? '${horas}h' : '',
       imagem: caminhoImagem ?? '',
       imagemUrl: (caminhoImagem != null && caminhoImagem.isNotEmpty)
@@ -87,7 +89,7 @@ class DetalheVaga extends StatelessWidget {
           children: [
             Stack(
               children: [
-                                Hero(
+                Hero(
                   tag: 'vaga_${vaga.id}',
                   child: vaga.imagemUrl != null
                       ? Image.network(
@@ -151,7 +153,10 @@ class DetalheVaga extends StatelessWidget {
                   top: 50,
                   left: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: _verde,
                       borderRadius: BorderRadius.circular(20),
@@ -171,7 +176,10 @@ class DetalheVaga extends StatelessWidget {
                   top: 50,
                   right: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -186,7 +194,11 @@ class DetalheVaga extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star_rounded, size: 15, color: Color(0xFFF4A261)),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 15,
+                          color: Color(0xFFF4A261),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           "${vaga.pontos} pts",
@@ -234,9 +246,16 @@ class DetalheVaga extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _verde.withOpacity(0.12),
                             shape: BoxShape.circle,
-                            border: Border.all(color: _verde.withOpacity(0.3), width: 1.5),
+                            border: Border.all(
+                              color: _verde.withOpacity(0.3),
+                              width: 1.5,
+                            ),
                           ),
-                          child: const Icon(Icons.person_rounded, color: _verde, size: 20),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            color: _verde,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Text(
@@ -252,18 +271,32 @@ class DetalheVaga extends StatelessWidget {
                     const SizedBox(height: 18),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined, size: 16, color: _verdeMedio),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: _verdeMedio,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           vaga.local,
-                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            color: const Color(0xFF6B705C),
+                          ),
                         ),
                         const SizedBox(width: 16),
-                        const Icon(Icons.access_time_rounded, size: 16, color: _verdeMedio),
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 16,
+                          color: _verdeMedio,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           vaga.tempo,
-                          style: GoogleFonts.quicksand(fontSize: 13, color: const Color(0xFF6B705C)),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            color: const Color(0xFF6B705C),
+                          ),
                         ),
                       ],
                     ),
@@ -294,7 +327,10 @@ class DetalheVaga extends StatelessWidget {
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: _verde,
-                              side: BorderSide(color: _verde.withOpacity(0.4), width: 1.5),
+                              side: BorderSide(
+                                color: _verde.withOpacity(0.4),
+                                width: 1.5,
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -302,13 +338,21 @@ class DetalheVaga extends StatelessWidget {
                             ),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Em breve: chat de dúvidas!")),
+                                const SnackBar(
+                                  content: Text("Em breve: chat de dúvidas!"),
+                                ),
                               );
                             },
-                            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 18,
+                            ),
                             label: Text(
                               "Tirar dúvidas",
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 13),
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
@@ -326,13 +370,21 @@ class DetalheVaga extends StatelessWidget {
                             ),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Inscrição realizada!")),
+                                const SnackBar(
+                                  content: Text("Inscrição realizada!"),
+                                ),
                               );
                             },
-                            icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.check_circle_outline_rounded,
+                              size: 18,
+                            ),
                             label: Text(
                               "Participar",
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, fontSize: 14),
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ),
@@ -426,8 +478,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
 
     if (dashboard != null && dashboard['error'] == null) {
       setState(() {
-        _horasServico =
-            int.tryParse('${dashboard['horasServico'] ?? 0}') ?? 0;
+        _horasServico = int.tryParse('${dashboard['horasServico'] ?? 0}') ?? 0;
         _trabalhosConcluidos =
             int.tryParse('${dashboard['trabalhosConcluidos'] ?? 0}') ?? 0;
         _pontos = int.tryParse('${dashboard['pontos'] ?? 0}') ?? 0;
@@ -720,7 +771,8 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => QuemSomos(nome: widget.nome, cpf: widget.cpf),
+                    builder: (_) =>
+                        QuemSomos(nome: widget.nome, cpf: widget.cpf),
                   ),
                 );
               }
@@ -1054,6 +1106,17 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       _AcessoData(
         icone: Icons.workspace_premium_outlined,
         label: "Certificados",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CertificadosUsuario(
+                cpf: widget.cpf,
+                nomeInicial: widget.nome,
+              ),
+            ),
+          );
+        },
       ),
       _AcessoData(
         icone: Icons.notifications_none_rounded,
@@ -1229,15 +1292,25 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               ),
               child: Stack(
                 children: [
-                                Hero(
-                  tag: 'vaga_${vaga.id}',
-                  child: vaga.imagemUrl != null
-                      ? Image.network(
-                          vaga.imagemUrl!,
-                          height: 140,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                  Hero(
+                    tag: 'vaga_${vaga.id}',
+                    child: vaga.imagemUrl != null
+                        ? Image.network(
+                            vaga.imagemUrl!,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 140,
+                              color: const Color(0xFFB7D5B0),
+                              child: const Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Colors.white54,
+                                size: 40,
+                              ),
+                            ),
+                          )
+                        : Container(
                             height: 140,
                             color: const Color(0xFFB7D5B0),
                             child: const Icon(
@@ -1246,17 +1319,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                               size: 40,
                             ),
                           ),
-                        )
-                      : Container(
-                          height: 140,
-                          color: const Color(0xFFB7D5B0),
-                          child: const Icon(
-                            Icons.image_not_supported_outlined,
-                            color: Colors.white54,
-                            size: 40,
-                          ),
-                        ),
-                ),
+                  ),
                   Positioned(
                     top: 12,
                     left: 12,
@@ -1316,7 +1379,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                         ),
                       ],
                     ),
-                                        Row(
+                    Row(
                       children: [
                         CircleAvatar(
                           radius: 14,
