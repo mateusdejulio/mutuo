@@ -255,8 +255,6 @@
       border: 2px solid var(--creme);
     }
     .nome-ong { font-size: 0.82rem; font-weight: 600; color: var(--verde-escuro); }
-    .estrelas-ong { color: var(--verde-principal); font-size: 0.7rem; }
-    .estrelas-ong span { color: var(--texto-suave); font-size: 0.72rem; }
 
     .metadados { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
     .item-metadado {
@@ -278,96 +276,17 @@
     .botao-saiba-mais:hover { background: var(--verde-escuro); }
     .botao-saiba-mais:active { transform: scale(0.98); }
 
-    /* ── MODAL ── */
-    .sobreposicao-modal {
-      display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(30,46,31,0.55); backdrop-filter: blur(4px);
-      align-items: flex-end; justify-content: center;
-    }
-    .sobreposicao-modal.aberto { display: flex; }
 
-    .folha-modal {
-      background: var(--branco); border-radius: 24px 24px 0 0;
-      width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto;
-      animation: deslizarCima 0.35s ease; position: relative;
-    }
     @keyframes deslizarCima {
       from { transform: translateY(60px); opacity: 0; }
       to   { transform: translateY(0); opacity: 1; }
     }
-    .imagem-modal {
-      width: 100%; height: 260px; object-fit: cover;
-      border-radius: 24px 24px 0 0;
-    }
-    .botao-fechar-modal {
-      position: absolute; top: 14px; right: 14px;
-      width: 36px; height: 36px;
-      background: rgba(30,46,31,0.55);
-      border: none; border-radius: 50%; cursor: pointer;
-      color: var(--creme); font-size: 1rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
-    }
-    .botao-fechar-modal:hover { background: rgba(30,46,31,0.8); }
 
-    .corpo-modal {
-      padding: 1.5rem 1.5rem 0;
-      margin-top: -18px;
-      background: var(--branco);
-      border-radius: 20px 20px 0 0;
-      position: relative; z-index: 2;
-    }
-    .corpo-modal h3 { font-size: 1.35rem; color: var(--verde-escuro); margin-bottom: 0.4rem; }
     .corpo-modal p.descricao { font-size: 0.88rem; color: var(--texto-suave); line-height: 1.6; margin-bottom: 1.2rem; }
 
-    .linha-ong-modal {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 10px;
-      padding-bottom: 1.1rem;
-      border-bottom: 1.5px solid var(--creme); margin-bottom: 1.2rem;
-    }
-    .esquerda-ong-modal { display: flex; align-items: center; gap: 10px; }
-    .esquerda-ong-modal img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
-    .nome-ong-modal { font-size: 0.9rem; font-weight: 600; color: var(--verde-escuro); }
-    .meta-ong-modal { font-size: 0.76rem; color: var(--texto-suave); margin-top: 2px; }
 
-    .etiqueta-pontos {
-      font-size: 0.8rem; font-weight: 600; color: var(--verde-escuro);
-      background: var(--creme); border-radius: 8px; padding: 4px 10px;
-    }
-    .botao-conversa {
-      margin-top: 6px;
-      background: var(--verde-principal); color: var(--creme);
-      border: none; border-radius: 10px; padding: 8px 14px;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.82rem; font-weight: 600; cursor: pointer;
-      display: flex; align-items: center; gap: 5px;
-      transition: background 0.2s;
-    }
-    .botao-conversa:hover { background: var(--verde-escuro); }
 
-    .avaliacoes-modal h5 { font-size: 1rem; color: var(--verde-escuro); margin-bottom: 0.85rem; }
-    .caixa-avaliacao {
-      background: var(--creme-claro); border-radius: 14px;
-      padding: 0.9rem 1rem; margin-bottom: 10px;
-    }
-    .caixa-avaliacao h6 { font-size: 0.85rem; font-weight: 600; color: var(--verde-escuro); margin-bottom: 2px; }
-    .nome-avaliador { font-size: 0.77rem; color: var(--texto-suave); margin-bottom: 6px; }
-    .estrelas-avaliacao { color: var(--verde-principal); font-size: 0.78rem; margin-bottom: 5px; }
-    .texto-avaliacao { font-size: 0.82rem; color: var(--texto-escuro); font-style: italic; margin-bottom: 4px; }
-    .data-avaliacao { font-size: 0.73rem; color: var(--texto-suave); }
 
-    .rodape-modal { padding: 1.2rem 1.5rem 1.8rem; }
-    .botao-inscrever {
-      width: 100%; border: none; cursor: pointer;
-      background: var(--verde-principal); color: var(--creme);
-      border-radius: 14px; padding: 14px;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .botao-inscrever:hover { background: var(--verde-escuro); }
-    .botao-inscrever:active { transform: scale(0.98); }
     .etiqueta-pontos-cartao {
     position: absolute; top: 11px; right: 12px;
     background: var(--creme); color: var(--verde-escuro);
@@ -448,6 +367,7 @@
 
    
     @media (max-width: 768px) {
+      body { padding-top: 64px; }
       .nav-links { display: none; }
       .nav-perfil span { display: none; }
       .area-filtros, .area-cartoes { margin-left: 1rem; margin-right: 1rem; }
@@ -456,6 +376,8 @@
       .grade-cartoes { grid-template-columns: 1fr; }
     }
   </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarUsuarioResponsiva.js" defer></script>
 </head>
 <body>
 

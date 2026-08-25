@@ -269,7 +269,6 @@
     }
     .campo-edit input:focus { outline: none; border-color: var(--verde-principal); }
 
-    .habilidades-wrap { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     .tag-habilidade { display: flex; align-items: center; gap: 6px; }
     .tag-habilidade .remover { display: none; border: none; background: none; cursor: pointer; color: #888; }
     .editando .tag-habilidade .remover { display: flex; }
@@ -325,9 +324,7 @@
     .item-info i { width: 36px; height: 36px; border-radius: 10px; background: var(--verde-palido); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--verde-principal); flex-shrink: 0; }
 
     .divisor { height: 1px; background: #f0f4ef; margin: 16px 0; }
-    .titulo-secao { font-size: 0.82rem; font-weight: 700; color: #9aab96; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
 
-    .habilidades { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag-habilidade { background: var(--verde-palido); color: var(--verde-escuro); font-size: 0.8rem; font-weight: 600; padding: 6px 14px; border-radius: 20px; }
 
     .card-pontos {
@@ -394,8 +391,6 @@
     .pontos-historico.negativo { color: #9aab96; }
     .btn-confirmar-servico { display: inline-flex; align-items: center; gap: 6px; font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 700; background: var(--verde-principal); color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: background 0.18s; margin-top: 8px; }
     .btn-confirmar-servico:hover { background: var(--verde-escuro); }
-    .link-comentario { font-size: 0.78rem; color: var(--verde-principal); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; }
-    .link-comentario:hover { text-decoration: underline; }
 .mensagem-salva {
   position: fixed;
   bottom: 24px; left: 50%;
@@ -456,6 +451,8 @@
       .rodape-servico { flex-direction: column; align-items: flex-start; }
     }
   </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarUsuarioResponsiva.js" defer></script>
 </head>
 <body>
 
