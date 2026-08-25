@@ -1246,6 +1246,126 @@ async function isOngPremium(cnpj) {
   }
 }
 
+// confirmação de serviços e avaliação
+
+// Aceitar / Recusar solicitação
+async function responderSolicitacao(cod, statusS, statusE) {
+  try {
+    await pool.query(
+      `UPDATE Mutuo_Solicitacao SET statusSolicitacao = ?, statusExecucao = ? WHERE codSolicitacao = ?`,
+      [statusS, statusE, cod]
+    );
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao responder solicitação:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Solicitações aceitas aguardando confirmação (aba "Confirmar Serviços" do perfil)
+async function getSolicitacoesParaConfirmar(cpfUsuario) {
+  const sql = `
+    SELECT 
+      SOL.codSolicitacao,
+      SOL.pontos,
+      SOL.dataSolicitacao,
+      SERV.nome AS nomeServico,
+      UPRES.nome AS nomePrestador
+    FROM Mutuo_Solicitacao AS SOL
+    JOIN Mutuo_Servico AS SERV ON SOL.codServico = SERV.cod
+    JOIN Mutuo_Usuario AS UPRES ON SERV.idUsuario = UPRES.cpf
+    WHERE SOL.codUsuario = ?
+      AND SOL.statusSolicitacao = 'Aceita'
+      AND SOL.statusExecucao != 'Realizada'
+    ORDER BY SOL.dataSolicitacao DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cpfUsuario]);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar solicitações para confirmar:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Confirmar realização → transfere pontos (transação)
+async function confirmarSolicitacao(cod) {
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+
+    const [[solicitacao]] = await conexao.query(
+      `SELECT sol.pontos, sol.codUsuario, sol.codServico, sol.statusExecucao, s.idUsuario AS prestadorCpf
+       FROM Mutuo_Solicitacao sol
+       JOIN Mutuo_Servico s ON sol.codServico = s.cod
+       WHERE sol.codSolicitacao = ?
+       FOR UPDATE`,
+      [cod]
+    );
+
+    if (!solicitacao) throw new Error('Solicitação não encontrada.');
+    if (solicitacao.statusExecucao === 'Realizada') throw new Error('Este serviço já foi confirmado.');
+
+    const { pontos, codUsuario, codServico, prestadorCpf } = solicitacao;
+
+    await conexao.query(`UPDATE Mutuo_Usuario SET pontos = pontos - ? WHERE cpf = ?`, [pontos, codUsuario]);
+    await conexao.query(`UPDATE Mutuo_Usuario SET pontos = pontos + ? WHERE cpf = ?`, [pontos, prestadorCpf]);
+    await conexao.query(
+      `UPDATE Mutuo_Solicitacao SET statusExecucao = 'Realizada', dataConclusao = NOW() WHERE codSolicitacao = ?`,
+      [cod]
+    );
+
+    await conexao.commit();
+    return { sucesso: true, codServico };
+  } catch (err) {
+    await conexao.rollback();
+    console.error('Erro ao confirmar solicitação:', err.message);
+    return { error: err.message };
+  } finally {
+    conexao.release();
+  }
+}
+
+// Avaliar o serviço (média ponderada)
+async function avaliarSolicitacao(cod, notaNova) {
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+
+    const [[solicitacao]] = await conexao.query(
+      `SELECT codServico, avaliado FROM Mutuo_Solicitacao WHERE codSolicitacao = ? FOR UPDATE`,
+      [cod]
+    );
+    if (!solicitacao) throw new Error('Solicitação não encontrada.');
+    if (solicitacao.avaliado) throw new Error('Este serviço já foi avaliado.');
+
+    const [[servico]] = await conexao.query(
+      `SELECT nota, avaliacoes FROM Mutuo_Servico WHERE cod = ? FOR UPDATE`,
+      [solicitacao.codServico]
+    );
+
+    const novaQtd = servico.avaliacoes + 1;
+    const novaMedia = servico.avaliacoes === 0
+      ? notaNova
+      : ((servico.nota * servico.avaliacoes) + notaNova) / novaQtd;
+
+    await conexao.query(
+      `UPDATE Mutuo_Servico SET nota = ?, avaliacoes = ? WHERE cod = ?`,
+      [novaMedia.toFixed(1), novaQtd, solicitacao.codServico]
+    );
+    await conexao.query(`UPDATE Mutuo_Solicitacao SET avaliado = 1 WHERE codSolicitacao = ?`, [cod]);
+
+    await conexao.commit();
+    return { sucesso: true };
+  } catch (err) {
+    await conexao.rollback();
+    console.error('Erro ao avaliar solicitação:', err.message);
+    return { error: err.message };
+  } finally {
+    conexao.release();
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   getUsuarioPorCpf,
@@ -1321,5 +1441,9 @@ module.exports = {
   atualizarPremiumUsuario,
   atualizarPremiumOng,
   contarServicosAtivosOng,
-  isOngPremium
+  isOngPremium,
+  responderSolicitacao,
+  getSolicitacoesParaConfirmar,
+  confirmarSolicitacao,
+  avaliarSolicitacao
 };

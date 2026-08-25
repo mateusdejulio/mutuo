@@ -733,6 +733,34 @@ app.put('/ongs/:cnpj/premium', async (req, res) => {
   });
 });
 
+// confirmação e avaliação
+
+app.put('/solicitacoes/:cod', async (req, res) => {
+  const { statusS, statusE } = req.body;
+  const resultado = await db.responderSolicitacao(req.params.cod, statusS, statusE);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
+});
+
+app.get('/solicitacoes/confirmar/:cpf', async (req, res) => {
+  const solicitacoes = await db.getSolicitacoesParaConfirmar(req.params.cpf);
+  if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });
+  res.json(solicitacoes);
+});
+
+app.put('/solicitacoes/:cod/confirmar', async (req, res) => {
+  const resultado = await db.confirmarSolicitacao(req.params.cod);
+  if (resultado.error) return res.status(400).json({ erro: resultado.error });
+  res.json(resultado);
+});
+
+app.post('/solicitacoes/:cod/avaliar', async (req, res) => {
+  const { nota } = req.body;
+  const resultado = await db.avaliarSolicitacao(req.params.cod, nota);
+  if (resultado.error) return res.status(400).json({ erro: resultado.error });
+  res.json(resultado);
+});
+
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
