@@ -277,10 +277,6 @@
     .info-perfil h2 { font-size: 1.15rem; font-weight: 700; color: #1a2e1b; margin-bottom: 2px; }
     .info-perfil span { font-size: 0.82rem; color: #9aab96; font-weight: 600; }
 
-    .bio-perfil {
-      font-size: 0.88rem; color: #4a6a4e; line-height: 1.55;
-      padding-bottom: 16px; border-bottom: 1px solid #f0f4ef; margin-bottom: 16px;
-    }
 
     .estatisticas-perfil { display: flex; gap: 0; }
     .stat-item {
@@ -353,12 +349,6 @@
       border-radius: 0 !important;
     }
 
-    .habilidades-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
 
     .tag-habilidade { display: flex; align-items: center; gap: 6px; }
 
@@ -448,12 +438,7 @@
 
     .divisor { height: 1px; background: #f0f4ef; margin: 16px 0; }
 
-    .titulo-secao {
-      font-size: 0.82rem; font-weight: 700; color: #9aab96;
-      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
-    }
 
-    .habilidades { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag-habilidade {
       background: var(--verde-palido); color: var(--verde-escuro);
       font-size: 0.8rem; font-weight: 600;
@@ -621,6 +606,8 @@
       .rodape-servico { flex-direction: column; align-items: flex-start; }
     }
   </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarOngResponsiva.js" defer></script>
 </head>
 <body>
 
@@ -724,8 +711,8 @@
   <div class="bloco">
     <div class="cabecalho-perfil">
       <div class="foto-perfil-wrap">
-        <img class="foto-perfil" id="cardFotoPerfil" src="../imagens/perfilOngI.png" alt="Foto da ONG"
-          onerror="this.src='https://ui-avatars.com/api/?name=ONG&background=588157&color=fff'">
+        <img class="foto-perfil" id="cardFotoPerfil" src="../imagens/mutuoLogo.png" alt="Foto da ONG"
+          onerror="this.src='mutuoLogo.png'">
         <span class="badge-online"></span>
         <button type="button" class="btn-trocar-foto" id="btnTrocarFoto" title="Trocar foto de perfil">
           <i class="bi bi-camera-fill"></i>
@@ -740,12 +727,12 @@
 
     <div class="estatisticas-perfil">
       <div class="stat-item">
-        <span class="stat-numero">1.000</span>
+        <span class="stat-numero" id="totalVoluntariosOng">0</span>
         <span class="stat-texto">Voluntários</span>
       </div>
       <div class="stat-item">
-        <span class="stat-numero">98%</span>
-        <span class="stat-texto">Avaliações positivas</span>
+        <span class="stat-numero">5.0</span>
+        <span class="stat-texto">Média de avaliações</span>
       </div>
       <div class="stat-item">
         <span class="stat-numero" id="tempoMembro">-</span>
@@ -772,9 +759,9 @@
 
     <div class="cabecalho-perfil">
       <img class="foto-perfil" id="perfilFotoSecundaria"
-        src="../imagens/perfilOngI.png"
+        src="../imagens/mutuoLogo.png"
         alt="Foto da ONG"
-        onerror="this.src='https://ui-avatars.com/api/?name=ONG&background=588157&color=fff'">
+        onerror="this.src='mutuoLogo.png'">
 
       <div class="info-nome cabecalho-perfil-nome">
         <h3 id="exibNome">Carregando...</h3>
@@ -851,51 +838,6 @@
     </div>
 
     <div class="divisor"></div>
-
-    <p class="titulo-secao">Áreas de atuação</p>
-
-    <div class="habilidades-wrap" id="habilidadesWrap">
-
-      <span class="tag-habilidade" data-tag="Educação">
-        Educação
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <span class="tag-habilidade" data-tag="Recreação">
-        Recreação
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <span class="tag-habilidade" data-tag="Artes">
-        Artes
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <span class="tag-habilidade" data-tag="Jardinagem">
-        Jardinagem
-        <button class="remover" onclick="removerTag(this)">
-          <i class="bi bi-x"></i>
-        </button>
-      </span>
-
-      <div class="add-habilidade">
-        <input
-          type="text"
-          id="inputTag"
-          placeholder="Nova habilidade"
-          onkeydown="if(event.key==='Enter') adicionarTag()">
-
-        <button onclick="adicionarTag()">
-          <i class="bi bi-plus-circle"></i>
-        </button>
-      </div>
-    </div>
 
     <div class="acoes-edit" id="acoesEdit" style="display:none">
       <button class="btn-cancelar" onclick="cancelarEdicao()">
@@ -1144,12 +1086,22 @@
     if (tentativa === 1) mostrarCarregandoPerfil();
 
     try {
-      const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(logada.cnpj)}`);
+      const cnpj = encodeURIComponent(logada.cnpj);
+      const [resposta, respostaVoluntarios] = await Promise.all([
+        fetch(`${API_BASE}/ongs/${cnpj}`),
+        fetch(`${API_BASE}/ongs/${cnpj}/voluntarios-realizados`)
+      ]);
       if (!resposta.ok) throw new Error('Não foi possível carregar os dados da ONG.');
 
       const ong = await resposta.json();
       ongAtual = ong;
       preencherTela(ong);
+
+      if (respostaVoluntarios.ok) {
+        const dadosVoluntarios = await respostaVoluntarios.json();
+        document.getElementById('totalVoluntariosOng').textContent =
+          Number(dadosVoluntarios.totalVoluntarios || 0).toLocaleString('pt-BR');
+      }
 
       sessionStorage.setItem('ongLogada', JSON.stringify({
         ...logada,

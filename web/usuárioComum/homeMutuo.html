@@ -349,8 +349,6 @@
     }
     .act-ong img { width: 31px; height: 31px; border-radius: 50%; object-fit: cover; }
     .act-ong-name { font-size: 0.8rem; font-weight: 600; color: var(--green-dark); }
-    .act-stars { color: var(--green-main); font-size: 0.7rem; }
-    .act-stars span { color: var(--text-muted); font-size: 0.73rem; }
 
     .act-meta { display: flex; gap: 1rem; margin-bottom: 0.95rem; flex-wrap: wrap; }
     .act-body > *:last-child { margin-top: auto; }
@@ -393,12 +391,6 @@
 }
 .btn-duvida:hover { background: var(--cream); border-color: var(--green-main); }
 .btn-duvida:active { transform: scale(0.97); }
-    .btn-outline {
-      background: transparent;
-      border: 1.5px solid var(--green-main);
-      color: var(--green-main);
-    }
-    .btn-outline:hover { background: var(--green-main); color: var(--cream); }
 
     
     .carousel-arrow {
@@ -539,11 +531,33 @@
       .welcome-banner, .stats-wrap, .quotes-wrap, .section-wrap {
         margin-left: 1rem; margin-right: 1rem;
       }
-      .act-card { flex: 0 0 85vw; }
+      .cards-track-wrap {
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-inline: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        touch-action: pan-x pan-y;
+      }
+      .cards-track-wrap::-webkit-scrollbar { display: none; }
+      .cards-track {
+        width: max-content;
+        transform: none !important;
+        transition: none;
+        padding-right: 1rem;
+      }
+      .act-card {
+        flex: 0 0 85vw;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+      }
       .carousel-arrow { display: none; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarUsuarioResponsiva.js" defer></script>
 </head>
 <body>
 

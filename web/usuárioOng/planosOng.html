@@ -48,6 +48,10 @@
       background-color: #f9fbf9;
     }
 
+    body {
+      overflow-x: hidden;
+    }
+
     /* Navegação */
 
     nav {
@@ -510,13 +514,19 @@
     }
 
     @media (max-width: 850px) {
+      .plans-wrapper {
+        justify-content: flex-start;
+      }
+
       .cards-container {
         flex-direction: column;
       }
 
+      .card-plano,
+      .card-plano:hover,
       .card-plano.premium,
       .card-plano.premium:hover {
-        transform: scale(1);
+        transform: none !important;
       }
     }
 
@@ -533,16 +543,101 @@
         display: none;
       }
 
+      .plans-wrapper {
+        min-height: calc(100vh - 64px);
+        padding: 34px 16px 48px;
+      }
+
+      .header-text {
+        width: 100%;
+        margin-bottom: 28px;
+        padding: 0 4px;
+      }
+
+      .header-text h2 {
+        margin-bottom: 10px;
+        font-size: clamp(1.55rem, 7vw, 2rem);
+        line-height: 1.2;
+      }
+
+      .header-text p {
+        margin-bottom: 0;
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+
       .cards-container {
-        gap: 30px;
+        gap: 26px;
       }
 
       .card-plano {
-        width: min(100%, 360px);
+        width: 100%;
+        max-width: 380px;
+        padding: 34px 22px 28px;
+        border-radius: 24px;
+      }
+
+      .card-icon {
+        margin-bottom: 10px;
+        font-size: 44px;
+      }
+
+      .card-title {
+        font-size: 1.55rem;
+      }
+
+      .preco-valor {
+        font-size: 1.9rem;
+      }
+
+      .feature-list {
+        margin-bottom: 24px;
+      }
+
+      .feature-item {
+        align-items: flex-start;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .popular-badge {
+        max-width: calc(100% - 28px);
+        padding: 5px 16px;
+        font-size: 0.72rem;
+      }
+
+      #mensagemPlano {
+        top: 76px;
+        width: calc(100% - 24px);
+      }
+
+      .mensagem-plano {
+        padding: 13px 14px;
+        font-size: 0.9rem;
       }
     }
 
     @media (max-width: 480px) {
+      .plans-wrapper {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+
+      .card-plano {
+        padding-right: 17px;
+        padding-left: 17px;
+      }
+
+      .btn-inscrever {
+        padding-right: 18px;
+        padding-left: 18px;
+        font-size: 0.86rem;
+      }
+
+      .modal-dialog {
+        margin: 12px;
+      }
+
       .modal-actions {
         flex-direction: column;
       }
@@ -552,6 +647,8 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarOngResponsiva.js" defer></script>
 </head>
 
 <body>

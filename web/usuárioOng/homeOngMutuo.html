@@ -118,24 +118,6 @@ nav {
   border: 2px solid var(--green-main);
 }
 
-.nav-profile {
-  display: flex; align-items: center; gap: 9px;
-  text-decoration: none;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(225,220,208,0.18);
-  border-radius: 40px;
-  padding: 5px 14px 5px 5px;
-  transition: background 0.2s;
-}
-.nav-profile:hover { background: rgba(255,255,255,0.16); }
-.nav-profile img {
-  width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
-  border: 2px solid rgba(225,220,208,0.4);
-}
-.nav-profile span {
-  color: var(--cream); font-size: 0.84rem; font-weight: 500;
-  white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
-}
 .perfil-nav {
   display: flex;
   align-items: center;
@@ -314,13 +296,6 @@ nav {
   font-family: 'Quicksand', sans-serif;
   font-size: 1.3rem; color: var(--green-dark);
 }
-.section-link {
-  font-size: 0.82rem; font-weight: 500;
-  color: var(--green-main); text-decoration: none;
-  display: flex; align-items: center; gap: 3px;
-  transition: gap 0.2s;
-}
-.section-link:hover { gap: 7px; }
 
 .actions-grid {
   display: grid;
@@ -473,19 +448,6 @@ nav {
   text-align: center;
 }
 .cards-status i { font-size: 1.6rem; color: var(--green-main); opacity: 0.6; }
-.skeleton-card {
-  background: var(--white);
-  border-radius: 20px;
-  border: 1.5px solid var(--cream);
-  overflow: hidden;
-}
-.skeleton-img, .skeleton-line {
-  background: linear-gradient(90deg, var(--cream-light) 25%, var(--cream) 37%, var(--cream-light) 63%);
-  background-size: 400% 100%;
-  animation: skeletonPulse 1.4s ease infinite;
-}
-.skeleton-img { height: 155px; }
-.skeleton-line { height: 12px; border-radius: 6px; margin: 10px 1.2rem; }
 @keyframes skeletonPulse {
   0% { background-position: 100% 50%; }
   100% { background-position: 0 50%; }
@@ -507,13 +469,14 @@ nav {
   .hero-tags { justify-content: center; }
   .hero-stats { justify-content: center; }
   .nav-links { display: none; }
-  .nav-profile span { display: none; }
   .welcome-banner, .hero-wrap, .quotes-wrap, .section-wrap {
     margin-left: 1rem; margin-right: 1rem;
   }
 }
   
   </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarOngResponsiva.js" defer></script>
 </head>
 <body>
 
