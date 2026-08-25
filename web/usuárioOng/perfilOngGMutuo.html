@@ -537,6 +537,16 @@
     }
     .btn-adicionar:hover { background: var(--verde-escuro); color: #fff; }
 
+    .badge-limite-servicos {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--verde-palido); color: var(--verde-escuro);
+      font-size: 0.75rem; font-weight: 700;
+      padding: 5px 11px; border-radius: 20px; margin-top: 6px;
+    }
+    .badge-limite-servicos.limite-atingido { background: #fdeeda; color: #b3690a; }
+    .badge-limite-servicos a { color: inherit; text-decoration: underline; font-weight: 700; }
+    .btn-adicionar.desabilitado { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+
     .barra-filtros-historico {
       display: flex; gap: 6px; margin: 16px 0;
       overflow-x: auto; padding-bottom: 2px;
@@ -925,8 +935,9 @@
     <div>
       <h3>Meus serviços</h3>
       <p>Serviços que você oferece na plataforma</p>
+      <span class="badge-limite-servicos" id="badgeLimiteServicosOng" style="display:none;"></span>
     </div>
-    <a href="adicionarServicoOng.html" class="btn-adicionar"><i class="bi bi-plus-lg"></i> Adicionar</a>
+    <a href="adicionarServicoOng.html" class="btn-adicionar" id="btnAdicionarServicoOng"><i class="bi bi-plus-lg"></i> Adicionar</a>
   </div>
 
   <div id="listaServicosOng">
@@ -982,7 +993,7 @@
 </div>
 <script src="../funcoes.js"></script>
 <script>
-  const API_BASE = 'http://localhost:3000';
+  const API_BASE = 'https://mutuo-api.onrender.com'
 
   document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -993,7 +1004,7 @@
     });
   });
 
-  
+
   const hamburger    = document.getElementById('hamburger');
   const mobileDrawer = document.getElementById('mobileDrawer');
   const overlay      = document.getElementById('drawerOverlay');
@@ -1057,12 +1068,27 @@
   }
 
   function formatarData(dataStr) {
-  if (!dataStr) return null;
-  const normalizada = typeof dataStr === 'string' ? dataStr.replace(' ', 'T') : dataStr;
-  const d = new Date(normalizada);
-  if (isNaN(d)) return null;
-  return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-}
+    if (!dataStr) return null;
+    const normalizada = typeof dataStr === 'string' ? dataStr.replace(' ', 'T') : dataStr;
+    const d = new Date(normalizada);
+    if (isNaN(d)) return null;
+    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+
+  function mostrarCarregandoPerfil() {
+    document.getElementById('navNomeOng').textContent = 'Carregando...';
+    document.getElementById('drawerNomeOng').textContent = 'Carregando...';
+    document.getElementById('cardNomeOng').textContent = 'Carregando...';
+    document.getElementById('cardUserHandle').textContent = '@...';
+    document.getElementById('exibNome').textContent = 'Carregando...';
+    document.getElementById('exibUser').textContent = '@...';
+    document.getElementById('exibEmail').textContent = 'Carregando...';
+    document.getElementById('exibTel').textContent = 'Carregando...';
+    document.getElementById('exibCadastro').textContent = 'Carregando...';
+    document.getElementById('exibCadastroEdit').textContent = 'Carregando...';
+    document.getElementById('tempoMembro').textContent = '...';
+    document.getElementById('exibePontos').textContent = '...';
+  }
 
   function preencherTela(ong) {
     const handle = gerarHandle(ong.nomeOng);
@@ -1085,8 +1111,6 @@
     document.getElementById('exibEmail').textContent = ong.email || '-';
     document.getElementById('exibTel').textContent = ong.telefone || 'Não informado';
 
-    
-
     const textoPlano = ong.premium ? 'Plano premium' : 'Plano gratuito';
     document.getElementById('exibPlano').textContent = textoPlano;
     document.getElementById('exibPlanoEdit').textContent = textoPlano;
@@ -1097,25 +1121,27 @@
     document.getElementById('inputTel').value = ong.telefone || '';
 
     if (ong.pontos !== undefined) {
-  document.getElementById('exibePontos').textContent = ong.pontos.toLocaleString('pt-BR');
+      document.getElementById('exibePontos').textContent = ong.pontos.toLocaleString('pt-BR');
+    }
 
-}
-const dataFormatada = formatarData(ong.cadastro);
-  const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
-  document.getElementById('exibCadastro').textContent = textoMembro;
-  document.getElementById('exibCadastroEdit').textContent = textoMembro;
-document.getElementById('tempoMembro').textContent =
-  calcularTempoNoMutuo(ong.cadastro);
+    const dataFormatada = formatarData(ong.cadastro);
+    const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
+    document.getElementById('exibCadastro').textContent = textoMembro;
+    document.getElementById('exibCadastroEdit').textContent = textoMembro;
+    document.getElementById('tempoMembro').textContent = calcularTempoNoMutuo(ong.cadastro);
+
     aplicarFotoEmTodosOsLugares(ong.foto_perfil, ong.nomeOng);
+    atualizarBadgeLimiteServicosOng(totalServicosOng);
   }
-  
 
-  async function carregarPerfilOng() {
+  async function carregarPerfilOng(tentativa = 1) {
     const logada = pegarOngLogada();
     if (!logada || !logada.cnpj) {
       window.location.href = '../login.html';
       return;
     }
+
+    if (tentativa === 1) mostrarCarregandoPerfil();
 
     try {
       const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(logada.cnpj)}`);
@@ -1136,11 +1162,19 @@ document.getElementById('tempoMembro').textContent =
 
     } catch (erro) {
       console.error(erro);
+
+      // Servidor (Render free tier) pode estar "acordando" (cold start).
+      // Tenta de novo silenciosamente, sem alert, mantendo "Carregando...".
+      if (tentativa < 6) {
+        setTimeout(() => carregarPerfilOng(tentativa + 1), 4000);
+        return;
+      }
+
+      // Depois de várias tentativas, preenche com o que tem em cache
       if (logada) {
         ongAtual = logada;
         preencherTela(logada);
       }
-      alert('Não foi possível conectar à API para carregar seus dados. Verifique se o servidor está rodando.');
     }
   }
 
@@ -1154,20 +1188,15 @@ document.getElementById('tempoMembro').textContent =
     const arquivo = inputFotoPerfil.files[0];
     if (!arquivo) return;
 
-    if (!ongAtual || !ongAtual.cnpj) {
-      alert('Não foi possível identificar a ONG logada.');
-      return;
-    }
+    if (!ongAtual || !ongAtual.cnpj) return;
 
     const tiposAceitos = ['image/jpeg', 'image/png', 'image/webp'];
     if (!tiposAceitos.includes(arquivo.type)) {
-      alert('Envie uma imagem em JPG, PNG ou WEBP.');
       inputFotoPerfil.value = '';
       return;
     }
 
     if (arquivo.size > 3 * 1024 * 1024) {
-      alert('A imagem deve ter no máximo 3MB.');
       inputFotoPerfil.value = '';
       return;
     }
@@ -1199,7 +1228,6 @@ document.getElementById('tempoMembro').textContent =
 
     } catch (erro) {
       console.error(erro);
-      alert(erro.message || 'Não foi possível trocar a foto de perfil.');
     } finally {
       btnTrocarFoto.innerHTML = '<i class="bi bi-camera-fill"></i>';
       inputFotoPerfil.value = '';
@@ -1207,258 +1235,299 @@ document.getElementById('tempoMembro').textContent =
   });
 
   // ── Edição de perfil ──
-     function ativarEdicao() {
-      document.getElementById('modoLeitura').style.display = 'none';
-      document.getElementById('modoEdicao').style.display = 'flex';
-      document.getElementById('acoesEdit').style.display = 'flex';
-      document.getElementById('btnEditar').style.display = 'none';
-      document.getElementById('perfilWrap').classList.add('editando-perfil');
-      document.getElementById('habilidadesWrap').classList.add('editando');
-      document.querySelector('.campo-nome-edit').style.display = 'flex';
-      document.querySelector('.cabecalho-perfil-nome').style.display = 'none';
-      document.getElementById('inputNome').focus();
-    }
- 
-    function cancelarEdicao() {
-      document.getElementById('modoEdicao').style.display = 'none';
-      document.getElementById('modoLeitura').style.display = 'flex';
-      document.getElementById('acoesEdit').style.display = 'none';
-      document.getElementById('btnEditar').style.display = 'flex';
-      document.getElementById('perfilWrap').classList.remove('editando-perfil');
-      document.getElementById('habilidadesWrap').classList.remove('editando');
-      document.querySelector('.campo-nome-edit').style.display = 'none';
-      document.querySelector('.cabecalho-perfil-nome').style.display = '';
-
-      if (ongAtual) preencherTela(ongAtual);
-    }
- 
-    async function salvarEdicao() {
-      if (!ongAtual || !ongAtual.cnpj) {
-        alert('Não foi possível identificar a ONG logada.');
-        return;
-      }
-
-      const nomeOng = document.getElementById('inputNome').value.trim();
-      const email   = document.getElementById('inputEmail').value.trim();
-      const tel     = document.getElementById('inputTel').value.trim();
-
-      if (!nomeOng || !email) {
-        alert('Nome e e-mail são obrigatórios.');
-        return;
-      }
-
-      const btnSalvar = document.querySelector('.btn-salvar');
-      const textoOriginalBtn = btnSalvar.textContent;
-      btnSalvar.textContent = 'Salvando...';
-      btnSalvar.disabled = true;
-
-      try {
-        const resposta = await fetch(`${API_BASE}/ongs/${ongAtual.cnpj}/perfil`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nomeOng, email, telefone: tel })
-        });
-
-        const resultado = await resposta.json();
-        if (!resposta.ok || resultado.error) {
-          throw new Error(resultado.erro || resultado.error || 'Erro ao salvar.');
-        }
-
-        ongAtual.nomeOng = nomeOng;
-        ongAtual.email = email;
-        ongAtual.telefone = tel;
-        preencherTela(ongAtual);
-
-        const logada = pegarOngLogada() || {};
-        sessionStorage.setItem('ongLogada', JSON.stringify({ ...logada, nomeOng, email }));
-
-        cancelarEdicao();
-
-      } catch (erro) {
-        console.error(erro);
-        alert(erro.message || 'Não foi possível salvar as alterações.');
-      } finally {
-        btnSalvar.textContent = textoOriginalBtn;
-        btnSalvar.disabled = false;
-      }
-    }
- 
-    function removerTag(btn) {
-      btn.closest('.tag-habilidade').remove();
-    }
- 
-    function adicionarTag() {
-      const inp = document.getElementById('inputTag');
-      const val = inp.value.trim();
-      if (!val) return;
- 
-      const wrap = document.getElementById('habilidadesWrap');
-      const addDiv = wrap.querySelector('.add-habilidade');
- 
-      const tag = document.createElement('span');
-      tag.className = 'tag-habilidade';
-      tag.dataset.tag = val;
-      tag.innerHTML = val + `
-        <button class="remover" onclick="removerTag(this)" aria-label="Remover ${val}">
-          <i class="bi bi-x"></i>
-        </button>`;
- 
-      wrap.insertBefore(tag, addDiv);
-      inp.value = '';
-      inp.focus();
-    }
-   const containerServicos = document.getElementById('listaServicosOng');
-
-function criarCardServicoPerfil(servico) {
-  const div = document.createElement('div');
-  div.className = 'card-servico';
-
-  const nome = servico.nomeServico || 'Serviço sem nome';
-  const descricao = servico.descricao || '';
-  const ativo = servico.ativo === undefined ? true : !!servico.ativo;
-  const nota = servico.nota ? Number(servico.nota).toFixed(1) : '—';
-  const avaliacoes = servico.avaliacoes ?? 0;
-  const pontos = servico.pontos ?? 0;
-
-  div.innerHTML = `
-    <div class="topo-servico">
-      <h4>${nome}</h4>
-      <span class="tag-ativo" style="${ativo ? '' : 'background:#f4f4f0;color:#999;'}">
-        ${ativo ? 'Ativo' : 'Inativo'}
-      </span>
-    </div>
-    <p class="descricao-servico">${descricao}</p>
-    <div class="rodape-servico">
-      <div class="avaliacao-servico">
-        <i class="bi bi-star-fill"></i> ${nota} <span>(${avaliacoes} avaliações)</span>
-      </div>
-      <div class="pontos-servico">
-        <i class="bi bi-lightning-charge-fill"></i> ${pontos} pts/hora
-      </div>
-      <div class="acoes-servico">
-        <button class="btn-excluir" data-id="${servico.id}">
-          <i class="bi bi-trash3"></i> Excluir
-        </button>
-        <a href="editarServicoOng.html?id=${servico.id}" class="btn-editar-servico">
-          <i class="bi bi-pencil"></i> Editar
-        </a>
-      </div>
-    </div>
-  `;
-
-  div.querySelector('.btn-excluir').addEventListener('click', () => excluirServicoPerfil(servico.id, div));
-
-  return div;
-}
-
-async function excluirServicoPerfil(id, cardEl) {
-  if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
-
-  try {
-    const resposta = await fetch(`${API_BASE}/servicos/ong/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ativo: 0 })
-    });
-
-    const resultado = await resposta.json();
-    if (!resposta.ok || resultado.error) {
-      throw new Error(resultado.erro || resultado.error || 'Erro ao excluir serviço.');
-    }
-
-    cardEl.remove();
-
-  } catch (erro) {
-    console.error(erro);
-    alert(erro.message || 'Não foi possível excluir o serviço.');
+  function ativarEdicao() {
+    document.getElementById('modoLeitura').style.display = 'none';
+    document.getElementById('modoEdicao').style.display = 'flex';
+    document.getElementById('acoesEdit').style.display = 'flex';
+    document.getElementById('btnEditar').style.display = 'none';
+    document.getElementById('perfilWrap').classList.add('editando-perfil');
+    document.getElementById('habilidadesWrap').classList.add('editando');
+    document.querySelector('.campo-nome-edit').style.display = 'flex';
+    document.querySelector('.cabecalho-perfil-nome').style.display = 'none';
+    document.getElementById('inputNome').focus();
   }
-}
 
-async function carregarServicosPerfilOng() {
-  const logada = pegarOngLogada();
-  if (!logada || !logada.cnpj) return;
+  function cancelarEdicao() {
+    document.getElementById('modoEdicao').style.display = 'none';
+    document.getElementById('modoLeitura').style.display = 'flex';
+    document.getElementById('acoesEdit').style.display = 'none';
+    document.getElementById('btnEditar').style.display = 'flex';
+    document.getElementById('perfilWrap').classList.remove('editando-perfil');
+    document.getElementById('habilidadesWrap').classList.remove('editando');
+    document.querySelector('.campo-nome-edit').style.display = 'none';
+    document.querySelector('.cabecalho-perfil-nome').style.display = '';
 
-  containerServicos.innerHTML = `
-    <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
-      Carregando seus serviços...
-    </p>`;
+    if (ongAtual) preencherTela(ongAtual);
+  }
 
-  try {
-    const resposta = await fetch(`${API_BASE}/servicos/ong/${logada.cnpj}`);
-    if (!resposta.ok) throw new Error('Não foi possível carregar seus serviços.');
+  async function salvarEdicao() {
+    if (!ongAtual || !ongAtual.cnpj) return;
 
-    const servicos = await resposta.json();
-    const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
+    const nomeOng = document.getElementById('inputNome').value.trim();
+    const email   = document.getElementById('inputEmail').value.trim();
+    const tel     = document.getElementById('inputTel').value.trim();
 
-    containerServicos.innerHTML = '';
+    if (!nomeOng || !email) return;
 
-    if (lista.length === 0) {
-      containerServicos.innerHTML = `
-        <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
-          Você ainda não cadastrou nenhum serviço.
-        </p>`;
-      return;
+    const btnSalvar = document.querySelector('.btn-salvar');
+    const textoOriginalBtn = btnSalvar.textContent;
+    btnSalvar.textContent = 'Salvando...';
+    btnSalvar.disabled = true;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/ongs/${ongAtual.cnpj}/perfil`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nomeOng, email, telefone: tel })
+      });
+
+      const resultado = await resposta.json();
+      if (!resposta.ok || resultado.error) {
+        throw new Error(resultado.erro || resultado.error || 'Erro ao salvar.');
+      }
+
+      ongAtual.nomeOng = nomeOng;
+      ongAtual.email = email;
+      ongAtual.telefone = tel;
+      preencherTela(ongAtual);
+
+      const logada = pegarOngLogada() || {};
+      sessionStorage.setItem('ongLogada', JSON.stringify({ ...logada, nomeOng, email }));
+
+      cancelarEdicao();
+
+    } catch (erro) {
+      console.error(erro);
+    } finally {
+      btnSalvar.textContent = textoOriginalBtn;
+      btnSalvar.disabled = false;
     }
+  }
 
-    lista.forEach(servico => {
-      containerServicos.appendChild(criarCardServicoPerfil(servico));
-    });
+  function removerTag(btn) {
+    btn.closest('.tag-habilidade').remove();
+  }
 
-  } catch (erro) {
-    console.error(erro);
+  function adicionarTag() {
+    const inp = document.getElementById('inputTag');
+    const val = inp.value.trim();
+    if (!val) return;
+
+    const wrap = document.getElementById('habilidadesWrap');
+    const addDiv = wrap.querySelector('.add-habilidade');
+
+    const tag = document.createElement('span');
+    tag.className = 'tag-habilidade';
+    tag.dataset.tag = val;
+    tag.innerHTML = val + `
+      <button class="remover" onclick="removerTag(this)" aria-label="Remover ${val}">
+        <i class="bi bi-x"></i>
+      </button>`;
+
+    wrap.insertBefore(tag, addDiv);
+    inp.value = '';
+    inp.focus();
+  }
+
+  const containerServicos = document.getElementById('listaServicosOng');
+  let totalServicosOng = 0;
+
+  function criarCardServicoPerfil(servico) {
+    const div = document.createElement('div');
+    div.className = 'card-servico';
+
+    const nome = servico.nomeServico || 'Serviço sem nome';
+    const descricao = servico.descricao || '';
+    const ativo = servico.ativo === undefined ? true : !!servico.ativo;
+    const nota = servico.nota ? Number(servico.nota).toFixed(1) : '—';
+    const avaliacoes = servico.avaliacoes ?? 0;
+    const pontos = servico.pontos ?? 0;
+
+    div.innerHTML = `
+      <div class="topo-servico">
+        <h4>${nome}</h4>
+        <span class="tag-ativo" style="${ativo ? '' : 'background:#f4f4f0;color:#999;'}">
+          ${ativo ? 'Ativo' : 'Inativo'}
+        </span>
+      </div>
+      <p class="descricao-servico">${descricao}</p>
+      <div class="rodape-servico">
+        <div class="avaliacao-servico">
+          <i class="bi bi-star-fill"></i> ${nota} <span>(${avaliacoes} avaliações)</span>
+        </div>
+        <div class="pontos-servico">
+          <i class="bi bi-lightning-charge-fill"></i> ${pontos} pts/hora
+        </div>
+        <div class="acoes-servico">
+          <button class="btn-excluir" data-id="${servico.id}">
+            <i class="bi bi-trash3"></i> Excluir
+          </button>
+          <a href="editarServicoOng.html?id=${servico.id}" class="btn-editar-servico">
+            <i class="bi bi-pencil"></i> Editar
+          </a>
+        </div>
+      </div>
+    `;
+
+    div.querySelector('.btn-excluir').addEventListener('click', () => excluirServicoPerfil(servico.id, div));
+
+    return div;
+  }
+
+  async function excluirServicoPerfil(id, cardEl) {
+    if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/servicos/ong/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ativo: 0 })
+      });
+
+      const resultado = await resposta.json();
+      if (!resposta.ok || resultado.error) {
+        throw new Error(resultado.erro || resultado.error || 'Erro ao excluir serviço.');
+      }
+
+      cardEl.remove();
+      totalServicosOng = Math.max(0, totalServicosOng - 1);
+      atualizarBadgeLimiteServicosOng(totalServicosOng);
+
+      if (totalServicosOng === 0) {
+        containerServicos.innerHTML = `
+          <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+            Você ainda não cadastrou nenhum serviço.
+          </p>`;
+      }
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível excluir o serviço.');
+    }
+  }
+
+  async function carregarServicosPerfilOng() {
+    const logada = pegarOngLogada();
+    if (!logada || !logada.cnpj) return;
+
     containerServicos.innerHTML = `
-      <p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">
-        Erro ao carregar seus serviços.
+      <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+        Carregando seus serviços...
       </p>`;
-  }
-}
-function calcularTempoNoMutuo(dataStr) {
-  if (!dataStr) return '-';
 
-  const normalizada =
-    typeof dataStr === 'string'
-      ? dataStr.replace(' ', 'T')
-      : dataStr;
+    try {
+      const resposta = await fetch(`${API_BASE}/servicos/ong/${encodeURIComponent(logada.cnpj)}`);
+      if (!resposta.ok) throw new Error('Não foi possível carregar seus serviços.');
 
-  const cadastro = new Date(normalizada);
-  const hoje = new Date();
+      const servicos = await resposta.json();
+      const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
+      totalServicosOng = lista.length;
 
-  if (Number.isNaN(cadastro.getTime()) || cadastro > hoje) {
-    return '-';
-  }
+      containerServicos.innerHTML = '';
 
-  let meses =
-    (hoje.getFullYear() - cadastro.getFullYear()) * 12 +
-    hoje.getMonth() -
-    cadastro.getMonth();
+      if (lista.length === 0) {
+        containerServicos.innerHTML = `
+          <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+            Você ainda não cadastrou nenhum serviço.
+          </p>`;
+      } else {
+        lista.forEach(servico => {
+          containerServicos.appendChild(criarCardServicoPerfil(servico));
+        });
+      }
 
-  if (hoje.getDate() < cadastro.getDate()) {
-    meses--;
-  }
+      atualizarBadgeLimiteServicosOng(totalServicosOng);
 
-  if (meses < 1) {
-    const dias = Math.max(
-      0,
-      Math.floor((hoje - cadastro) / 86400000)
-    );
-
-    return `${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+    } catch (erro) {
+      console.error(erro);
+      containerServicos.innerHTML = `
+        <p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">
+          Erro ao carregar seus serviços.
+        </p>`;
+    }
   }
 
-  if (meses < 12) {
-    return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+  function atualizarBadgeLimiteServicosOng(totalAtual) {
+    const badge = document.getElementById('badgeLimiteServicosOng');
+    const btnAdicionar = document.getElementById('btnAdicionarServicoOng');
+    if (!badge) return;
+
+    const logada = pegarOngLogada() || {};
+    let valorPremium = ongAtual?.premium ?? logada.premium;
+    if (valorPremium && typeof valorPremium === 'object' && Array.isArray(valorPremium.data)) {
+      valorPremium = valorPremium.data[0];
+    }
+    const premium = valorPremium === true || Number(valorPremium) === 1;
+    const limite = premium ? 10 : 5;
+    const atingiuLimite = totalAtual >= limite;
+
+    badge.style.display = 'inline-flex';
+    badge.classList.toggle('limite-atingido', atingiuLimite);
+
+    if (atingiuLimite && !premium) {
+      badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados — <a href="planosOng.html">vire Premium</a> para cadastrar até 10`;
+    } else if (atingiuLimite) {
+      badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados (limite Premium atingido)`;
+    } else {
+      badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados`;
+    }
+
+    if (btnAdicionar) {
+      btnAdicionar.classList.toggle('desabilitado', atingiuLimite);
+      btnAdicionar.title = atingiuLimite
+        ? (premium ? 'Limite de serviços Premium atingido.' : 'Limite atingido. Vire Premium para cadastrar mais.')
+        : '';
+    }
   }
 
-  const anos = Math.floor(meses / 12);
-  const mesesRestantes = meses % 12;
+  function calcularTempoNoMutuo(dataStr) {
+    if (!dataStr) return '-';
 
-  if (mesesRestantes === 0) {
-    return `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+    const normalizada =
+      typeof dataStr === 'string'
+        ? dataStr.replace(' ', 'T')
+        : dataStr;
+
+    const cadastro = new Date(normalizada);
+    const hoje = new Date();
+
+    if (Number.isNaN(cadastro.getTime()) || cadastro > hoje) {
+      return '-';
+    }
+
+    let meses =
+      (hoje.getFullYear() - cadastro.getFullYear()) * 12 +
+      hoje.getMonth() -
+      cadastro.getMonth();
+
+    if (hoje.getDate() < cadastro.getDate()) {
+      meses--;
+    }
+
+    if (meses < 1) {
+      const dias = Math.max(
+        0,
+        Math.floor((hoje - cadastro) / 86400000)
+      );
+
+      return `${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+    }
+
+    if (meses < 12) {
+      return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+    }
+
+    const anos = Math.floor(meses / 12);
+    const mesesRestantes = meses % 12;
+
+    if (mesesRestantes === 0) {
+      return `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+    }
+
+    return `${anos} ${anos === 1 ? 'ano' : 'anos'} e ` +
+      `${mesesRestantes} ${mesesRestantes === 1 ? 'mês' : 'meses'}`;
   }
 
-  return `${anos} ${anos === 1 ? 'ano' : 'anos'} e ` +
-    `${mesesRestantes} ${mesesRestantes === 1 ? 'mês' : 'meses'}`;
-}
   carregarPerfilOng();
   carregarServicosPerfilOng();
 </script>
