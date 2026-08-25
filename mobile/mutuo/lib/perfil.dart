@@ -6,6 +6,7 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
+import 'package:mutuo/planosUsuario.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -129,11 +130,17 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
     super.dispose();
   }
 
-  // ─── inicial segura pro avatar (mesmo padrão usado no resto do app) ───
+    // ─── inicial segura pro avatar (mesmo padrão usado no resto do app) ───
   String get _inicial {
     final nome = _usuario?['nome']?.toString() ?? widget.nomeInicial;
     return nome.isNotEmpty ? nome[0].toUpperCase() : 'U';
   }
+
+  // Plano gratuito: até 3 serviços ativos. Usuários premium (campo `premium`
+  // vindo do banco) podem cadastrar até 8 — limite já aplicado no backend
+  // (rota POST /servicos).
+  bool get _limiteAtingido =>
+      (_usuario?['premium'] != 1) && _servicos.length >= 3;
 
   Future<void> _carregarUsuario() async {
     setState(() => _carregando = true);
@@ -1369,9 +1376,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               'Membro desde ${_formatarMesAno(_usuario?['cadastro']?.toString())}',
             ),
             const SizedBox(height: 8),
-            _campoSomenteLeitura(
+                        _campoSomenteLeitura(
               Icons.workspace_premium_rounded,
-              'Plano gratuito',
+              _usuario?['premium'] == 1 ? 'Plano Premium' : 'Plano gratuito',
             ),
             const SizedBox(height: 20),
             Row(
@@ -1436,9 +1443,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               esmaecido: true,
             ),
             const SizedBox(height: 12),
-            _itemInfo(
+                       _itemInfo(
               Icons.workspace_premium_rounded,
-              'Plano gratuito',
+              _usuario?['premium'] == 1 ? 'Plano Premium' : 'Plano gratuito',
               esmaecido: true,
             ),
           ],
@@ -1691,27 +1698,39 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () => _abrirModalServico(),
+                            GestureDetector(
+                onTap: _limiteAtingido
+                    ? () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PlanosUsuario(
+                            cpf: widget.cpf,
+                            nomeInicial: widget.nomeInicial,
+                          ),
+                        ),
+                      )
+                    : () => _abrirModalServico(),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 9,
                   ),
                   decoration: BoxDecoration(
-                    color: _verde,
+                    color: _limiteAtingido ? Colors.redAccent : _verde,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.add_rounded,
+                      Icon(
+                        _limiteAtingido
+                            ? Icons.workspace_premium_outlined
+                            : Icons.add_rounded,
                         size: 16,
                         color: Colors.white,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Adicionar',
+                        _limiteAtingido ? 'Ver planos' : 'Adicionar',
                         style: GoogleFonts.quicksand(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -1724,6 +1743,38 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               ),
             ],
           ),
+          if (_limiteAtingido) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.redAccent.withOpacity(0.25)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: Colors.redAccent,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Limite de 3 serviços do plano gratuito consumido. Assine o Premium pra cadastrar até 8.',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           if (_carregandoServicos)
             const Padding(

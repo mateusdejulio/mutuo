@@ -463,7 +463,7 @@ class ApiService {
     }
   }
 
-  // ─── Atualiza nome/email/telefone do usuário ───
+    // ─── Atualiza nome/email/telefone do usuário ───
   // Usa PUT /usuarios/:cpf/perfil
   Future<Map<String, dynamic>> atualizarUsuario(
     String cpf,
@@ -486,6 +486,50 @@ class ApiService {
       };
     }
   }
+
+    // ─── Ativa o plano Premium do usuário comum (simulação de assinatura) ───
+  // Usa PUT /usuarios/:cpf/premium
+  Future<Map<String, dynamic>> ativarPremiumUsuario(String cpf) async {
+    final url = Uri.parse(
+      '$baseUrl/usuarios/${Uri.encodeComponent(cpf)}/premium',
+    );
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode({'premium': 1}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // ─── Cancela o plano Premium do usuário comum ───
+  // Usa PUT /usuarios/:cpf/premium (mesma rota, premium: 0)
+  Future<Map<String, dynamic>> cancelarPremiumUsuario(String cpf) async {
+    final url = Uri.parse(
+      '$baseUrl/usuarios/${Uri.encodeComponent(cpf)}/premium',
+    );
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode({'premium': 0}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  
 
   // ─── Serviços do usuário logado ───
   Future<List<dynamic>> buscarServicosDoUsuario(String cpf) async {
