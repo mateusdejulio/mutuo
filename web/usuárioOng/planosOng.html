@@ -50,60 +50,75 @@
 
     body {
       overflow-x: hidden;
+      line-height: normal;
     }
+
+    /*
+     * Reset defensivo: o Bootstrap (carregado nesta página) redefine
+     * line-height/font-size em elementos genéricos. Isso não deveria
+     * afetar a nav (que tem tamanhos fixos em px/rem), mas alguns
+     * navegadores recalculam a altura de flex containers a partir do
+     * line-height do conteúdo quando não há "!important" reforçando o
+     * height. As regras acima e abaixo garantem que a nav sempre
+     * renderize com a mesma altura das demais páginas da ONG.
+     */
 
     /* Navegação */
 
     nav {
-      position: fixed;
-      top: 0;
-      right: 0;
-      left: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      height: 72px;
-      padding: 0 2rem;
-      background-color: var(--verde-medio);
-      box-shadow: 0 2px 16px rgba(58, 90, 64, 0.25);
+      position: fixed !important;
+      top: 0 !important;
+      right: 0 !important;
+      left: 0 !important;
+      z-index: 1000 !important;
+      display: flex !important;
+      align-items: center !important;
+      height: 72px !important;
+      min-height: 72px !important;
+      padding: 0 2rem !important;
+      background-color: var(--verde-medio) !important;
+      box-shadow: 0 2px 16px rgba(58, 90, 64, 0.25) !important;
+      box-sizing: border-box !important;
     }
 
     .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-      margin-right: 2rem;
-      color: var(--bege);
-      font-size: 1.55rem;
-      letter-spacing: 0.4px;
-      text-decoration: none;
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      flex-shrink: 0 !important;
+      margin-right: 2rem !important;
+      color: var(--bege) !important;
+      font-size: 1.55rem !important;
+      line-height: 1.2 !important;
+      letter-spacing: 0.4px !important;
+      text-decoration: none !important;
     }
 
     .nav-brand img {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 8px !important;
     }
 
     .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      flex: 1;
-      margin: 0;
-      padding: 0;
-      list-style: none;
+      display: flex !important;
+      align-items: center !important;
+      gap: 2px !important;
+      flex: 1 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: none !important;
     }
 
     .nav-links a {
-      padding: 0.45rem 0.9rem;
-      border-radius: 8px;
-      color: rgba(225, 220, 208, 0.82);
-      font-size: 0.875rem;
-      font-weight: 500;
-      text-decoration: none;
-      white-space: nowrap;
+      padding: 0.45rem 0.9rem !important;
+      border-radius: 8px !important;
+      color: rgba(225, 220, 208, 0.82) !important;
+      font-size: 0.875rem !important;
+      font-weight: 500 !important;
+      line-height: normal !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
       transition:
         color 0.18s,
         background 0.18s;
@@ -166,17 +181,18 @@
     }
 
     .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-left: auto;
+      display: flex !important;
+      align-items: center !important;
+      gap: 1rem !important;
+      margin-left: auto !important;
     }
 
     .nav-bell {
       position: relative;
-      color: var(--bege);
-      font-size: 1.25rem;
-      text-decoration: none;
+      color: var(--bege) !important;
+      font-size: 1.25rem !important;
+      line-height: normal !important;
+      text-decoration: none !important;
       opacity: 0.8;
       transition: opacity 0.2s;
     }
@@ -203,14 +219,14 @@
     }
 
     .perfil-nav {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 5px 14px 5px 5px;
-      border: 1px solid rgba(225, 220, 208, 0.18);
-      border-radius: 40px;
-      background: rgba(255, 255, 255, 0.1);
-      text-decoration: none;
+      display: flex !important;
+      align-items: center !important;
+      gap: 9px !important;
+      padding: 5px 14px 5px 5px !important;
+      border: 1px solid rgba(225, 220, 208, 0.18) !important;
+      border-radius: 40px !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      text-decoration: none !important;
       transition: background 0.2s;
     }
 
@@ -219,19 +235,20 @@
     }
 
     .perfil-nav img {
-      width: 36px;
-      height: 36px;
-      border: 2px solid rgba(225, 220, 208, 0.4);
-      border-radius: 50%;
-      object-fit: cover;
+      width: 36px !important;
+      height: 36px !important;
+      border: 2px solid rgba(225, 220, 208, 0.4) !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
     }
 
     .perfil-nav span {
       overflow: hidden;
       max-width: 150px;
-      color: var(--bege);
-      font-size: 0.84rem;
-      font-weight: 500;
+      color: var(--bege) !important;
+      font-size: 0.84rem !important;
+      font-weight: 500 !important;
+      line-height: normal !important;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -545,7 +562,7 @@
 
       .plans-wrapper {
         min-height: calc(100vh - 64px);
-        padding: 34px 16px 48px;
+        padding: 88px 16px 48px;
       }
 
       .header-text {
@@ -647,14 +664,14 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="../navbarOngResponsiva.css">
-  <script src="../navbarOngResponsiva.js" defer></script>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css?v=20260825-2">
+  <script src="../navbarOngResponsiva.js?v=20260825-2" defer></script>
 </head>
 
 <body>
 
   <nav>
-    <a class="nav-brand" href="homeOngMutuo.html">
+    <a class="nav-brand" href="#">
       <img
         src="../imagens/mutuoLogo.png"
         alt="Logo"
@@ -728,7 +745,7 @@
       <a href="perfilOngGMutuo.html" class="perfil-nav">
         <img
           src="../imagens/mutuoLogo.png"
-          alt="Perfil da ONG"
+          alt="perfil"
           id="navFotoPerfil"
         >
 

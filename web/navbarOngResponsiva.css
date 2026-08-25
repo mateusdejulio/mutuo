@@ -1,3 +1,100 @@
+.ong-nav-hamburger,
+.ong-mobile-drawer,
+.ong-drawer-overlay {
+  font-family: 'Quicksand', sans-serif;
+}
+
+@media (min-width: 769px) {
+  body > nav,
+  body > nav.barra-nav {
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 0 2rem !important;
+    background-color: #588157 !important;
+    font-family: 'Quicksand', sans-serif !important;
+    font-size: 16px !important;
+    line-height: normal !important;
+  }
+
+  body > nav > .nav-brand,
+  body > nav > .marca-nav,
+  body > nav > .nav-marca {
+    gap: 10px !important;
+    margin-right: 2rem !important;
+    color: #e1dcd0 !important;
+    font-family: 'Quicksand', sans-serif !important;
+    font-size: 1.55rem !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    letter-spacing: .4px !important;
+  }
+
+  body > nav > .nav-brand img,
+  body > nav > .marca-nav img,
+  body > nav > .nav-marca img {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+  }
+
+  body > nav > .nav-links,
+  body > nav > .links-nav {
+    gap: 2px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body > nav > .nav-links > li > a,
+  body > nav > .links-nav > li > a {
+    padding: .45rem .9rem !important;
+    border-radius: 8px !important;
+    font-family: 'Quicksand', sans-serif !important;
+    font-size: .875rem !important;
+    font-weight: 500 !important;
+    line-height: normal !important;
+  }
+
+  body > nav .nav-right,
+  body > nav .nav-direita {
+    gap: 1rem !important;
+  }
+
+  body > nav .nav-bell,
+  body > nav .nav-sino,
+  body > nav .sino-nav {
+    color: #e1dcd0 !important;
+    font-size: 1.25rem !important;
+    line-height: normal !important;
+  }
+
+  body > nav .perfil-nav,
+  body > nav .nav-perfil,
+  body > nav .nav-profile,
+  body > nav .perfil-usuario-nav {
+    gap: 9px !important;
+    padding: 5px 14px 5px 5px !important;
+    border-radius: 40px !important;
+  }
+
+  body > nav .perfil-nav img,
+  body > nav .nav-perfil img,
+  body > nav .nav-profile img,
+  body > nav .perfil-usuario-nav img {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  body > nav .perfil-nav span,
+  body > nav .nav-perfil span,
+  body > nav .nav-profile span,
+  body > nav .perfil-usuario-nav span {
+    font-family: 'Quicksand', sans-serif !important;
+    font-size: .84rem !important;
+    font-weight: 500 !important;
+    line-height: normal !important;
+  }
+}
+
 .ong-nav-hamburger {
   display: none;
   width: 42px;
