@@ -961,7 +961,7 @@ async function contarVoluntariosOng(cnpj) {
        FROM Mutuo_SolicitacaoONG AS SOL
        JOIN Mutuo_ServicoOng AS SERV ON SOL.codServico = SERV.id
        WHERE SERV.cnpj = ?
-         AND SOL.statusExecucao = 'Realizada'`,
+         AND LOWER(TRIM(SOL.statusExecucao)) = 'realizada'`,
       [cnpj]
     );
 
@@ -1496,6 +1496,7 @@ module.exports = {
   getSolicitacoesParaConfirmar,
   confirmarSolicitacao,
   avaliarSolicitacao,
-contarVoluntariosOng
+contarVoluntariosOng,
+  isOngPremium
 };
   }
