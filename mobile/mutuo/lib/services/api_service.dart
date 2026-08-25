@@ -429,6 +429,23 @@ class ApiService {
     }
   }
 
+  // ─── NOVO: busca TODAS as atividades ativas de ONGs (tela de ONGs) ───
+  // Usa GET /servicos-ong
+  Future<List<dynamic>> buscarTodosServicosOng() async {
+    final url = Uri.parse('$baseUrl/servicos-ong');
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // ─── Atualiza nome/email/telefone do usuário ───
   // Usa PUT /usuarios/:cpf/perfil
   Future<Map<String, dynamic>> atualizarUsuario(
@@ -507,6 +524,48 @@ class ApiService {
     try {
       final request = http.MultipartRequest('POST', url);
       request.fields['cpf'] = cpf;
+      request.fields['nomeServico'] = nomeServico;
+      request.fields['descricao'] = descricao;
+      request.fields['foco'] = foco;
+      request.fields['duracao'] = duracao;
+
+      if (imagemBytes != null && imagemNome != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'imagem',
+            imagemBytes,
+            filename: imagemNome,
+            contentType: _mimeTypeDaExtensao(imagemNome),
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // ─── Atualiza um serviço existente do usuário ───
+  // Usa PUT /servicos/:id (multer, campo 'imagem' opcional — só
+  // manda se o usuário trocar a foto na edição)
+  Future<Map<String, dynamic>> atualizarServico({
+    required String id,
+    required String nomeServico,
+    required String descricao,
+    required String foco,
+    required String duracao,
+    List<int>? imagemBytes,
+    String? imagemNome,
+  }) async {
+    final url = Uri.parse('$baseUrl/servicos/$id');
+    try {
+      final request = http.MultipartRequest('PUT', url);
       request.fields['nomeServico'] = nomeServico;
       request.fields['descricao'] = descricao;
       request.fields['foco'] = foco;
