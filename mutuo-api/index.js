@@ -223,6 +223,19 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
       return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
     }
 
+    // ── Checagem do limite de serviços por plano ──
+    const premium = await db.isOngPremium(cnpj);
+    const limite = premium ? 8 : 5;
+    const totalAtual = await db.contarServicosAtivosOng(cnpj);
+
+    if (totalAtual >= limite) {
+      return res.status(403).json({
+        erro: premium
+          ? `Você atingiu o limite de ${limite} serviços do plano Premium.`
+          : `Você atingiu o limite de ${limite} serviços do plano gratuito. Assine o Premium para cadastrar até 8 serviços.`
+      });
+    }
+
     const imagem = req.file ? req.file.filename : null;
 
     const id = await db.cadastrarServicoOng({
@@ -243,7 +256,6 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
     res.status(500).json({ sucesso: false, erro: e.message });
   }
 });
-
 // Lista os serviços cadastrados por um usuário comum
 app.get('/servicos/usuario/:cpf', async (req, res) => {
   const servicos = await db.getServicosUsuario(req.params.cpf);
@@ -720,6 +732,8 @@ app.put('/ongs/:cnpj/premium', async (req, res) => {
     premium
   });
 });
+
+
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
 // Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.
