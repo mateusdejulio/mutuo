@@ -800,6 +800,11 @@ app.post('/solicitacoes/:cod/avaliar', async (req, res) => {
   res.json(resultado);
 });
 
+app.put('/solicitacoes/:cod/lida', async (req, res) => {
+  const resultado = await db.marcarSolicitacaoLida(req.params.cod);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
+});
 
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
