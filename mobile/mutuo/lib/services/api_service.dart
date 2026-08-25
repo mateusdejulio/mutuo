@@ -257,7 +257,7 @@ class ApiService {
     }
   }
 
-  // ─── Ativa o plano Premium da ONG (simulação de assinatura) ───
+    // ─── Ativa o plano Premium da ONG (simulação de assinatura) ───
   // Usa PUT /ongs/:cnpj/premium
   Future<Map<String, dynamic>> ativarPremiumOng(String cnpj) async {
     final url = Uri.parse('$baseUrl/ongs/${Uri.encodeComponent(cnpj)}/premium');
@@ -275,6 +275,27 @@ class ApiService {
       };
     }
   }
+
+  // ─── Cancela o plano Premium da ONG ───
+  // Usa PUT /ongs/:cnpj/premium (mesma rota, premium: 0)
+  Future<Map<String, dynamic>> cancelarPremiumOng(String cnpj) async {
+    final url = Uri.parse('$baseUrl/ongs/${Uri.encodeComponent(cnpj)}/premium');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode({'premium': 0}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+
 
   // ─── Cadastra uma atividade/serviço oferecido pela ONG ───
   // Usa POST /servicos/ong (multer, campo do arquivo precisa se chamar

@@ -538,7 +538,7 @@ class _InicialOngState extends State<InicialOng> {
             ),
           ),
           const SizedBox(height: 10),
-          Wrap(
+                    Wrap(
             alignment: WrapAlignment.center,
             spacing: 8,
             runSpacing: 8,
@@ -548,11 +548,12 @@ class _InicialOngState extends State<InicialOng> {
                   icone: Icons.location_on_outlined,
                   texto: _localizacao,
                 ),
-              // "ONG verificada" ainda não existe como campo no banco — visual fixo por enquanto.
-              _badgeClaro(
-                icone: Icons.verified_outlined,
-                texto: "ONG verificada",
-              ),
+              // Badge só aparece pra ONGs com plano Premium ativo.
+              if (_ong?['premium'] == 1)
+                _badgeClaro(
+                  icone: Icons.verified_outlined,
+                  texto: "ONG verificada",
+                ),
             ],
           ),
           const SizedBox(height: 22),

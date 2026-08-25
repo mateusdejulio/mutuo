@@ -35,7 +35,7 @@ class _PlanosOngState extends State<PlanosOng> {
     _carregarOng();
   }
 
-  Future<void> _carregarOng() async {
+    Future<void> _carregarOng() async {
     setState(() => _carregando = true);
     final dados = await _api.buscarOngPorCnpj(widget.cnpj);
     if (!mounted) return;
@@ -43,6 +43,68 @@ class _PlanosOngState extends State<PlanosOng> {
       _ong = dados;
       _carregando = false;
     });
+  }
+
+  Future<void> _confirmarCancelamento() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Cancelar assinatura',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'Tem certeza que deseja cancelar o plano Premium da ONG? Vocês voltam pro plano gratuito (até 5 serviços ativos) imediatamente.',
+          style: GoogleFonts.quicksand(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Voltar',
+              style: GoogleFonts.quicksand(color: const Color(0xFF6B705C)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Cancelar assinatura',
+              style: GoogleFonts.quicksand(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return;
+
+    setState(() => _carregando = true);
+    final resultado = await _api.cancelarPremiumOng(widget.cnpj);
+    if (!mounted) return;
+
+    if (resultado['sucesso'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Assinatura cancelada. Vocês voltaram ao plano gratuito.'),
+        ),
+      );
+      await _carregarOng();
+    } else {
+      setState(() => _carregando = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            resultado['erro']?.toString() ??
+                'Não foi possível cancelar a assinatura.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   @override
@@ -122,7 +184,7 @@ class _PlanosOngState extends State<PlanosOng> {
                           'Serviços ilimitados',
                           'Suporte prioritário 24h',
                         ],
-                        onAssinar: () async {
+                                                onAssinar: () async {
                           final resultado = await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -134,6 +196,8 @@ class _PlanosOngState extends State<PlanosOng> {
                           );
                           if (resultado == true) _carregarOng();
                         },
+                        permiteCancelamento: true,
+                        onCancelar: _confirmarCancelamento,
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -243,7 +307,7 @@ class _PlanosOngState extends State<PlanosOng> {
     );
   }
 
-  Widget _cardPlano({
+    Widget _cardPlano({
     required IconData icone,
     required String titulo,
     required String preco,
@@ -251,7 +315,9 @@ class _PlanosOngState extends State<PlanosOng> {
     required List<String> itens,
     bool destaque = false,
     bool recomendado = false,
+    bool permiteCancelamento = false,
     VoidCallback? onAssinar,
+    VoidCallback? onCancelar,
   }) {
     return Stack(
       clipBehavior: Clip.none,
@@ -336,8 +402,8 @@ class _PlanosOngState extends State<PlanosOng> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              if (atual)
+                            const SizedBox(height: 8),
+              if (atual) ...[
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -362,8 +428,28 @@ class _PlanosOngState extends State<PlanosOng> {
                       ),
                     ),
                   ),
-                )
-              else if (destaque)
+                ),
+                if (permiteCancelamento) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: onCancelar,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.redAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      child: Text(
+                        'Cancelar assinatura',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ] else if (destaque)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
