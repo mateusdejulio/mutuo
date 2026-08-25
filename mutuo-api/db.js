@@ -1217,6 +1217,35 @@ async function atualizarPremiumOng(cnpj, premium) {
   }
 }
 
+// Conta quantos serviços ATIVOS uma ONG já tem cadastrados
+async function contarServicosAtivosOng(cnpj) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT COUNT(*) AS total FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1',
+      [cnpj]
+    );
+    return rows[0].total;
+  } catch (err) {
+    console.error('Erro ao contar serviços da ONG:', err.message);
+    throw err;
+  }
+}
+
+// Verifica se a ONG é premium 
+async function isOngPremium(cnpj) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT premium FROM Mutuo_ONG WHERE cnpj = ?',
+      [cnpj]
+    );
+    if (rows.length === 0) return false;
+    return rows[0].premium === 1;
+  } catch (err) {
+    console.error('Erro ao verificar premium da ONG:', err.message);
+    throw err;
+  }
+}
+
 module.exports = { 
   getUsuarios, 
   getUsuarioPorCpf,
@@ -1290,5 +1319,7 @@ module.exports = {
   contarServicosAtivosUsuario,
   isUsuarioPremium,
   atualizarPremiumUsuario,
-  atualizarPremiumOng
+  atualizarPremiumOng,
+  contarServicosAtivosOng,
+  isOngPremium
 };
