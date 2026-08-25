@@ -676,7 +676,7 @@
     
   </div>
 </div>
-    <!-- HISTÓRICO -->
+<!-- HISTÓRICO -->
     <div class="bloco">
       <div class="cabecalho-bloco">
         <div><h3>Histórico de trocas</h3><p>Serviços prestados e recebidos</p></div>
@@ -712,18 +712,7 @@
           <span class="pontos-historico negativo">−150 pts</span>
         </div>
       </div>
-      <div class="lista-historico" id="confirmar" style="display:none;">
-        <div class="item-historico">
-          <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
-          <div class="corpo-historico">
-            <h4>Aula de violão</h4>
-            <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Marcos Lima</p>
-            <a href="#" class="link-comentario"><i class="bi bi-chat-left-text"></i> Adicionar comentário</a>
-            <p class="data-historico"><i class="bi bi-calendar3"></i> 12 nov 2025</p>
-            <button class="btn-confirmar-servico"><i class="bi bi-check-circle-fill"></i> Confirmar realização</button>
-          </div>
-        </div>
-      </div>
+      <div class="lista-historico" id="confirmar" style="display:none;"></div>
     </div>
 
   </div>
@@ -731,6 +720,7 @@
   <i class="bi bi-check-circle-fill"></i>
   <span id="mensagemSalvaTexto">Alterações salvas com sucesso!</span>
 </div>
+
   <script>
     // ── FILTROS HISTÓRICO ──
     document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
@@ -1101,6 +1091,112 @@ async function atualizarBadgeLimiteServicos(totalAtual) {
 
       return partes.join(' e ');
     }
+
+    // ── ABA CONFIRMAR SERVIÇOS ──
+    let codSolicitacaoAvaliando = null;
+    let notaSelecionada = 0;
+
+    async function carregarSolicitacoesParaConfirmar() {
+      const container = document.getElementById('confirmar');
+      if (!usuario.cpf) return;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/solicitacoes/confirmar/${encodeURIComponent(usuario.cpf)}`);
+        const lista = await resposta.json();
+
+        if (!Array.isArray(lista) || lista.length === 0) {
+          container.innerHTML = `<p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">Nenhum serviço aguardando confirmação.</p>`;
+          return;
+        }
+
+        container.innerHTML = lista.map(s => `
+          <div class="item-historico">
+            <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
+            <div class="corpo-historico">
+              <h4>${s.nomeServico}</h4>
+              <p class="participante"><i class="bi bi-person-fill"></i> Prestador: ${s.nomePrestador}</p>
+              <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
+              <button class="btn-confirmar-servico" onclick="confirmarServico(${s.codSolicitacao}, '${s.nomeServico.replace(/'/g, "\\'")}')">
+                <i class="bi bi-check-circle-fill"></i> Confirmar realização
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (erro) {
+        console.error('Erro ao carregar solicitações para confirmar:', erro);
+        container.innerHTML = `<p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">Erro ao carregar.</p>`;
+      }
+    }
+
+    async function confirmarServico(cod, nomeServico) {
+      if (!confirm('Confirmar a realização deste serviço? Os pontos serão transferidos.')) return;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/solicitacoes/${cod}/confirmar`, { method: 'PUT' });
+        const resultado = await resposta.json();
+
+        if (!resposta.ok || resultado.erro) {
+          throw new Error(resultado.erro || 'Erro ao confirmar serviço.');
+        }
+
+        mostrarMensagemSalva('Serviço confirmado! Pontos transferidos.');
+        carregarSolicitacoesParaConfirmar();
+        abrirModalAvaliacao(cod, nomeServico);
+      } catch (erro) {
+        console.error(erro);
+        alert(erro.message || 'Não foi possível confirmar o serviço.');
+      }
+    }
+
+    function abrirModalAvaliacao(cod, nomeServico) {
+      codSolicitacaoAvaliando = cod;
+      notaSelecionada = 0;
+      document.getElementById('modalAvaliacaoServico').textContent = nomeServico;
+      atualizarEstrelas(0);
+      document.getElementById('modalAvaliacao').style.display = 'flex';
+    }
+
+    function atualizarEstrelas(valor) {
+      document.querySelectorAll('#estrelasAvaliacao i').forEach(estrela => {
+        estrela.style.color = Number(estrela.dataset.valor) <= valor ? '#f5a623' : '#e4ebe2';
+      });
+    }
+
+    document.querySelectorAll('#estrelasAvaliacao i').forEach(estrela => {
+      estrela.addEventListener('click', () => {
+        notaSelecionada = Number(estrela.dataset.valor);
+        atualizarEstrelas(notaSelecionada);
+      });
+    });
+
+    async function enviarAvaliacao() {
+      if (!notaSelecionada) {
+        alert('Selecione uma nota de 1 a 5 estrelas.');
+        return;
+      }
+
+      try {
+        const resposta = await fetch(`${API_BASE}/solicitacoes/${codSolicitacaoAvaliando}/avaliar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nota: notaSelecionada })
+        });
+        const resultado = await resposta.json();
+
+        if (!resposta.ok || resultado.erro) {
+          throw new Error(resultado.erro || 'Erro ao enviar avaliação.');
+        }
+
+        document.getElementById('modalAvaliacao').style.display = 'none';
+        mostrarMensagemSalva('Avaliação enviada, obrigado!');
+        carregarServicosUsuario(); // atualiza nota exibida nos cards de serviço
+      } catch (erro) {
+        console.error(erro);
+        alert(erro.message || 'Não foi possível enviar a avaliação.');
+      }
+    }
+
+    carregarSolicitacoesParaConfirmar();
     
     carregarServicosUsuario();
   </script>
