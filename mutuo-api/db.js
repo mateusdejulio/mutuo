@@ -1370,7 +1370,8 @@ async function confirmarSolicitacao(cod) {
     await conexao.beginTransaction();
 
     const [[solicitacao]] = await conexao.query(
-      `SELECT sol.pontos, sol.codUsuario, sol.codServico, sol.statusExecucao, s.idUsuario AS prestadorCpf
+      `SELECT sol.codUsuario, sol.codServico, sol.statusExecucao, 
+              s.pontos AS pontosServico, s.idUsuario AS prestadorCpf
        FROM Mutuo_Solicitacao sol
        JOIN Mutuo_Servico s ON sol.codServico = s.cod
        WHERE sol.codSolicitacao = ?
@@ -1381,13 +1382,18 @@ async function confirmarSolicitacao(cod) {
     if (!solicitacao) throw new Error('Solicitação não encontrada.');
     if (solicitacao.statusExecucao === 'Realizada') throw new Error('Este serviço já foi confirmado.');
 
-    const { pontos, codUsuario, codServico, prestadorCpf } = solicitacao;
+    const { pontosServico, codUsuario, codServico, prestadorCpf } = solicitacao;
 
-    await conexao.query(`UPDATE Mutuo_Usuario SET pontos = pontos - ? WHERE cpf = ?`, [pontos, codUsuario]);
-    await conexao.query(`UPDATE Mutuo_Usuario SET pontos = pontos + ? WHERE cpf = ?`, [pontos, prestadorCpf]);
+    const [resultado1] = await conexao.query(`UPDATE Mutuo_Usuario SET pontos = pontos - ? WHERE cpf = ?`, [pontosServico, codUsuario]);
+    const [resultado2] = await conexao.query(`UPDATE Mutuo_Usuario SET pontos = pontos + ? WHERE cpf = ?`, [pontosServico, prestadorCpf]);
+
+    if (resultado1.affectedRows === 0 || resultado2.affectedRows === 0) {
+      throw new Error('Falha ao atualizar pontos dos usuários.');
+    }
+
     await conexao.query(
-      `UPDATE Mutuo_Solicitacao SET statusExecucao = 'Realizada', dataConclusao = NOW() WHERE codSolicitacao = ?`,
-      [cod]
+      `UPDATE Mutuo_Solicitacao SET statusExecucao = 'Realizada', dataConclusao = NOW(), pontos = ? WHERE codSolicitacao = ?`,
+      [pontosServico, cod]
     );
 
     await conexao.commit();
@@ -1469,6 +1475,23 @@ async function marcarSolicitacaoLida(cod) {
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao marcar como lida:', err.message);
+    return { error: err.message };
+  }
+}
+
+// notificações
+async function contarNaoLidas(cpf) {
+  try {
+    const [[resultado]] = await pool.query(
+      `SELECT COUNT(*) AS total 
+       FROM Mutuo_Solicitacao SOL
+       JOIN Mutuo_Servico SERV ON SOL.codServico = SERV.cod
+       WHERE SERV.idUsuario = ? AND SOL.lida = 0`,
+      [cpf]
+    );
+    return resultado.total;
+  } catch (err) {
+    console.error('Erro ao contar não lidas:', err.message);
     return { error: err.message };
   }
 }
@@ -1556,5 +1579,6 @@ module.exports = {
   avaliarSolicitacao,
   contarVoluntariosOng,
   isOngPremium,
-  marcarSolicitacaoLida
+  marcarSolicitacaoLida,
+  contarNaoLidas
 };

@@ -1,6 +1,7 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+/*const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3000'
-  : 'https://mutuo-api.onrender.com';
+  : 'https://mutuo-api.onrender.com';*/
+const API_URL = 'http://localhost:3000';
 
 function atualizarTodasFotos(url) {
   ['fotoTopo','fotoNavbarTopo', 'fotoPerfil', 'fotoDrawer'].forEach(id => {
@@ -207,5 +208,28 @@ async function inscreverServico(cod, todosServicosRef) {
   } catch (erro) {
     console.error(erro);
     alert(erro.message || 'Não foi possível se inscrever no serviço.');
+  }
+}
+
+async function atualizarBadgeNotificacoes() {
+  const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+  const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+  if (!usuarioLogado || !usuarioLogado.cpf) return;
+
+  try {
+    const resposta = await fetch(`${API_URL}/solicitacoes/naolidas/${encodeURIComponent(usuarioLogado.cpf)}`);
+    const dados = await resposta.json();
+    const badge = document.querySelector('.bell-badge') || document.querySelector('.nav-bell .bell-badge');
+
+    if (!badge) return;
+
+    if (dados.total > 0) {
+      badge.textContent = dados.total;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (erro) {
+    console.error('Erro ao atualizar badge de notificações:', erro);
   }
 }
