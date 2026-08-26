@@ -253,7 +253,7 @@
     <div class="nav-right">
       <a href="notificacoesMutuo.html" class="nav-bell">
         <i class="bi bi-bell-fill"></i>
-        <span class="bell-badge">3</span>
+        <span class="bell-badge"></span>
       </a>
       <a href="perfilMutuo.html" class="nav-profile">
          <img id="fotoNavbarTopo" src="../imagens/mutuoLogo.png" alt="Foto de perfil">
@@ -303,9 +303,6 @@
 
 if(usuario){
     document.getElementById("nomeUsuario").textContent =
-        usuario.nome || usuario.nome_usuario;
-
-    document.getElementById("nomeBoasVindas").textContent =
         usuario.nome || usuario.nome_usuario;
 
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
