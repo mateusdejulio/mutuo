@@ -5,6 +5,7 @@ import 'package:mutuo/perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/checkoutPremiumUsuario.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 class PlanosUsuario extends StatefulWidget {
   final String cpf;
@@ -241,8 +242,9 @@ class _PlanosUsuarioState extends State<PlanosUsuario> {
           ),
           const Spacer(),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),

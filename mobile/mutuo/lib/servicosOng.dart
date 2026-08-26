@@ -6,6 +6,7 @@ import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/widgets/modal_atividade_ong.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 class ServicosOng extends StatefulWidget {
   final String nome;
@@ -363,8 +364,9 @@ class _ServicosOngState extends State<ServicosOng> {
           ),
           const SizedBox(width: 10),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),

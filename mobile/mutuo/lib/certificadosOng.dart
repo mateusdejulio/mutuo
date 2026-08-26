@@ -5,6 +5,7 @@ import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/servicosOng.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 class CertificadosOng extends StatefulWidget {
   final String cnpj;
@@ -174,8 +175,9 @@ class _CertificadosOngState extends State<CertificadosOng> {
           ),
           const Spacer(),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),

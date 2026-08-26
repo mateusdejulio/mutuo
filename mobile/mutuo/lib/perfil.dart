@@ -9,6 +9,7 @@ import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/planosUsuario.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 // ─── DATA CLASS PARA HISTÓRICO (dados de exemplo, ligue à sua API quando tiver a rota) ───
 class _ItemHistorico {
@@ -1071,8 +1072,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
           ),
           const SizedBox(width: 10),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),

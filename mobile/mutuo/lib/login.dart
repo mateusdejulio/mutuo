@@ -3,6 +3,7 @@ import 'package:mutuo/cadastro.dart';
 import 'package:mutuo/inicialUser.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -35,10 +36,11 @@ class _LoginState extends State<Login> {
     // Tenta como usuário primeiro
     final resUsuario = await api.fazerLoginUsuario(email, senha);
 
-    if (resUsuario['sucesso'] == true) {
+        if (resUsuario['sucesso'] == true) {
       final dadosUsuario = resUsuario['usuario'] ?? {};
       final nome = dadosUsuario['nome'] ?? email;
       final cpf = dadosUsuario['cpf']?.toString() ?? '';
+      await AuthService.salvarLoginUsuario(cpf, nome);
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -52,10 +54,11 @@ class _LoginState extends State<Login> {
     // Se não for usuário, tenta como ONG
     final resOng = await api.fazerLoginOng(email, senha);
 
-    if (resOng['sucesso'] == true) {
+        if (resOng['sucesso'] == true) {
       final dadosOng = resOng['usuario'] ?? {};
       final nome = dadosOng['nomeOng'] ?? email;
       final cnpj = dadosOng['cnpj']?.toString() ?? '';
+      await AuthService.salvarLoginOng(cnpj, nome);
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
