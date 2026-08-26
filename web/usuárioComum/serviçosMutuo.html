@@ -464,9 +464,8 @@ nav {
   </div>
 </div>
 
+<script src="../funcoes.js"></script>
 <script>
-
-
   let todosServicos = [];
   let categoriaAtiva = 'todos';
 
@@ -653,11 +652,13 @@ async function inscreverServico(cod, servicos) {
     alert('Não foi possível enviar a solicitação. Tente novamente.');
   }
 }
-carregarFoto();
-atualizarBadgeNotificacoes();
+
+window.addEventListener('load', () => {
+  carregarFoto();
+  atualizarBadgeNotificacoes();
+});
 
 </script>
-<script src="../funcoes.js"></script>
 
 </body>
 </html>

@@ -290,14 +290,16 @@ async function alterServico(cod, ativo, horas, foco, nota) {
   }
 }
 
+// no db.js
 async function alterSolicitacao(cod, statusS, statusE, pontos) {
-  const sql = 'UPDATE Mutuo_Solicitacao SET statusSolicitacao = ?, statusExecucao = ?, pontos = ? WHERE codSolicitacao = ?';
-
   try {
-    const [result] = await pool.query(sql, [statusS, statusE, pontos, cod]);
-    return { success: true, affectedRows: result.affectedRows };
+    await pool.query(
+      `UPDATE Mutuo_Solicitacao SET statusSolicitacao = ?, statusExecucao = ?, pontos = ?, lida = 1 WHERE codSolicitacao = ?`,
+      [statusS, statusE, pontos, cod]
+    );
+    return { sucesso: true };
   } catch (err) {
-    console.error("Erro no db.js/alterServico:", err.message);
+    console.error('Erro ao alterar solicitação:', err.message);
     return { error: err.message };
   }
 }
@@ -1323,19 +1325,6 @@ async function isOngPremium(cnpj) {
 
 // confirmação de serviços e avaliação
 
-// Aceitar / Recusar solicitação
-async function responderSolicitacao(cod, statusS, statusE) {
-  try {
-    await pool.query(
-      `UPDATE Mutuo_Solicitacao SET statusSolicitacao = ?, statusExecucao = ?, lida = 1 WHERE codSolicitacao = ?`,
-      [statusS, statusE, cod]
-    );
-    return { sucesso: true };
-  } catch (err) {
-    console.error('Erro ao responder solicitação:', err.message);
-    return { error: err.message };
-  }
-}
 
 // Solicitações aceitas aguardando confirmação (aba "Confirmar Serviços" do perfil)
 async function getSolicitacoesParaConfirmar(cpfUsuario) {
@@ -1573,7 +1562,6 @@ module.exports = {
   atualizarPremiumOng,
   contarServicosAtivosOng,
   isOngPremium,
-  responderSolicitacao,
   getSolicitacoesParaConfirmar,
   confirmarSolicitacao,
   avaliarSolicitacao,

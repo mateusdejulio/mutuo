@@ -709,6 +709,7 @@
     </div>
   </div>
 
+  <script src="../funcoes.js"></script>
   <script>
     // ── FILTROS HISTÓRICO ──
     document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
@@ -1263,9 +1264,12 @@ async function atualizarBadgeLimiteServicos(totalAtual) {
     carregarHistoricoUtilizados();
     
     carregarServicosUsuario();
-    atualizarBadgeNotificacoes();
+    
+    window.addEventListener('load', () => {
+      carregarFoto();
+      atualizarBadgeNotificacoes();
+    });
 
   </script>
-  <script src="../funcoes.js"></script>
 </body>
 </html>

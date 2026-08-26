@@ -774,13 +774,6 @@ app.get(
 
 // confirmação e avaliação
 
-app.put('/solicitacoes/:cod', async (req, res) => {
-  const { statusS, statusE } = req.body;
-  const resultado = await db.responderSolicitacao(req.params.cod, statusS, statusE);
-  if (resultado.error) return res.status(500).json({ erro: resultado.error });
-  res.json(resultado);
-});
-
 app.get('/solicitacoes/confirmar/:cpf', async (req, res) => {
   const solicitacoes = await db.getSolicitacoesParaConfirmar(req.params.cpf);
   if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });

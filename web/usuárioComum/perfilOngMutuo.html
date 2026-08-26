@@ -770,6 +770,7 @@
     </div>
   </div>
 
+  <script src="../funcoes.js"></script>
   <script>
     // Abas
     document.querySelectorAll('.btn-aba').forEach(btn => {
@@ -810,8 +811,12 @@ if(usuario){
 
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
 }
- carregarFoto();
+
+window.addEventListener('load', () => {
+  carregarFoto();
+  atualizarBadgeNotificacoes();
+});
+
 </script>
- <script src="../funcoes.js"></script>
 </body>
 </html>

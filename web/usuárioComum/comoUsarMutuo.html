@@ -276,6 +276,7 @@
     </div>
 </div>
 
+ <script src="../funcoes.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
@@ -289,9 +290,11 @@ if(usuario){
 
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
 }
- carregarFoto();
- atualizarBadgeNotificacoes();
+window.addEventListener('load', () => {
+  carregarFoto();
+  atualizarBadgeNotificacoes();
+});
 </script>
- <script src="../funcoes.js"></script>
+
 </body>
 </html>
