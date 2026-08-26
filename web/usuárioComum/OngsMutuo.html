@@ -452,6 +452,8 @@
     
   </div>
 </div>
+
+<script src="../funcoes.js"></script>
 <script>
 
 
@@ -606,9 +608,11 @@
     document.getElementById("nomeUsuario").textContent = usuario.nome || usuario.nome_usuario;
     document.title = "Mútuo | " + (usuario.nome || usuario.nome_usuario);
   }
-  carregarFoto();
-  atualizarBadgeNotificacoes();
+  window.addEventListener('load', () => {
+    carregarFoto();
+    atualizarBadgeNotificacoes();
+  });
 </script>
- <script src="../funcoes.js"></script>
+ 
 </body>
 </html>

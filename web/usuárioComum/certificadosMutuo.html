@@ -411,8 +411,6 @@
 
       carregarCertificados(usuario.cpf);
   }
-  carregarFoto();
-  atualizarBadgeNotificacoes();
 
 async function carregarCertificados(cpf) {
   try {
@@ -496,6 +494,10 @@ function criarCardServico(servico, data) {
   return card;
 }
 
+window.addEventListener('load', () => {
+  carregarFoto();
+  atualizarBadgeNotificacoes();
+});
 </script>
 </body>
 </html>

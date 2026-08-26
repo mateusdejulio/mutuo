@@ -375,10 +375,11 @@
 <div class="notif-list" id="mensagens" style="display:none;">
   <!-- mensagens continua estática até o chat ter backend -->
 </div>
-       
-  <script>
-   let recebidas = [];
-let enviadas = [];
+    
+<script src="../funcoes.js"></script>
+<script>
+  let recebidas = [];
+  let enviadas = [];
 
 function statusClasse(status) {
   if (status === 'Aceita') return 'aceito';
@@ -551,6 +552,6 @@ window.addEventListener('load', carregarSolicitacoes);
  atualizarBadgeNotificacoes();
  carregarSolicitacoes();
 </script>
- <script src="../funcoes.js"></script>
+
 </body>
 </html>

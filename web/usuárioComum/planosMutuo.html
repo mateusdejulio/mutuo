@@ -959,8 +959,6 @@
       }
     }
 
-    atualizarBadgeNotificacoes();
-
     async function verificarPlanoAtual() {
       try {
         const resposta = await fetch(
@@ -1186,6 +1184,11 @@
       mensagem.style.display = "none";
       clearTimeout(temporizadorMensagem);
     }
+
+    window.addEventListener('load', () => {
+      carregarFoto();
+      atualizarBadgeNotificacoes();
+    });
   </script>
 
 </body>
