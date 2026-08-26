@@ -4,6 +4,7 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/checkoutPremiumUsuario.dart';
+import 'package:mutuo/widgets/avatar_perfil.dart';
 
 class PlanosUsuario extends StatefulWidget {
   final String cpf;
@@ -291,14 +292,10 @@ class _PlanosUsuarioState extends State<PlanosUsuario> {
                 ),
               ),
             ],
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: _verdeMedio.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.person, color: _branco, size: 18),
+            child: AvatarPerfil(
+              cpf: widget.cpf,
+              nome: widget.nomeInicial,
+              radius: 18,
             ),
           ),
         ],

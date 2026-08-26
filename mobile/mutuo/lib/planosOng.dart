@@ -26,8 +26,12 @@ class _PlanosOngState extends State<PlanosOng> {
 
   Map<String, dynamic>? _ong;
   bool _carregando = true;
+  String? _fotoUrl;
 
   bool get _isPremium => _ong?['premium'] == 1;
+
+  String get _inicial =>
+      widget.nomeInicial.isNotEmpty ? widget.nomeInicial[0].toUpperCase() : 'O';
 
   @override
   void initState() {
@@ -37,10 +41,14 @@ class _PlanosOngState extends State<PlanosOng> {
 
     Future<void> _carregarOng() async {
     setState(() => _carregando = true);
-    final dados = await _api.buscarOngPorCnpj(widget.cnpj);
+    final resultados = await Future.wait([
+      _api.buscarOngPorCnpj(widget.cnpj),
+      _api.buscarFotoPerfilOng(widget.cnpj),
+    ]);
     if (!mounted) return;
     setState(() {
-      _ong = dados;
+      _ong = resultados[0] as Map<String, dynamic>?;
+      _fotoUrl = resultados[1] as String?;
       _carregando = false;
     });
   }
@@ -292,17 +300,47 @@ class _PlanosOngState extends State<PlanosOng> {
                 ),
               ),
             ],
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: _verdeMedio.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.person, color: _branco, size: 18),
-            ),
+            child: _avatarCircle(size: 36),
           ),
         ],
+      ),
+    );
+  }
+
+  // ─── AVATAR (foto da ONG com fallback pra iniciais) ────────
+  Widget _avatarCircle({required double size}) {
+    final foto = _fotoUrl;
+    if (foto == null || foto.isEmpty) {
+      return _avatarIniciais(size: size);
+    }
+    return ClipOval(
+      child: Image.network(
+        '${ApiService.baseUrl}$foto',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return _avatarIniciais(size: size);
+        },
+        errorBuilder: (context, error, stack) => _avatarIniciais(size: size),
+      ),
+    );
+  }
+
+  Widget _avatarIniciais({required double size}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(color: _bege, shape: BoxShape.circle),
+      alignment: Alignment.center,
+      child: Text(
+        _inicial,
+        style: GoogleFonts.quicksand(
+          fontSize: size * 0.42,
+          fontWeight: FontWeight.bold,
+          color: _verde,
+        ),
       ),
     );
   }
