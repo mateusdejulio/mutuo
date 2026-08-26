@@ -434,9 +434,12 @@ class ApiService {
   }
 
   // ─── NOVO: busca os serviços em destaque (usuários premium) pro carrossel da tela inicial ───
-  // Usa GET /servicos-destaque
-  Future<List<dynamic>> buscarServicosDestaque() async {
-    final url = Uri.parse('$baseUrl/servicos-destaque');
+  // Usa GET /servicos-destaque. Passa o cpf do usuário logado pra API excluir
+  // os próprios serviços do resultado (ver AND s.idUsuario != ? em db.js).
+  Future<List<dynamic>> buscarServicosDestaque({String? cpf}) async {
+    final url = Uri.parse(
+      '$baseUrl/servicos-destaque${cpf != null ? '?cpf=${Uri.encodeComponent(cpf)}' : ''}',
+    );
     try {
       final response = await http.get(url, headers: _headers);
       if (response.statusCode == 200) {

@@ -673,6 +673,8 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                           width: 76,
                                           height: 76,
                                           fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              _imagemIndisponivel(),
                                         )
                                       : Image.file(
                                           File(imagemSelecionada!.path),
@@ -719,6 +721,8 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                                     width: 76,
                                     height: 76,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _imagemIndisponivel(),
                                   ),
                                 ),
                                 Positioned(
@@ -2326,4 +2330,18 @@ class _NavItemPerfil {
     required this.label,
     this.onTap,
   });
+}
+
+Widget _imagemIndisponivel() {
+  return Container(
+    width: 76,
+    height: 76,
+    color: const Color(0xFFE5E2D8),
+    alignment: Alignment.center,
+    child: const Icon(
+      Icons.broken_image_outlined,
+      color: Color(0xFF9E9E9E),
+      size: 28,
+    ),
+  );
 }
