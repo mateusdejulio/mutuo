@@ -806,6 +806,12 @@ app.put('/solicitacoes/:cod/lida', async (req, res) => {
   res.json(resultado);
 });
 
+app.get('/solicitacoes/naolidas/:cpf', async (req, res) => {
+  const total = await db.contarNaoLidas(req.params.cpf);
+  if (total.error) return res.status(500).json({ erro: total.error });
+  res.json({ total });
+});
+
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.

@@ -897,7 +897,8 @@ mostrarMensagemSalva('Perfil atualizado com sucesso!');
     }
 
     // ── SERVIÇOS DO USUÁRIO ──
-    const API_BASE = 'https://mutuo-api.onrender.com';
+    //const API_BASE = 'https://mutuo-api.onrender.com';
+    const API_BASE = 'http://localhost:3000';
     const containerServicosMutuo = document.getElementById('listaServicosMutuo');
 
     // plano (gratuito/premium)
@@ -1263,6 +1264,8 @@ async function atualizarBadgeLimiteServicos(totalAtual) {
     carregarHistoricoUtilizados();
     
     carregarServicosUsuario();
+    atualizarBadgeNotificacoes();
+    
   </script>
   <script src="../funcoes.js"></script>
 </body>

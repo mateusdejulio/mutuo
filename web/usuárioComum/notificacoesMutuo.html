@@ -491,7 +491,7 @@ async function responderSolicitacao(cod, aceitar, pontos) {
 }
 
 function updateCounter() {
-  const count = document.querySelectorAll('.notif-card.unread').length;
+  const count = recebidas.filter(s => !s.lida).length; // conta só uma vez, direto do array
   const badge = document.getElementById('counter-badge');
   const bellBadge = document.querySelector('.bell-badge');
   if (count === 0) {
@@ -548,6 +548,8 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 
 window.addEventListener('load', carregarSolicitacoes);
  carregarFoto();
+ atualizarBadgeNotificacoes();
+ carregarSolicitacoes();
 </script>
  <script src="../funcoes.js"></script>
 </body>
