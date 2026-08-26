@@ -15,6 +15,7 @@ class _LoginState extends State<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
   bool _carregando = false;
+  bool _ocultarSenha = true;
 
   static const _verde = Color.fromARGB(255, 58, 90, 64);
 
@@ -49,7 +50,7 @@ class _LoginState extends State<Login> {
     }
 
     // Se não for usuário, tenta como ONG
-        final resOng = await api.fazerLoginOng(email, senha);
+    final resOng = await api.fazerLoginOng(email, senha);
 
     if (resOng['sucesso'] == true) {
       final dadosOng = resOng['usuario'] ?? {};
@@ -176,7 +177,7 @@ class _LoginState extends State<Login> {
                           // Senha
                           TextField(
                             controller: senhaController,
-                            obscureText: true,
+                            obscureText: _ocultarSenha,
                             decoration: InputDecoration(
                               labelText: "Senha",
                               labelStyle: const TextStyle(color: _verde),
@@ -187,6 +188,17 @@ class _LoginState extends State<Login> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(20),
                                 borderSide: const BorderSide(color: _verde, width: 2),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _ocultarSenha
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: _verde,
+                                ),
+                                onPressed: () => setState(
+                                  () => _ocultarSenha = !_ocultarSenha,
+                                ),
                               ),
                             ),
                           ),

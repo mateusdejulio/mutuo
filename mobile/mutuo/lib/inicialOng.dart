@@ -137,7 +137,12 @@ class _InicialOngState extends State<InicialOng> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _sectionTitle("Adicionados recentemente"),
+                                Expanded(
+                                  child: _sectionTitle(
+                                    "Adicionados recentemente",
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -738,6 +743,8 @@ class _InicialOngState extends State<InicialOng> {
   Widget _sectionTitle(String texto) {
     return Text(
       texto,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: GoogleFonts.quicksand(
         fontSize: 17,
         fontWeight: FontWeight.w800,
@@ -782,13 +789,6 @@ class _InicialOngState extends State<InicialOng> {
             ),
           );
         },
-      ),
-      _AcessoOngData(
-        icone: Icons.person_outline_rounded,
-        label: "Meu Perfil",
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Em breve: tela de perfil da ONG")),
-        ),
       ),
       _AcessoOngData(
         icone: Icons.workspace_premium_outlined,
@@ -931,6 +931,15 @@ class _InicialOngState extends State<InicialOng> {
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => Container(
+                      width: 56,
+                      height: 56,
+                      color: _bege,
+                      child: const Icon(
+                        Icons.volunteer_activism_outlined,
+                        color: _verde,
+                      ),
+                    ),
                   )
                 : Container(
                     width: 56,

@@ -1139,7 +1139,21 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         label: "Notificações",
         badge: 3,
       ),
-      _AcessoData(icone: Icons.trending_up_rounded, label: "Meu Plano"),
+      _AcessoData(
+        icone: Icons.trending_up_rounded,
+        label: "Meu Plano",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PlanosUsuario(
+                cpf: widget.cpf,
+                nomeInicial: widget.nome,
+              ),
+            ),
+          );
+        },
+      ),
     ];
 
     return GridView.count(
