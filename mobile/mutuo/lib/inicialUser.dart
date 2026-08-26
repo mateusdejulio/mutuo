@@ -495,7 +495,7 @@ class _InicialUsuarioState extends State<InicialUsuario> {
 
   // ─── NOVO: busca os serviços em destaque na API e monta a lista de Vaga ───
   Future<void> _carregarVagasDestaque() async {
-    final dados = await _apiService.buscarServicosDestaque();
+    final dados = await _apiService.buscarServicosDestaque(cpf: widget.cpf);
     if (!mounted) return;
 
     setState(() {

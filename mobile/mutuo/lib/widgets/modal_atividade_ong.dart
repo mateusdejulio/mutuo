@@ -469,6 +469,8 @@ Future<void> abrirModalAtividadeOng({
                                           width: 76,
                                           height: 76,
                                           fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              _imagemIndisponivel(),
                                         )
                                       : Image.file(
                                           File(imagemSelecionada!.path),
@@ -515,6 +517,8 @@ Future<void> abrirModalAtividadeOng({
                                     width: 76,
                                     height: 76,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _imagemIndisponivel(),
                                   ),
                                 ),
                                 Positioned(
@@ -603,6 +607,20 @@ Future<void> abrirModalAtividadeOng({
         },
       );
     },
+  );
+}
+
+Widget _imagemIndisponivel() {
+  return Container(
+    width: 76,
+    height: 76,
+    color: const Color(0xFFE5E2D8),
+    alignment: Alignment.center,
+    child: const Icon(
+      Icons.broken_image_outlined,
+      color: Color(0xFF9E9E9E),
+      size: 28,
+    ),
   );
 }
 

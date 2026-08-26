@@ -145,10 +145,12 @@ class _InicialOngState extends State<InicialOng> {
                                 const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "Em breve: lista completa de atividades",
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ServicosOng(
+                                          nome: _ong?['nomeOng'] ?? widget.nome,
+                                          cnpj: widget.cnpj,
                                         ),
                                       ),
                                     );
