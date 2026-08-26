@@ -7,6 +7,7 @@ import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/perfil.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 // Representa um serviço vindo do banco (rota /servicos-usuario)
@@ -688,8 +689,9 @@ class _ServicosState extends State<Servicos> {
           ),
           const SizedBox(width: 10),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => Login()),

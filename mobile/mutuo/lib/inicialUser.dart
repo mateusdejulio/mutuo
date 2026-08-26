@@ -9,6 +9,7 @@ import 'package:mutuo/certificadosUsuario.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/planosUsuario.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 // Agora representa um serviço vindo do banco (rota /servicos-destaque)
@@ -754,8 +755,9 @@ class _InicialUsuarioState extends State<InicialUsuario> {
           ),
           const SizedBox(width: 10),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),

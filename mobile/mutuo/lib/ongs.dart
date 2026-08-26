@@ -6,6 +6,7 @@ import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/perfil.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 // ─── MODEL ────────────────────────────────────────────────
 // Representa uma atividade de ONG vinda do banco (rota /servicos-ong)
@@ -651,8 +652,9 @@ class _OngsState extends State<Ongs> {
           ),
           const SizedBox(width: 10),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => Login()),

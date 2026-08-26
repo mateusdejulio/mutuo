@@ -5,6 +5,7 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
+import 'package:mutuo/services/auth_service.dart';
 
 class QuemSomos extends StatefulWidget {
   final String nome;
@@ -266,8 +267,9 @@ class _QuemSomosState extends State<QuemSomos> {
           ),
           const SizedBox(width: 10),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
+                await AuthService.logout();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const Login()),
