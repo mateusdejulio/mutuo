@@ -1,4 +1,34 @@
 (function () {
+  function ongEstaLogada() {
+    try {
+      const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
+      return Boolean(ong.cnpj);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function exigirLoginOng() {
+    if (ongEstaLogada()) return true;
+    window.location.replace('../login.html');
+    return false;
+  }
+
+  function sairDaConta(event) {
+    event?.preventDefault();
+    sessionStorage.removeItem('ongLogada');
+    sessionStorage.removeItem('usuarioLogado');
+    window.location.replace('../login.html');
+  }
+
+  if (!exigirLoginOng()) return;
+  window.addEventListener('pageshow', exigirLoginOng);
+
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a');
+    if (link?.textContent.trim().includes('Sair da conta')) sairDaConta(event);
+  });
+
   const nav = document.querySelector('body > nav');
   if (!nav || nav.querySelector('.ong-nav-hamburger')) return;
 

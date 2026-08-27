@@ -4,6 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mútuo | Login</title>
+  <script>
+    // Quem já está autenticado permanece na respectiva área interna.
+    try {
+      const ongLogada = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
+      const usuarioLogado = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+
+      if (ongLogada.cnpj) {
+        window.location.replace('usuárioOng/homeOngMutuo.html');
+      } else if (usuarioLogado.cpf) {
+        window.location.replace('usuárioComum/homeMutuo.html');
+      }
+    } catch (_) {
+      sessionStorage.removeItem('ongLogada');
+      sessionStorage.removeItem('usuarioLogado');
+    }
+  </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -584,9 +600,9 @@
           mostrarAlertMutuo(tipoSelecionado);
 
           setTimeout(() => {
-            window.location.href = tipoSelecionado === 'ong'
+            window.location.replace(tipoSelecionado === 'ong'
               ? 'usuárioOng/homeOngMutuo.html'
-              : 'usuárioComum/homeMutuo.html';
+              : 'usuárioComum/homeMutuo.html');
           }, 2000);
 
         } else {

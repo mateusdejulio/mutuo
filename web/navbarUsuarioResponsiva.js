@@ -1,4 +1,37 @@
 (function () {
+  function usuarioEstaLogado() {
+    try {
+      const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+      return Boolean(usuario.cpf);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function exigirLoginUsuario() {
+    if (usuarioEstaLogado()) return true;
+    window.location.replace('../login.html');
+    return false;
+  }
+
+  function sairDaConta(event) {
+    event?.preventDefault();
+    sessionStorage.removeItem('usuarioLogado');
+    sessionStorage.removeItem('ongLogada');
+    window.location.replace('../login.html');
+  }
+
+  if (!exigirLoginUsuario()) return;
+
+  // O navegador pode restaurar uma página antiga pelo botão Voltar (bfcache).
+  // Nesse caso, a sessão é conferida novamente antes de exibir conteúdo privado.
+  window.addEventListener('pageshow', exigirLoginUsuario);
+
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a');
+    if (link?.textContent.trim().includes('Sair da conta')) sairDaConta(event);
+  });
+
   const nav = document.querySelector('body > nav');
   if (!nav || nav.querySelector('.ong-nav-hamburger')) return;
 
