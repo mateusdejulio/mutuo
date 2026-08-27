@@ -16,6 +16,12 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+// Garante que o campo "foco" seja sempre salvo em minúsculo e sem espaços
+// nas pontas, independente do valor recebido do client (app, web etc).
+function normalizarFoco(foco) {
+  return foco ? foco.trim().toLowerCase() : foco;
+}
+
 async function validarLogin(login, senha) {
   try {
     const [rows] = await pool.query(
@@ -265,7 +271,7 @@ async function alterONG(cnpj, ativo, responsavel, foco) {
   const sql = 'UPDATE Mutuo_ONG SET ativo = ?, nomeResponsavel = ?, foco = ? WHERE cnpj = ?';
 
   try {
-    const [result] = await pool.query(sql, [ativo, responsavel, foco, cnpj]);
+    const [result] = await pool.query(sql, [ativo, responsavel, normalizarFoco(foco), cnpj]);
     return { success: true, affectedRows: result.affectedRows };
   } catch (err) {
     console.error("Erro no db.js/alterONG:", err.message);
@@ -282,7 +288,7 @@ async function alterServico(cod, ativo, horas, foco, nota) {
   const sql = 'UPDATE Mutuo_Servico SET ativo = ?, qtdHoras = ?, foco = ?, avaliacao = ? WHERE cod = ?';
 
   try {
-    const [result] = await pool.query(sql, [ativo, horas, foco, nota, cod]);
+    const [result] = await pool.query(sql, [ativo, horas, normalizarFoco(foco), nota, cod]);
     return { success: true, affectedRows: result.affectedRows };
   } catch (err) {
     console.error("Erro no db.js/alterServico:", err.message);
@@ -358,7 +364,7 @@ async function cadastrarOng(ong) {
     ong.endereco,
     ong.uf,
     senhaHash,
-    ong.foco,
+    normalizarFoco(ong.foco),
     ong.descricao,
     ong.foto_perfil,
     ong.cadastro
@@ -384,7 +390,7 @@ async function cadastrarServico(servico) {
   const values = [
     servico.nomeServico,
     servico.descricao,
-    servico.foco,
+    normalizarFoco(servico.foco),
     servico.duracao,
     servico.cpf,
     servico.imagem
@@ -412,7 +418,7 @@ async function cadastrarServicoOng(servico) {
     servico.cnpj,
     servico.horas,
     servico.descricao,
-    servico.foco,
+    normalizarFoco(servico.foco),
     servico.imagem
   ];
 
@@ -472,7 +478,7 @@ async function getServicoPorId(id) {
 // Atualiza um serviço do usuário
 async function atualizarServico(id, servico) {
   const campos = ['nome = ?', 'descricao = ?', 'foco = ?', 'qtdHoras = ?'];
-  const valores = [servico.nomeServico, servico.descricao, servico.foco, servico.duracao];
+  const valores = [servico.nomeServico, servico.descricao, normalizarFoco(servico.foco), servico.duracao];
 
   if (servico.imagem) {
     campos.push('imagem = ?');
@@ -713,7 +719,7 @@ async function getServicoOngPorId(id) {
 
 async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem }) {
   const campos = ['nomeServico = ?', 'descricao = ?', 'foco = ?', 'horas = ?'];
-  const values = [nomeServico, descricao, foco, horas];
+  const values = [nomeServico, descricao, normalizarFoco(foco), horas];
   if (imagem) { campos.push('imagem = ?'); values.push(imagem); }
   values.push(id);
   const [result] = await pool.query(`UPDATE Mutuo_ServicoOng SET ${campos.join(', ')} WHERE id = ?`, values);

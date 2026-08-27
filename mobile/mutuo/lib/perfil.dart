@@ -75,15 +75,15 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
 
   // ─── Opções de foco disponíveis no cadastro de serviço ─────
   static const List<String> _focosServico = [
-    'Culinária',
-    'Jardinagem',
-    'Música',
-    'Tecnologia',
-    'Educação',
-    'Animais',
-    'Idosos',
-    'Ambiental',
-    'Outro',
+    'culinária',
+    'jardinagem',
+    'música',
+    'tecnologia',
+    'educação',
+    'animais',
+    'idosos',
+    'ambiental',
+    'outro',
   ];
 
   final List<_ItemHistorico> _prestados = [

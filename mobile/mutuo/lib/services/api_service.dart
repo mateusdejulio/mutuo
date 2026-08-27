@@ -315,7 +315,7 @@ class ApiService {
       request.fields['cnpj'] = cnpj;
       request.fields['nomeServico'] = nomeServico;
       request.fields['descricao'] = descricao;
-      request.fields['foco'] = foco;
+      request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
 
       if (imagemBytes != null && imagemNome != null) {
@@ -408,7 +408,7 @@ class ApiService {
       final request = http.MultipartRequest('PUT', url);
       request.fields['nomeServico'] = nomeServico;
       request.fields['descricao'] = descricao;
-      request.fields['foco'] = foco;
+      request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
 
       if (imagemBytes != null && imagemNome != null) {
@@ -611,7 +611,7 @@ class ApiService {
       request.fields['cpf'] = cpf;
       request.fields['nomeServico'] = nomeServico;
       request.fields['descricao'] = descricao;
-      request.fields['foco'] = foco;
+      request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
 
       if (imagemBytes != null && imagemNome != null) {
@@ -653,7 +653,7 @@ class ApiService {
       final request = http.MultipartRequest('PUT', url);
       request.fields['nomeServico'] = nomeServico;
       request.fields['descricao'] = descricao;
-      request.fields['foco'] = foco;
+      request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
 
       if (imagemBytes != null && imagemNome != null) {

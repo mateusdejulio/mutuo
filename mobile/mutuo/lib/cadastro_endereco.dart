@@ -143,7 +143,7 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
         'endereco': enderecoController.text,
         'uf': estadoSelecionado,
         'senha': widget.senha,
-        'foco': widget.foco,
+        'foco': widget.foco.trim().toLowerCase(),
         'descricao': widget.descricao,
       });
     } else {

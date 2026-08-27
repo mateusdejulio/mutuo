@@ -9,15 +9,15 @@ const _verde = Color(0xFF3A5A40);
 const _verdeMedio = Color(0xFF588157);
 
 const List<String> _focosServicoOng = [
-  'Culinária',
-  'Jardinagem',
-  'Música',
-  'Tecnologia',
-  'Educação',
-  'Animais',
-  'Idosos',
-  'Ambiental',
-  'Outro',
+  'culinária',
+  'jardinagem',
+  'música',
+  'tecnologia',
+  'educação',
+  'animais',
+  'idosos',
+  'ambiental',
+  'outro',
 ];
 
 /// Abre o modal de cadastro/edição de atividade da ONG.
