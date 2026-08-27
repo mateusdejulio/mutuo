@@ -181,6 +181,34 @@ nav {
   transition: all 0.2s;
 }
 .btn-filter:hover { border-color: var(--green-main); background: var(--cream-light); }
+.btn-filter.active { background: var(--green-main); color: var(--cream); border-color: var(--green-main); }
+
+.filter-panel {
+  display: none;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 1rem;
+  background: var(--cream-light);
+  border: 1.5px solid var(--cream);
+  border-radius: 14px;
+}
+.filter-panel.open { display: grid; }
+.filter-field { display: flex; flex-direction: column; gap: 5px; }
+.filter-field label { font-size: 0.75rem; font-weight: 700; color: var(--green-dark); }
+.filter-field select {
+  width: 100%; border: 1.5px solid var(--cream); border-radius: 9px;
+  padding: 9px 10px; background: var(--white); color: var(--text-dark);
+  font-family: 'Quicksand', sans-serif; outline: none;
+}
+.filter-field select:focus { border-color: var(--green-main); }
+.filter-actions { display: flex; align-items: flex-end; }
+.btn-clear {
+  width: 100%; border: 1.5px solid var(--green-main); border-radius: 9px;
+  padding: 9px 10px; background: transparent; color: var(--green-dark);
+  font-family: 'Quicksand', sans-serif; font-weight: 700; cursor: pointer;
+}
+.btn-clear:hover { background: var(--white); }
 
 
 .cats {
@@ -379,6 +407,7 @@ nav {
   .filters-wrap, .cards-wrap { margin-left: 1rem; margin-right: 1rem; }
   .hero-search { padding: 2rem 1rem 2.5rem; }
   .hero-search h2 { font-size: 1.45rem; }
+  .filter-panel { grid-template-columns: 1fr; }
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
@@ -447,8 +476,46 @@ nav {
   <div class="filters-top">
     <span class="results-count"><strong id="countLabel">0</strong> serviços encontrados</span>
     <div class="filter-btns">
-      <button class="btn-filter"><i class="bi bi-funnel"></i> Filtros</button>
-      <button class="btn-filter"><i class="bi bi-arrow-down-up"></i> Ordenar</button>
+      <button class="btn-filter" id="btnAbrirFiltros" type="button" onclick="alternarFiltros()"><i class="bi bi-funnel"></i> Filtros</button>
+    </div>
+  </div>
+  <div class="filter-panel" id="painelFiltros">
+    <div class="filter-field">
+      <label for="filtroLocalizacao">Localização</label>
+      <select id="filtroLocalizacao" onchange="aplicarFiltros()">
+        <option value="">Todas as localizações</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="filtroDuracao">Duração</label>
+      <select id="filtroDuracao" onchange="aplicarFiltros()">
+        <option value="">Qualquer duração</option>
+        <option value="ate2">Até 2 horas</option>
+        <option value="3a5">De 3 a 5 horas</option>
+        <option value="mais5">Mais de 5 horas</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="filtroPontos">Pontos necessários</label>
+      <select id="filtroPontos" onchange="aplicarFiltros()">
+        <option value="">Qualquer quantidade</option>
+        <option value="ate50">Até 50 pontos</option>
+        <option value="51a100">De 51 a 100 pontos</option>
+        <option value="mais100">Mais de 100 pontos</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="filtroOrdenacao">Ordenar por</label>
+      <select id="filtroOrdenacao" onchange="aplicarFiltros()">
+        <option value="recentes">Mais recentes</option>
+        <option value="nome">Nome (A–Z)</option>
+        <option value="pontosMenor">Menos pontos</option>
+        <option value="pontosMaior">Mais pontos</option>
+        <option value="duracaoMenor">Menor duração</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn-clear" type="button" onclick="limparFiltros()"><i class="bi bi-x-circle"></i> Limpar filtros</button>
     </div>
   </div>
   <div class="cats" id="listaCategorias">
@@ -491,6 +558,7 @@ nav {
     todosServicos = servicos;
 
     montarCategorias(todosServicos);
+    montarLocalizacoes(todosServicos);
     aplicarFiltros(); // usa o termo/categoria já selecionados, evita sobrescrever busca em andamento
   } catch (err) {
     console.error('Erro ao carregar serviços:', err);
@@ -521,19 +589,76 @@ nav {
   }
 
   function filterCards() {
-    const termo = document.getElementById('searchInput').value.toLowerCase();
-    const filtrados = todosServicos.filter(s => {
-      const bateCat = categoriaAtiva === 'todos' || s.foco === categoriaAtiva;
-      const bateTermo = !termo ||
-        s.nome.toLowerCase().includes(termo) ||
-        (s.descricao || '').toLowerCase().includes(termo);
-      return bateCat && bateTermo;
+    aplicarFiltros();
+  }
+
+  function montarLocalizacoes(servicos) {
+    const select = document.getElementById('filtroLocalizacao');
+    const locais = [...new Set(servicos.map(s => [s.cidade, s.estado].filter(Boolean).join(', ')).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    locais.forEach(local => {
+      const option = document.createElement('option');
+      option.value = local;
+      option.textContent = local;
+      select.appendChild(option);
     });
-    renderizarCards(filtrados);
+  }
+
+  function alternarFiltros() {
+    const painel = document.getElementById('painelFiltros');
+    const aberto = painel.classList.toggle('open');
+    document.getElementById('btnAbrirFiltros').classList.toggle('active', aberto);
+  }
+
+  function limparFiltros() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filtroLocalizacao').value = '';
+    document.getElementById('filtroDuracao').value = '';
+    document.getElementById('filtroPontos').value = '';
+    document.getElementById('filtroOrdenacao').value = 'recentes';
+    categoriaAtiva = 'todos';
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === 'todos'));
+    aplicarFiltros();
   }
 
   function aplicarFiltros() {
-    filterCards();
+    const termo = document.getElementById('searchInput').value.toLocaleLowerCase('pt-BR').trim();
+    const localizacao = document.getElementById('filtroLocalizacao').value;
+    const duracao = document.getElementById('filtroDuracao').value;
+    const pontosSelecionados = document.getElementById('filtroPontos').value;
+    const ordenacao = document.getElementById('filtroOrdenacao').value;
+
+    const filtrados = todosServicos.filter(s => {
+      const bateCat = categoriaAtiva === 'todos' || s.foco === categoriaAtiva;
+      const bateTermo = !termo ||
+        (s.nome || '').toLocaleLowerCase('pt-BR').includes(termo) ||
+        (s.descricao || '').toLocaleLowerCase('pt-BR').includes(termo) ||
+        (s.nomeUsuario || '').toLocaleLowerCase('pt-BR').includes(termo);
+      const localServico = [s.cidade, s.estado].filter(Boolean).join(', ');
+      const bateLocal = !localizacao || localServico === localizacao;
+      const horas = Number(s.qtdHoras) || 0;
+      const bateDuracao = !duracao ||
+        (duracao === 'ate2' && horas <= 2) ||
+        (duracao === '3a5' && horas >= 3 && horas <= 5) ||
+        (duracao === 'mais5' && horas > 5);
+      const pontos = Number(s.pontos) || 0;
+      const batePontos = !pontosSelecionados ||
+        (pontosSelecionados === 'ate50' && pontos <= 50) ||
+        (pontosSelecionados === '51a100' && pontos >= 51 && pontos <= 100) ||
+        (pontosSelecionados === 'mais100' && pontos > 100);
+      return bateCat && bateTermo && bateLocal && bateDuracao && batePontos;
+    });
+
+    filtrados.sort((a, b) => {
+      if (ordenacao === 'nome') return (a.nome || '').localeCompare(b.nome || '', 'pt-BR');
+      if (ordenacao === 'pontosMenor') return Number(a.pontos || 0) - Number(b.pontos || 0);
+      if (ordenacao === 'pontosMaior') return Number(b.pontos || 0) - Number(a.pontos || 0);
+      if (ordenacao === 'duracaoMenor') return Number(a.qtdHoras || 0) - Number(b.qtdHoras || 0);
+      return Number(b.cod || 0) - Number(a.cod || 0);
+    });
+
+    renderizarCards(filtrados);
   }
 
   function renderizarCards(servicos) {
