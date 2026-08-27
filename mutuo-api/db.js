@@ -13,7 +13,10 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '-03:00' // NOW() do banco grava em horário de Brasília; sem isso
+                      // o mysql2 interpreta o valor cru como UTC e desalinha
+                      // todos os horários em -3h ao converter pro front-end.
 });
 
 // Garante que o campo "foco" seja sempre salvo em minúsculo e sem espaços

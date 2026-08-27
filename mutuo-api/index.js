@@ -33,7 +33,11 @@ async function enviarPush(tipo, id, { titulo, corpo, dados }) {
     const resposta = await mensageria.sendEachForMulticast({
       tokens,
       notification: { title: titulo, body: corpo },
-      data: dados || {}
+      data: dados || {},
+      android: {
+        priority: 'high' // garante entrega imediata mesmo com o dispositivo
+                          // em Doze/economia de energia ou com o app encerrado.
+      }
     });
 
     const tokensInvalidos = resposta.responses

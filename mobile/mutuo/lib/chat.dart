@@ -6,6 +6,7 @@ import 'package:mutuo/inicialUser.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/main.dart' show routeObserver;
 import 'package:mutuo/models/conversa.dart';
+import 'package:mutuo/models/mensagem.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/perfil.dart';
 import 'package:mutuo/perfilOng.dart';
@@ -14,6 +15,7 @@ import 'package:mutuo/servicos.dart';
 import 'package:mutuo/servicosOng.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/services/auth_service.dart';
+import 'package:mutuo/services/chat_socket_service.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
 
 // ─── TELA LISTA DE CONVERSAS ────────────────────────────────
@@ -41,9 +43,11 @@ class _ChatState extends State<Chat> with RouteAware {
   static const _branco = Colors.white;
 
   final ApiService _apiService = ApiService();
+  final ChatSocketService _socketService = ChatSocketService.instance;
   List<Conversa> _conversas = [];
   bool _carregando = true;
   String? _fotoPropriaOng;
+  final List<void Function()> _cancelarListeners = [];
 
   bool get _souUsuario => widget.tipoConta == 'usuario';
 
@@ -52,6 +56,50 @@ class _ChatState extends State<Chat> with RouteAware {
     super.initState();
     _carregarConversas();
     if (!_souUsuario) _carregarFotoPropriaOng();
+    _conectarSocket();
+  }
+
+  // Mantém a lista atualizada em tempo real (nova mensagem chegando ou sendo
+  // enviada em qualquer conversa), sem precisar sair e voltar pra essa tela.
+  // A conexão é idempotente/compartilhada com o resto do app (ChatSessaoService).
+  void _conectarSocket() {
+    _socketService.conectar(widget.tipoConta, widget.identificador);
+
+    // mensagem:nova = mensagem recebida de outra conta -> conta como não lida.
+    _cancelarListeners.add(
+      _socketService.onMensagemNova(
+        (mensagem) => _atualizarPreview(mensagem, incrementarNaoLidas: true),
+      ),
+    );
+    // mensagem:enviada = ack da mensagem que EU mandei -> não é não lida.
+    _cancelarListeners.add(
+      _socketService.onMensagemEnviada(
+        (mensagem) => _atualizarPreview(mensagem, incrementarNaoLidas: false),
+      ),
+    );
+  }
+
+  // Atualiza a prévia/ordem da conversa localmente. Se a conversa ainda não
+  // estiver na lista (ex: primeira mensagem de uma conta nova), recarrega
+  // do servidor pra pegar nome/foto de quem está do outro lado.
+  void _atualizarPreview(Mensagem mensagem, {required bool incrementarNaoLidas}) {
+    if (!mounted) return;
+
+    final index = _conversas.indexWhere((c) => c.id == mensagem.conversaId);
+    if (index == -1) {
+      _carregarConversas();
+      return;
+    }
+
+    setState(() {
+      final atual = _conversas.removeAt(index);
+      final atualizada = atual.copyWith(
+        ultimaMensagem: mensagem.conteudo,
+        ultimaMensagemEm: mensagem.enviadaEm,
+        naoLidas: incrementarNaoLidas ? atual.naoLidas + 1 : atual.naoLidas,
+      );
+      _conversas.insert(0, atualizada);
+    });
   }
 
   @override
@@ -65,6 +113,10 @@ class _ChatState extends State<Chat> with RouteAware {
 
   @override
   void dispose() {
+    for (final cancelar in _cancelarListeners) {
+      cancelar();
+    }
+    _cancelarListeners.clear();
     routeObserver.unsubscribe(this);
     super.dispose();
   }
