@@ -51,15 +51,15 @@ class _PerfilOngState extends State<PerfilOng> {
   int _bottomNavIndex = -1; // perfil não faz parte das abas fixas
 
   static const List<String> _focosServico = [
-    'Culinária',
-    'Jardinagem',
-    'Música',
-    'Tecnologia',
-    'Educação',
-    'Animais',
-    'Idosos',
-    'Ambiental',
-    'Outro',
+    'culinária',
+    'jardinagem',
+    'música',
+    'tecnologia',
+    'educação',
+    'animais',
+    'idosos',
+    'ambiental',
+    'outro',
   ];
 
   @override

@@ -322,7 +322,6 @@ app.get('/servicos', async (req, res) => res.json(await db.getServicos()));
 
 // ── Cadastro de Serviço da ONG ──
 app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
-  console.log(' Arquivo recebido (servico ong):', req.file);
   try {
     const { nomeServico, descricao, foco, duracao, cnpj } = req.body;
 
