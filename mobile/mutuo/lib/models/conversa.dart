@@ -21,6 +21,23 @@ class Conversa {
     this.naoLidas = 0,
   });
 
+  Conversa copyWith({
+    String? ultimaMensagem,
+    DateTime? ultimaMensagemEm,
+    int? naoLidas,
+  }) {
+    return Conversa(
+      id: id,
+      tipoOutraConta: tipoOutraConta,
+      idOutraConta: idOutraConta,
+      nomeOutraConta: nomeOutraConta,
+      fotoOutraConta: fotoOutraConta,
+      ultimaMensagem: ultimaMensagem ?? this.ultimaMensagem,
+      ultimaMensagemEm: ultimaMensagemEm ?? this.ultimaMensagemEm,
+      naoLidas: naoLidas ?? this.naoLidas,
+    );
+  }
+
   factory Conversa.fromJson(Map<String, dynamic> json) {
     return Conversa(
       id: int.parse(json['id'].toString()),
