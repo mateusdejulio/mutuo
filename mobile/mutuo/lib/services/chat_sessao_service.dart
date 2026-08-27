@@ -34,6 +34,10 @@ class ChatSessaoService {
   String? get id => _id;
   bool get ativa => _tipo != null && _id != null;
 
+  /// Soma de `naoLidas` de todas as conversas — usado pro badge da aba
+  /// "Chat" na navBar (ver [NavBadgeIcon]).
+  final ValueNotifier<int> totalNaoLidas = ValueNotifier<int>(0);
+
   /// Como a notificação é exibida. Substituível nos testes.
   @visibleForTesting
   Future<void> Function(String titulo, String corpo, {String? payload})
@@ -62,6 +66,9 @@ class ChatSessaoService {
     _cancelarListener = ChatSocketService.instance.onMensagemNova(
       _aoReceberMensagem,
     );
+
+    await _recarregarConversas();
+    _recalcularTotalNaoLidas();
   }
 
   void encerrar() {
@@ -71,7 +78,24 @@ class ChatSessaoService {
     _tipo = null;
     _id = null;
     _conversas.clear();
+    totalNaoLidas.value = 0;
     ChatSocketService.instance.desconectar();
+  }
+
+  /// Chamado pela tela de conversa ao marcar como lida, pra zerar o badge
+  /// global na hora, sem esperar a lista de conversas recarregar do zero.
+  void marcarConversaLidaLocal(int conversaId) {
+    final conversa = _conversas[conversaId];
+    if (conversa == null || conversa.naoLidas == 0) return;
+    _conversas[conversaId] = conversa.copyWith(naoLidas: 0);
+    _recalcularTotalNaoLidas();
+  }
+
+  void _recalcularTotalNaoLidas() {
+    totalNaoLidas.value = _conversas.values.fold(
+      0,
+      (soma, c) => soma + c.naoLidas,
+    );
   }
 
   Future<void> _aoReceberMensagem(Mensagem mensagem) async {
@@ -79,8 +103,20 @@ class ChatSessaoService {
     final meuId = _id;
     if (meuTipo == null || meuId == null) return;
 
-    // Mensagem própria (eco) ou da conversa já aberta: não notifica.
+    // Mensagem própria (eco): não conta como não lida nem notifica.
     if (mensagem.ehMinha(meuTipo, meuId)) return;
+
+    // Recalcula o badge a partir do servidor, que é quem decide de fato o
+    // que conta como lido (a tela de conversa aberta já marca como lida
+    // sozinha ao receber, então isso também cobre o caso de zerar de volta).
+    try {
+      await _recarregarConversas();
+      _recalcularTotalNaoLidas();
+    } catch (e) {
+      debugPrint('Falha ao recalcular mensagens não lidas: $e');
+    }
+
+    // Da conversa já aberta na tela: não dispara notificação local.
     if (mensagem.conversaId == _conversaAbertaId) return;
 
     // Chamado de um callback do socket (sem await de quem dispara), então

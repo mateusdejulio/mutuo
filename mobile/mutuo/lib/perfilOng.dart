@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mutuo/inicialOng.dart';
@@ -1220,10 +1221,14 @@ class _PerfilOngState extends State<PerfilOng> {
             return BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(
-                  isSelected ? item.icon : item.outlinedIcon,
-                  size: 22,
-                ),
+                child: item.label == 'Chat'
+                    ? ChatBadgeIcon(
+                        icon: isSelected ? item.icon : item.outlinedIcon,
+                      )
+                    : Icon(
+                        isSelected ? item.icon : item.outlinedIcon,
+                        size: 22,
+                      ),
               ),
               label: item.label,
             );
