@@ -9,12 +9,17 @@ void main() {
   runApp(const MeuApp());
 }
 
+// Usado por telas que precisam recarregar dados quando voltam a ficar
+// visíveis (ex: lib/chat.dart recarregando a lista ao voltar de uma conversa).
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class MeuApp extends StatelessWidget {
   const MeuApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
       title: 'Mútuo',
       localizationsDelegates: const [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mutuo/chat.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
@@ -554,6 +555,23 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     ).then((_) => setState(() => _bottomNavIndex = 0));
   }
 
+  void _irParaChat() {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (_, __, ___) => Chat(
+          tipoConta: "usuario",
+          identificador: widget.cpf,
+          nome: widget.nome,
+        ),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    ).then((_) => setState(() => _bottomNavIndex = 0));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -670,6 +688,8 @@ class _InicialUsuarioState extends State<InicialUsuario> {
               _irParaServicos();
             } else if (index == 2) {
               _irParaOngs();
+            } else if (index == 3) {
+              _irParaChat();
             } else {
               setState(() => _bottomNavIndex = index);
             }
@@ -1120,7 +1140,11 @@ class _InicialUsuarioState extends State<InicialUsuario> {
         label: "ONGs",
         onTap: _irParaOngs,
       ),
-      _AcessoData(icone: Icons.chat_bubble_outline_rounded, label: "Chat"),
+      _AcessoData(
+        icone: Icons.chat_bubble_outline_rounded,
+        label: "Chat",
+        onTap: _irParaChat,
+      ),
       _AcessoData(
         icone: Icons.workspace_premium_outlined,
         label: "Certificados",

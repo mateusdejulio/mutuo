@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mutuo/chat.dart';
+import 'package:mutuo/conversaChat.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
@@ -20,6 +22,7 @@ class Ong {
   final String? imagemUrl;
   final String categoria;
   final String nomeOng;
+  final String? cnpjOng;
   final String? fotoOngUrl;
   final double avaliacao;
   final int totalAvaliacoes;
@@ -35,6 +38,7 @@ class Ong {
     this.imagemUrl,
     this.categoria = "Geral",
     this.nomeOng = "ONG",
+    this.cnpjOng,
     this.fotoOngUrl,
     this.avaliacao = 4.0,
     this.totalAvaliacoes = 0,
@@ -64,6 +68,7 @@ class Ong {
       nomeOng: (json['nomeOng']?.toString().isNotEmpty ?? false)
           ? json['nomeOng'].toString()
           : 'ONG',
+      cnpjOng: json['cnpj']?.toString(),
       fotoOngUrl: (caminhoFoto != null && caminhoFoto.isNotEmpty)
           ? '${ApiService.baseUrl}$caminhoFoto'
           : null,
@@ -75,8 +80,9 @@ class Ong {
 // ─── DETALHE ONG ──────────────────────────────────────────
 class DetalheOng extends StatelessWidget {
   final Ong ong;
+  final String meuCpf;
 
-  const DetalheOng({super.key, required this.ong});
+  const DetalheOng({super.key, required this.ong, required this.meuCpf});
 
   static const _verde = Color(0xFF3A5A40);
   static const _verdeMedio = Color(0xFF588157);
@@ -319,13 +325,7 @@ class DetalheOng extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Em breve: chat de dúvidas!"),
-                                ),
-                              );
-                            },
+                            onPressed: () => _abrirChatComOng(context),
                             icon: const Icon(
                               Icons.chat_bubble_outline_rounded,
                               size: 18,
@@ -378,6 +378,46 @@ class DetalheOng extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Abre (ou cria) a conversa com a ONG dona da atividade ───
+  Future<void> _abrirChatComOng(BuildContext context) async {
+    final cnpj = ong.cnpjOng;
+    if (cnpj == null || cnpj.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível abrir o chat.")),
+      );
+      return;
+    }
+
+    final resultado = await ApiService().buscarOuCriarConversa(
+      tipo1: "usuario",
+      id1: meuCpf,
+      tipo2: "ong",
+      id2: cnpj,
+    );
+    if (!context.mounted) return;
+
+    final conversa = resultado['conversa'];
+    if (resultado['sucesso'] != true || conversa == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível abrir o chat.")),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ConversaChat(
+          conversaId: int.parse(conversa['id'].toString()),
+          meuTipo: "usuario",
+          meuId: meuCpf,
+          nomeOutraConta: ong.nomeOng,
+          fotoOutraConta: ong.fotoOngUrl,
         ),
       ),
     );
@@ -489,6 +529,17 @@ class _OngsState extends State<Ongs> {
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(opacity: animation, child: child);
           },
+        ),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Chat(
+            tipoConta: "usuario",
+            identificador: widget.cpf,
+            nome: widget.nome,
+          ),
         ),
       );
     } else {
@@ -924,7 +975,7 @@ class _OngsState extends State<Ongs> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => DetalheOng(ong: ong)),
+        MaterialPageRoute(builder: (_) => DetalheOng(ong: ong, meuCpf: widget.cpf)),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 18),
@@ -1125,7 +1176,7 @@ class _OngsState extends State<Ongs> {
                       icon: const Icon(Icons.info_outline, size: 16),
                       onPressed: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => DetalheOng(ong: ong)),
+                        MaterialPageRoute(builder: (_) => DetalheOng(ong: ong, meuCpf: widget.cpf)),
                       ),
                       label: Text(
                         "Saiba mais",
