@@ -5,8 +5,45 @@ const multer = require('multer');
 const fs = require('fs');
 const http = require('http');
 const { Server } = require('socket.io');
+const { initializeApp: initializeFirebaseApp, cert } = require('firebase-admin/app');
+const { getMessaging } = require('firebase-admin/messaging');
 const db = require('./db');
 const nodemailer = require('nodemailer');
+
+// Push é acessório: se a credencial não estiver presente (ex: ambiente de
+// desenvolvimento sem o arquivo), o chat via socket continua funcionando normalmente.
+let mensageria = null;
+try {
+  const credenciais = require('./firebase-service-account.json');
+  const firebaseApp = initializeFirebaseApp({ credential: cert(credenciais) });
+  mensageria = getMessaging(firebaseApp);
+} catch (err) {
+  console.warn('Push via Firebase desativado (firebase-service-account.json ausente ou inválido):', err.message);
+}
+
+// Envia push para os tokens de uma conta e limpa os tokens que o Firebase
+// reportou como inválidos/desregistrados.
+async function enviarPush(tipo, id, { titulo, corpo, dados }) {
+  if (!mensageria) return;
+
+  const tokens = await db.getTokensDaConta(tipo, id);
+  if (!tokens.length || tokens.error) return;
+
+  try {
+    const resposta = await mensageria.sendEachForMulticast({
+      tokens,
+      notification: { title: titulo, body: corpo },
+      data: dados || {}
+    });
+
+    const tokensInvalidos = resposta.responses
+      .map((r, i) => (r.success ? null : tokens[i]))
+      .filter(Boolean);
+    await db.removerTokensInvalidos(tokensInvalidos);
+  } catch (err) {
+    console.error('Erro ao enviar push:', err.message);
+  }
+}
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -48,7 +85,20 @@ io.on('connection', (socket) => {
       if (mensagem.error) return;
 
       const destino = await buscarOutroParticipante(conversaId, tipo, id);
-      if (destino) io.to(`${destino.tipo}:${destino.id}`).emit('mensagem:nova', mensagem);
+      if (destino) {
+        io.to(`${destino.tipo}:${destino.id}`).emit('mensagem:nova', mensagem);
+
+        const remetente = tipo === 'usuario'
+          ? await db.getUsuarioPorCpf(id)
+          : await db.getOngPorCnpj(id);
+        const nomeRemetente = remetente?.nome || remetente?.nomeOng || 'Nova mensagem';
+
+        enviarPush(destino.tipo, destino.id, {
+          titulo: nomeRemetente,
+          corpo: conteudo,
+          dados: { conversaId: String(conversaId) }
+        });
+      }
 
       socket.emit('mensagem:enviada', mensagem);
     } catch (err) {
@@ -917,6 +967,22 @@ app.get('/conversas/:tipo/:id', async (req, res) => {
   const conversas = await db.getConversasDaConta(req.params.tipo, req.params.id);
   if (conversas.error) return res.status(500).json({ erro: conversas.error });
   res.json(conversas);
+});
+
+app.post('/notificacoes/token', async (req, res) => {
+  try {
+    const { tipo, identificador, token } = req.body;
+    if (!tipo || !identificador || !token) {
+      return res.status(400).json({ sucesso: false, erro: 'tipo, identificador e token são obrigatórios.' });
+    }
+
+    const resultado = await db.salvarTokenDispositivo(tipo, identificador, token);
+    if (resultado.error) return res.status(500).json({ sucesso: false, erro: resultado.error });
+
+    res.json(resultado);
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
 });
 
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,

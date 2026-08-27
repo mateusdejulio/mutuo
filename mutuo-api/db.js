@@ -1633,8 +1633,48 @@ async function marcarConversaComoLida(conversaId, tipoLeitor, idLeitor) {
   }
 }
 
+// Upsert do token FCM de um dispositivo: se o token já existe, atualiza qual
+// conta ele pertence agora e o timestamp (troca de login no mesmo aparelho).
+async function salvarTokenDispositivo(tipo, identificador, token) {
+  try {
+    await pool.query(
+      `INSERT INTO Mutuo_DispositivoToken (tipo, identificador, token_fcm)
+       VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE tipo = VALUES(tipo), identificador = VALUES(identificador), atualizado_em = NOW()`,
+      [tipo, identificador, token]
+    );
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao salvar token de dispositivo:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function getTokensDaConta(tipo, identificador) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT token_fcm FROM Mutuo_DispositivoToken WHERE tipo = ? AND identificador = ?',
+      [tipo, identificador]
+    );
+    return rows.map((r) => r.token_fcm);
+  } catch (err) {
+    console.error('Erro ao buscar tokens da conta:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Remove tokens que o Firebase reportou como inválidos/desregistrados após um envio.
+async function removerTokensInvalidos(tokens) {
+  if (!tokens.length) return;
+  try {
+    await pool.query('DELETE FROM Mutuo_DispositivoToken WHERE token_fcm IN (?)', [tokens]);
+  } catch (err) {
+    console.error('Erro ao remover tokens inválidos:', err.message);
+  }
+}
+
 module.exports = {
-  getUsuarios, 
+  getUsuarios,
   getUsuarioPorCpf,
   atualizarDadosUsuario,
   validarLogin,
@@ -1722,5 +1762,8 @@ module.exports = {
   getConversaPorId,
   getMensagens,
   criarMensagem,
-  marcarConversaComoLida
+  marcarConversaComoLida,
+  salvarTokenDispositivo,
+  getTokensDaConta,
+  removerTokensInvalidos
 };

@@ -2,8 +2,6 @@
 node_modules/
 mutuo-api/cache/
 npm-debug.log*
-.env
-*.env
 
 # ── Uploads (arquivos enviados pelos usuários, não deveriam ir pro repo) ──
 mutuo-api/uploads/

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/models/mensagem.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/services/chat_sessao_service.dart';
 import 'package:mutuo/services/chat_socket_service.dart';
 
 // ─── TELA DE UMA CONVERSA ───────────────────────────────────
@@ -33,7 +34,7 @@ class _ConversaChatState extends State<ConversaChat> {
   static const _branco = Colors.white;
 
   final ApiService _apiService = ApiService();
-  final ChatSocketService _socketService = ChatSocketService();
+  final ChatSocketService _socketService = ChatSocketService.instance;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -41,10 +42,13 @@ class _ConversaChatState extends State<ConversaChat> {
   bool _carregando = true;
   int _tempIdCounter = -1;
   final List<int> _pendentesTempIds = [];
+  final List<void Function()> _cancelarListeners = [];
 
   @override
   void initState() {
     super.initState();
+    // Enquanto esta conversa está na frente, ela não deve gerar notificação.
+    ChatSessaoService.instance.definirConversaAberta(widget.conversaId);
     _carregarHistorico();
   }
 
@@ -66,17 +70,19 @@ class _ConversaChatState extends State<ConversaChat> {
   }
 
   void _conectarSocket() {
+    // A conexão é única por sessão (ChatSessaoService); conectar aqui é
+    // idempotente e cobre o caso de abrir a conversa direto de outra tela.
     _socketService.conectar(widget.meuTipo, widget.meuId);
 
-    _socketService.onMensagemNova((mensagem) {
+    _cancelarListeners.add(_socketService.onMensagemNova((mensagem) {
       if (!mounted || mensagem.conversaId != widget.conversaId) return;
       setState(() => _mensagens.add(mensagem));
       _marcarComoLida();
       _scrollToBottom();
-    });
+    }));
 
-    _socketService.onMensagemEnviada((mensagemReal) {
-      if (!mounted) return;
+    _cancelarListeners.add(_socketService.onMensagemEnviada((mensagemReal) {
+      if (!mounted || mensagemReal.conversaId != widget.conversaId) return;
       setState(() {
         if (_pendentesTempIds.isNotEmpty) {
           final tempId = _pendentesTempIds.removeAt(0);
@@ -88,9 +94,7 @@ class _ConversaChatState extends State<ConversaChat> {
         }
         _mensagens.add(mensagemReal);
       });
-    });
-
-    _socketService.onConversaLida((_) {});
+    }));
   }
 
   void _marcarComoLida() {
@@ -138,8 +142,12 @@ class _ConversaChatState extends State<ConversaChat> {
 
   @override
   void dispose() {
-    _socketService.removerListeners();
-    _socketService.desconectar();
+    // Só remove os listeners desta tela: a conexão segue viva pela sessão.
+    for (final cancelar in _cancelarListeners) {
+      cancelar();
+    }
+    _cancelarListeners.clear();
+    ChatSessaoService.instance.definirConversaAberta(null);
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
