@@ -338,7 +338,6 @@
       mensagemFeedback.className = 'mensagem-feedback';
 
       // CPF do usuário logado, salvo no sessionStorage pela página de login
-      // ATENÇÃO: ajuste a chave 'usuarioLogado' se o seu login salvar com outro nome
       const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
       const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
       const cpf = usuarioLogado?.cpf;
