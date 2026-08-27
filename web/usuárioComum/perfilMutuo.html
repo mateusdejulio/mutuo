@@ -545,7 +545,7 @@
       </div>
       <div class="divisor"></div>
       <div class="estatisticas-perfil">
-        <div class="stat-item"><span class="stat-numero">27</span><span class="stat-texto">Trocas realizadas</span></div>
+        <div class="stat-item"><span class="stat-numero" id="trocasRealizadas">—</span><span class="stat-texto">Trocas realizadas</span></div>
         <div class="stat-item"><span class="stat-numero">5.0</span><span class="stat-texto">Média de avaliações</span></div>
         <div class="stat-item"><span class="stat-numero" id="tempoMembro">—</span><span class="stat-texto">No Mútuo</span></div>
       </div>
@@ -899,10 +899,29 @@ mostrarMensagemSalva('Perfil atualizado com sucesso!');
 
     // ── SERVIÇOS DO USUÁRIO ──
     const API_BASE = 'https://mutuo-api.onrender.com';
+
+    async function carregarTrocasRealizadas() {
+      const campoTrocas = document.getElementById('trocasRealizadas');
+      if (!usuario.cpf || !campoTrocas) return;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}/estatisticas`);
+        if (!resposta.ok) throw new Error('Erro ao buscar estatísticas do usuário.');
+
+        const estatisticas = await resposta.json();
+        campoTrocas.textContent = Number(estatisticas.trabalhosConcluidos) || 0;
+      } catch (erro) {
+        console.error('Erro ao carregar trocas realizadas:', erro);
+        campoTrocas.textContent = '0';
+      }
+    }
     const containerServicosMutuo = document.getElementById('listaServicosMutuo');
 
     // plano (gratuito/premium)
-    if (usuario.cpf) atualizarLabelPlano();
+    if (usuario.cpf) {
+      atualizarLabelPlano();
+      carregarTrocasRealizadas();
+    }
 
     function criarCardServicoUsuario(servico) {
       const div = document.createElement('div');

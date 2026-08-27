@@ -121,6 +121,10 @@ function pegarOngLogada() {
   try { return JSON.parse(raw); } catch { return null; }
 }
 
+function atualizarTituloOng(nomeOng) {
+  if (nomeOng) document.title = `Mútuo | ${nomeOng}`;
+}
+
 function urlDaFoto(nomeArquivo, nomeOngFallback) {
   if (nomeArquivo) return `${API_URL}/uploads/fotos/${nomeArquivo}`;
   return '../imagens/mutuoLogo.png';
@@ -209,7 +213,6 @@ async function inscreverServico(cod, todosServicosRef) {
     alert(erro.message || 'Não foi possível se inscrever no serviço.');
   }
 }
-
 async function atualizarBadgeNotificacoes() {
   const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
   const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;

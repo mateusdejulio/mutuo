@@ -947,10 +947,6 @@
       document.getElementById("nomeUsuario").textContent =
         usuario.nome || usuario.nome_usuario || "Usuário";
 
-      document.title =
-        "Mútuo | " +
-        (usuario.nome || usuario.nome_usuario || "Planos");
-
       verificarPlanoAtual();
 
       // Evita que a página pare caso carregarFoto não exista.

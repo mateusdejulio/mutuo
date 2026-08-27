@@ -1034,6 +1034,7 @@
 
   function preencherTela(ong) {
     const handle = gerarHandle(ong.nomeOng);
+    atualizarTituloOng(ong.nomeOng);
 
     document.getElementById('navNomeOng').textContent = ong.nomeOng || 'ONG';
     document.getElementById('drawerNomeOng').textContent = ong.nomeOng || 'ONG';
@@ -1245,6 +1246,7 @@
 
       const logada = pegarOngLogada() || {};
       sessionStorage.setItem('ongLogada', JSON.stringify({ ...logada, nomeOng, email }));
+      atualizarTituloOng(nomeOng);
 
       cancelarEdicao();
 
