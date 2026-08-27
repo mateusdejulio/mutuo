@@ -3,6 +3,8 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const http = require('http');
+const { Server } = require('socket.io');
 const db = require('./db');
 const nodemailer = require('nodemailer');
 
@@ -20,6 +22,50 @@ app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+// Dada uma conversa e a conta que está agindo nela, retorna { tipo, id } da outra conta.
+async function buscarOutroParticipante(conversaId, tipo, id) {
+  const conversa = await db.getConversaPorId(conversaId);
+  if (!conversa || conversa.error) return null;
+  const souParticipante1 = conversa.tipo_participante_1 === tipo && String(conversa.id_participante_1) === String(id);
+  return souParticipante1
+    ? { tipo: conversa.tipo_participante_2, id: conversa.id_participante_2 }
+    : { tipo: conversa.tipo_participante_1, id: conversa.id_participante_1 };
+}
+
+io.on('connection', (socket) => {
+  socket.on('identificar', ({ tipo, id } = {}) => {
+    if (!tipo || !id) return;
+    socket.join(`${tipo}:${id}`);
+  });
+
+  socket.on('mensagem:enviar', async ({ conversaId, tipo, id, conteudo } = {}) => {
+    try {
+      const mensagem = await db.criarMensagem(conversaId, tipo, id, conteudo);
+      if (mensagem.error) return;
+
+      const destino = await buscarOutroParticipante(conversaId, tipo, id);
+      if (destino) io.to(`${destino.tipo}:${destino.id}`).emit('mensagem:nova', mensagem);
+
+      socket.emit('mensagem:enviada', mensagem);
+    } catch (err) {
+      console.error('Erro no evento mensagem:enviar:', err.message);
+    }
+  });
+
+  socket.on('conversa:lida', async ({ conversaId, tipo, id } = {}) => {
+    try {
+      const destino = await buscarOutroParticipante(conversaId, tipo, id);
+      await db.marcarConversaComoLida(conversaId, tipo, id);
+      if (destino) io.to(`${destino.tipo}:${destino.id}`).emit('conversa:lida', conversaId);
+    } catch (err) {
+      console.error('Erro no evento conversa:lida:', err.message);
+    }
+  });
+});
 
 app.patch('/servicos/:id/status', async (req, res) => {
   try {
@@ -806,6 +852,73 @@ app.get('/solicitacoes/naolidas/:cpf', async (req, res) => {
 });
 
 
+// ── Rotas de Chat ──
+app.post('/conversas', async (req, res) => {
+  try {
+    const { tipo1, id1, tipo2, id2 } = req.body;
+    if (!tipo1 || !id1 || !tipo2 || !id2) {
+      return res.status(400).json({ sucesso: false, erro: 'tipo1, id1, tipo2 e id2 são obrigatórios.' });
+    }
+    const conversa = await db.buscarOuCriarConversa(tipo1, id1, tipo2, id2);
+    if (conversa.error) return res.status(500).json({ sucesso: false, erro: conversa.error });
+    res.json({ sucesso: true, conversa });
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
+// Precisam vir antes de /conversas/:tipo/:id — ambas têm 2 segmentos após
+// /conversas, e o Express casa pela primeira rota que corresponder ao formato.
+app.get('/conversas/:conversaId/mensagens', async (req, res) => {
+  const mensagens = await db.getMensagens(req.params.conversaId, req.query.desde);
+  if (mensagens.error) return res.status(500).json({ erro: mensagens.error });
+  res.json(mensagens);
+});
+
+app.post('/conversas/:conversaId/mensagens', async (req, res) => {
+  try {
+    const { tipo, id, conteudo } = req.body;
+    if (!tipo || !id || !conteudo) {
+      return res.status(400).json({ sucesso: false, erro: 'tipo, id e conteudo são obrigatórios.' });
+    }
+
+    const mensagem = await db.criarMensagem(req.params.conversaId, tipo, id, conteudo);
+    if (mensagem.error) return res.status(500).json({ sucesso: false, erro: mensagem.error });
+
+    const destino = await buscarOutroParticipante(req.params.conversaId, tipo, id);
+    if (destino) io.to(`${destino.tipo}:${destino.id}`).emit('mensagem:nova', mensagem);
+
+    res.json({ sucesso: true, mensagem });
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
+app.patch('/conversas/:conversaId/lida', async (req, res) => {
+  try {
+    const { tipo, id } = req.body;
+    if (!tipo || !id) {
+      return res.status(400).json({ sucesso: false, erro: 'tipo e id são obrigatórios.' });
+    }
+
+    const destino = await buscarOutroParticipante(req.params.conversaId, tipo, id);
+    const resultado = await db.marcarConversaComoLida(req.params.conversaId, tipo, id);
+    if (resultado.error) return res.status(500).json({ sucesso: false, erro: resultado.error });
+
+    if (destino) io.to(`${destino.tipo}:${destino.id}`).emit('conversa:lida', req.params.conversaId);
+
+    res.json(resultado);
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
+app.get('/conversas/:tipo/:id', async (req, res) => {
+  const conversas = await db.getConversasDaConta(req.params.tipo, req.params.id);
+  if (conversas.error) return res.status(500).json({ erro: conversas.error });
+  res.json(conversas);
+});
+
 // Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
 // campo com nome errado) sempre responda em JSON, nunca em HTML.
 // Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.
@@ -816,4 +929,4 @@ app.use((err, req, res, next) => {
 
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
+server.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
