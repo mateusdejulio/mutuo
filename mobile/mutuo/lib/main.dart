@@ -14,10 +14,11 @@ import 'package:mutuo/services/auth_service.dart';
 import 'package:mutuo/services/chat_sessao_service.dart';
 import 'package:mutuo/services/notificacao_local_service.dart';
 import 'package:mutuo/services/push_service.dart';
+import 'package:mutuo/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   await NotificacaoLocalService.inicializar();
