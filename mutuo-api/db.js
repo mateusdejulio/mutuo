@@ -1485,7 +1485,155 @@ async function contarNaoLidas(cpf) {
   }
 }
 
-module.exports = { 
+// ── Chat ──
+
+// Normaliza a ordem dos dois participantes (por tipo+id concatenados) para
+// que A→B e B→A sempre caiam na mesma linha de Mutuo_Conversa.
+function normalizarParticipantes(tipo1, id1, tipo2, id2) {
+  const chave1 = `${tipo1}:${id1}`;
+  const chave2 = `${tipo2}:${id2}`;
+  if (chave1 <= chave2) return { tipo1, id1, tipo2, id2 };
+  return { tipo1: tipo2, id1: id2, tipo2: tipo1, id2: id1 };
+}
+
+async function buscarOuCriarConversa(tipo1, id1, tipo2, id2) {
+  try {
+    const p = normalizarParticipantes(tipo1, id1, tipo2, id2);
+
+    const [existentes] = await pool.query(
+      `SELECT * FROM Mutuo_Conversa
+       WHERE tipo_participante_1 = ? AND id_participante_1 = ?
+         AND tipo_participante_2 = ? AND id_participante_2 = ?`,
+      [p.tipo1, p.id1, p.tipo2, p.id2]
+    );
+    if (existentes.length > 0) return existentes[0];
+
+    const [result] = await pool.query(
+      `INSERT INTO Mutuo_Conversa (tipo_participante_1, id_participante_1, tipo_participante_2, id_participante_2)
+       VALUES (?, ?, ?, ?)`,
+      [p.tipo1, p.id1, p.tipo2, p.id2]
+    );
+
+    const [[nova]] = await pool.query('SELECT * FROM Mutuo_Conversa WHERE id = ?', [result.insertId]);
+    return nova;
+  } catch (err) {
+    console.error('Erro ao buscar ou criar conversa:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Lista as conversas de uma conta, trazendo nome/foto do outro participante,
+// prévia da última mensagem e contagem de não lidas.
+async function getConversasDaConta(tipo, id) {
+  try {
+    const [conversas] = await pool.query(
+      `SELECT c.*,
+              (SELECT m.conteudo FROM Mutuo_Mensagem m WHERE m.conversa_id = c.id ORDER BY m.enviada_em DESC LIMIT 1) AS ultimaMensagem,
+              (SELECT COUNT(*) FROM Mutuo_Mensagem m WHERE m.conversa_id = c.id AND m.lida = 0 AND NOT (m.tipo_remetente = ? AND m.id_remetente = ?)) AS naoLidas
+       FROM Mutuo_Conversa c
+       WHERE (c.tipo_participante_1 = ? AND c.id_participante_1 = ?)
+          OR (c.tipo_participante_2 = ? AND c.id_participante_2 = ?)
+       ORDER BY c.ultima_mensagem_em DESC`,
+      [tipo, id, tipo, id, tipo, id]
+    );
+
+    return await Promise.all(conversas.map(async (c) => {
+      const souParticipante1 = c.tipo_participante_1 === tipo && c.id_participante_1 === id;
+      const tipoOutraConta = souParticipante1 ? c.tipo_participante_2 : c.tipo_participante_1;
+      const idOutraConta = souParticipante1 ? c.id_participante_2 : c.id_participante_1;
+
+      let nomeOutraConta = null;
+      let fotoOutraConta = null;
+
+      if (tipoOutraConta === 'usuario') {
+        const [[u]] = await pool.query('SELECT nome, foto_perfil FROM Mutuo_Usuario WHERE cpf = ?', [idOutraConta]);
+        if (u) {
+          nomeOutraConta = u.nome;
+          fotoOutraConta = u.foto_perfil ? `/uploads/fotos/${u.foto_perfil}` : null;
+        }
+      } else {
+        const [[o]] = await pool.query('SELECT nomeOng, foto_perfil FROM Mutuo_ONG WHERE cnpj = ?', [idOutraConta]);
+        if (o) {
+          nomeOutraConta = o.nomeOng;
+          fotoOutraConta = o.foto_perfil ? `/uploads/fotos/${o.foto_perfil}` : null;
+        }
+      }
+
+      return {
+        id: c.id,
+        tipoOutraConta,
+        idOutraConta,
+        nomeOutraConta,
+        fotoOutraConta,
+        ultimaMensagem: c.ultimaMensagem,
+        ultimaMensagemEm: c.ultima_mensagem_em,
+        naoLidas: Number(c.naoLidas) || 0
+      };
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar conversas da conta:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function getConversaPorId(conversaId) {
+  try {
+    const [[conversa]] = await pool.query('SELECT * FROM Mutuo_Conversa WHERE id = ?', [conversaId]);
+    return conversa || null;
+  } catch (err) {
+    console.error('Erro ao buscar conversa por id:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function getMensagens(conversaId, desde) {
+  try {
+    let sql = 'SELECT * FROM Mutuo_Mensagem WHERE conversa_id = ?';
+    const params = [conversaId];
+    if (desde) {
+      sql += ' AND enviada_em > ?';
+      params.push(new Date(desde));
+    }
+    sql += ' ORDER BY enviada_em ASC';
+    const [rows] = await pool.query(sql, params);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar mensagens:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function criarMensagem(conversaId, tipoRemetente, idRemetente, conteudo) {
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO Mutuo_Mensagem (conversa_id, tipo_remetente, id_remetente, conteudo) VALUES (?, ?, ?, ?)',
+      [conversaId, tipoRemetente, idRemetente, conteudo]
+    );
+    await pool.query('UPDATE Mutuo_Conversa SET ultima_mensagem_em = NOW() WHERE id = ?', [conversaId]);
+
+    const [[mensagem]] = await pool.query('SELECT * FROM Mutuo_Mensagem WHERE id = ?', [result.insertId]);
+    return mensagem;
+  } catch (err) {
+    console.error('Erro ao criar mensagem:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function marcarConversaComoLida(conversaId, tipoLeitor, idLeitor) {
+  try {
+    await pool.query(
+      `UPDATE Mutuo_Mensagem SET lida = 1
+       WHERE conversa_id = ? AND NOT (tipo_remetente = ? AND id_remetente = ?)`,
+      [conversaId, tipoLeitor, idLeitor]
+    );
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao marcar conversa como lida:', err.message);
+    return { error: err.message };
+  }
+}
+
+module.exports = {
   getUsuarios, 
   getUsuarioPorCpf,
   atualizarDadosUsuario,
@@ -1568,5 +1716,11 @@ module.exports = {
   contarVoluntariosOng,
   isOngPremium,
   marcarSolicitacaoLida,
-  contarNaoLidas
+  contarNaoLidas,
+  buscarOuCriarConversa,
+  getConversasDaConta,
+  getConversaPorId,
+  getMensagens,
+  criarMensagem,
+  marcarConversaComoLida
 };
