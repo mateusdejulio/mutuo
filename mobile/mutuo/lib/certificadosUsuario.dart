@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mutuo/login.dart';
@@ -704,10 +705,14 @@ class _CertificadosUsuarioState extends State<CertificadosUsuario> {
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  isSelected ? item.icon : item.outlinedIcon,
-                  size: 22,
-                ),
+                child: item.label == 'Chat'
+                    ? ChatBadgeIcon(
+                        icon: isSelected ? item.icon : item.outlinedIcon,
+                      )
+                    : Icon(
+                        isSelected ? item.icon : item.outlinedIcon,
+                        size: 22,
+                      ),
               ),
               label: item.label,
             );

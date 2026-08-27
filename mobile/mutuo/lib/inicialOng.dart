@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
 import 'package:mutuo/login.dart';
@@ -294,10 +295,14 @@ class _InicialOngState extends State<InicialOng> {
             return BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(
-                  isSelected ? item.icon : item.outlinedIcon,
-                  size: 22,
-                ),
+                child: item.label == 'Chat'
+                    ? ChatBadgeIcon(
+                        icon: isSelected ? item.icon : item.outlinedIcon,
+                      )
+                    : Icon(
+                        isSelected ? item.icon : item.outlinedIcon,
+                        size: 22,
+                      ),
               ),
               label: item.label,
             );

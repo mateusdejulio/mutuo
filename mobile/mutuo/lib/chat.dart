@@ -17,6 +17,7 @@ import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/services/auth_service.dart';
 import 'package:mutuo/services/chat_socket_service.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
+import 'package:mutuo/widgets/chat_badge_icon.dart';
 
 // ─── TELA LISTA DE CONVERSAS ────────────────────────────────
 class Chat extends StatefulWidget {
@@ -697,10 +698,14 @@ class _ChatState extends State<Chat> with RouteAware {
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  isSelected ? item.icon : item.outlinedIcon,
-                  size: 22,
-                ),
+                child: item.label == 'Chat'
+                    ? ChatBadgeIcon(
+                        icon: isSelected ? item.icon : item.outlinedIcon,
+                      )
+                    : Icon(
+                        isSelected ? item.icon : item.outlinedIcon,
+                        size: 22,
+                      ),
               ),
               label: item.label,
             );

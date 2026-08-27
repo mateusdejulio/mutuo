@@ -99,6 +99,7 @@ class _ConversaChatState extends State<ConversaChat> {
 
   void _marcarComoLida() {
     _socketService.marcarComoLida(widget.conversaId, widget.meuTipo, widget.meuId);
+    ChatSessaoService.instance.marcarConversaLidaLocal(widget.conversaId);
   }
 
   void _scrollToBottom() {

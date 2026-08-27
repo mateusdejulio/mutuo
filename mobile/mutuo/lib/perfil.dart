@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
@@ -2306,10 +2307,14 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  isSelected ? item.icon : item.outlinedIcon,
-                  size: 22,
-                ),
+                child: item.label == 'Chat'
+                    ? ChatBadgeIcon(
+                        icon: isSelected ? item.icon : item.outlinedIcon,
+                      )
+                    : Icon(
+                        isSelected ? item.icon : item.outlinedIcon,
+                        size: 22,
+                      ),
               ),
               label: item.label,
             );
