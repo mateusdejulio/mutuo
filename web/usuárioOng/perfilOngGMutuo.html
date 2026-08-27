@@ -1019,7 +1019,8 @@
 
   function mostrarCarregandoPerfil() {
     document.getElementById('navNomeOng').textContent = 'Carregando...';
-    document.getElementById('drawerNomeOng').textContent = 'Carregando...';
+    const nomeDrawerAntigo = document.getElementById('drawerNomeOng');
+    if (nomeDrawerAntigo) nomeDrawerAntigo.textContent = 'Carregando...';
     document.getElementById('cardNomeOng').textContent = 'Carregando...';
     document.getElementById('cardUserHandle').textContent = '@...';
     document.getElementById('exibNome').textContent = 'Carregando...';
@@ -1037,7 +1038,10 @@
     atualizarTituloOng(ong.nomeOng);
 
     document.getElementById('navNomeOng').textContent = ong.nomeOng || 'ONG';
-    document.getElementById('drawerNomeOng').textContent = ong.nomeOng || 'ONG';
+    const nomeDrawerAntigo = document.getElementById('drawerNomeOng');
+    if (nomeDrawerAntigo) nomeDrawerAntigo.textContent = ong.nomeOng || 'ONG';
+    const nomeDrawerAtual = document.querySelector('.ong-drawer-profile strong');
+    if (nomeDrawerAtual) nomeDrawerAtual.textContent = ong.nomeOng || 'ONG';
 
     document.getElementById('cardNomeOng').textContent = ong.nomeOng || 'ONG';
     document.getElementById('cardUserHandle').textContent = handle;
