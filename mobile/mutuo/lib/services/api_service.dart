@@ -810,6 +810,33 @@ class ApiService {
     }
   }
 
+  // ─── Registra o token FCM do dispositivo para push (Fase 5) ───
+  // Usa POST /notificacoes/token
+  Future<Map<String, dynamic>> enviarTokenNotificacao({
+    required String tipo,
+    required String identificador,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/notificacoes/token');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({
+          'tipo': tipo,
+          'identificador': identificador,
+          'token': token,
+        }),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
   // Detecta o mimetype certo pela extensão do arquivo, pois o Flutter Web
   // nem sempre expõe o content-type real da imagem escolhida no seletor.
   MediaType _mimeTypeDaExtensao(String nomeArquivo) {
