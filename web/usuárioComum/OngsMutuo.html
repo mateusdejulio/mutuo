@@ -182,6 +182,28 @@
       transition: all 0.2s;
     }
     .botao-filtro:hover { border-color: var(--verde-principal); background: var(--creme-claro); }
+    .botao-filtro.ativo { background: var(--verde-principal); color: var(--creme); border-color: var(--verde-principal); }
+    .painel-filtros {
+      display: none; grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px; padding: 16px; margin-bottom: 1rem;
+      background: var(--creme-claro); border: 1.5px solid var(--creme); border-radius: 14px;
+    }
+    .painel-filtros.aberto { display: grid; }
+    .campo-filtro { display: flex; flex-direction: column; gap: 5px; }
+    .campo-filtro label { font-size: 0.75rem; font-weight: 700; color: var(--verde-escuro); }
+    .campo-filtro select {
+      width: 100%; border: 1.5px solid var(--creme); border-radius: 9px;
+      padding: 9px 10px; background: var(--branco); color: var(--texto-escuro);
+      font-family: 'Quicksand', sans-serif; outline: none;
+    }
+    .campo-filtro select:focus { border-color: var(--verde-principal); }
+    .acoes-filtro { display: flex; align-items: flex-end; }
+    .botao-limpar {
+      width: 100%; border: 1.5px solid var(--verde-principal); border-radius: 9px;
+      padding: 9px 10px; background: transparent; color: var(--verde-escuro);
+      font-family: 'Quicksand', sans-serif; font-weight: 700; cursor: pointer;
+    }
+    .botao-limpar:hover { background: var(--branco); }
 
     .categorias { display: flex; flex-wrap: wrap; gap: 8px; }
     .pilula-categoria {
@@ -373,6 +395,7 @@
       .area-filtros, .area-cartoes { margin-left: 1rem; margin-right: 1rem; }
       .heroi-busca { padding: 2rem 1rem 2.5rem; }
       .heroi-busca h2 { font-size: 1.45rem; }
+      .painel-filtros { grid-template-columns: 1fr; }
       .grade-cartoes { grid-template-columns: 1fr; }
     }
   </style>
@@ -436,8 +459,46 @@
   <div class="topo-filtros">
     <span class="contador-resultados"><strong id="labelContador">5</strong> serviços encontrados</span>
     <div class="grupo-botoes-filtro">
-      <button class="botao-filtro"><i class="bi bi-funnel"></i> Filtros</button>
-      <button class="botao-filtro"><i class="bi bi-arrow-down-up"></i> Ordenar</button>
+      <button class="botao-filtro" id="botaoAbrirFiltros" type="button" onclick="alternarPainelFiltros()"><i class="bi bi-funnel"></i> Filtros</button>
+    </div>
+  </div>
+  <div class="painel-filtros" id="painelFiltros">
+    <div class="campo-filtro">
+      <label for="filtroLocalizacao">Localização</label>
+      <select id="filtroLocalizacao" onchange="aplicarFiltros()">
+        <option value="">Todas as localizações</option>
+      </select>
+    </div>
+    <div class="campo-filtro">
+      <label for="filtroDuracao">Duração</label>
+      <select id="filtroDuracao" onchange="aplicarFiltros()">
+        <option value="">Qualquer duração</option>
+        <option value="ate2">Até 2 horas</option>
+        <option value="3a5">De 3 a 5 horas</option>
+        <option value="mais5">Mais de 5 horas</option>
+      </select>
+    </div>
+    <div class="campo-filtro">
+      <label for="filtroPontos">Pontos necessários</label>
+      <select id="filtroPontos" onchange="aplicarFiltros()">
+        <option value="">Qualquer quantidade</option>
+        <option value="ate50">Até 50 pontos</option>
+        <option value="51a100">De 51 a 100 pontos</option>
+        <option value="mais100">Mais de 100 pontos</option>
+      </select>
+    </div>
+    <div class="campo-filtro">
+      <label for="filtroOrdenacao">Ordenar por</label>
+      <select id="filtroOrdenacao" onchange="aplicarFiltros()">
+        <option value="recentes">Mais recentes</option>
+        <option value="nome">Nome (A–Z)</option>
+        <option value="pontosMenor">Menos pontos</option>
+        <option value="pontosMaior">Mais pontos</option>
+        <option value="duracaoMenor">Menor duração</option>
+      </select>
+    </div>
+    <div class="acoes-filtro">
+      <button class="botao-limpar" type="button" onclick="limparFiltros()"><i class="bi bi-x-circle"></i> Limpar filtros</button>
     </div>
   </div>
   <div class="categorias" id="listaCategorias">
@@ -472,7 +533,8 @@
       todosServicos = await resp.json();
 
       montarCategorias(todosServicos);
-      renderizarCards(todosServicos);
+      montarLocalizacoes(todosServicos);
+      aplicarFiltros();
     } catch (err) {
       console.error('Erro ao carregar serviços das ONGs:', err);
       document.getElementById('gradeCartoes').innerHTML =
@@ -505,14 +567,68 @@
     aplicarFiltros();
   }
 
+  function montarLocalizacoes(servicos) {
+    const select = document.getElementById('filtroLocalizacao');
+    const locais = [...new Set(servicos.map(s => [s.cidade, s.estado].filter(Boolean).join(', ')).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    locais.forEach(local => {
+      const option = document.createElement('option');
+      option.value = local;
+      option.textContent = local;
+      select.appendChild(option);
+    });
+  }
+
+  function alternarPainelFiltros() {
+    const painel = document.getElementById('painelFiltros');
+    const aberto = painel.classList.toggle('aberto');
+    document.getElementById('botaoAbrirFiltros').classList.toggle('ativo', aberto);
+  }
+
+  function limparFiltros() {
+    document.getElementById('campoBusca').value = '';
+    document.getElementById('filtroLocalizacao').value = '';
+    document.getElementById('filtroDuracao').value = '';
+    document.getElementById('filtroPontos').value = '';
+    document.getElementById('filtroOrdenacao').value = 'recentes';
+    categoriaAtiva = 'todos';
+    document.querySelectorAll('.pilula-categoria').forEach(p => p.classList.toggle('ativa', p.dataset.categoria === 'todos'));
+    aplicarFiltros();
+  }
+
   function aplicarFiltros() {
-    const termo = document.getElementById('campoBusca').value.toLowerCase().trim();
+    const termo = document.getElementById('campoBusca').value.toLocaleLowerCase('pt-BR').trim();
+    const localizacao = document.getElementById('filtroLocalizacao').value;
+    const duracao = document.getElementById('filtroDuracao').value;
+    const pontosSelecionados = document.getElementById('filtroPontos').value;
+    const ordenacao = document.getElementById('filtroOrdenacao').value;
     const filtrados = todosServicos.filter(s => {
       const bateCat = categoriaAtiva === 'todos' || s.foco === categoriaAtiva;
       const bateTermo = !termo ||
-        s.nomeServico.toLowerCase().includes(termo) ||
-        (s.descricao || '').toLowerCase().includes(termo);
-      return bateCat && bateTermo;
+        (s.nomeServico || '').toLocaleLowerCase('pt-BR').includes(termo) ||
+        (s.descricao || '').toLocaleLowerCase('pt-BR').includes(termo) ||
+        (s.nomeOng || '').toLocaleLowerCase('pt-BR').includes(termo);
+      const localServico = [s.cidade, s.estado].filter(Boolean).join(', ');
+      const bateLocal = !localizacao || localServico === localizacao;
+      const horas = Number(s.horas) || 0;
+      const bateDuracao = !duracao ||
+        (duracao === 'ate2' && horas <= 2) ||
+        (duracao === '3a5' && horas >= 3 && horas <= 5) ||
+        (duracao === 'mais5' && horas > 5);
+      const pontos = Number(s.pontos) || 0;
+      const batePontos = !pontosSelecionados ||
+        (pontosSelecionados === 'ate50' && pontos <= 50) ||
+        (pontosSelecionados === '51a100' && pontos >= 51 && pontos <= 100) ||
+        (pontosSelecionados === 'mais100' && pontos > 100);
+      return bateCat && bateTermo && bateLocal && bateDuracao && batePontos;
+    });
+
+    filtrados.sort((a, b) => {
+      if (ordenacao === 'nome') return (a.nomeServico || '').localeCompare(b.nomeServico || '', 'pt-BR');
+      if (ordenacao === 'pontosMenor') return Number(a.pontos || 0) - Number(b.pontos || 0);
+      if (ordenacao === 'pontosMaior') return Number(b.pontos || 0) - Number(a.pontos || 0);
+      if (ordenacao === 'duracaoMenor') return Number(a.horas || 0) - Number(b.horas || 0);
+      return Number(b.id || 0) - Number(a.id || 0);
     });
     renderizarCards(filtrados);
   }
