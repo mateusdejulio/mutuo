@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mutuo/chat.dart';
+import 'package:mutuo/conversaChat.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/quem_somos.dart';
@@ -22,6 +24,7 @@ class Servico {
   final String? imagemUrl;
   final String categoria;
   final String autor;
+  final String? autorId;
   final String? fotoAutorUrl;
   final double avaliacao;
   final int totalAvaliacoes;
@@ -37,6 +40,7 @@ class Servico {
     this.imagemUrl,
     this.categoria = "Geral",
     this.autor = "Voluntário",
+    this.autorId,
     this.fotoAutorUrl,
     this.avaliacao = 4.0,
     this.totalAvaliacoes = 0,
@@ -65,6 +69,7 @@ class Servico {
       autor: (json['nomeUsuario']?.toString().isNotEmpty ?? false)
           ? json['nomeUsuario'].toString()
           : 'Voluntário',
+      autorId: json['idUsuario']?.toString(),
       fotoAutorUrl: (json['fotoUsuario']?.toString().isNotEmpty ?? false)
           ? '${ApiService.baseUrl}${json['fotoUsuario']}'
           : null,
@@ -76,8 +81,13 @@ class Servico {
 // ─── DETALHE SERVIÇO ──────────────────────────────────────
 class DetalheServico extends StatelessWidget {
   final Servico servico;
+  final String meuCpf;
 
-  const DetalheServico({super.key, required this.servico});
+  const DetalheServico({
+    super.key,
+    required this.servico,
+    required this.meuCpf,
+  });
 
   static const _verde = Color(0xFF3A5A40);
   static const _verdeMedio = Color(0xFF588157);
@@ -357,13 +367,7 @@ class DetalheServico extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Em breve: chat de dúvidas!"),
-                                ),
-                              );
-                            },
+                            onPressed: () => _abrirChatComAutor(context),
                             icon: const Icon(
                               Icons.chat_bubble_outline_rounded,
                               size: 18,
@@ -416,6 +420,46 @@ class DetalheServico extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Abre (ou cria) a conversa com quem cadastrou o serviço ───
+  Future<void> _abrirChatComAutor(BuildContext context) async {
+    final autorId = servico.autorId;
+    if (autorId == null || autorId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível abrir o chat.")),
+      );
+      return;
+    }
+
+    final resultado = await ApiService().buscarOuCriarConversa(
+      tipo1: "usuario",
+      id1: meuCpf,
+      tipo2: "usuario",
+      id2: autorId,
+    );
+    if (!context.mounted) return;
+
+    final conversa = resultado['conversa'];
+    if (resultado['sucesso'] != true || conversa == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível abrir o chat.")),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ConversaChat(
+          conversaId: int.parse(conversa['id'].toString()),
+          meuTipo: "usuario",
+          meuId: meuCpf,
+          nomeOutraConta: servico.autor,
+          fotoOutraConta: servico.fotoAutorUrl,
         ),
       ),
     );
@@ -526,6 +570,17 @@ class _ServicosState extends State<Servicos> {
               Ongs(nome: widget.nome, cpf: widget.cpf, initialNavIndex: 2),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
+        ),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Chat(
+            tipoConta: "usuario",
+            identificador: widget.cpf,
+            nome: widget.nome,
+          ),
         ),
       );
     } else {
@@ -961,7 +1016,7 @@ class _ServicosState extends State<Servicos> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => DetalheServico(servico: servico)),
+        MaterialPageRoute(builder: (_) => DetalheServico(servico: servico, meuCpf: widget.cpf)),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 18),
@@ -1178,7 +1233,7 @@ class _ServicosState extends State<Servicos> {
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => DetalheServico(servico: servico),
+                          builder: (_) => DetalheServico(servico: servico, meuCpf: widget.cpf),
                         ),
                       ),
                       label: Text(

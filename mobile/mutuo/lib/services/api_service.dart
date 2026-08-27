@@ -743,6 +743,73 @@ class ApiService {
     }
   }
 
+  // ─── Busca (ou cria) a conversa entre duas contas ───
+  // Usa POST /conversas
+  Future<Map<String, dynamic>> buscarOuCriarConversa({
+    required String tipo1,
+    required String id1,
+    required String tipo2,
+    required String id2,
+  }) async {
+    final url = Uri.parse('$baseUrl/conversas');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({
+          'tipo1': tipo1,
+          'id1': id1,
+          'tipo2': tipo2,
+          'id2': id2,
+        }),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
+    }
+  }
+
+  // ─── Lista as conversas de uma conta (tela de Chat) ───
+  // Usa GET /conversas/:tipo/:id
+  Future<List<dynamic>> buscarConversas(String tipo, String id) async {
+    final url = Uri.parse(
+      '$baseUrl/conversas/${Uri.encodeComponent(tipo)}/${Uri.encodeComponent(id)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ─── Busca o histórico de mensagens de uma conversa ───
+  // Usa GET /conversas/:conversaId/mensagens (opcionalmente só as novas, com ?desde=)
+  Future<List<dynamic>> buscarMensagens(int conversaId, {String? desde}) async {
+    final url = Uri.parse(
+      '$baseUrl/conversas/$conversaId/mensagens${desde != null ? '?desde=${Uri.encodeComponent(desde)}' : ''}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Detecta o mimetype certo pela extensão do arquivo, pois o Flutter Web
   // nem sempre expõe o content-type real da imagem escolhida no seletor.
   MediaType _mimeTypeDaExtensao(String nomeArquivo) {

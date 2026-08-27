@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mutuo/chat.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/planosOng.dart';
@@ -229,7 +230,18 @@ class _InicialOngState extends State<InicialOng> {
         icon: Icons.chat_bubble_rounded,
         outlinedIcon: Icons.chat_bubble_outline_rounded,
         label: 'Chat',
-        onTap: null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Chat(
+                tipoConta: "ong",
+                identificador: widget.cnpj,
+                nome: _nomeOng,
+              ),
+            ),
+          );
+        },
       ),
     ];
 
