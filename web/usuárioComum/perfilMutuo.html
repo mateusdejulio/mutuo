@@ -653,8 +653,8 @@
       <div class="linha-pontos"></div>
       <p style="font-size:0.72rem;opacity:0.6;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Este mês</p>
       <div class="movimentacao-mes">
-        <div><p class="mov-label">Recebidos</p><span class="mov-valor entrada">+320 pts</span></div>
-        <div><p class="mov-label">Gastos</p><span class="mov-valor saida">−200 pts</span></div>
+        <div><p class="mov-label">Recebidos</p><span class="mov-valor entrada" id="movRecebidos">--</span></div>
+        <div><p class="mov-label">Gastos</p><span class="mov-valor saida" id="movGastos">--</span></div>
       </div>
     </div>
 
@@ -1278,6 +1278,22 @@ async function atualizarBadgeLimiteServicos(totalAtual) {
         container.innerHTML = `<p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">Erro ao carregar.</p>`;
       }
     }
+
+    async function carregarMovimentacaoMensal() {
+      if (!usuario.cpf) return;
+
+      try {
+        const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}/movimentacao`);
+        const dados = await resposta.json();
+
+        document.getElementById('movRecebidos').textContent = `+${dados.recebidos} pts`;
+        document.getElementById('movGastos').textContent = `−${dados.gastos} pts`;
+      } catch (erro) {
+        console.error('Erro ao carregar movimentação mensal:', erro);
+      }
+    }
+
+    carregarMovimentacaoMensal();
 
     carregarHistoricoPrestados();
     carregarHistoricoUtilizados();
