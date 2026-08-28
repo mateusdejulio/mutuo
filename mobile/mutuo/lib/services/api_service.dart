@@ -265,6 +265,141 @@ class ApiService {
     }
   }
 
+  // ─── Conta solicitações não lidas recebidas por uma ONG (badge) ───
+  // Usa GET /solicitacoes-ong/naolidas/:cnpj
+  Future<int> contarSolicitacoesNaoLidasOng(String cnpj) async {
+    final url = Uri.parse(
+      '$baseUrl/solicitacoes-ong/naolidas/${Uri.encodeComponent(cnpj)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return int.tryParse(data['total']?.toString() ?? '0') ?? 0;
+      }
+      return 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // ─── Marca uma solicitação (ONG-prestadora) como lida ───
+  // Usa PUT /solicitacoes-ong/:cod/lida
+  Future<void> marcarSolicitacaoOngLida(dynamic codSolicitacao) async {
+    final url = Uri.parse('$baseUrl/solicitacoes-ong/$codSolicitacao/lida');
+    try {
+      await http.put(url, headers: _headers);
+    } catch (e) {
+      // Notificação é acessório: falha aqui não deve travar a tela.
+    }
+  }
+
+  // ─── Cria uma solicitação de um usuário pro serviço de outro usuário ───
+  // Usa POST /solicitacoes
+  Future<Map<String, dynamic>> cadastrarSolicitacao({
+    required String codServico,
+    required String codUsuario,
+    int pontos = 0,
+  }) async {
+    final url = Uri.parse('$baseUrl/solicitacoes');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({
+          'codServico': codServico,
+          'codUsuario': codUsuario,
+          'pontos': pontos,
+        }),
+      );
+      final dados = jsonDecode(response.body);
+      if (response.statusCode == 200 && dados['error'] == null) {
+        return {'sucesso': true, ...dados};
+      }
+      return {'sucesso': false, 'erro': dados['erro'] ?? 'Não foi possível enviar a solicitação.'};
+    } catch (e) {
+      return {'sucesso': false, 'erro': 'Não foi possível conectar ao servidor.'};
+    }
+  }
+
+  // ─── Cria uma solicitação de um usuário pra atividade de uma ONG ───
+  // Usa POST /solicitacoes-ong
+  Future<Map<String, dynamic>> cadastrarSolicitacaoOng({
+    required String codServico,
+    required String codUsuario,
+    int pontos = 0,
+  }) async {
+    final url = Uri.parse('$baseUrl/solicitacoes-ong');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({
+          'codServico': codServico,
+          'codUsuario': codUsuario,
+          'pontos': pontos,
+        }),
+      );
+      final dados = jsonDecode(response.body);
+      if (response.statusCode == 200 && dados['error'] == null) {
+        return {'sucesso': true, ...dados};
+      }
+      return {'sucesso': false, 'erro': dados['erro'] ?? 'Não foi possível enviar a solicitação.'};
+    } catch (e) {
+      return {'sucesso': false, 'erro': 'Não foi possível conectar ao servidor.'};
+    }
+  }
+
+  // ─── Aceita/recusa uma solicitação recebida (lado usuário-prestador) ───
+  // Usa PUT /solicitacoes/:cod
+  Future<Map<String, dynamic>> alterarSolicitacao(
+    dynamic codSolicitacao, {
+    required String statusS,
+    required String statusE,
+    required dynamic pontos,
+  }) async {
+    final url = Uri.parse('$baseUrl/solicitacoes/$codSolicitacao');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode({'statusS': statusS, 'statusE': statusE, 'pontos': pontos}),
+      );
+      final dados = jsonDecode(response.body);
+      if (response.statusCode == 200 && dados['error'] == null) {
+        return {'sucesso': true, ...dados};
+      }
+      return {'sucesso': false, 'erro': dados['erro'] ?? 'Não foi possível atualizar a solicitação.'};
+    } catch (e) {
+      return {'sucesso': false, 'erro': 'Não foi possível conectar ao servidor.'};
+    }
+  }
+
+  // ─── Aceita/recusa uma solicitação recebida (lado ONG) ───
+  // Usa PUT /solicitacoes-ong/:cod
+  Future<Map<String, dynamic>> alterarSolicitacaoOng(
+    dynamic codSolicitacao, {
+    required String statusS,
+    required String statusE,
+    required dynamic pontos,
+  }) async {
+    final url = Uri.parse('$baseUrl/solicitacoes-ong/$codSolicitacao');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode({'statusS': statusS, 'statusE': statusE, 'pontos': pontos}),
+      );
+      final dados = jsonDecode(response.body);
+      if (response.statusCode == 200 && dados['error'] == null) {
+        return {'sucesso': true, ...dados};
+      }
+      return {'sucesso': false, 'erro': dados['erro'] ?? 'Não foi possível atualizar a solicitação.'};
+    } catch (e) {
+      return {'sucesso': false, 'erro': 'Não foi possível conectar ao servidor.'};
+    }
+  }
+
   // ─── Busca a foto de perfil da ONG ───
   // Usa GET /perfil/foto/ong/:cnpj
   Future<String?> buscarFotoPerfilOng(String cnpj) async {

@@ -455,7 +455,25 @@ app.patch('/servicos/ong/:id/status', async (req, res) => {
 app.get('/solicitacoes', async (req, res) => res.json(await db.getSolicitacoes()));
 app.put('/solicitacoes/:cod', async (req, res) => {
   const { statusS, statusE, pontos } = req.body;
-  res.json(await db.alterSolicitacao(req.params.cod, statusS, statusE, pontos));
+  const resultado = await db.alterSolicitacao(req.params.cod, statusS, statusE, pontos);
+
+  // Avisa o solicitador que o prestador respondeu (aceitou/recusou).
+  const info = await db.getSolicitacaoBasica(req.params.cod);
+  if (info) {
+    io.to(`usuario:${info.codUsuario}`).emit('solicitacao:atualizada', {
+      codSolicitacao: req.params.cod,
+      statusSolicitacao: statusS
+    });
+    enviarPush('usuario', info.codUsuario, {
+      titulo: info.nomeServico || 'Solicitação',
+      corpo: statusS === 'Aceita'
+        ? 'Sua solicitação foi aceita!'
+        : `Sua solicitação foi ${(statusS || 'atualizada').toLowerCase()}.`,
+      dados: { tipo: 'solicitacao' }
+    });
+  }
+
+  res.json(resultado);
 });
 
 // ── Rotas Premium ──
@@ -551,6 +569,23 @@ app.post('/solicitacoes', async (req, res) => {
     const resultado = await db.cadastrarSolicitacao(codServico, codUsuario, pontos || 0);
     if (resultado.error) return res.status(500).json({ erro: resultado.error });
 
+    // Avisa o prestador em tempo real (badge) e por push (fechado/background).
+    const [servico, solicitador] = await Promise.all([
+      db.getServicoPorId(codServico),
+      db.getUsuarioPorCpf(codUsuario)
+    ]);
+    if (servico && servico.idUsuario) {
+      io.to(`usuario:${servico.idUsuario}`).emit('solicitacao:nova', {
+        codSolicitacao: resultado.id,
+        ong: false
+      });
+      enviarPush('usuario', servico.idUsuario, {
+        titulo: solicitador?.nome || 'Nova solicitação',
+        corpo: `Quer solicitar seu serviço "${servico.nomeServico}"`,
+        dados: { tipo: 'solicitacao' }
+      });
+    }
+
     res.json(resultado);
   } catch (e) {
     res.status(500).json({ erro: e.message });
@@ -592,6 +627,24 @@ app.post('/solicitacoes-ong', async (req, res) => {
     }
     const resultado = await db.cadastrarSolicitacaoOng(codServico, codUsuario, pontos || 0);
     if (resultado.error) return res.status(500).json({ erro: resultado.error });
+
+    // Avisa a ONG em tempo real (badge) e por push (fechado/background).
+    const [servico, solicitador] = await Promise.all([
+      db.getServicoOngPorId(codServico),
+      db.getUsuarioPorCpf(codUsuario)
+    ]);
+    if (servico && servico.cnpj) {
+      io.to(`ong:${servico.cnpj}`).emit('solicitacao:nova', {
+        codSolicitacao: resultado.id,
+        ong: true
+      });
+      enviarPush('ong', servico.cnpj, {
+        titulo: solicitador?.nome || 'Nova solicitação',
+        corpo: `Quer participar de "${servico.nomeServico}"`,
+        dados: { tipo: 'solicitacao' }
+      });
+    }
+
     res.json(resultado);
   } catch (e) {
     res.status(500).json({ erro: e.message });
@@ -687,7 +740,38 @@ app.get('/solicitacoes-ong/prestador/:cnpj', async (req, res) => {
 // Aceita/recusa uma solicitação de serviço de ONG
 app.put('/solicitacoes-ong/:cod', async (req, res) => {
   const { statusS, statusE, pontos } = req.body;
-  res.json(await db.alterSolicitacaoOng(req.params.cod, statusS, statusE, pontos));
+  const resultado = await db.alterSolicitacaoOng(req.params.cod, statusS, statusE, pontos);
+
+  // Avisa o solicitador que a ONG respondeu (aceitou/recusou).
+  const info = await db.getSolicitacaoOngBasica(req.params.cod);
+  if (info) {
+    io.to(`usuario:${info.codUsuario}`).emit('solicitacao:atualizada', {
+      codSolicitacao: req.params.cod,
+      statusSolicitacao: statusS
+    });
+    enviarPush('usuario', info.codUsuario, {
+      titulo: info.nomeServico || 'Solicitação',
+      corpo: statusS === 'Aceita'
+        ? 'Sua solicitação foi aceita!'
+        : `Sua solicitação foi ${(statusS || 'atualizada').toLowerCase()}.`,
+      dados: { tipo: 'solicitacao' }
+    });
+  }
+
+  res.json(resultado);
+});
+
+// Conta solicitações não lidas recebidas por uma ONG (badge).
+app.get('/solicitacoes-ong/naolidas/:cnpj', async (req, res) => {
+  const total = await db.contarNaoLidasOng(req.params.cnpj);
+  if (total.error) return res.status(500).json({ erro: total.error });
+  res.json({ total });
+});
+
+app.put('/solicitacoes-ong/:cod/lida', async (req, res) => {
+  const resultado = await db.marcarSolicitacaoOngLida(req.params.cod);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
 });
 
 // ── Rota de Contato ──

@@ -9,11 +9,13 @@ import 'package:mutuo/conversaChat.dart';
 import 'package:mutuo/inicialUser.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/models/conversa.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/services/auth_service.dart';
 import 'package:mutuo/services/chat_sessao_service.dart';
 import 'package:mutuo/services/notificacao_local_service.dart';
 import 'package:mutuo/services/push_service.dart';
+import 'package:mutuo/services/solicitacao_sessao_service.dart';
 import 'package:mutuo/firebase_options.dart';
 
 void main() async {
@@ -23,7 +25,10 @@ void main() async {
 
   await NotificacaoLocalService.inicializar();
   NotificacaoLocalService.aoTocar = _abrirConversaDaNotificacao;
-  PushService.configurarAoTocar(_abrirConversaPorId);
+  PushService.configurarAoTocar(
+    _abrirConversaPorId,
+    aoAbrirNotificacoes: _abrirTelaNotificacoes,
+  );
 
   runApp(const MeuApp());
 }
@@ -36,13 +41,18 @@ final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 // fora da árvore de widgets (sem BuildContext).
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-/// Abre a conversa da notificação tocada (payload montado em ChatSessaoService).
+/// Abre a tela tocada a partir de uma notificação local (payload montado em
+/// ChatSessaoService pro chat, ou em SolicitacaoSessaoService pra solicitações).
 void _abrirConversaDaNotificacao(String payload) {
-  final navigator = navigatorKey.currentState;
-  if (navigator == null) return;
-
   try {
     final dados = jsonDecode(payload) as Map<String, dynamic>;
+    if (dados['tipo'] == 'solicitacao') {
+      _abrirTelaNotificacoes();
+      return;
+    }
+
+    final navigator = navigatorKey.currentState;
+    if (navigator == null) return;
     navigator.push(
       MaterialPageRoute(
         builder: (_) => ConversaChat(
@@ -57,6 +67,27 @@ void _abrirConversaDaNotificacao(String payload) {
   } catch (_) {
     // Payload inválido: só ignora o toque.
   }
+}
+
+/// Abre a central de notificações/solicitações a partir do toque em uma
+/// notificação de solicitação (local ou push), resolvendo tipo/id/nome da
+/// sessão salva já que esse toque acontece fora da árvore de widgets.
+Future<void> _abrirTelaNotificacoes() async {
+  final sessao = await AuthService.obterSessao();
+  if (sessao == null) return;
+
+  final navigator = navigatorKey.currentState;
+  if (navigator == null) return;
+
+  navigator.push(
+    MaterialPageRoute(
+      builder: (_) => Notificacoes(
+        tipoConta: sessao['tipo']!,
+        identificador: sessao['id']!,
+        nome: sessao['nome']!,
+      ),
+    ),
+  );
 }
 
 /// Abre a conversa a partir do toque em uma notificação push (FCM), cujo
@@ -149,8 +180,10 @@ class _TelaInicialState extends State<_TelaInicial> {
       return;
     }
 
-    // Sessão retomada: liga o chat (socket + notificações) desde o início.
+    // Sessão retomada: liga o chat e as solicitações (socket + notificações)
+    // desde o início.
     await ChatSessaoService.instance.iniciar(sessao['tipo']!, sessao['id']!);
+    await SolicitacaoSessaoService.instance.iniciar(sessao['tipo']!, sessao['id']!);
     if (!mounted) return;
 
     if (sessao['tipo'] == 'ong') {

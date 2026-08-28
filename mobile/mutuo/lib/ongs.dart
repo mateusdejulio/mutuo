@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mutuo/widgets/chat_badge_icon.dart';
+import 'package:mutuo/widgets/notificacao_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
 import 'package:mutuo/conversaChat.dart';
@@ -353,13 +354,7 @@ class DetalheOng extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Interesse registrado!"),
-                                ),
-                              );
-                            },
+                            onPressed: () => _solicitar(context),
                             icon: const Icon(
                               Icons.check_circle_outline_rounded,
                               size: 18,
@@ -381,6 +376,34 @@ class DetalheOng extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _solicitar(BuildContext context) async {
+    final codServico = ong.id;
+    if (codServico == null || codServico.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível enviar a solicitação.")),
+      );
+      return;
+    }
+
+    final resultado = await ApiService().cadastrarSolicitacaoOng(
+      codServico: codServico,
+      codUsuario: meuCpf,
+      pontos: ong.pontos,
+    );
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          resultado['sucesso'] == true
+              ? "Solicitação enviada!"
+              : (resultado['erro']?.toString() ?? "Não foi possível enviar a solicitação."),
+        ),
+        backgroundColor: resultado['sucesso'] == true ? null : Colors.redAccent,
       ),
     );
   }
@@ -708,11 +731,7 @@ class _OngsState extends State<Ongs> {
                 color: _verdeMedio.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.notifications_outlined,
-                color: _branco,
-                size: 22,
-              ),
+              child: const NotificacaoBadgeIcon(),
             ),
           ),
           const SizedBox(width: 10),

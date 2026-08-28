@@ -60,13 +60,20 @@ class PushService {
 
   /// Registra o toque em notificação com o app em background (volta ao
   /// primeiro plano) e, se o app foi aberto a partir de uma notificação
-  /// (estava fechado), trata a mensagem que o abriu.
+  /// (estava fechado), trata a mensagem que o abriu. `dados['tipo']` separa
+  /// push de chat (leva a uma conversa) de push de solicitação (leva à
+  /// central de notificações/solicitações).
   static Future<void> configurarAoTocar(
-    void Function(int conversaId) aoAbrirConversa,
-  ) async {
+    void Function(int conversaId) aoAbrirConversa, {
+    void Function()? aoAbrirNotificacoes,
+  }) async {
     if (!_suportado) return;
 
     void tratar(RemoteMessage mensagem) {
+      if (mensagem.data['tipo'] == 'solicitacao') {
+        aoAbrirNotificacoes?.call();
+        return;
+      }
       final conversaId = int.tryParse(mensagem.data['conversaId']?.toString() ?? '');
       if (conversaId != null) aoAbrirConversa(conversaId);
     }

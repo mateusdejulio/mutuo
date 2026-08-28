@@ -19,6 +19,8 @@ class ChatSocketService {
   final List<void Function(Mensagem)> _listenersMensagemNova = [];
   final List<void Function(Mensagem)> _listenersMensagemEnviada = [];
   final List<void Function(int)> _listenersConversaLida = [];
+  final List<void Function()> _listenersSolicitacaoNova = [];
+  final List<void Function()> _listenersSolicitacaoAtualizada = [];
 
   bool get conectado => _socket != null;
 
@@ -59,6 +61,20 @@ class ChatSocketService {
       if (conversaId == null) return;
       for (final callback in List.of(_listenersConversaLida)) {
         callback(conversaId);
+      }
+    });
+
+    // Payload não importa aqui: quem escuta apenas recarrega a contagem/lista
+    // de solicitações a partir do servidor (mesmo padrão de `mensagem:nova`).
+    socket.on('solicitacao:nova', (_) {
+      for (final callback in List.of(_listenersSolicitacaoNova)) {
+        callback();
+      }
+    });
+
+    socket.on('solicitacao:atualizada', (_) {
+      for (final callback in List.of(_listenersSolicitacaoAtualizada)) {
+        callback();
       }
     });
 
@@ -109,5 +125,15 @@ class ChatSocketService {
   void Function() onConversaLida(void Function(int) callback) {
     _listenersConversaLida.add(callback);
     return () => _listenersConversaLida.remove(callback);
+  }
+
+  void Function() onSolicitacaoNova(void Function() callback) {
+    _listenersSolicitacaoNova.add(callback);
+    return () => _listenersSolicitacaoNova.remove(callback);
+  }
+
+  void Function() onSolicitacaoAtualizada(void Function() callback) {
+    _listenersSolicitacaoAtualizada.add(callback);
+    return () => _listenersSolicitacaoAtualizada.remove(callback);
   }
 }

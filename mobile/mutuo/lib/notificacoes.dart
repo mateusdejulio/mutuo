@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
+import 'package:mutuo/conversaChat.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/inicialUser.dart';
 import 'package:mutuo/login.dart';
@@ -12,6 +13,7 @@ import 'package:mutuo/servicos.dart';
 import 'package:mutuo/servicosOng.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/services/auth_service.dart';
+import 'package:mutuo/services/solicitacao_sessao_service.dart';
 import 'package:mutuo/widgets/chat_badge_icon.dart';
 
 // ─── TELA DE NOTIFICAÇÕES / SOLICITAÇÕES ───────────────────
@@ -48,6 +50,7 @@ class _NotificacoesState extends State<Notificacoes> {
   final ApiService _apiService = ApiService();
   List<Map<String, dynamic>> _solicitacoes = [];
   bool _carregando = true;
+  final Set<dynamic> _processando = {};
 
   bool get _souUsuario => widget.tipoConta == 'usuario';
 
@@ -70,21 +73,114 @@ class _NotificacoesState extends State<Notificacoes> {
       _carregando = false;
     });
 
-    // Só o lado usuário tem rastreio de "lida" hoje (Mutuo_Solicitacao).
-    // Marca as recém-carregadas como lidas pra zerar o badge de novo.
-    if (_souUsuario) _marcarTodasComoLidas(lista);
+    // Marca as recém-carregadas como lidas pra zerar o badge do sino.
+    _marcarTodasComoLidas(lista);
   }
 
   Future<void> _marcarTodasComoLidas(List<Map<String, dynamic>> lista) async {
     final naoLidas = lista.where((s) => !_paraBool(s['lida']));
     for (final s in naoLidas) {
       final cod = s['codSolicitacao'];
-      if (cod != null) await _apiService.marcarSolicitacaoLida(cod);
+      if (cod == null) continue;
+      if (_souUsuario) {
+        await _apiService.marcarSolicitacaoLida(cod);
+      } else {
+        await _apiService.marcarSolicitacaoOngLida(cod);
+      }
     }
+    SolicitacaoSessaoService.instance.recarregar();
   }
 
   static bool _paraBool(dynamic valor) =>
       valor == true || valor == 1 || valor == '1';
+
+  // ─── Aceita/recusa uma solicitação recebida ─────────────────
+  Future<void> _responder(Map<String, dynamic> s, String novoStatus) async {
+    final cod = s['codSolicitacao'];
+    if (cod == null) return;
+
+    setState(() => _processando.add(cod));
+
+    final resultado = _souUsuario
+        ? await _apiService.alterarSolicitacao(
+            cod,
+            statusS: novoStatus,
+            statusE: s['statusExecucao']?.toString() ?? 'Não iniciado',
+            pontos: s['pontos'] ?? 0,
+          )
+        : await _apiService.alterarSolicitacaoOng(
+            cod,
+            statusS: novoStatus,
+            statusE: s['statusExecucao']?.toString() ?? 'Não iniciado',
+            pontos: s['pontos'] ?? 0,
+          );
+
+    if (!mounted) return;
+
+    setState(() {
+      _processando.remove(cod);
+      if (resultado['sucesso'] == true) {
+        final index = _solicitacoes.indexWhere((item) => item['codSolicitacao'] == cod);
+        if (index != -1) {
+          _solicitacoes[index] = {..._solicitacoes[index], 'statusSolicitacao': novoStatus};
+        }
+      }
+    });
+
+    if (resultado['sucesso'] != true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(resultado['erro']?.toString() ?? 'Não foi possível atualizar a solicitação.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  // ─── Abre (ou cria) a conversa com quem fez a solicitação ───
+  Future<void> _enviarMensagem(Map<String, dynamic> s) async {
+    final cpfSolicitador = s['cpfSolicitador']?.toString();
+    final nomeSolicitador = s['nomeSolicitador']?.toString() ?? 'Conta';
+    final fotoSolicitador = s['fotoSolicitador']?.toString();
+
+    if (cpfSolicitador == null || cpfSolicitador.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível abrir o chat.')),
+      );
+      return;
+    }
+
+    final resultado = await _apiService.buscarOuCriarConversa(
+      tipo1: widget.tipoConta,
+      id1: widget.identificador,
+      tipo2: 'usuario',
+      id2: cpfSolicitador,
+    );
+    if (!mounted) return;
+
+    final conversa = resultado['conversa'];
+    if (resultado['sucesso'] != true || conversa == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível abrir o chat.')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ConversaChat(
+          conversaId: int.parse(conversa['id'].toString()),
+          meuTipo: widget.tipoConta,
+          meuId: widget.identificador,
+          nomeOutraConta: nomeSolicitador,
+          fotoOutraConta: (fotoSolicitador != null && fotoSolicitador.isNotEmpty)
+              ? '${ApiService.baseUrl}$fotoSolicitador'
+              : null,
+        ),
+      ),
+    );
+  }
 
   String _dataFormatada(dynamic isoData) {
     if (isoData == null) return '-';
@@ -182,12 +278,15 @@ class _NotificacoesState extends State<Notificacoes> {
   }
 
   Widget _cardSolicitacao(Map<String, dynamic> s) {
+    final cod = s['codSolicitacao'];
     final nome = s['nomeSolicitador']?.toString() ?? 'Conta';
     final servico = s['nomeServico']?.toString() ?? '';
     final status = s['statusSolicitacao']?.toString() ?? 'Pendente';
     final data = _dataFormatada(s['dataSolicitacao']);
     final pontos = s['pontos']?.toString();
     final foto = s['fotoSolicitador']?.toString();
+    final pendente = status.toLowerCase() == 'pendente';
+    final processando = _processando.contains(cod);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -291,6 +390,78 @@ class _NotificacoesState extends State<Notificacoes> {
                     ],
                   ],
                 ),
+                const SizedBox(height: 10),
+                if (processando)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4),
+                    child: SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: _verde),
+                    ),
+                  )
+                else
+                  Row(
+                    children: [
+                      if (pendente) ...[
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.redAccent,
+                              side: const BorderSide(color: Colors.redAccent),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () => _responder(s, 'Recusada'),
+                            child: Text(
+                              'Recusar',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _verde,
+                              foregroundColor: _branco,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () => _responder(s, 'Aceita'),
+                            child: Text(
+                              'Aceitar',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      IconButton(
+                        onPressed: () => _enviarMensagem(s),
+                        tooltip: 'Enviar mensagem',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                        icon: const Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          size: 18,
+                          color: _verdeMedio,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),

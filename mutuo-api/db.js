@@ -984,12 +984,13 @@ async function cadastrarSolicitacaoOng(codServico, codUsuario, pontos) {
 // Lista as solicitações RECEBIDAS por uma ONG (ela é a dona do serviço)
 async function getSolicitacoesOng(cnpj) {
   const sql = `
-    SELECT 
+    SELECT
       SOL.codSolicitacao,
       SOL.statusSolicitacao,
       SOL.statusExecucao,
       SOL.dataSolicitacao,
       SOL.pontos,
+      SOL.lida,
       SERV.nomeServico,
       USOL.nome AS nomeSolicitador,
       USOL.cpf AS cpfSolicitador,
@@ -1033,13 +1034,75 @@ async function contarVoluntariosOng(cnpj) {
 
 // Aceita/recusa uma solicitação de serviço de ONG
 async function alterSolicitacaoOng(cod, statusS, statusE, pontos) {
-  const sql = 'UPDATE Mutuo_SolicitacaoONG SET statusSolicitacao = ?, statusExecucao = ?, pontos = ? WHERE codSolicitacao = ?';
+  const sql = 'UPDATE Mutuo_SolicitacaoONG SET statusSolicitacao = ?, statusExecucao = ?, pontos = ?, lida = 1 WHERE codSolicitacao = ?';
   try {
     const [result] = await pool.query(sql, [statusS, statusE, pontos, cod]);
     return { success: true, affectedRows: result.affectedRows };
   } catch (err) {
     console.error('Erro ao alterar solicitação da ONG:', err.message);
     return { error: err.message };
+  }
+}
+
+// Conta solicitações não lidas recebidas por uma ONG (badge de notificações).
+async function contarNaoLidasOng(cnpj) {
+  try {
+    const [[resultado]] = await pool.query(
+      `SELECT COUNT(*) AS total
+       FROM Mutuo_SolicitacaoONG SOL
+       JOIN Mutuo_ServicoOng SERV ON SOL.codServico = SERV.id
+       WHERE SERV.cnpj = ? AND SOL.lida = 0`,
+      [cnpj]
+    );
+    return resultado.total;
+  } catch (err) {
+    console.error('Erro ao contar não lidas da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function marcarSolicitacaoOngLida(cod) {
+  try {
+    await pool.query(`UPDATE Mutuo_SolicitacaoONG SET lida = 1 WHERE codSolicitacao = ?`, [cod]);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao marcar solicitação da ONG como lida:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Dados mínimos de uma solicitação (usuário-prestador) pra montar a
+// notificação de aceite/recusa pro solicitador.
+async function getSolicitacaoBasica(cod) {
+  try {
+    const [[row]] = await pool.query(
+      `SELECT SOL.codUsuario, SERV.nome AS nomeServico
+       FROM Mutuo_Solicitacao SOL
+       JOIN Mutuo_Servico SERV ON SOL.codServico = SERV.cod
+       WHERE SOL.codSolicitacao = ?`,
+      [cod]
+    );
+    return row || null;
+  } catch (err) {
+    console.error('Erro ao buscar solicitação:', err.message);
+    return null;
+  }
+}
+
+// Idem, pro lado ONG (Mutuo_SolicitacaoONG + Mutuo_ServicoOng).
+async function getSolicitacaoOngBasica(cod) {
+  try {
+    const [[row]] = await pool.query(
+      `SELECT SOL.codUsuario, SERV.nomeServico
+       FROM Mutuo_SolicitacaoONG SOL
+       JOIN Mutuo_ServicoOng SERV ON SOL.codServico = SERV.id
+       WHERE SOL.codSolicitacao = ?`,
+      [cod]
+    );
+    return row || null;
+  } catch (err) {
+    console.error('Erro ao buscar solicitação da ONG:', err.message);
+    return null;
   }
 }
 
@@ -1799,6 +1862,10 @@ module.exports = {
   getSolicitacoesOng,
   contarVoluntariosOng,
   alterSolicitacaoOng,
+  contarNaoLidasOng,
+  marcarSolicitacaoOngLida,
+  getSolicitacaoBasica,
+  getSolicitacaoOngBasica,
   buscarCertificadosPorUsuario,
   buscarDadosCertificado,
   verificarCertificado,
