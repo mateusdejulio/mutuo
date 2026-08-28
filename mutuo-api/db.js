@@ -1763,21 +1763,6 @@ async function marcarConversaComoLida(conversaId, tipoLeitor, idLeitor) {
 
 // PERFIL ONG -> PARTE DO USUÁRIO
 
-async function buscarPerfilOng(cnpj) {
-  try {
-    const [[ong]] = await pool.query(
-      `SELECT cnpj, nomeOng, nomeResponsavel, telefone, email, endereco, estado, cidade, bairro,
-              descricao, foco, foto_perfil, pontos, cadastro
-       FROM Mutuo_ONG WHERE cnpj = ?`,
-      [cnpj]
-    );
-    return ong || null;
-  } catch (err) {
-    console.error('Erro ao buscar perfil da ONG:', err.message);
-    return { error: err.message };
-  }
-}
-
 async function buscarServicosAtivosOng(cnpj) {
   try {
     const [servicos] = await pool.query(
@@ -1960,6 +1945,5 @@ module.exports = {
   getTokensDaConta,
   removerTokensInvalidos,
   getMovimentacaoMensal,
-  buscarPerfilOng,
   buscarServicosAtivosOng
 };
