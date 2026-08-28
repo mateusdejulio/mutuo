@@ -236,6 +236,92 @@ class ApiService {
     }
   }
 
+  // ─── Busca as solicitações feitas por um usuário como solicitador ───
+  // (aba "Utilizados" do histórico do perfil) — Usa GET /solicitacoes/usuario/:cpf
+  Future<List<dynamic>> buscarSolicitacoesUsuario(String cpf) async {
+    final url = Uri.parse(
+      '$baseUrl/solicitacoes/usuario/${Uri.encodeComponent(cpf)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ─── Busca as solicitações aceitas aguardando confirmação do usuário ───
+  // (aba "Confirmar" do histórico do perfil) — Usa GET /solicitacoes/confirmar/:cpf
+  Future<List<dynamic>> buscarSolicitacoesParaConfirmar(String cpf) async {
+    final url = Uri.parse(
+      '$baseUrl/solicitacoes/confirmar/${Uri.encodeComponent(cpf)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ─── Confirma que um serviço solicitado foi realizado ───
+  // Usa PUT /solicitacoes/:cod/confirmar
+  Future<Map<String, dynamic>> confirmarSolicitacao(String cod) async {
+    final url = Uri.parse('$baseUrl/solicitacoes/$cod/confirmar');
+    try {
+      final response = await http.put(url, headers: _headers);
+      final dados = jsonDecode(response.body);
+      if (response.statusCode == 200 && dados['erro'] == null) {
+        return {'sucesso': true, ...dados};
+      }
+      return {
+        'sucesso': false,
+        'erro': dados['erro'] ?? 'Não foi possível confirmar a realização.',
+      };
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor.',
+      };
+    }
+  }
+
+  // ─── Avalia (1 a 5) um serviço já realizado ───
+  // Usa POST /solicitacoes/:cod/avaliar, body {nota}
+  Future<Map<String, dynamic>> avaliarSolicitacao(String cod, int nota) async {
+    final url = Uri.parse('$baseUrl/solicitacoes/$cod/avaliar');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers,
+        body: jsonEncode({'nota': nota}),
+      );
+      final dados = jsonDecode(response.body);
+      if (response.statusCode == 200 && dados['erro'] == null) {
+        return {'sucesso': true, ...dados};
+      }
+      return {
+        'sucesso': false,
+        'erro': dados['erro'] ?? 'Não foi possível registrar a avaliação.',
+      };
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor.',
+      };
+    }
+  }
+
   // ─── Conta solicitações não lidas de um usuário prestador (badge) ───
   // Usa GET /solicitacoes/naolidas/:cpf
   Future<int> contarSolicitacoesNaoLidas(String cpf) async {
