@@ -53,7 +53,11 @@ class _ConversaChatState extends State<ConversaChat> {
   }
 
   Future<void> _carregarHistorico() async {
-    final dados = await _apiService.buscarMensagens(widget.conversaId);
+    final dados = await _apiService.buscarMensagens(
+      widget.conversaId,
+      meuTipo: widget.meuTipo,
+      meuId: widget.meuId,
+    );
     if (!mounted) return;
 
     setState(() {
@@ -235,9 +239,66 @@ class _ConversaChatState extends State<ConversaChat> {
               ),
             ),
           ),
+          IconButton(
+            onPressed: _confirmarLimparConversa,
+            icon: const Icon(Icons.delete_outline_rounded, color: _branco),
+            tooltip: 'Limpar conversa',
+          ),
         ],
       ),
     );
+  }
+
+  // ─── Confirmação + chamada da API pra limpar a conversa ───
+  Future<void> _confirmarLimparConversa() async {
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Limpar conversa',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'As mensagens vão desaparecer só do seu lado. A outra conta continua vendo o histórico normalmente.',
+          style: GoogleFonts.quicksand(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancelar', style: GoogleFonts.quicksand(color: _verdeMedio)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Limpar',
+              style: GoogleFonts.quicksand(color: Colors.redAccent, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmou != true || !mounted) return;
+
+    final resultado = await _apiService.limparConversa(
+      widget.conversaId,
+      meuTipo: widget.meuTipo,
+      meuId: widget.meuId,
+    );
+
+    if (!mounted) return;
+
+    if (resultado['sucesso'] == true) {
+      setState(() => _mensagens = []);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(resultado['erro'] ?? 'Não foi possível limpar a conversa.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   Widget _avatarOutraConta() {

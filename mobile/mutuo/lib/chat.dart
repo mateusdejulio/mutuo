@@ -45,12 +45,22 @@ class _ChatState extends State<Chat> with RouteAware {
 
   final ApiService _apiService = ApiService();
   final ChatSocketService _socketService = ChatSocketService.instance;
+  final TextEditingController _buscaController = TextEditingController();
   List<Conversa> _conversas = [];
+  String _termoBusca = '';
   bool _carregando = true;
   String? _fotoPropriaOng;
   final List<void Function()> _cancelarListeners = [];
 
   bool get _souUsuario => widget.tipoConta == 'usuario';
+
+  List<Conversa> get _conversasFiltradas {
+    if (_termoBusca.trim().isEmpty) return _conversas;
+    final termo = _termoBusca.trim().toLowerCase();
+    return _conversas
+        .where((c) => (c.nomeOutraConta ?? '').toLowerCase().contains(termo))
+        .toList();
+  }
 
   @override
   void initState() {
@@ -119,6 +129,7 @@ class _ChatState extends State<Chat> with RouteAware {
     }
     _cancelarListeners.clear();
     routeObserver.unsubscribe(this);
+    _buscaController.dispose();
     super.dispose();
   }
 
@@ -195,11 +206,52 @@ class _ChatState extends State<Chat> with RouteAware {
   }
 
   Widget _corpo() {
+    return Column(
+      children: [
+        _campoBusca(),
+        Expanded(child: _listaOuEstados()),
+      ],
+    );
+  }
+
+  Widget _campoBusca() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: TextField(
+        controller: _buscaController,
+        onChanged: (valor) => setState(() => _termoBusca = valor),
+        style: GoogleFonts.quicksand(fontSize: 14),
+        decoration: InputDecoration(
+          hintText: 'Buscar conversa...',
+          hintStyle: GoogleFonts.quicksand(color: const Color(0xFF6B705C)),
+          prefixIcon: const Icon(Icons.search, color: _verdeMedio),
+          suffixIcon: _termoBusca.isEmpty
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close, color: _verdeMedio, size: 18),
+                  onPressed: () {
+                    _buscaController.clear();
+                    setState(() => _termoBusca = '');
+                  },
+                ),
+          filled: true,
+          fillColor: _branco,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _listaOuEstados() {
     if (_carregando) {
       return const Center(child: CircularProgressIndicator(color: _verde));
     }
 
-    if (_conversas.isEmpty) {
+    if (_conversasFiltradas.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -213,7 +265,9 @@ class _ChatState extends State<Chat> with RouteAware {
               ),
               const SizedBox(height: 10),
               Text(
-                "Nenhuma conversa ainda",
+                _termoBusca.trim().isEmpty
+                    ? "Nenhuma conversa ainda"
+                    : "Nenhuma conversa encontrada",
                 style: GoogleFonts.quicksand(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -222,7 +276,9 @@ class _ChatState extends State<Chat> with RouteAware {
               ),
               const SizedBox(height: 4),
               Text(
-                "Fale com ONGs e usuários pelos botões de contato nas telas de serviços.",
+                _termoBusca.trim().isEmpty
+                    ? "Fale com ONGs e usuários pelos botões de contato nas telas de serviços."
+                    : "Tente buscar por outro nome.",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.quicksand(
                   fontSize: 12,
@@ -241,8 +297,8 @@ class _ChatState extends State<Chat> with RouteAware {
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        itemCount: _conversas.length,
-        itemBuilder: (context, index) => _itemConversa(_conversas[index]),
+        itemCount: _conversasFiltradas.length,
+        itemBuilder: (context, index) => _itemConversa(_conversasFiltradas[index]),
       ),
     );
   }

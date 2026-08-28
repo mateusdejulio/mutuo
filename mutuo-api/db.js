@@ -1537,13 +1537,21 @@ async function getConversasDaConta(tipo, id) {
   try {
     const [conversas] = await pool.query(
       `SELECT c.*,
-              (SELECT m.conteudo FROM Mutuo_Mensagem m WHERE m.conversa_id = c.id ORDER BY m.enviada_em DESC LIMIT 1) AS ultimaMensagem,
+              (SELECT m.conteudo FROM Mutuo_Mensagem m
+                 WHERE m.conversa_id = c.id
+                   AND m.enviada_em > COALESCE(
+                     CASE WHEN c.tipo_participante_1 = ? AND c.id_participante_1 = ?
+                          THEN c.limpo_em_participante_1
+                          ELSE c.limpo_em_participante_2 END,
+                     '1970-01-01'
+                   )
+                 ORDER BY m.enviada_em DESC LIMIT 1) AS ultimaMensagem,
               (SELECT COUNT(*) FROM Mutuo_Mensagem m WHERE m.conversa_id = c.id AND m.lida = 0 AND NOT (m.tipo_remetente = ? AND m.id_remetente = ?)) AS naoLidas
        FROM Mutuo_Conversa c
        WHERE (c.tipo_participante_1 = ? AND c.id_participante_1 = ?)
           OR (c.tipo_participante_2 = ? AND c.id_participante_2 = ?)
        ORDER BY c.ultima_mensagem_em DESC`,
-      [tipo, id, tipo, id, tipo, id]
+      [tipo, id, tipo, id, tipo, id, tipo, id]
     );
 
     return await Promise.all(conversas.map(async (c) => {
@@ -1595,13 +1603,30 @@ async function getConversaPorId(conversaId) {
   }
 }
 
-async function getMensagens(conversaId, desde) {
+async function getMensagens(conversaId, desde, tipoSolicitante, idSolicitante) {
   try {
+    let limpoEm = null;
+    if (tipoSolicitante && idSolicitante) {
+      const conversa = await getConversaPorId(conversaId);
+      if (conversa && !conversa.error) {
+        const souParticipante1 =
+          conversa.tipo_participante_1 === tipoSolicitante &&
+          conversa.id_participante_1 === idSolicitante;
+        limpoEm = souParticipante1
+          ? conversa.limpo_em_participante_1
+          : conversa.limpo_em_participante_2;
+      }
+    }
+
     let sql = 'SELECT * FROM Mutuo_Mensagem WHERE conversa_id = ?';
     const params = [conversaId];
     if (desde) {
       sql += ' AND enviada_em > ?';
       params.push(new Date(desde));
+    }
+    if (limpoEm) {
+      sql += ' AND enviada_em > ?';
+      params.push(limpoEm);
     }
     sql += ' ORDER BY enviada_em ASC';
     const [rows] = await pool.query(sql, params);
@@ -1638,6 +1663,35 @@ async function marcarConversaComoLida(conversaId, tipoLeitor, idLeitor) {
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao marcar conversa como lida:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Marca "limpo_em" no slot do participante correspondente (1 ou 2). A partir
+// desse timestamp, mensagens anteriores somem só pra essa conta — a outra
+// continua vendo o histórico completo.
+async function limparConversaParaConta(conversaId, tipo, id) {
+  try {
+    const conversa = await getConversaPorId(conversaId);
+    if (!conversa || conversa.error) return { error: 'Conversa não encontrada.' };
+
+    const souParticipante1 =
+      conversa.tipo_participante_1 === tipo && conversa.id_participante_1 === id;
+    const souParticipante2 =
+      conversa.tipo_participante_2 === tipo && conversa.id_participante_2 === id;
+
+    if (!souParticipante1 && !souParticipante2) {
+      return { error: 'Essa conta não participa dessa conversa.' };
+    }
+
+    const coluna = souParticipante1 ? 'limpo_em_participante_1' : 'limpo_em_participante_2';
+    await pool.query(
+      `UPDATE Mutuo_Conversa SET ${coluna} = NOW() WHERE id = ?`,
+      [conversaId]
+    );
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao limpar conversa:', err.message);
     return { error: err.message };
   }
 }
@@ -1772,6 +1826,7 @@ module.exports = {
   getMensagens,
   criarMensagem,
   marcarConversaComoLida,
+  limparConversaParaConta,
   salvarTokenDispositivo,
   getTokensDaConta,
   removerTokensInvalidos
