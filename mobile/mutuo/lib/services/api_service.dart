@@ -793,10 +793,16 @@ class ApiService {
 
   // ─── Busca o histórico de mensagens de uma conversa ───
   // Usa GET /conversas/:conversaId/mensagens (opcionalmente só as novas, com ?desde=)
-  Future<List<dynamic>> buscarMensagens(int conversaId, {String? desde}) async {
-    final url = Uri.parse(
-      '$baseUrl/conversas/$conversaId/mensagens${desde != null ? '?desde=${Uri.encodeComponent(desde)}' : ''}',
-    );
+  Future<List<dynamic>> buscarMensagens(
+    int conversaId, {
+    String? desde,
+    required String meuTipo,
+    required String meuId,
+  }) async {
+    final params = <String, String>{'tipo': meuTipo, 'id': meuId};
+    if (desde != null) params['desde'] = desde;
+    final url = Uri.parse('$baseUrl/conversas/$conversaId/mensagens')
+        .replace(queryParameters: params);
     try {
       final response = await http.get(url, headers: _headers);
       if (response.statusCode == 200) {
@@ -807,6 +813,29 @@ class ApiService {
       return [];
     } catch (e) {
       return [];
+    }
+  }
+
+  // ─── Limpa o histórico da conversa só pro lado de quem chamou ───
+  // Usa PUT /conversas/:conversaId/limpar
+  Future<Map<String, dynamic>> limparConversa(
+    int conversaId, {
+    required String meuTipo,
+    required String meuId,
+  }) async {
+    final url = Uri.parse('$baseUrl/conversas/$conversaId/limpar');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers,
+        body: jsonEncode({'tipo': meuTipo, 'id': meuId}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'sucesso': false,
+        'erro': 'Não foi possível conectar ao servidor: $e',
+      };
     }
   }
 

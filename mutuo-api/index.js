@@ -924,7 +924,8 @@ app.post('/conversas', async (req, res) => {
 // Precisam vir antes de /conversas/:tipo/:id — ambas têm 2 segmentos após
 // /conversas, e o Express casa pela primeira rota que corresponder ao formato.
 app.get('/conversas/:conversaId/mensagens', async (req, res) => {
-  const mensagens = await db.getMensagens(req.params.conversaId, req.query.desde);
+  const { desde, tipo, id } = req.query;
+  const mensagens = await db.getMensagens(req.params.conversaId, desde, tipo, id);
   if (mensagens.error) return res.status(500).json({ erro: mensagens.error });
   res.json(mensagens);
 });
@@ -961,6 +962,20 @@ app.patch('/conversas/:conversaId/lida', async (req, res) => {
 
     if (destino) io.to(`${destino.tipo}:${destino.id}`).emit('conversa:lida', req.params.conversaId);
 
+    res.json(resultado);
+  } catch (e) {
+    res.status(500).json({ sucesso: false, erro: e.message });
+  }
+});
+
+app.put('/conversas/:conversaId/limpar', async (req, res) => {
+  try {
+    const { tipo, id } = req.body;
+    if (!tipo || !id) {
+      return res.status(400).json({ sucesso: false, erro: 'tipo e id são obrigatórios.' });
+    }
+    const resultado = await db.limparConversaParaConta(req.params.conversaId, tipo, id);
+    if (resultado.error) return res.status(400).json({ sucesso: false, erro: resultado.error });
     res.json(resultado);
   } catch (e) {
     res.status(500).json({ sucesso: false, erro: e.message });
