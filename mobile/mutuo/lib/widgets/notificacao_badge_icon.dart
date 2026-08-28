@@ -24,10 +24,39 @@ class NotificacaoBadgeIcon extends StatelessWidget {
         final icone = Icon(icon, color: color, size: size);
         if (total <= 0) return icone;
 
-        return Badge(
-          label: Text(total > 99 ? '99+' : '$total'),
-          backgroundColor: const Color(0xFFC1121F),
-          child: icone,
+        // Stack + Positioned em vez do widget Badge do Material: o Badge
+        // podia inflar o tamanho do ícone dentro do container fixo do sino,
+        // deformando-o. Aqui o Stack sempre tem exatamente o tamanho do
+        // ícone (child não-posicionado) e a bolinha só é pintada por cima.
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            icone,
+            Positioned(
+              top: -4,
+              right: -6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFC1121F),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white, width: 1),
+                ),
+                child: Text(
+                  total > 99 ? '99+' : '$total',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
