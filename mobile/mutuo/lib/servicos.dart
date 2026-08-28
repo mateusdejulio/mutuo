@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mutuo/widgets/chat_badge_icon.dart';
+import 'package:mutuo/widgets/notificacao_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
 import 'package:mutuo/conversaChat.dart';
@@ -395,13 +396,7 @@ class DetalheServico extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Interesse registrado!"),
-                                ),
-                              );
-                            },
+                            onPressed: () => _solicitar(context),
                             icon: const Icon(
                               Icons.check_circle_outline_rounded,
                               size: 18,
@@ -428,6 +423,40 @@ class DetalheServico extends StatelessWidget {
   }
 
   // ─── Abre (ou cria) a conversa com quem cadastrou o serviço ───
+  Future<void> _solicitar(BuildContext context) async {
+    final codServico = servico.id;
+    if (codServico == null || codServico.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível enviar a solicitação.")),
+      );
+      return;
+    }
+    if (servico.autorId == meuCpf) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Você não pode solicitar seu próprio serviço.")),
+      );
+      return;
+    }
+
+    final resultado = await ApiService().cadastrarSolicitacao(
+      codServico: codServico,
+      codUsuario: meuCpf,
+      pontos: servico.pontos,
+    );
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          resultado['sucesso'] == true
+              ? "Solicitação enviada!"
+              : (resultado['erro']?.toString() ?? "Não foi possível enviar a solicitação."),
+        ),
+        backgroundColor: resultado['sucesso'] == true ? null : Colors.redAccent,
+      ),
+    );
+  }
+
   Future<void> _abrirChatComAutor(BuildContext context) async {
     final autorId = servico.autorId;
     if (autorId == null || autorId.isEmpty) {
@@ -749,11 +778,7 @@ class _ServicosState extends State<Servicos> {
                 color: _verdeMedio.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.notifications_outlined,
-                color: _branco,
-                size: 22,
-              ),
+              child: const NotificacaoBadgeIcon(),
             ),
           ),
           const SizedBox(width: 10),

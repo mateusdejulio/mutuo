@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:mutuo/widgets/chat_badge_icon.dart';
+import 'package:mutuo/widgets/notificacao_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/notificacoes.dart';
@@ -1077,11 +1078,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 color: _verdeMedio.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.notifications_outlined,
-                color: _branco,
-                size: 22,
-              ),
+              child: const NotificacaoBadgeIcon(),
             ),
           ),
           const SizedBox(width: 10),

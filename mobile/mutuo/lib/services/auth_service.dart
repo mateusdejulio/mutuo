@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'chat_sessao_service.dart';
+import 'solicitacao_sessao_service.dart';
 
 /// Gerencia a sessão salva localmente (login persistente).
 class AuthService {
@@ -15,6 +16,7 @@ class AuthService {
     await prefs.setString(_kId, cpf);
     await prefs.setString(_kNome, nome);
     await ChatSessaoService.instance.iniciar('usuario', cpf);
+    await SolicitacaoSessaoService.instance.iniciar('usuario', cpf);
   }
 
   /// Salva a sessão de uma ONG após login bem-sucedido.
@@ -24,6 +26,7 @@ class AuthService {
     await prefs.setString(_kId, cnpj);
     await prefs.setString(_kNome, nome);
     await ChatSessaoService.instance.iniciar('ong', cnpj);
+    await SolicitacaoSessaoService.instance.iniciar('ong', cnpj);
   }
 
   /// Retorna a sessão salva (ou null se não houver nenhuma).
@@ -40,6 +43,7 @@ class AuthService {
   static Future<void> logout() async {
     // Único ponto por onde todas as telas saem: derruba socket e listeners.
     ChatSessaoService.instance.encerrar();
+    SolicitacaoSessaoService.instance.encerrar();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kTipo);
     await prefs.remove(_kId);
