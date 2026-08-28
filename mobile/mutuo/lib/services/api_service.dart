@@ -217,6 +217,54 @@ class ApiService {
     }
   }
 
+  // ─── Busca as solicitações recebidas por um usuário como prestador ───
+  // (tela de Notificações/Solicitações) — Usa GET /solicitacoes/prestador/:cpf
+  Future<List<dynamic>> buscarSolicitacoesPrestador(String cpf) async {
+    final url = Uri.parse(
+      '$baseUrl/solicitacoes/prestador/${Uri.encodeComponent(cpf)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) return data;
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ─── Conta solicitações não lidas de um usuário prestador (badge) ───
+  // Usa GET /solicitacoes/naolidas/:cpf
+  Future<int> contarSolicitacoesNaoLidas(String cpf) async {
+    final url = Uri.parse(
+      '$baseUrl/solicitacoes/naolidas/${Uri.encodeComponent(cpf)}',
+    );
+    try {
+      final response = await http.get(url, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return int.tryParse(data['total']?.toString() ?? '0') ?? 0;
+      }
+      return 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // ─── Marca uma solicitação (usuário-prestador) como lida ───
+  // Usa PUT /solicitacoes/:cod/lida
+  Future<void> marcarSolicitacaoLida(dynamic codSolicitacao) async {
+    final url = Uri.parse('$baseUrl/solicitacoes/$codSolicitacao/lida');
+    try {
+      await http.put(url, headers: _headers);
+    } catch (e) {
+      // Notificação é acessório: falha aqui não deve travar a tela.
+    }
+  }
+
   // ─── Busca a foto de perfil da ONG ───
   // Usa GET /perfil/foto/ong/:cnpj
   Future<String?> buscarFotoPerfilOng(String cnpj) async {

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/login.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/services/api_service.dart';
 import 'package:mutuo/widgets/modal_atividade_ong.dart';
@@ -1160,7 +1161,18 @@ class _PerfilOngState extends State<PerfilOng> {
         icon: Icons.assignment_turned_in_rounded,
         outlinedIcon: Icons.assignment_turned_in_outlined,
         label: 'Solicitações',
-        onTap: null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Notificacoes(
+                tipoConta: 'ong',
+                identificador: widget.cnpj,
+                nome: _ong?['nomeOng'] ?? widget.nomeInicial,
+              ),
+            ),
+          );
+        },
       ),
       _NavItemPerfilOng(
         icon: Icons.chat_bubble_rounded,

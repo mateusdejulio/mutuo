@@ -40,4 +40,16 @@ class Mensagem {
 
   bool ehMinha(String meuTipo, String meuId) =>
       tipoRemetente == meuTipo && idRemetente == meuId;
+
+  Mensagem copyWith({bool? lida}) {
+    return Mensagem(
+      id: id,
+      conversaId: conversaId,
+      tipoRemetente: tipoRemetente,
+      idRemetente: idRemetente,
+      conteudo: conteudo,
+      enviadaEm: enviadaEm,
+      lida: lida ?? this.lida,
+    );
+  }
 }

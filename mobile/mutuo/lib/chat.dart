@@ -7,6 +7,7 @@ import 'package:mutuo/login.dart';
 import 'package:mutuo/main.dart' show routeObserver;
 import 'package:mutuo/models/conversa.dart';
 import 'package:mutuo/models/mensagem.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/perfil.dart';
 import 'package:mutuo/perfilOng.dart';
@@ -449,17 +450,29 @@ class _ChatState extends State<Chat> with RouteAware {
             ),
           ),
           const Spacer(),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _verdeMedio.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Notificacoes(
+                  tipoConta: widget.tipoConta,
+                  identificador: widget.identificador,
+                  nome: widget.nome,
+                ),
+              ),
             ),
-            child: const Icon(
-              Icons.notifications_outlined,
-              color: _branco,
-              size: 22,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _verdeMedio.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: _branco,
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -687,7 +700,16 @@ class _ChatState extends State<Chat> with RouteAware {
               icon: Icons.assignment_turned_in_rounded,
               outlinedIcon: Icons.assignment_turned_in_outlined,
               label: "Solicitações",
-              onTap: null,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => Notificacoes(
+                    tipoConta: widget.tipoConta,
+                    identificador: widget.identificador,
+                    nome: widget.nome,
+                  ),
+                ),
+              ),
             ),
             _NavItemChat(
               icon: Icons.chat_bubble_rounded,

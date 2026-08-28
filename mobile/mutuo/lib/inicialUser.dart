@@ -3,6 +3,7 @@ import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
 import 'package:mutuo/login.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/servicos.dart';
 import 'package:mutuo/quem_somos.dart';
@@ -471,11 +472,21 @@ class _InicialUsuarioState extends State<InicialUsuario> {
   List<Vaga> _vagas = [];
   bool _carregandoVagas = true;
 
+  // ─── NOVO: contagem real de solicitações não lidas (badge) ───
+  int _naoLidasSolicitacoes = 0;
+
   @override
   void initState() {
     super.initState();
     _carregarEstatisticas();
     _carregarVagasDestaque();
+    _carregarNaoLidasSolicitacoes();
+  }
+
+  Future<void> _carregarNaoLidasSolicitacoes() async {
+    final total = await _apiService.contarSolicitacoesNaoLidas(widget.cpf);
+    if (!mounted) return;
+    setState(() => _naoLidasSolicitacoes = total);
   }
 
   Future<void> _carregarEstatisticas() async {
@@ -765,17 +776,29 @@ class _InicialUsuarioState extends State<InicialUsuario> {
             ),
           ),
           const Spacer(),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _verdeMedio.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Notificacoes(
+                  tipoConta: 'usuario',
+                  identificador: widget.cpf,
+                  nome: widget.nome,
+                ),
+              ),
             ),
-            child: const Icon(
-              Icons.notifications_outlined,
-              color: _branco,
-              size: 22,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _verdeMedio.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: _branco,
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -1168,7 +1191,19 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       _AcessoData(
         icone: Icons.notifications_none_rounded,
         label: "Notificações",
-        badge: 3,
+        badge: _naoLidasSolicitacoes > 0 ? _naoLidasSolicitacoes : null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Notificacoes(
+                tipoConta: 'usuario',
+                identificador: widget.cpf,
+                nome: widget.nome,
+              ),
+            ),
+          );
+        },
       ),
       _AcessoData(
         icone: Icons.trending_up_rounded,

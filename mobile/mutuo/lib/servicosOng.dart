@@ -3,6 +3,7 @@ import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/inicialOng.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/services/api_service.dart';
@@ -166,6 +167,17 @@ class _ServicosOngState extends State<ServicosOng> {
           ),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
+        ),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Notificacoes(
+            tipoConta: 'ong',
+            identificador: widget.cnpj,
+            nome: _ong?['nomeOng'] ?? widget.nome,
+          ),
         ),
       );
     } else {
@@ -350,17 +362,29 @@ class _ServicosOngState extends State<ServicosOng> {
             ),
           ),
           const Spacer(),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _verdeMedio.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Notificacoes(
+                  tipoConta: 'ong',
+                  identificador: widget.cnpj,
+                  nome: _ong?['nomeOng'] ?? widget.nome,
+                ),
+              ),
             ),
-            child: const Icon(
-              Icons.notifications_outlined,
-              color: _branco,
-              size: 22,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _verdeMedio.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: _branco,
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 10),
