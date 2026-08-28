@@ -989,6 +989,25 @@ app.get('/solicitacoes/naolidas/:cpf', async (req, res) => {
   res.json({ total });
 });
 
+app.get('/usuarios/:cpf/movimentacao', async (req, res) => {
+  const resultado = await db.getMovimentacaoMensal(req.params.cpf);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
+});
+
+// perfil ong -> usuário comum
+
+app.get('/ongs/:cnpj', async (req, res) => {
+  const ong = await db.buscarPerfilOng(req.params.cnpj);
+  if (ong?.error) return res.status(500).json({ erro: ong.error });
+  if (!ong) return res.status(404).json({ erro: 'ONG não encontrada.' });
+
+  const servicos = await db.buscarServicosAtivosOng(req.params.cnpj);
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+
+  res.json({ ong, servicos });
+});
+
 
 // ── Rotas de Chat ──
 app.post('/conversas', async (req, res) => {

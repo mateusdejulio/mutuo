@@ -1424,6 +1424,37 @@ async function getSolicitacoesParaConfirmar(cpfUsuario) {
   }
 }
 
+// movimentação mensal de pontos
+async function getMovimentacaoMensal(cpf) {
+  const sql = `
+    SELECT 
+      COALESCE((
+        SELECT SUM(sol.pontos)
+        FROM Mutuo_Solicitacao sol
+        JOIN Mutuo_Servico s ON sol.codServico = s.cod
+        WHERE s.idUsuario = ?
+          AND sol.statusExecucao = 'Realizada'
+          AND MONTH(sol.dataConclusao) = MONTH(CURDATE())
+          AND YEAR(sol.dataConclusao) = YEAR(CURDATE())
+      ), 0) AS recebidos,
+      COALESCE((
+        SELECT SUM(sol.pontos)
+        FROM Mutuo_Solicitacao sol
+        WHERE sol.codUsuario = ?
+          AND sol.statusExecucao = 'Realizada'
+          AND MONTH(sol.dataConclusao) = MONTH(CURDATE())
+          AND YEAR(sol.dataConclusao) = YEAR(CURDATE())
+      ), 0) AS gastos
+  `;
+  try {
+    const [[resultado]] = await pool.query(sql, [cpf, cpf]);
+    return resultado;
+  } catch (err) {
+    console.error('Erro ao buscar movimentação mensal:', err.message);
+    return { error: err.message };
+  }
+}
+
 // Confirmar realização → transfere pontos (transação)
 async function confirmarSolicitacao(cod) {
   const conexao = await pool.getConnection();
@@ -1730,6 +1761,37 @@ async function marcarConversaComoLida(conversaId, tipoLeitor, idLeitor) {
   }
 }
 
+// PERFIL ONG -> PARTE DO USUÁRIO
+
+async function buscarPerfilOng(cnpj) {
+  try {
+    const [[ong]] = await pool.query(
+      `SELECT cnpj, nomeOng, nomeResponsavel, telefone, email, endereco, estado, cidade, bairro,
+              descricao, foco, foto_perfil, pontos, cadastro
+       FROM Mutuo_ONG WHERE cnpj = ?`,
+      [cnpj]
+    );
+    return ong || null;
+  } catch (err) {
+    console.error('Erro ao buscar perfil da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function buscarServicosAtivosOng(cnpj) {
+  try {
+    const [servicos] = await pool.query(
+      `SELECT id, nomeServico, horas, descricao, foco, imagem, pontos
+       FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1`,
+      [cnpj]
+    );
+    return servicos;
+  } catch (err) {
+    console.error('Erro ao buscar serviços da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
 // Marca "limpo_em" no slot do participante correspondente (1 ou 2). A partir
 // desse timestamp, mensagens anteriores somem só pra essa conta — a outra
 // continua vendo o histórico completo.
@@ -1896,5 +1958,8 @@ module.exports = {
   limparConversaParaConta,
   salvarTokenDispositivo,
   getTokensDaConta,
-  removerTokensInvalidos
+  removerTokensInvalidos,
+  getMovimentacaoMensal,
+  buscarPerfilOng,
+  buscarServicosAtivosOng
 };

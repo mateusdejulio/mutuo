@@ -125,8 +125,6 @@
       font-weight: 500;
     }
 
-
-   
     .linha-tags {
       display: flex;
       flex-wrap: wrap;
@@ -142,7 +140,6 @@
       border-radius: 20px;
     }
 
-    
     .grade-contatos {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -521,51 +518,27 @@
 
   <!-- CAPA -->
   <div class="capa-perfil">
-    <img src="../imagens/passeioCachorro.png" class="capa-imagem" alt="Capa da ONG"
-      onerror="this.style.background='linear-gradient(135deg,#588157,#3a5a40)';this.style.display='block'">
+    <img id="capaOng" src="../imagens/mutuoLogo.png" class="capa-imagem" alt="Capa da ONG">
     <div class="capa-overlay"></div>
   </div>
 
   <div class="container-perfil">
 
     <!-- ── IDENTIDADE ── -->
-    <div class="bloco-identidade">
-      <div class="cabecalho-identidade">
-        <img src="../imagens/ongPerfil1.png" class="avatar-ong" alt="Logo Instituto Cães Amigos"
-          onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
-        <div class="identidade-texto">
-          <h2 class="nome-ong">Instituto Cães Amigos</h2>
-          <p class="slogan-ong">Transformando vidas através do cuidado e ação social</p>
-        </div>
+    <div class="cabecalho-identidade">
+      <img id="avatarOng" src="../imagens/mutuoLogo.png" class="avatar-ong" alt="Logo da ONG">
+      <div class="identidade-texto">
+        <h2 class="nome-ong" id="nomeOngPerfil">--</h2>
+        <p class="slogan-ong" id="localizacaoOng"></p>
       </div>
+    </div>
 
-      <div class="linha-tags">
-        <span class="etiqueta-categoria"><i class="bi bi-paw-fill"></i> Animais</span>
-        <span class="etiqueta-categoria"><i class="bi bi-tree-fill"></i> Ambiental</span>
-      </div>
+    <div class="linha-tags" id="tagsOng"></div>
 
-      <div class="grade-contatos">
-        <div class="item-contato">
-          <i class="bi bi-geo-alt-fill"></i>
-          Rio de Janeiro, RJ
-        </div>
-        <div class="item-contato">
-          <i class="bi bi-globe"></i>
-          institutocaesamigos.org.br
-        </div>
-        <div class="item-contato">
-          <i class="bi bi-envelope-fill"></i>
-          contato@caesamigos.com
-        </div>
-        <div class="item-contato">
-          <i class="bi bi-telephone-fill"></i>
-          +55 19 99999-9999
-        </div>
-        <div class="item-contato">
-          <i class="bi bi-qr-code"></i>
-          Pix: 1234567890
-        </div>
-      </div>
+    <div class="grade-contatos">
+      <div class="item-contato"><i class="bi bi-geo-alt-fill"></i> <span id="enderecoOng"></span></div>
+      <div class="item-contato"><i class="bi bi-envelope-fill"></i> <span id="emailOng"></span></div>
+      <div class="item-contato"><i class="bi bi-telephone-fill"></i> <span id="telefoneOng"></span></div>
     </div>
 
     <!-- ── ABAS ── -->
@@ -581,193 +554,16 @@
     <!-- ABA SOBRE -->
     <div id="sobre" class="conteudo-aba">
       <div class="bloco-sobre">
-        <p class="titulo-secao">Nossa história</p>
-        <p class="texto-sobre">
-          Fundado em 2017 por um grupo de protetores e voluntários apaixonados pelos animais, o Instituto Cães Amigos nasceu do desejo de garantir uma vida mais digna, segura e amorosa para cães em situação de abandono ou maus-tratos. Começamos com poucos resgates em um abrigo improvisado, oferecendo cuidados básicos, alimentação e muito carinho.
-        </p>
-        <p class="texto-sobre">
-          Hoje, acolhemos e reabilitamos centenas de cães todos os anos, promovendo adoções responsáveis, campanhas de conscientização e ações de castração e educação animal. Nossa caminhada é guiada pela compaixão, pela responsabilidade e pela certeza de que cada vida importa e merece uma segunda chance.
-        </p>
+        <p class="titulo-secao">Sobre</p>
+        <p class="texto-sobre" id="descricaoOng"></p>
       </div>
     </div>
 
     <!-- ABA SERVIÇOS -->
     <div id="servicos" class="conteudo-aba" style="display:none;">
-      <div class="grade-servicos">
-
-        <div class="card-servico-ong">
-          <img src="../imagens/passeioCachorro.png" class="imagem-servico" alt="Passeio com cachorros"
-            onerror="this.style.background='#eaf2e6';this.style.height='180px';this.style.display='block'">
-          <div class="corpo-servico">
-            <h3 class="titulo-servico">Passeie com os cachorros</h3>
-            <p class="descricao-servico">Ande com os nossos cachorros e proporcione momentos de alegria e exercício para eles. Uma experiência enriquecedora para você e para os animais!</p>
-
-            <div class="info-ong-servico">
-              <img src="../imagens/ongPerfil1.png" class="foto-ong-mini" alt="ONG"
-                onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
-              <div>
-                <p class="nome-ong-mini">Instituto Cães Amigos</p>
-                <div class="avaliacao-servico">
-                  <i class="bi bi-star-fill"></i> 5.0 <span>(1.024 avaliações)</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="detalhes-servico">
-              <div class="detalhe-item-servico">
-                <i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ
-              </div>
-              <div class="detalhe-item-servico">
-                <i class="bi bi-clock-history"></i> 1 hora
-              </div>
-              <div class="detalhe-item-servico">
-                <i class="bi bi-lightning-charge-fill"></i> 80 pts
-              </div>
-            </div>
-
-            <button class="btn-saiba-mais" onclick="abrirModal('modalPasseio')">
-              <i class="bi bi-arrow-right-circle-fill"></i> Saiba mais
-            </button>
-          </div>
-        </div>
-
-        <div class="card-servico-ong">
-          <img src="../imagens/banho.png" class="imagem-servico" alt="Banho e tosa"
-            onerror="this.style.background='#eaf2e6';this.style.height='180px';this.style.display='block'">
-          <div class="corpo-servico">
-            <h3 class="titulo-servico">Banho e tosa solidária</h3>
-            <p class="descricao-servico">Ajude a cuidar da higiene e bem-estar dos nossos animais. Aprenda técnicas de banho e tosa enquanto contribui para a saúde dos cães do abrigo.</p>
-
-            <div class="info-ong-servico">
-              <img src="../imagens/ongPerfil1.png" class="foto-ong-mini" alt="ONG"
-                onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
-              <div>
-                <p class="nome-ong-mini">Instituto Cães Amigos</p>
-                <div class="avaliacao-servico">
-                  <i class="bi bi-star-fill"></i> 4.8 <span>(342 avaliações)</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="detalhes-servico">
-              <div class="detalhe-item-servico">
-                <i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ
-              </div>
-              <div class="detalhe-item-servico">
-                <i class="bi bi-clock-history"></i> 2 horas
-              </div>
-              <div class="detalhe-item-servico">
-                <i class="bi bi-lightning-charge-fill"></i> 120 pts
-              </div>
-            </div>
-
-            <button class="btn-saiba-mais" onclick="abrirModal('modalBanho')">
-              <i class="bi bi-arrow-right-circle-fill"></i> Saiba mais
-            </button>
-          </div>
-        </div>
-
-      </div>
+      <div class="grade-servicos" id="gradeServicosOng"></div>
     </div>
 
-  </div>
-
-  <!-- MODAL: Passeio com os cachorros -->
-  <div class="sobreposicao-modal" id="modalPasseio">
-    <div class="folha-modal">
-      <img src="../imagens/passeioCachorro.png" class="imagem-modal" alt="Passeio com cachorros"
-        onerror="this.style.display='none'">
-      <button class="btn-fechar-modal" onclick="fecharModal('modalPasseio')"><i class="bi bi-x-lg"></i></button>
-      <div class="corpo-modal">
-        <h3>Passeie com os cachorros</h3>
-        <p class="descricao-modal">Ande com os nossos cachorros e proporcione momentos de alegria e exercício para eles. Com apenas um passeio, você oferece carinho, movimento e companhia para animais resgatados que aguardam um novo lar.</p>
-        <div class="linha-ong-modal">
-          <div class="esquerda-ong-modal">
-            <img src="../imagens/ongPerfil1.png" alt="ONG"
-              onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
-            <div>
-              <p class="nome-ong-modal">Instituto Cães Amigos</p>
-              <div class="meta-ong-modal">
-                <span><i class="bi bi-star-fill"></i> 5.0 (1.024)</span>
-                <span><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-                <span><i class="bi bi-clock-fill"></i> 1 hora</span>
-              </div>
-            </div>
-          </div>
-          <div class="coluna-direita-modal">
-            <span class="etiqueta-pontos-modal"><i class="bi bi-lightning-charge-fill"></i> 80 pontos recebidos</span>
-            <a href="chatMutuo.html" class="btn-conversa-modal"><i class="bi bi-chat-dots-fill"></i> Converse conosco</a>
-          </div>
-        </div>
-        <div class="avaliacoes-modal">
-          <h5>Avaliações</h5>
-          <div class="caixa-avaliacao">
-            <p class="nome-avaliador">Felipe Souza</p>
-            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-            <p class="texto-avaliacao">"Experiência incrível! Os cachorros são super animados."</p>
-            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 10 mar 2025</p>
-          </div>
-          <div class="caixa-avaliacao">
-            <p class="nome-avaliador">João Silva</p>
-            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-            <p class="texto-avaliacao">"Passeio muito divertido, recomendo demais!"</p>
-            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 09 fev 2025</p>
-          </div>
-        </div>
-      </div>
-      <div class="rodape-modal">
-        <button class="btn-inscrever"><i class="bi bi-heart-fill"></i> Inscrever-me como voluntário</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Banho e tosa solidária -->
-  <div class="sobreposicao-modal" id="modalBanho">
-    <div class="folha-modal">
-      <img src="../imagens/banho.png" class="imagem-modal" alt="Banho e tosa"
-        onerror="this.style.display='none'">
-      <button class="btn-fechar-modal" onclick="fecharModal('modalBanho')"><i class="bi bi-x-lg"></i></button>
-      <div class="corpo-modal">
-        <h3>Banho e tosa solidária</h3>
-        <p class="descricao-modal">Ajude a cuidar da higiene e bem-estar dos nossos animais. Aprenda técnicas de banho e tosa enquanto contribui diretamente para a saúde e o conforto dos cães do abrigo.</p>
-        <div class="linha-ong-modal">
-          <div class="esquerda-ong-modal">
-            <img src="../imagens/ongPerfil1.png" alt="ONG"
-              onerror="this.src='https://ui-avatars.com/api/?name=CA&background=588157&color=fff'">
-            <div>
-              <p class="nome-ong-modal">Instituto Cães Amigos</p>
-              <div class="meta-ong-modal">
-                <span><i class="bi bi-star-fill"></i> 4.8 (342)</span>
-                <span><i class="bi bi-geo-alt-fill"></i> Rio de Janeiro, RJ</span>
-                <span><i class="bi bi-clock-fill"></i> 2 horas</span>
-              </div>
-            </div>
-          </div>
-          <div class="coluna-direita-modal">
-            <span class="etiqueta-pontos-modal"><i class="bi bi-lightning-charge-fill"></i> 120 pontos recebidos</span>
-            <a href="chatMutuo.html" class="btn-conversa-modal"><i class="bi bi-chat-dots-fill"></i> Converse conosco</a>
-          </div>
-        </div>
-        <div class="avaliacoes-modal">
-          <h5>Avaliações</h5>
-          <div class="caixa-avaliacao">
-            <p class="nome-avaliador">Ana Lima</p>
-            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-            <p class="texto-avaliacao">"Muito organizado e divertido! Aprendi bastante."</p>
-            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 09 fev 2025</p>
-          </div>
-          <div class="caixa-avaliacao">
-            <p class="nome-avaliador">Marcos Ribeiro</p>
-            <div class="estrelas-avaliacao"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
-            <p class="texto-avaliacao">"Ótima experiência, os cães ficaram lindos e felizes!"</p>
-            <p class="data-avaliacao"><i class="bi bi-calendar3"></i> 15 jan 2025</p>
-          </div>
-        </div>
-      </div>
-      <div class="rodape-modal">
-        <button class="btn-inscrever"><i class="bi bi-heart-fill"></i> Inscrever-me como voluntário</button>
-      </div>
-    </div>
   </div>
 
   <script src="../funcoes.js"></script>
@@ -807,6 +603,130 @@ if(usuario){
         usuario.nome || usuario.nome_usuario;
 
 }
+
+const params = new URLSearchParams(window.location.search);
+const cnpjOng = params.get('cnpj');
+
+let dadosOng = null;
+let servicosOng = [];
+
+async function carregarPerfilOng() {
+  if (!cnpjOng) {
+    document.querySelector('.container-perfil').innerHTML = '<p style="padding:40px;text-align:center;color:#9aab96;">ONG não especificada.</p>';
+    return;
+  }
+
+  try {
+    const resposta = await fetch(`${API_URL}/ongs/${encodeURIComponent(cnpjOng)}`);
+    if (!resposta.ok) throw new Error('ONG não encontrada.');
+    const dados = await resposta.json();
+
+    dadosOng = dados.ong;
+    servicosOng = dados.servicos;
+
+    preencherIdentidade(dadosOng);
+    preencherServicos(servicosOng);
+  } catch (erro) {
+    console.error('Erro ao carregar perfil da ONG:', erro);
+    document.querySelector('.container-perfil').innerHTML = '<p style="padding:40px;text-align:center;color:#9aab96;">Não foi possível carregar esta ONG.</p>';
+  }
+}
+
+function resolverImagemOng(caminho) {
+  if (!caminho) return '../imagens/mutuoLogo.png';
+  if (caminho.startsWith('http')) return caminho;
+  return `${API_URL}${caminho}`;
+}
+
+function preencherIdentidade(ong) {
+  document.title = 'Mútuo | ' + ong.nomeOng;
+  document.getElementById('nomeOngPerfil').textContent = ong.nomeOng;
+  document.getElementById('avatarOng').src = resolverImagemOng(ong.foto_perfil);
+  document.getElementById('capaOng').src = resolverImagemOng(ong.foto_perfil);
+  document.getElementById('localizacaoOng').textContent = `${ong.cidade || ''}${ong.estado ? ', ' + ong.estado : ''}`;
+  document.getElementById('enderecoOng').textContent = `${ong.endereco || ''}${ong.bairro ? ' - ' + ong.bairro : ''}`;
+  document.getElementById('emailOng').textContent = ong.email || 'Não informado';
+  document.getElementById('telefoneOng').textContent = ong.telefone || 'Não informado';
+  document.getElementById('descricaoOng').textContent = ong.descricao || 'Esta ONG ainda não adicionou uma descrição.';
+
+  const tagsContainer = document.getElementById('tagsOng');
+  tagsContainer.innerHTML = ong.foco
+    ? `<span class="etiqueta-categoria"><i class="bi bi-tag-fill"></i> ${ong.foco}</span>`
+    : '';
+}
+
+function preencherServicos(servicos) {
+  const grade = document.getElementById('gradeServicosOng');
+
+  if (!servicos.length) {
+    grade.innerHTML = '<p style="color:#9aab96;font-size:0.85rem;">Esta ONG ainda não cadastrou serviços.</p>';
+    return;
+  }
+
+  grade.innerHTML = servicos.map(s => `
+    <div class="card-servico-ong">
+      <img src="${resolverImagemOng(s.imagem)}" class="imagem-servico" alt="${s.nomeServico}">
+      <div class="corpo-servico">
+        <h3 class="titulo-servico">${s.nomeServico}</h3>
+        <p class="descricao-servico">${s.descricao || ''}</p>
+        <div class="detalhes-servico">
+          <div class="detalhe-item-servico"><i class="bi bi-clock-history"></i> ${s.horas}h</div>
+          <div class="detalhe-item-servico"><i class="bi bi-lightning-charge-fill"></i> ${s.pontos} pts</div>
+        </div>
+        <button class="btn-saiba-mais" onclick="abrirModalServico(${s.id})">
+          <i class="bi bi-arrow-right-circle-fill"></i> Saiba mais
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function abrirModalServico(id) {
+  const s = servicosOng.find(item => item.id === id);
+  if (!s) return;
+
+  // remove modal anterior, se existir, pra não empilhar
+  document.getElementById('modalDinamicoServico')?.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'sobreposicao-modal aberto';
+  modal.id = 'modalDinamicoServico';
+  modal.innerHTML = `
+    <div class="folha-modal">
+      <img src="${resolverImagemOng(s.imagem)}" class="imagem-modal" alt="${s.nomeServico}" onerror="this.style.display='none'">
+      <button class="btn-fechar-modal" onclick="document.getElementById('modalDinamicoServico').remove(); document.body.style.overflow='';"><i class="bi bi-x-lg"></i></button>
+      <div class="corpo-modal">
+        <h3>${s.nomeServico}</h3>
+        <p class="descricao-modal">${s.descricao || ''}</p>
+        <div class="linha-ong-modal">
+          <div class="esquerda-ong-modal">
+            <img src="${resolverImagemOng(dadosOng.foto_perfil)}" alt="${dadosOng.nomeOng}">
+            <div>
+              <p class="nome-ong-modal">${dadosOng.nomeOng}</p>
+              <div class="meta-ong-modal">
+                <span><i class="bi bi-geo-alt-fill"></i> ${dadosOng.cidade || ''}${dadosOng.estado ? ', ' + dadosOng.estado : ''}</span>
+                <span><i class="bi bi-clock-fill"></i> ${s.horas}h</span>
+              </div>
+            </div>
+          </div>
+          <div class="coluna-direita-modal">
+            <span class="etiqueta-pontos-modal"><i class="bi bi-lightning-charge-fill"></i> ${s.pontos} pontos</span>
+            <a href="chatMutuo.html" class="btn-conversa-modal"><i class="bi bi-chat-dots-fill"></i> Converse conosco</a>
+          </div>
+        </div>
+      </div>
+      <div class="rodape-modal">
+        <button class="btn-inscrever"><i class="bi bi-heart-fill"></i> Inscrever-me como voluntário</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.body.style.overflow = 'hidden';
+
+  modal.addEventListener('click', e => { if (e.target === modal) { modal.remove(); document.body.style.overflow = ''; } });
+}
+
+carregarPerfilOng();
 
 window.addEventListener('load', () => {
   carregarFoto();
