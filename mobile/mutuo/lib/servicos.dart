@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
 import 'package:mutuo/conversaChat.dart';
 import 'package:mutuo/login.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/ongs.dart';
 import 'package:mutuo/quem_somos.dart';
 import 'package:mutuo/widgets/avatar_perfil.dart';
@@ -730,17 +731,29 @@ class _ServicosState extends State<Servicos> {
             ),
           ),
           const Spacer(),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _verdeMedio.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Notificacoes(
+                  tipoConta: 'usuario',
+                  identificador: widget.cpf,
+                  nome: widget.nome,
+                ),
+              ),
             ),
-            child: const Icon(
-              Icons.notifications_outlined,
-              color: _branco,
-              size: 22,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _verdeMedio.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: _branco,
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 10),

@@ -3,6 +3,7 @@ import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
 import 'package:mutuo/login.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/certificadosOng.dart';
@@ -28,6 +29,7 @@ class _InicialOngState extends State<InicialOng> {
 
   Map<String, dynamic>? _ong;
   List<dynamic> _atividades = [];
+  List<dynamic> _solicitacoes = [];
   int _totalVoluntarios = 0;
   bool _carregando = true;
   String? _fotoUrl;
@@ -78,11 +80,20 @@ class _InicialOngState extends State<InicialOng> {
     setState(() {
       _ong = ong;
       _atividades = atividades;
+      _solicitacoes = solicitacoes;
       _totalVoluntarios = cpfsUnicos.length;
       _fotoUrl = foto;
       _carregando = false;
     });
   }
+
+  // Sem rastreio de "lida" pro lado ONG (Mutuo_SolicitacaoONG não tem essa
+  // coluna), então o badge usa como proxy a quantidade de solicitações
+  // ainda pendentes de resposta — é real, só não é exatamente "não lida".
+  int get _solicitacoesPendentes => _solicitacoes
+      .whereType<Map<String, dynamic>>()
+      .where((s) => (s['statusSolicitacao']?.toString() ?? '').toLowerCase() == 'pendente')
+      .length;
 
   String get _nomeOng =>
       _ong?['nomeOng']?.toString() ??
@@ -193,10 +204,6 @@ class _InicialOngState extends State<InicialOng> {
   }
 
   // ─── BOTTOM NAV (mesmo padrão visual do resto do app) ──────
-  // "Atividades", "Solicitações" e "Chat" ainda não têm tela própria
-  // pra ONG — ficam com onTap: null por enquanto, igual o "Chat" já
-  // funciona hoje em inicialUser.dart (só realça a aba, sem navegar
-  // pra lugar nenhum e sem quebrar nada).
   Widget _buildBottomNav() {
     final navItems = [
       _NavItemOng(
@@ -225,7 +232,18 @@ class _InicialOngState extends State<InicialOng> {
         icon: Icons.assignment_turned_in_rounded,
         outlinedIcon: Icons.assignment_turned_in_outlined,
         label: 'Solicitações',
-        onTap: null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Notificacoes(
+                tipoConta: 'ong',
+                identificador: widget.cnpj,
+                nome: _nomeOng,
+              ),
+            ),
+          );
+        },
       ),
       _NavItemOng(
         icon: Icons.chat_bubble_rounded,
@@ -336,18 +354,29 @@ class _InicialOngState extends State<InicialOng> {
             ),
           ),
           const Spacer(),
-          // TODO: badge de notificações fixo — ainda não existe rota de contagem real.
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _verdeMedio.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Notificacoes(
+                  tipoConta: 'ong',
+                  identificador: widget.cnpj,
+                  nome: _nomeOng,
+                ),
+              ),
             ),
-            child: const Icon(
-              Icons.notifications_outlined,
-              color: _branco,
-              size: 22,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _verdeMedio.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: _branco,
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -793,9 +822,16 @@ class _InicialOngState extends State<InicialOng> {
       _AcessoOngData(
         icone: Icons.notifications_none_rounded,
         label: "Notificações",
-        badge: 3, // TODO: sem rota de contagem real ainda — valor fixo
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Em breve: central de notificações")),
+        badge: _solicitacoesPendentes > 0 ? _solicitacoesPendentes : null,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => Notificacoes(
+              tipoConta: 'ong',
+              identificador: widget.cnpj,
+              nome: _nomeOng,
+            ),
+          ),
         ),
       ),
       _AcessoOngData(

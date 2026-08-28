@@ -99,6 +99,20 @@ class _ConversaChatState extends State<ConversaChat> {
         _mensagens.add(mensagemReal);
       });
     }));
+
+    // A outra conta abriu/leu a conversa: minhas mensagens viram "visto".
+    _cancelarListeners.add(_socketService.onConversaLida((conversaId) {
+      if (!mounted || conversaId != widget.conversaId) return;
+      setState(() {
+        _mensagens = _mensagens
+            .map(
+              (m) => (!m.lida && m.ehMinha(widget.meuTipo, widget.meuId))
+                  ? m.copyWith(lida: true)
+                  : m,
+            )
+            .toList();
+      });
+    }));
   }
 
   void _marcarComoLida() {
@@ -407,17 +421,48 @@ class _ConversaChatState extends State<ConversaChat> {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              _formatarHora(mensagem.enviadaEm),
-              style: GoogleFonts.quicksand(
-                fontSize: 10,
-                color: ehMinha ? _branco.withOpacity(0.7) : const Color(0xFF9E9E9E),
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _formatarHora(mensagem.enviadaEm),
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    color: ehMinha ? _branco.withOpacity(0.7) : const Color(0xFF9E9E9E),
+                  ),
+                ),
+                if (ehMinha) ...[
+                  const SizedBox(width: 4),
+                  _statusEnvio(mensagem),
+                ],
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  // ─── STATUS DE ENVIO (só nas minhas mensagens) ─────────────
+  // Relógio = ainda enviando (id temporário/otimista); check simples =
+  // entregue mas a outra conta ainda não abriu a conversa; check duplo
+  // colorido = "visto" (a outra conta já marcou a conversa como lida).
+  Widget _statusEnvio(Mensagem mensagem) {
+    if (mensagem.id < 0) {
+      return Icon(
+        Icons.access_time_rounded,
+        size: 12,
+        color: _branco.withOpacity(0.7),
+      );
+    }
+    if (mensagem.lida) {
+      return const Icon(
+        Icons.done_all_rounded,
+        size: 14,
+        color: Color(0xFF8ECAE6),
+      );
+    }
+    return Icon(Icons.done_rounded, size: 14, color: _branco.withOpacity(0.7));
   }
 
   // ─── CAMPO DE ENVIO ─────────────────────────────────────────

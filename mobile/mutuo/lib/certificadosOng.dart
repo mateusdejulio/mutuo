@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
+import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/servicosOng.dart';
@@ -602,7 +603,18 @@ class _CertificadosOngState extends State<CertificadosOng> {
         icon: Icons.assignment_turned_in_rounded,
         outlinedIcon: Icons.assignment_turned_in_outlined,
         label: 'Solicitações',
-        onTap: null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Notificacoes(
+                tipoConta: 'ong',
+                identificador: widget.cnpj,
+                nome: widget.nomeInicial,
+              ),
+            ),
+          );
+        },
       ),
       _NavItemCertificadosOng(
         icon: Icons.chat_bubble_rounded,
