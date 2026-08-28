@@ -3,6 +3,7 @@ import 'package:mutuo/widgets/chat_badge_icon.dart';
 import 'package:mutuo/widgets/notificacao_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/chat.dart';
+import 'package:mutuo/conversaChat.dart';
 import 'package:mutuo/login.dart';
 import 'package:mutuo/notificacoes.dart';
 import 'package:mutuo/ongs.dart';
@@ -28,6 +29,8 @@ class Vaga {
   final String? imagemUrl;
   final String categoria;
   final String autor;
+  final String? autorId;
+  final String? fotoAutorUrl;
   final double avaliacao;
   final int totalAvaliacoes;
   final int pontos;
@@ -42,6 +45,8 @@ class Vaga {
     this.imagemUrl,
     this.categoria = "Geral",
     this.autor = "Voluntário",
+    this.autorId,
+    this.fotoAutorUrl,
     this.avaliacao = 4.0,
     this.totalAvaliacoes = 0,
     this.pontos = 0,
@@ -69,6 +74,10 @@ class Vaga {
       autor: (json['nomeUsuario']?.toString().isNotEmpty ?? false)
           ? json['nomeUsuario'].toString()
           : 'Voluntário',
+      autorId: json['idUsuario']?.toString(),
+      fotoAutorUrl: (json['fotoUsuario']?.toString().isNotEmpty ?? false)
+          ? '${ApiService.baseUrl}${json['fotoUsuario']}'
+          : null,
       pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
     );
   }
@@ -77,8 +86,9 @@ class Vaga {
 // ─── DETALHE VAGA ─────────────────────────────────────────
 class DetalheVaga extends StatelessWidget {
   final Vaga vaga;
+  final String meuCpf;
 
-  const DetalheVaga({super.key, required this.vaga});
+  const DetalheVaga({super.key, required this.vaga, required this.meuCpf});
 
   static const _verde = Color(0xFF3A5A40);
   static const _verdeMedio = Color(0xFF588157);
@@ -329,40 +339,36 @@ class DetalheVaga extends StatelessWidget {
                     const SizedBox(height: 32),
                     Row(
                       children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: _verde,
-                              side: BorderSide(
-                                color: _verde.withOpacity(0.4),
-                                width: 1.5,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Em breve: chat de dúvidas!"),
+                        if (vaga.autorId == null || vaga.autorId != meuCpf) ...[
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: _verde,
+                                side: BorderSide(
+                                  color: _verde.withOpacity(0.4),
+                                  width: 1.5,
                                 ),
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 18,
-                            ),
-                            label: Text(
-                              "Tirar dúvidas",
-                              style: GoogleFonts.quicksand(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              onPressed: () => _abrirChatComAutor(context),
+                              icon: const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                "Tirar dúvidas",
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
+                          const SizedBox(width: 12),
+                        ],
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
@@ -401,6 +407,46 @@ class DetalheVaga extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Abre (ou cria) a conversa com quem cadastrou a vaga ───
+  Future<void> _abrirChatComAutor(BuildContext context) async {
+    final autorId = vaga.autorId;
+    if (autorId == null || autorId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível abrir o chat.")),
+      );
+      return;
+    }
+
+    final resultado = await ApiService().buscarOuCriarConversa(
+      tipo1: "usuario",
+      id1: meuCpf,
+      tipo2: "usuario",
+      id2: autorId,
+    );
+    if (!context.mounted) return;
+
+    final conversa = resultado['conversa'];
+    if (resultado['sucesso'] != true || conversa == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível abrir o chat.")),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ConversaChat(
+          conversaId: int.parse(conversa['id'].toString()),
+          meuTipo: "usuario",
+          meuId: meuCpf,
+          nomeOutraConta: vaga.autor,
+          fotoOutraConta: vaga.fotoAutorUrl,
         ),
       ),
     );
@@ -1359,7 +1405,9 @@ class _InicialUsuarioState extends State<InicialUsuario> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => DetalheVaga(vaga: vaga)),
+        MaterialPageRoute(
+          builder: (_) => DetalheVaga(vaga: vaga, meuCpf: widget.cpf),
+        ),
       ),
       child: Container(
         width: 260,

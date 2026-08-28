@@ -9,6 +9,7 @@ import 'package:mutuo/perfilOng.dart';
 import 'package:mutuo/planosOng.dart';
 import 'package:mutuo/certificadosOng.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/services/solicitacao_sessao_service.dart';
 import 'package:mutuo/widgets/modal_atividade_ong.dart';
 import 'package:mutuo/servicosOng.dart';
 import 'package:mutuo/services/auth_service.dart';
@@ -30,7 +31,6 @@ class _InicialOngState extends State<InicialOng> {
 
   Map<String, dynamic>? _ong;
   List<dynamic> _atividades = [];
-  List<dynamic> _solicitacoes = [];
   int _totalVoluntarios = 0;
   bool _carregando = true;
   String? _fotoUrl;
@@ -81,20 +81,11 @@ class _InicialOngState extends State<InicialOng> {
     setState(() {
       _ong = ong;
       _atividades = atividades;
-      _solicitacoes = solicitacoes;
       _totalVoluntarios = cpfsUnicos.length;
       _fotoUrl = foto;
       _carregando = false;
     });
   }
-
-  // Sem rastreio de "lida" pro lado ONG (Mutuo_SolicitacaoONG não tem essa
-  // coluna), então o badge usa como proxy a quantidade de solicitações
-  // ainda pendentes de resposta — é real, só não é exatamente "não lida".
-  int get _solicitacoesPendentes => _solicitacoes
-      .whereType<Map<String, dynamic>>()
-      .where((s) => (s['statusSolicitacao']?.toString() ?? '').toLowerCase() == 'pendente')
-      .length;
 
   String get _nomeOng =>
       _ong?['nomeOng']?.toString() ??
@@ -819,7 +810,6 @@ class _InicialOngState extends State<InicialOng> {
       _AcessoOngData(
         icone: Icons.notifications_none_rounded,
         label: "Notificações",
-        badge: _solicitacoesPendentes > 0 ? _solicitacoesPendentes : null,
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
@@ -866,11 +856,21 @@ class _InicialOngState extends State<InicialOng> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: 1.55,
-      children: itens.map((item) => _acessoCard(item)).toList(),
+      children: itens.map((item) {
+        if (item.label == "Notificações") {
+          return ValueListenableBuilder<int>(
+            valueListenable: SolicitacaoSessaoService.instance.totalNaoLidas,
+            builder: (context, total, _) =>
+                _acessoCard(item, badgeOverride: total > 0 ? total : null),
+          );
+        }
+        return _acessoCard(item);
+      }).toList(),
     );
   }
 
-  Widget _acessoCard(_AcessoOngData item) {
+  Widget _acessoCard(_AcessoOngData item, {int? badgeOverride}) {
+    final badge = badgeOverride ?? item.badge;
     return GestureDetector(
       onTap: item.onTap,
       child: Container(
@@ -906,7 +906,7 @@ class _InicialOngState extends State<InicialOng> {
                 ),
               ],
             ),
-            if (item.badge != null)
+            if (badge != null)
               Positioned(
                 top: 0,
                 right: 0,
@@ -920,7 +920,7 @@ class _InicialOngState extends State<InicialOng> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    "${item.badge}",
+                    "$badge",
                     style: GoogleFonts.quicksand(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,

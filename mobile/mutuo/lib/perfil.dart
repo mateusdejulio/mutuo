@@ -14,8 +14,9 @@ import 'package:mutuo/services/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mutuo/services/auth_service.dart';
 
-// ─── DATA CLASS PARA HISTÓRICO (dados de exemplo, ligue à sua API quando tiver a rota) ───
+// ─── DATA CLASS PARA HISTÓRICO (populada a partir da API) ───
 class _ItemHistorico {
+  final dynamic codSolicitacao;
   final String titulo;
   final String participante;
   final double? estrelas;
@@ -24,8 +25,10 @@ class _ItemHistorico {
   final int pontos;
   final bool positivo;
   final bool aguardandoConfirmacao;
+  final bool podeAvaliar;
 
   _ItemHistorico({
+    this.codSolicitacao,
     required this.titulo,
     required this.participante,
     this.estrelas,
@@ -34,7 +37,63 @@ class _ItemHistorico {
     this.pontos = 0,
     this.positivo = true,
     this.aguardandoConfirmacao = false,
+    this.podeAvaliar = false,
   });
+
+  static String _formatarData(dynamic isoData) {
+    if (isoData == null) return '-';
+    final data = DateTime.tryParse(isoData.toString());
+    if (data == null) return '-';
+    const meses = [
+      'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+      'jul', 'ago', 'set', 'out', 'nov', 'dez',
+    ];
+    return '${data.day} ${meses[data.month - 1]} ${data.year}';
+  }
+
+  // Aba "Prestados" — GET /solicitacoes/prestador/:cpf
+  factory _ItemHistorico.prestado(Map<String, dynamic> json) {
+    final nota = json['nota'];
+    return _ItemHistorico(
+      codSolicitacao: json['codSolicitacao'],
+      titulo: json['nomeServico']?.toString() ?? 'Serviço',
+      participante: 'Cliente: ${json['nomeSolicitador']?.toString() ?? '-'}',
+      estrelas: nota != null ? double.tryParse(nota.toString()) : null,
+      data: _formatarData(json['dataSolicitacao']),
+      pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
+      positivo: true,
+    );
+  }
+
+  // Aba "Utilizados" — GET /solicitacoes/usuario/:cpf
+  factory _ItemHistorico.utilizado(Map<String, dynamic> json) {
+    final nota = json['nota'];
+    final realizado =
+        (json['statusExecucao']?.toString() ?? '').toLowerCase() ==
+        'realizada';
+    return _ItemHistorico(
+      codSolicitacao: json['codSolicitacao'],
+      titulo: json['nomeServico']?.toString() ?? 'Serviço',
+      participante: 'Prestador: ${json['nomePrestador']?.toString() ?? '-'}',
+      estrelas: nota != null ? double.tryParse(nota.toString()) : null,
+      data: _formatarData(json['dataSolicitacao']),
+      pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
+      positivo: false,
+      podeAvaliar: realizado && nota == null,
+    );
+  }
+
+  // Aba "Confirmar" — GET /solicitacoes/confirmar/:cpf
+  factory _ItemHistorico.confirmar(Map<String, dynamic> json) {
+    return _ItemHistorico(
+      codSolicitacao: json['codSolicitacao'],
+      titulo: json['nomeServico']?.toString() ?? 'Serviço',
+      participante: 'Prestador: ${json['nomePrestador']?.toString() ?? '-'}',
+      data: _formatarData(json['dataSolicitacao']),
+      pontos: int.tryParse('${json['pontos'] ?? 0}') ?? 0,
+      aguardandoConfirmacao: true,
+    );
+  }
 }
 
 class PerfilUsuario extends StatefulWidget {
@@ -89,41 +148,16 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
     'outro',
   ];
 
-  final List<_ItemHistorico> _prestados = [
-    _ItemHistorico(
-      titulo: 'Aula de yoga',
-      participante: 'Cliente: João Silva',
-      estrelas: 5,
-      comentario: 'Excelente professora! Muito atenciosa e paciente.',
-      data: '15 out 2025',
-      pontos: 150,
-      positivo: true,
-    ),
-  ];
-  final List<_ItemHistorico> _utilizados = [
-    _ItemHistorico(
-      titulo: 'Aula de violão',
-      participante: 'Prestador: Marcos Lima',
-      estrelas: 5,
-      comentario: 'Aula incrível, aprendi muito!',
-      data: '15 out 2025',
-      pontos: 150,
-      positivo: false,
-    ),
-  ];
-  final List<_ItemHistorico> _confirmar = [
-    _ItemHistorico(
-      titulo: 'Aula de violão',
-      participante: 'Prestador: Marcos Lima',
-      data: '12 nov 2025',
-      aguardandoConfirmacao: true,
-    ),
-  ];
+  List<dynamic> _prestadosApi = [];
+  List<dynamic> _utilizadosApi = [];
+  List<dynamic> _confirmarApi = [];
+  bool _carregandoHistorico = true;
 
   @override
   void initState() {
     super.initState();
     _carregarUsuario();
+    _carregarHistorico();
   }
 
   @override
@@ -177,6 +211,130 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
       _servicos = lista;
       _carregandoServicos = false;
     });
+  }
+
+  Future<void> _carregarHistorico() async {
+    setState(() => _carregandoHistorico = true);
+
+    final resultados = await Future.wait([
+      _api.buscarSolicitacoesPrestador(widget.cpf),
+      _api.buscarSolicitacoesUsuario(widget.cpf),
+      _api.buscarSolicitacoesParaConfirmar(widget.cpf),
+    ]);
+
+    if (!mounted) return;
+    setState(() {
+      _prestadosApi = resultados[0];
+      _utilizadosApi = resultados[1];
+      _confirmarApi = resultados[2];
+      _carregandoHistorico = false;
+    });
+  }
+
+  // ─── Confirma que um serviço solicitado foi realizado ───
+  Future<void> _confirmarSolicitacao(dynamic cod) async {
+    if (cod == null) return;
+
+    final resultado = await _api.confirmarSolicitacao(cod.toString());
+    if (!mounted) return;
+
+    if (resultado['sucesso'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Serviço confirmado! Pontos atualizados.')),
+      );
+      _carregarHistorico();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            resultado['erro']?.toString() ??
+                'Não foi possível confirmar a realização.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  // ─── Abre o diálogo de avaliação (1 a 5 estrelas) e envia a nota ───
+  Future<void> _abrirDialogoAvaliar(dynamic cod) async {
+    if (cod == null) return;
+
+    int notaSelecionada = 5;
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Avaliar serviço',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.w800),
+          ),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(5, (i) {
+              final indice = i + 1;
+              return IconButton(
+                onPressed: () =>
+                    setDialogState(() => notaSelecionada = indice),
+                icon: Icon(
+                  indice <= notaSelecionada
+                      ? Icons.star_rounded
+                      : Icons.star_border_rounded,
+                  color: const Color(0xFFF5A623),
+                  size: 30,
+                ),
+              );
+            }),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(
+                'Cancelar',
+                style: GoogleFonts.quicksand(color: _cinzaTexto),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(
+                'Avaliar',
+                style: GoogleFonts.quicksand(
+                  color: _verde,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmou != true || !mounted) return;
+
+    final resultado = await _api.avaliarSolicitacao(
+      cod.toString(),
+      notaSelecionada,
+    );
+    if (!mounted) return;
+
+    if (resultado['sucesso'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avaliação registrada!')),
+      );
+      _carregarHistorico();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            resultado['erro']?.toString() ??
+                'Não foi possível registrar a avaliação.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   Future<void> _salvarEdicao() async {
@@ -993,7 +1151,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
             : RefreshIndicator(
                 color: _verde,
                 onRefresh: () async {
-                  await _carregarUsuario();
+                  await Future.wait([_carregarUsuario(), _carregarHistorico()]);
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -1988,11 +2146,20 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
 
   // ─── CARD HISTÓRICO ────────────────────────────────────────
   Widget _cardHistorico() {
-    final listaAtual = _filtroHistorico == 'prestados'
-        ? _prestados
+    final List<_ItemHistorico> listaAtual = _filtroHistorico == 'prestados'
+        ? _prestadosApi
+              .whereType<Map<String, dynamic>>()
+              .map(_ItemHistorico.prestado)
+              .toList()
         : _filtroHistorico == 'utilizados'
-        ? _utilizados
-        : _confirmar;
+        ? _utilizadosApi
+              .whereType<Map<String, dynamic>>()
+              .map(_ItemHistorico.utilizado)
+              .toList()
+        : _confirmarApi
+              .whereType<Map<String, dynamic>>()
+              .map(_ItemHistorico.confirmar)
+              .toList();
 
     return Container(
       width: double.infinity,
@@ -2043,20 +2210,27 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
             ),
           ),
           const SizedBox(height: 14),
-          ...listaAtual.map((item) => _itemHistoricoCard(item)),
-          if (listaAtual.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: Text(
-                  'Nada por aqui ainda.',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 12,
-                    color: const Color(0xFF9AAB96),
+          if (_carregandoHistorico)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator(color: _verde)),
+            )
+          else ...[
+            ...listaAtual.map((item) => _itemHistoricoCard(item)),
+            if (listaAtual.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: Text(
+                    'Nada por aqui ainda.',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: const Color(0xFF9AAB96),
+                    ),
                   ),
                 ),
               ),
-            ),
+          ],
         ],
       ),
     );
@@ -2181,13 +2355,8 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 if (item.aguardandoConfirmacao) ...[
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Em breve: confirmar realização'),
-                        ),
-                      );
-                    },
+                    onPressed: () =>
+                        _confirmarSolicitacao(item.codSolicitacao),
                     icon: const Icon(Icons.check_circle_rounded, size: 14),
                     label: Text(
                       'Confirmar realização',
@@ -2199,6 +2368,31 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _verdeMedio,
                       foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+                if (item.podeAvaliar) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _abrirDialogoAvaliar(item.codSolicitacao),
+                    icon: const Icon(Icons.star_rounded, size: 14),
+                    label: Text(
+                      'Avaliar',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFF5A623),
+                      side: const BorderSide(color: Color(0xFFF5A623)),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
