@@ -463,11 +463,25 @@ async function carregarSolicitacoes() {
 
     document.getElementById('recebidas').innerHTML = recebidas.map(cardRecebida).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
 
-    const htmlEnviados = [...enviadas.map(cardEnviada), ...enviadasOng.map(cardEnviadaOng)].join('');
+    const enviadosCombinados = [
+      ...enviadas.map(s => ({ ...s, _tipo: 'usuario' })),
+      ...enviadasOng.map(s => ({ ...s, _tipo: 'ong' }))
+    ].sort((a, b) => new Date(b.dataSolicitacao) - new Date(a.dataSolicitacao));
+
+    const htmlEnviados = enviadosCombinados.map(s => s._tipo === 'ong' ? cardEnviadaOng(s) : cardEnviada(s)).join('');
     document.getElementById('meus-pedidos').innerHTML = htmlEnviados || '<div class="empty"><i class="bi bi-inbox"></i><p>Você ainda não fez pedidos.</p></div>';
 
-    const todasHtml = [...recebidas.map(cardRecebida), ...enviadas.map(cardEnviada), ...enviadasOng.map(cardEnviadaOng)];
-    document.getElementById('todas').innerHTML = todasHtml.join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma notificação.</p></div>';
+    const todasCombinadas = [
+      ...recebidas.map(s => ({ ...s, _tipo: 'recebida' })),
+      ...enviadosCombinados
+    ].sort((a, b) => new Date(b.dataSolicitacao) - new Date(a.dataSolicitacao));
+
+    const todasHtml = todasCombinadas.map(s => {
+      if (s._tipo === 'recebida') return cardRecebida(s);
+      if (s._tipo === 'ong') return cardEnviadaOng(s);
+      return cardEnviada(s);
+    }).join('');
+    document.getElementById('todas').innerHTML = todasHtml || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma notificação.</p></div>';
 
     updateCounter();
   } catch (err) {
