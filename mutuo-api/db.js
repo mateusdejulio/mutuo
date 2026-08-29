@@ -1597,6 +1597,31 @@ async function contarNaoLidas(cpf) {
   }
 }
 
+async function getServicosRecebidosOng(cnpj) {
+  const sql = `
+    SELECT
+      SOL.codSolicitacao,
+      SOL.pontos,
+      SOL.dataSolicitacao,
+      SOL.dataConclusao,
+      SERV.nomeServico,
+      U.nome AS nomeVoluntario
+    FROM Mutuo_SolicitacaoONG SOL
+    JOIN Mutuo_ServicoOng SERV ON SOL.codServico = SERV.id
+    JOIN Mutuo_Usuario U ON SOL.codUsuario = U.cpf
+    WHERE SERV.cnpj = ?
+      AND SOL.statusExecucao = 'Realizada'
+    ORDER BY SOL.dataConclusao DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cnpj]);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar serviços recebidos da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
 // ── Chat ──
 
 // Normaliza a ordem dos dois participantes (por tipo+id concatenados) para
@@ -2129,5 +2154,6 @@ module.exports = {
   getSolicitacoesOngParaConfirmar,
   confirmarSolicitacaoOng,
   verificarBonusMensalOng,
-  getMovimentacaoMensalOng
+  getMovimentacaoMensalOng,
+  getServicosRecebidosOng
 };

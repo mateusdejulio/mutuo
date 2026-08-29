@@ -798,6 +798,12 @@ app.put('/solicitacoes-ong/:cod/confirmar', async (req, res) => {
   res.json(resultado);
 });
 
+app.get('/solicitacoes-ong/recebidos/:cnpj', async (req, res) => {
+  const solicitacoes = await db.getServicosRecebidosOng(req.params.cnpj);
+  if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });
+  res.json(solicitacoes);
+});
+
 app.get('/ongs/:cnpj/movimentacao', async (req, res) => {
   const resultado = await db.getMovimentacaoMensalOng(req.params.cnpj);
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
