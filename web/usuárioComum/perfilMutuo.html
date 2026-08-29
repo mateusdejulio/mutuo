@@ -1293,16 +1293,27 @@ async function atualizarBadgeLimiteServicos(totalAtual) {
       }
     }
 
-    carregarMovimentacaoMensal();
-
-    carregarHistoricoPrestados();
-    carregarHistoricoUtilizados();
+    async function atualizarPontosExibidos() {
+      if (!usuario.cpf) return;
+      try {
+        const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}`);
+        const dados = await resposta.json();
+        usuario.pontos = dados.pontos;
+        sessionStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+        document.getElementById('exibPontos').textContent = usuario.pontos.toLocaleString('pt-BR');
+      } catch (erro) {
+        console.error('Erro ao atualizar pontos:', erro);
+      }
+    }
     
-    carregarServicosUsuario();
-
     window.addEventListener('load', () => {
       carregarFoto();
       atualizarBadgeNotificacoes();
+      atualizarPontosExibidos();
+      carregarMovimentacaoMensal();
+      carregarHistoricoPrestados();
+      carregarHistoricoUtilizados();
+      carregarServicosUsuario();
     });
 
   </script>

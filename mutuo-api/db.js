@@ -1436,6 +1436,15 @@ async function getMovimentacaoMensal(cpf) {
           AND sol.statusExecucao = 'Realizada'
           AND MONTH(sol.dataConclusao) = MONTH(CURDATE())
           AND YEAR(sol.dataConclusao) = YEAR(CURDATE())
+      ), 0)
+      +
+      COALESCE((
+        SELECT SUM(solOng.pontos)
+        FROM Mutuo_SolicitacaoONG solOng
+        WHERE solOng.codUsuario = ?
+          AND solOng.statusExecucao = 'Realizada'
+          AND MONTH(solOng.dataConclusao) = MONTH(CURDATE())
+          AND YEAR(solOng.dataConclusao) = YEAR(CURDATE())
       ), 0) AS recebidos,
       COALESCE((
         SELECT SUM(sol.pontos)
@@ -1447,7 +1456,7 @@ async function getMovimentacaoMensal(cpf) {
       ), 0) AS gastos
   `;
   try {
-    const [[resultado]] = await pool.query(sql, [cpf, cpf]);
+    const [[resultado]] = await pool.query(sql, [cpf, cpf, cpf]);
     return resultado;
   } catch (err) {
     console.error('Erro ao buscar movimentação mensal:', err.message);
@@ -1911,7 +1920,7 @@ async function confirmarSolicitacaoOng(cod) {
 // Bônus mensal de 500 pontos — aplicado uma vez por mês, no primeiro carregamento do perfil
 async function verificarBonusMensalOng(cnpj) {
   try {
-    const [[ong]] = await pool.query(`SELECT ultimoBonusMensal FROM Mutuo_ONG WHERE cnpj = ?`, [cnpj]);
+    const [[ong]] = await pool.query(`SELECT ultimoBonusMensal, pontos FROM Mutuo_ONG WHERE cnpj = ?`, [cnpj]);
     if (!ong) return { error: 'ONG não encontrada.' };
 
     const hoje = new Date();
@@ -1924,12 +1933,18 @@ async function verificarBonusMensalOng(cnpj) {
       jaRecebeu = ultima.getMonth() === mesAtual && ultima.getFullYear() === anoAtual;
     }
 
-    if (!jaRecebeu) {
+    if (!jaRecebeu && ong.pontos <= 1000) {
       await pool.query(
         `UPDATE Mutuo_ONG SET pontos = pontos + 500, ultimoBonusMensal = CURDATE() WHERE cnpj = ?`,
         [cnpj]
       );
       return { aplicado: true };
+    }
+
+    // Mesmo não aplicando bônus (por já ter recebido ou por estar acima do teto),
+    // marca a data pra não ficar testando o teto repetidamente todo santo dia.
+    if (!jaRecebeu && ong.pontos > 1000) {
+      await pool.query(`UPDATE Mutuo_ONG SET ultimoBonusMensal = CURDATE() WHERE cnpj = ?`, [cnpj]);
     }
 
     return { aplicado: false };
