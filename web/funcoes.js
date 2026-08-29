@@ -213,6 +213,7 @@ async function inscreverServico(cod, todosServicosRef) {
     alert(erro.message || 'Não foi possível se inscrever no serviço.');
   }
 }
+
 async function atualizarBadgeNotificacoes() {
   const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
   const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
@@ -233,5 +234,27 @@ async function atualizarBadgeNotificacoes() {
     }
   } catch (erro) {
     console.error('Erro ao atualizar badge de notificações:', erro);
+  }
+}
+
+async function atualizarBadgeNotificacoesOng() {
+  const ongLogadaStr = sessionStorage.getItem('ongLogada');
+  const ongLogada = ongLogadaStr ? JSON.parse(ongLogadaStr) : null;
+  if (!ongLogada || !ongLogada.cnpj) return;
+
+  try {
+    const resposta = await fetch(`${API_URL}/solicitacoes-ong/naolidas/${encodeURIComponent(ongLogada.cnpj)}`);
+    const dados = await resposta.json();
+    const badge = document.querySelector('.badge-sino') || document.querySelector('.bell-badge');
+    if (!badge) return;
+
+    if (dados.total > 0) {
+      badge.textContent = dados.total;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (erro) {
+    console.error('Erro ao atualizar badge de notificações da ONG:', erro);
   }
 }

@@ -609,8 +609,6 @@
   </div>
   <script src="../funcoes.js"></script>
   <script>
-    carregarNavOng();
-    carregarCertificadosOng();
 
     let listaCompleta = [];
 
@@ -691,6 +689,12 @@
       );
       renderizarTabela(filtrada);
     }
+
+    window.addEventListener('load', () => {
+      carregarNavOng();
+      atualizarBadgeNotificacoesOng();
+      carregarCertificadosOng();
+    });
   </script>
 
 

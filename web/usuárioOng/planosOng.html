@@ -1079,10 +1079,6 @@
         return;
       }
 
-      if (typeof carregarNavOng === "function") {
-        carregarNavOng();
-      }
-
       verificarPlanoAtual();
     }
 
@@ -1336,6 +1332,11 @@
 
       clearTimeout(temporizadorMensagem);
     }
+
+    window.addEventListener('load', () => {
+      carregarNavOng();
+      atualizarBadgeNotificacoesOng();
+    });
   </script>
 
 </body>

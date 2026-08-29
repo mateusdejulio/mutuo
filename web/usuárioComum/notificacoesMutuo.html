@@ -452,17 +452,21 @@ async function carregarSolicitacoes() {
   if (!usuarioLogado || !usuarioLogado.cpf) return;
 
   try {
-    const [respRecebidas, respEnviadas] = await Promise.all([
+    const [respRecebidas, respEnviadas, respEnviadasOng] = await Promise.all([
       fetch(`${API_URL}/solicitacoes/prestador/${usuarioLogado.cpf}`),
-      fetch(`${API_URL}/solicitacoes/usuario/${usuarioLogado.cpf}`)
+      fetch(`${API_URL}/solicitacoes/usuario/${usuarioLogado.cpf}`),
+      fetch(`${API_URL}/solicitacoes-ong/usuario/${usuarioLogado.cpf}`)
     ]);
     recebidas = await respRecebidas.json();
     enviadas = await respEnviadas.json();
+    const enviadasOng = await respEnviadasOng.json();
 
     document.getElementById('recebidas').innerHTML = recebidas.map(cardRecebida).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
-    document.getElementById('meus-pedidos').innerHTML = enviadas.map(cardEnviada).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Você ainda não fez pedidos.</p></div>';
 
-    const todasHtml = [...recebidas.map(cardRecebida), ...enviadas.map(cardEnviada)];
+    const htmlEnviados = [...enviadas.map(cardEnviada), ...enviadasOng.map(cardEnviadaOng)].join('');
+    document.getElementById('meus-pedidos').innerHTML = htmlEnviados || '<div class="empty"><i class="bi bi-inbox"></i><p>Você ainda não fez pedidos.</p></div>';
+
+    const todasHtml = [...recebidas.map(cardRecebida), ...enviadas.map(cardEnviada), ...enviadasOng.map(cardEnviadaOng)];
     document.getElementById('todas').innerHTML = todasHtml.join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma notificação.</p></div>';
 
     updateCounter();
@@ -536,6 +540,25 @@ function tempoRelativo(dataStr) {
   // depois de 24h, mostra a data certa em vez de "há X dias"
   return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
     + ' às ' + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function cardEnviadaOng(s) {
+  return `
+    <div class="notif-card" data-id="ong-${s.codSolicitacao}">
+      <div class="notif-avatar">
+        <img src="${resolverImagem(s.fotoOng)}" alt="${s.nomeOng}">
+        <span class="type-icon order"><i class="bi bi-heart-fill"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Sua oferta para ONG</span>
+          <span class="status-pill ${statusClasse(s.statusSolicitacao)}">${s.statusSolicitacao}</span>
+        </div>
+        <p class="notif-name">${s.nomeOng}</p>
+        <p class="notif-service"><i class="bi bi-briefcase-fill"></i> ${s.nomeServico}</p>
+      </div>
+      <span class="notif-time" title="${new Date(s.dataSolicitacao).toLocaleString('pt-BR')}">${tempoRelativo(s.dataSolicitacao)}</span>
+    </div>`;
 }
 
 document.querySelectorAll('.filter-btn').forEach(btn => {

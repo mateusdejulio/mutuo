@@ -727,7 +727,10 @@
       }
     }
     
-    carregarNavOng();
+    window.addEventListener('load', () => {
+      carregarNavOng();
+      atualizarBadgeNotificacoesOng();
+    });
   </script>
 </body>
 </html>
