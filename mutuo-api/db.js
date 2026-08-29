@@ -1806,6 +1806,170 @@ async function limparConversaParaConta(conversaId, tipo, id) {
   }
 }
 
+// NOTIFICAÇÕES E PONTOS -> LADO DA ONG
+
+// Notificações do lado do usuário (status da oferta que ele fez pra uma ONG)
+async function getSolicitacoesOngUsuario(cpf) {
+  const sql = `
+    SELECT
+      SOL.codSolicitacao,
+      SOL.statusSolicitacao,
+      SOL.statusExecucao,
+      SOL.dataSolicitacao,
+      SOL.pontos,
+      SERV.nomeServico,
+      ONG.nomeOng,
+      ONG.cnpj AS cnpjOng,
+      ONG.foto_perfil AS fotoOng
+    FROM Mutuo_SolicitacaoONG AS SOL
+    JOIN Mutuo_ServicoOng AS SERV ON SOL.codServico = SERV.id
+    JOIN Mutuo_ONG AS ONG ON SERV.cnpj = ONG.cnpj
+    WHERE SOL.codUsuario = ?
+    ORDER BY SOL.dataSolicitacao DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cpf]);
+    return rows.map(r => ({
+      ...r,
+      fotoOng: r.fotoOng ? `/uploads/fotos/${r.fotoOng}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar solicitações de ONG do usuário:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Aba "Confirmar Serviços" do perfil da ONG
+async function getSolicitacoesOngParaConfirmar(cnpj) {
+  const sql = `
+    SELECT
+      SOL.codSolicitacao,
+      SOL.pontos,
+      SOL.dataSolicitacao,
+      SERV.nomeServico,
+      U.nome AS nomeVoluntario
+    FROM Mutuo_SolicitacaoONG SOL
+    JOIN Mutuo_ServicoOng SERV ON SOL.codServico = SERV.id
+    JOIN Mutuo_Usuario U ON SOL.codUsuario = U.cpf
+    WHERE SERV.cnpj = ?
+      AND SOL.statusSolicitacao = 'Aceita'
+      AND SOL.statusExecucao != 'Realizada'
+    ORDER BY SOL.dataSolicitacao DESC
+  `;
+  try {
+    const [rows] = await pool.query(sql, [cnpj]);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar solicitações da ONG para confirmar:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Confirmar realização → transfere pontos da ONG para o voluntário (transação)
+async function confirmarSolicitacaoOng(cod) {
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+
+    const [[solicitacao]] = await conexao.query(
+      `SELECT SOL.codUsuario, SOL.statusExecucao, SERV.pontos AS pontosServico, SERV.cnpj AS cnpjOng
+       FROM Mutuo_SolicitacaoONG SOL
+       JOIN Mutuo_ServicoOng SERV ON SOL.codServico = SERV.id
+       WHERE SOL.codSolicitacao = ?
+       FOR UPDATE`,
+      [cod]
+    );
+
+    if (!solicitacao) throw new Error('Solicitação não encontrada.');
+    if (solicitacao.statusExecucao === 'Realizada') throw new Error('Este serviço já foi confirmado.');
+
+    const { pontosServico, codUsuario, cnpjOng } = solicitacao;
+
+    const [r1] = await conexao.query(`UPDATE Mutuo_ONG SET pontos = pontos - ? WHERE cnpj = ?`, [pontosServico, cnpjOng]);
+    const [r2] = await conexao.query(`UPDATE Mutuo_Usuario SET pontos = pontos + ? WHERE cpf = ?`, [pontosServico, codUsuario]);
+
+    if (r1.affectedRows === 0 || r2.affectedRows === 0) {
+      throw new Error('Falha ao atualizar pontos.');
+    }
+
+    await conexao.query(
+      `UPDATE Mutuo_SolicitacaoONG SET statusExecucao = 'Realizada', dataConclusao = NOW(), pontos = ? WHERE codSolicitacao = ?`,
+      [pontosServico, cod]
+    );
+
+    await conexao.commit();
+    return { sucesso: true };
+  } catch (err) {
+    await conexao.rollback();
+    console.error('Erro ao confirmar solicitação da ONG:', err.message);
+    return { error: err.message };
+  } finally {
+    conexao.release();
+  }
+}
+
+// Bônus mensal de 500 pontos — aplicado uma vez por mês, no primeiro carregamento do perfil
+async function verificarBonusMensalOng(cnpj) {
+  try {
+    const [[ong]] = await pool.query(`SELECT ultimoBonusMensal FROM Mutuo_ONG WHERE cnpj = ?`, [cnpj]);
+    if (!ong) return { error: 'ONG não encontrada.' };
+
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+
+    let jaRecebeu = false;
+    if (ong.ultimoBonusMensal) {
+      const ultima = new Date(ong.ultimoBonusMensal);
+      jaRecebeu = ultima.getMonth() === mesAtual && ultima.getFullYear() === anoAtual;
+    }
+
+    if (!jaRecebeu) {
+      await pool.query(
+        `UPDATE Mutuo_ONG SET pontos = pontos + 500, ultimoBonusMensal = CURDATE() WHERE cnpj = ?`,
+        [cnpj]
+      );
+      return { aplicado: true };
+    }
+
+    return { aplicado: false };
+  } catch (err) {
+    console.error('Erro ao verificar bônus mensal da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
+// Movimentação mensal de pontos da ONG (gastos com confirmações + bônus recebido)
+async function getMovimentacaoMensalOng(cnpj) {
+  const sql = `
+    SELECT 
+      COALESCE((
+        SELECT SUM(SOL.pontos)
+        FROM Mutuo_SolicitacaoONG SOL
+        JOIN Mutuo_ServicoOng SERV ON SOL.codServico = SERV.id
+        WHERE SERV.cnpj = ?
+          AND SOL.statusExecucao = 'Realizada'
+          AND MONTH(SOL.dataConclusao) = MONTH(CURDATE())
+          AND YEAR(SOL.dataConclusao) = YEAR(CURDATE())
+      ), 0) AS gastos,
+      (
+        SELECT CASE 
+          WHEN ultimoBonusMensal IS NOT NULL 
+            AND MONTH(ultimoBonusMensal) = MONTH(CURDATE()) 
+            AND YEAR(ultimoBonusMensal) = YEAR(CURDATE())
+          THEN 500 ELSE 0 END
+        FROM Mutuo_ONG WHERE cnpj = ?
+      ) AS recebidos
+  `;
+  try {
+    const [[resultado]] = await pool.query(sql, [cnpj, cnpj]);
+    return resultado;
+  } catch (err) {
+    console.error('Erro ao buscar movimentação mensal da ONG:', err.message);
+    return { error: err.message };
+  }
+}
+
 // Upsert do token FCM de um dispositivo: se o token já existe, atualiza qual
 // conta ele pertence agora e o timestamp (troca de login no mesmo aparelho).
 async function salvarTokenDispositivo(tipo, identificador, token) {
@@ -1945,5 +2109,10 @@ module.exports = {
   getTokensDaConta,
   removerTokensInvalidos,
   getMovimentacaoMensal,
-  buscarServicosAtivosOng
+  buscarServicosAtivosOng,
+  getSolicitacoesOngUsuario,
+  getSolicitacoesOngParaConfirmar,
+  confirmarSolicitacaoOng,
+  verificarBonusMensalOng,
+  getMovimentacaoMensalOng
 };

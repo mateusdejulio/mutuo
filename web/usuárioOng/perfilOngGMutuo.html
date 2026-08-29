@@ -861,14 +861,8 @@
     <div class="linha-pontos"></div>
     <p style="font-size:0.72rem;opacity:0.6;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Este mês</p>
     <div class="movimentacao-mes">
-      <div>
-        <p class="mov-label">Gastos</p>
-        <span class="mov-valor entrada">−320 pts</span>
-      </div>
-      <div>
-        <p class="mov-label">Serviços recebidos</p>
-        <span class="mov-valor saida">20</span>
-      </div>
+      <div><p class="mov-label">Gastos</p><span class="mov-valor entrada" id="movGastosOng">--</span></div>
+      <div><p class="mov-label">Recebidos</p><span class="mov-valor saida" id="movRecebidosOng">--</span></div>
     </div>
   </div>
 
@@ -918,18 +912,7 @@
       </div>
     </div>
 
-    <div class="lista-historico" id="confirmar" style="display:none;">
-      <div class="item-historico">
-        <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
-        <div class="corpo-historico">
-          <h4>Aula de ciência</h4>
-          <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Marcos Lima</p>
-          <a href="#" class="link-comentario"><i class="bi bi-chat-left-text"></i> Adicionar comentário</a>
-          <p class="data-historico"><i class="bi bi-calendar3"></i> 12 nov 2025</p>
-          <button class="btn-confirmar-servico"><i class="bi bi-check-circle-fill"></i> Confirmar realização</button>
-        </div>
-      </div>
-    </div>
+    <div class="lista-historico" id="confirmar" style="display:none;"></div>
   </div>
 
 </div>
@@ -1486,8 +1469,89 @@
       `${mesesRestantes} ${mesesRestantes === 1 ? 'mês' : 'meses'}`;
   }
 
-  carregarPerfilOng();
-  carregarServicosPerfilOng();
+  async function carregarMovimentacaoOng() {
+    const logada = pegarOngLogada();
+    if (!logada || !logada.cnpj) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(logada.cnpj)}/movimentacao`);
+      const dados = await resposta.json();
+      document.getElementById('movGastosOng').textContent = `−${dados.gastos} pts`;
+      document.getElementById('movRecebidosOng').textContent = `+${dados.recebidos} pts`;
+    } catch (erro) {
+      console.error('Erro ao carregar movimentação da ONG:', erro);
+    }
+  }
+
+  async function carregarConfirmarOng() {
+    const logada = pegarOngLogada();
+    const container = document.getElementById('confirmar');
+    if (!logada || !logada.cnpj) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/solicitacoes-ong/confirmar/${encodeURIComponent(logada.cnpj)}`);
+      const lista = await resposta.json();
+
+      if (!Array.isArray(lista) || lista.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">Nenhum serviço aguardando confirmação.</p>`;
+        return;
+      }
+
+      container.innerHTML = lista.map(s => `
+        <div class="item-historico">
+          <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
+          <div class="corpo-historico">
+            <h4>${s.nomeServico}</h4>
+            <p class="participante"><i class="bi bi-person-fill"></i> Voluntário: ${s.nomeVoluntario}</p>
+            <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
+            <button class="btn-confirmar-servico" onclick="confirmarServicoOng(${s.codSolicitacao})">
+              <i class="bi bi-check-circle-fill"></i> Confirmar realização
+            </button>
+          </div>
+        </div>
+      `).join('');
+    } catch (erro) {
+      console.error('Erro ao carregar solicitações para confirmar:', erro);
+      container.innerHTML = `<p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">Erro ao carregar.</p>`;
+    }
+  }
+
+  async function confirmarServicoOng(cod) {
+    if (!confirm('Confirmar a realização deste serviço? Os pontos serão transferidos.')) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/solicitacoes-ong/${cod}/confirmar`, { method: 'PUT' });
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || resultado.erro) {
+        throw new Error(resultado.erro || 'Erro ao confirmar serviço.');
+      }
+
+      carregarConfirmarOng();
+      carregarMovimentacaoOng();
+
+      // atualiza o saldo exibido
+      const respostaOng = await fetch(`${API_BASE}/ongs/${encodeURIComponent(ongAtual.cnpj)}`);
+      const dadosOng = await respostaOng.json();
+      ongAtual.pontos = dadosOng.pontos;
+      document.getElementById('exibePontos').textContent = ongAtual.pontos.toLocaleString('pt-BR');
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível confirmar o serviço.');
+    }
+  }
+
+  carregarConfirmarOng();
+  carregarMovimentacaoOng();
+
+  window.addEventListener('load', () => {
+    carregarNavOng();
+    atualizarBadgeNotificacoesOng();
+    carregarPerfilOng();
+    carregarServicosPerfilOng();
+  });
+  
 </script>
 </body>
 </html>

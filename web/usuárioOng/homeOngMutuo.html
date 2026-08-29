@@ -1091,13 +1091,14 @@ nav {
     }
   }
 
-
   // ── INICIALIZAÇÃO ──
-  carregarServicosOng();
+  
 
-  if (typeof carregarNavOng === 'function') {
+  window.addEventListener('load', () => {
     carregarNavOng();
-  }
+    atualizarBadgeNotificacoesOng();
+    carregarServicosOng();
+  });
 </script>
 </body>
 </html>

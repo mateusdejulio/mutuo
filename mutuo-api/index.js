@@ -291,6 +291,8 @@ app.get('/ongs/:cnpj', async (req, res) => {
   if (!ong) return res.status(404).json({ erro: 'ONG não encontrada' });
   if (ong.error) return res.status(500).json({ erro: ong.error });
 
+  await db.verificarBonusMensalOng(req.params.cnpj);
+
   const pontos = await db.countPontosOng(req.params.cnpj);
   const servicos = await db.buscarServicosAtivosOng(req.params.cnpj);
 
@@ -772,6 +774,32 @@ app.get('/solicitacoes-ong/naolidas/:cnpj', async (req, res) => {
 
 app.put('/solicitacoes-ong/:cod/lida', async (req, res) => {
   const resultado = await db.marcarSolicitacaoOngLida(req.params.cod);
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json(resultado);
+});
+
+// pontos e notificação lado da ong
+
+app.get('/solicitacoes-ong/usuario/:cpf', async (req, res) => {
+  const solicitacoes = await db.getSolicitacoesOngUsuario(req.params.cpf);
+  if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });
+  res.json(solicitacoes);
+});
+
+app.get('/solicitacoes-ong/confirmar/:cnpj', async (req, res) => {
+  const solicitacoes = await db.getSolicitacoesOngParaConfirmar(req.params.cnpj);
+  if (solicitacoes.error) return res.status(500).json({ erro: solicitacoes.error });
+  res.json(solicitacoes);
+});
+
+app.put('/solicitacoes-ong/:cod/confirmar', async (req, res) => {
+  const resultado = await db.confirmarSolicitacaoOng(req.params.cod);
+  if (resultado.error) return res.status(400).json({ erro: resultado.error });
+  res.json(resultado);
+});
+
+app.get('/ongs/:cnpj/movimentacao', async (req, res) => {
+  const resultado = await db.getMovimentacaoMensalOng(req.params.cnpj);
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
   res.json(resultado);
 });

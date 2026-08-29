@@ -437,7 +437,8 @@
   </div>
 <script src="../funcoes.js"></script>
   <script>
-    carregarNavOng();
+
+    let solicitacoesOngAtual = [];
 
 function classeStatus(status) {
   if (status === 'Aceita') return 'aceito';
@@ -490,9 +491,9 @@ async function carregarSolicitacoesOng() {
 
   try {
     const resp = await fetch(`${API_URL}/solicitacoes-ong/prestador/${encodeURIComponent(ongLogada.cnpj)}`);
-    const solicitacoesOng = await resp.json();
-  
-    const html = solicitacoesOng.map(cardSolicitacao).join('') ||
+    solicitacoesOngAtual = await resp.json();
+
+    const html = solicitacoesOngAtual.map(cardSolicitacao).join('') ||
       '<div class="estado-vazio"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
 
     document.getElementById('recebidas').innerHTML = html;
@@ -543,7 +544,7 @@ function marcarTodasLidas() {
 }
 
 function atualizarContador() {
-  const total = document.querySelectorAll('.card-notificacao.nao-lida').length;
+  const total = solicitacoesOngAtual.filter(s => s.statusSolicitacao === 'Pendente').length; // conta 1x, direto do array
   const badgeContador = document.getElementById('badge-contador');
   const badgeSino = document.getElementById('badge-sino');
   if (total === 0) {
@@ -565,8 +566,13 @@ document.querySelectorAll('.btn-filtro').forEach(btn => {
   });
 });
 
-window.addEventListener('load', carregarSolicitacoesOng);
-  </script>
+window.addEventListener('load', () => {
+  carregarNavOng();
+  atualizarBadgeNotificacoesOng();
+  cardSolicitacoesOng();
+});
+
+</script>
 
 </body>
 </html>
