@@ -617,12 +617,12 @@ async function carregarPerfilOng() {
   }
 
   try {
-    const resposta = await fetch(`${API_URL}/ongs/${encodeURIComponent(cnpjOng)}`);
+    const resposta = await fetch(`${API_URL_ONG}/ongs/${encodeURIComponent(cnpjOng)}`);
     if (!resposta.ok) throw new Error('ONG não encontrada.');
     const dados = await resposta.json();
 
-    dadosOng = dados.ong;
-    servicosOng = dados.servicos;
+    dadosOng = dados;              // ← antes era dados.ong
+    servicosOng = dados.servicos;  // ← continua igual
 
     preencherIdentidade(dadosOng);
     preencherServicos(servicosOng);
