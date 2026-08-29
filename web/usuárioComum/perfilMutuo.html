@@ -1220,21 +1220,35 @@ async function atualizarBadgeLimiteServicos(totalAtual) {
       if (!usuario.cpf) return;
 
       try {
-        const resposta = await fetch(`${API_BASE}/solicitacoes/prestador/${encodeURIComponent(usuario.cpf)}`);
-        const lista = await resposta.json();
-        const concluidos = (Array.isArray(lista) ? lista : []).filter(s => s.statusExecucao === 'Realizada');
+        const [respUsuarios, respOng] = await Promise.all([
+          fetch(`${API_BASE}/solicitacoes/prestador/${encodeURIComponent(usuario.cpf)}`),
+          fetch(`${API_BASE}/solicitacoes-ong/usuario/${encodeURIComponent(usuario.cpf)}`)
+        ]);
+        const listaUsuarios = await respUsuarios.json();
+        const listaOng = await respOng.json();
 
-        if (!concluidos.length) {
+        const concluidosUsuarios = (Array.isArray(listaUsuarios) ? listaUsuarios : [])
+          .filter(s => s.statusExecucao === 'Realizada')
+          .map(s => ({ ...s, participante: s.nomeSolicitador, _tipo: 'usuario' }));
+
+        const concluidosOng = (Array.isArray(listaOng) ? listaOng : [])
+          .filter(s => s.statusExecucao === 'Realizada')
+          .map(s => ({ ...s, participante: s.nomeOng, _tipo: 'ong' }));
+
+        const combinados = [...concluidosUsuarios, ...concluidosOng]
+          .sort((a, b) => new Date(b.dataSolicitacao) - new Date(a.dataSolicitacao));
+
+        if (!combinados.length) {
           container.innerHTML = `<p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">Nenhum serviço prestado ainda.</p>`;
           return;
         }
 
-        container.innerHTML = concluidos.map(s => `
+        container.innerHTML = combinados.map(s => `
           <div class="item-historico">
             <div class="icone-historico prestado"><i class="bi bi-arrow-up-right"></i></div>
             <div class="corpo-historico">
               <h4>${s.nomeServico}</h4>
-              <p class="participante"><i class="bi bi-person-fill"></i> Cliente: ${s.nomeSolicitador}</p>
+              <p class="participante"><i class="bi bi-person-fill"></i> ${s._tipo === 'ong' ? 'ONG' : 'Cliente'}: ${s.participante}</p>
               ${gerarEstrelas(s.nota)}
               <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
             </div>

@@ -673,7 +673,7 @@
   </a>
   <a href="notificacoesOng.html" class="drawer-nav-link">
     <i class="bi bi-bell-fill"></i> Notificações
-    <span class="drawer-bell-badge">3</span>
+    <span class="drawer-bell-badge"></span>
   </a>
   <a href="perfilOngGMutuo.html" class="drawer-nav-link active">
     <i class="bi bi-person-fill"></i> Meu Perfil
@@ -894,23 +894,7 @@
       <button class="btn-filtro-hist" data-alvo="confirmar">Confirmar serviços</button>
     </div>
 
-    <div class="lista-historico" id="utilizados">
-      <div class="item-historico">
-        <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
-        <div class="corpo-historico">
-          <h4>Aula de ciência</h4>
-          <p class="participante"><i class="bi bi-person-fill"></i> Prestador: Marcos Lima</p>
-          <div class="estrelas">
-            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-            <i class="bi bi-star-fill"></i>
-          </div>
-          <p class="comentario-historico">"Experiência incrível com as crianças!"</p>
-          <p class="data-historico"><i class="bi bi-calendar3"></i> 15 out 2025</p>
-        </div>
-        <span class="pontos-historico negativo">−150 pts</span>
-      </div>
-    </div>
+    <div class="lista-historico" id="utilizados"></div>
 
     <div class="lista-historico" id="confirmar" style="display:none;"></div>
   </div>
@@ -1542,14 +1526,45 @@
     }
   }
 
-  carregarConfirmarOng();
-  carregarMovimentacaoOng();
+  async function carregarServicosRecebidosOng() {
+  const logada = pegarOngLogada();
+  const container = document.getElementById('utilizados');
+  if (!logada || !logada.cnpj) return;
+
+  try {
+    const resposta = await fetch(`${API_BASE}/solicitacoes-ong/recebidos/${encodeURIComponent(logada.cnpj)}`);
+    const lista = await resposta.json();
+
+    if (!Array.isArray(lista) || lista.length === 0) {
+      container.innerHTML = `<p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">Nenhum serviço recebido ainda.</p>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(s => `
+      <div class="item-historico">
+        <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
+        <div class="corpo-historico">
+          <h4>${s.nomeServico}</h4>
+          <p class="participante"><i class="bi bi-person-fill"></i> Prestador: ${s.nomeVoluntario}</p>
+          <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataConclusao || s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
+        </div>
+        <span class="pontos-historico negativo">−${s.pontos} pts</span>
+      </div>
+    `).join('');
+  } catch (erro) {
+    console.error('Erro ao carregar serviços recebidos:', erro);
+    container.innerHTML = `<p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">Erro ao carregar.</p>`;
+  }
+}
 
   window.addEventListener('load', () => {
     carregarNavOng();
     atualizarBadgeNotificacoesOng();
     carregarPerfilOng();
     carregarServicosPerfilOng();
+    carregarConfirmarOng();
+    carregarMovimentacaoOng();
+    carregarServicosRecebidosOng();
   });
   
 </script>
