@@ -294,7 +294,7 @@ app.get('/ongs/:cnpj', async (req, res) => {
   const pontos = await db.countPontosOng(req.params.cnpj);
   const servicos = await db.buscarServicosAtivosOng(req.params.cnpj);
 
-  res.json({ ong: { ...ong, pontos }, servicos });
+  res.json({ ...ong, pontos, servicos });
 });
 
 // Total de CPFs distintos que já realizaram serviços para a ONG.
