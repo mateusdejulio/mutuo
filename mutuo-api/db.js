@@ -400,8 +400,8 @@ async function cadastrarOng(ong) {
 async function cadastrarServico(servico) {
   const sql = `
     INSERT INTO Mutuo_Servico
-    (nome, descricao, foco, qtdHoras, idUsuario, imagem, imagem_dados, imagem_tipo)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    (nome, descricao, foco, qtdHoras, idUsuario, imagem, imagem_dados, imagem_tipo, pontos)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -412,7 +412,8 @@ async function cadastrarServico(servico) {
     servico.cpf,
     servico.imagem,
     servico.imagemDados,
-    servico.imagemTipo
+    servico.imagemTipo,
+    servico.pontos
   ];
 
   try {
@@ -428,8 +429,8 @@ async function cadastrarServico(servico) {
 async function cadastrarServicoOng(servico) {
   const sql = `
     INSERT INTO Mutuo_ServicoOng
-    (nomeServico, cnpj, horas, descricao, foco, imagem, imagem_dados, imagem_tipo)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    (nomeServico, cnpj, horas, descricao, foco, imagem, imagem_dados, imagem_tipo, pontos)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -440,7 +441,8 @@ async function cadastrarServicoOng(servico) {
     normalizarFoco(servico.foco),
     servico.imagem,
     servico.imagemDados,
-    servico.imagemTipo
+    servico.imagemTipo,
+    servico.pontos
   ];
 
   try {
@@ -484,7 +486,7 @@ async function atualizarStatusServico(id, ativo) {
 async function getServicoPorId(id) {
   try {
     const [rows] = await pool.query(
-      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS duracao, imagem, idUsuario
+      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS duracao, imagem, idUsuario, pontos
        FROM Mutuo_Servico
        WHERE cod = ?`,
       [id]
@@ -498,8 +500,8 @@ async function getServicoPorId(id) {
 
 // Atualiza um serviço do usuário
 async function atualizarServico(id, servico) {
-  const campos = ['nome = ?', 'descricao = ?', 'foco = ?', 'qtdHoras = ?'];
-  const valores = [servico.nomeServico, servico.descricao, normalizarFoco(servico.foco), servico.duracao];
+  const campos = ['nome = ?', 'descricao = ?', 'foco = ?', 'qtdHoras = ?', 'pontos = ?'];
+  const valores = [servico.nomeServico, servico.descricao, normalizarFoco(servico.foco), servico.duracao, servico.pontos];
 
   if (servico.imagem) {
     campos.push('imagem = ?', 'imagem_dados = ?', 'imagem_tipo = ?');
@@ -778,7 +780,7 @@ async function countPontosOng(cnpj) {
 
 async function getServicoOngPorId(id) {
   const [rows] = await pool.query(
-    'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem FROM Mutuo_ServicoOng WHERE id = ?',
+    'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem, pontos FROM Mutuo_ServicoOng WHERE id = ?',
     [id]
   );
   if (rows.length === 0) return null;
@@ -787,9 +789,9 @@ async function getServicoOngPorId(id) {
   return servico;
 }
 
-async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem, imagemDados, imagemTipo }) {
-  const campos = ['nomeServico = ?', 'descricao = ?', 'foco = ?', 'horas = ?'];
-  const values = [nomeServico, descricao, normalizarFoco(foco), horas];
+async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem, imagemDados, imagemTipo, pontos }) {
+  const campos = ['nomeServico = ?', 'descricao = ?', 'foco = ?', 'horas = ?', 'pontos = ?'];
+  const values = [nomeServico, descricao, normalizarFoco(foco), horas, pontos];
   if (imagem) {
     campos.push('imagem = ?', 'imagem_dados = ?', 'imagem_tipo = ?');
     values.push(imagem, imagemDados, imagemTipo);
