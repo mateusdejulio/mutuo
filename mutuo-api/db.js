@@ -1617,6 +1617,43 @@ async function avaliarSolicitacao(cod, notaNova) {
   }
 }
 
+// Avaliar a atividade da ONG (média ponderada) — espelha avaliarSolicitacao
+async function avaliarSolicitacaoOng(cod, notaNova) {
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+
+    const [[solicitacao]] = await conexao.query(
+      `SELECT codServico, avaliado FROM Mutuo_SolicitacaoONG WHERE codSolicitacao = ? FOR UPDATE`,
+      [cod]
+    );
+    if (!solicitacao) throw new Error('Solicitação não encontrada.');
+    if (solicitacao.avaliado) throw new Error('Este serviço já foi avaliado.');
+
+    const [[servico]] = await conexao.query(
+      `SELECT nota, avaliacoes FROM Mutuo_ServicoOng WHERE id = ? FOR UPDATE`,
+      [solicitacao.codServico]
+    );
+
+    const novaQtd = servico.avaliacoes + 1;
+    const novaMedia = servico.avaliacoes === 0
+      ? notaNova
+      : ((servico.nota * servico.avaliacoes) + notaNova) / novaQtd;
+
+    await conexao.query(`UPDATE Mutuo_ServicoOng SET nota = ?, avaliacoes = ? WHERE id = ?`, [novaMedia.toFixed(1), novaQtd, solicitacao.codServico]);
+    await conexao.query(`UPDATE Mutuo_SolicitacaoONG SET avaliado = 1, nota = ? WHERE codSolicitacao = ?`, [notaNova, cod]);
+
+    await conexao.commit();
+    return { sucesso: true };
+  } catch (err) {
+    await conexao.rollback();
+    console.error('Erro ao avaliar solicitação da ONG:', err.message);
+    return { error: err.message };
+  } finally {
+    conexao.release();
+  }
+}
+
 // Conta usuários distintos que concluíram serviços pertencentes a uma ONG
 async function contarVoluntariosOng(cnpj) {
   try {
@@ -1676,6 +1713,7 @@ async function getServicosRecebidosOng(cnpj) {
       SOL.pontos,
       SOL.dataSolicitacao,
       SOL.dataConclusao,
+      SOL.nota,
       SERV.nomeServico,
       U.nome AS nomeVoluntario
     FROM Mutuo_SolicitacaoONG SOL
@@ -2208,6 +2246,7 @@ module.exports = {
   getSolicitacoesParaConfirmar,
   confirmarSolicitacao,
   avaliarSolicitacao,
+  avaliarSolicitacaoOng,
   contarVoluntariosOng,
   isOngPremium,
   marcarSolicitacaoLida,

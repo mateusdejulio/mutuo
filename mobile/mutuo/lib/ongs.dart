@@ -110,29 +110,10 @@ class DetalheOng extends StatelessWidget {
                           height: 280,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 280,
-                              width: double.infinity,
-                              color: const Color(0xFFB7D5B0),
-                              child: const Icon(
-                                Icons.broken_image,
-                                color: Colors.white,
-                                size: 50,
-                              ),
-                            );
-                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              _semFotoServico(height: 280),
                         )
-                      : Container(
-                          height: 280,
-                          width: double.infinity,
-                          color: const Color(0xFFB7D5B0),
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: Colors.white,
-                            size: 50,
-                          ),
-                        ),
+                      : _semFotoServico(height: 280),
                 ),
                 Positioned(
                   top: 8,
@@ -1042,29 +1023,10 @@ class _OngsState extends State<Ongs> {
                             height: 170,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 170,
-                                width: double.infinity,
-                                color: const Color(0xFFB7D5B0),
-                                child: const Icon(
-                                  Icons.broken_image,
-                                  color: Colors.white54,
-                                  size: 56,
-                                ),
-                              );
-                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                _semFotoServico(height: 170),
                           )
-                        : Container(
-                            height: 170,
-                            width: double.infinity,
-                            color: const Color(0xFFB7D5B0),
-                            child: const Icon(
-                              Icons.image_not_supported_outlined,
-                              color: Colors.white54,
-                              size: 56,
-                            ),
-                          ),
+                        : _semFotoServico(height: 170),
                   ),
                   Positioned(
                     top: 12,
@@ -1322,6 +1284,22 @@ class _OngsState extends State<Ongs> {
       ),
     );
   }
+}
+
+// ─── Placeholder exibido quando o serviço não tem foto cadastrada ───
+Widget _semFotoServico({double height = 280}) {
+  return Container(
+    height: height,
+    width: double.infinity,
+    color: const Color(0xFFB7D5B0),
+    alignment: Alignment.center,
+    child: Image.asset(
+      'assets/images/mutuoLogo.png',
+      width: height * 0.4,
+      height: height * 0.4,
+      fit: BoxFit.contain,
+    ),
+  );
 }
 
 // ─── NAV ITEM AUXILIAR ────────────────────────────────────

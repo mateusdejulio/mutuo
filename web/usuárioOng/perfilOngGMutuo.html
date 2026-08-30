@@ -958,6 +958,21 @@
   <span id="mensagemSalvaTexto">Alterações salvas com sucesso!</span>
 </div>
 
+<div class="modal-overlay" id="modalAvaliacaoOng" style="display:none; position:fixed; inset:0; background:rgba(30,46,31,0.55); z-index:600; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:20px; padding:28px; max-width:380px; width:90%; text-align:center;">
+    <h3 style="color:var(--verde-escuro); margin-bottom:6px;">Avalie o voluntário</h3>
+    <p style="font-size:0.85rem; color:#7a8c76; margin-bottom:18px;" id="modalAvaliacaoOngServico"></p>
+    <div id="estrelasAvaliacaoOng" style="font-size:2rem; color:#e4ebe2; margin-bottom:22px; cursor:pointer;">
+      <i class="bi bi-star-fill" data-valor="1"></i>
+      <i class="bi bi-star-fill" data-valor="2"></i>
+      <i class="bi bi-star-fill" data-valor="3"></i>
+      <i class="bi bi-star-fill" data-valor="4"></i>
+      <i class="bi bi-star-fill" data-valor="5"></i>
+    </div>
+    <button class="btn-salvar" style="width:100%;" onclick="enviarAvaliacaoOng()">Enviar avaliação</button>
+  </div>
+</div>
+
 <script src="../funcoes.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="../chat-socket.js"></script>
@@ -1565,7 +1580,7 @@
             <h4>${s.nomeServico}</h4>
             <p class="participante"><i class="bi bi-person-fill"></i> Voluntário: ${s.nomeVoluntario}</p>
             <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
-            <button class="btn-confirmar-servico" onclick="confirmarServicoOng(${s.codSolicitacao})">
+            <button class="btn-confirmar-servico" onclick="confirmarServicoOng(${s.codSolicitacao}, '${(s.nomeServico || '').replace(/'/g, "\\'")}')">
               <i class="bi bi-check-circle-fill"></i> Confirmar realização
             </button>
           </div>
@@ -1577,7 +1592,7 @@
     }
   }
 
-  async function confirmarServicoOng(cod) {
+  async function confirmarServicoOng(cod, nomeServico) {
     if (!confirm('Confirmar a realização deste serviço? Os pontos serão transferidos.')) return;
 
     try {
@@ -1597,10 +1612,72 @@
       ongAtual.pontos = dadosOng.pontos;
       document.getElementById('exibePontos').textContent = ongAtual.pontos.toLocaleString('pt-BR');
 
+      abrirModalAvaliacaoOng(cod, nomeServico);
     } catch (erro) {
       console.error(erro);
       alert(erro.message || 'Não foi possível confirmar o serviço.');
     }
+  }
+
+  // ── Avaliação (estrelas) do voluntário, igual ao fluxo do usuário comum ──
+  let codSolicitacaoAvaliandoOng = null;
+  let notaSelecionadaOng = 0;
+
+  function abrirModalAvaliacaoOng(cod, nomeServico) {
+    codSolicitacaoAvaliandoOng = cod;
+    notaSelecionadaOng = 0;
+    document.getElementById('modalAvaliacaoOngServico').textContent = nomeServico;
+    atualizarEstrelasOng(0);
+    document.getElementById('modalAvaliacaoOng').style.display = 'flex';
+  }
+
+  function atualizarEstrelasOng(valor) {
+    document.querySelectorAll('#estrelasAvaliacaoOng i').forEach(estrela => {
+      estrela.style.color = Number(estrela.dataset.valor) <= valor ? '#f5a623' : '#e4ebe2';
+    });
+  }
+
+  document.querySelectorAll('#estrelasAvaliacaoOng i').forEach(estrela => {
+    estrela.addEventListener('click', () => {
+      notaSelecionadaOng = Number(estrela.dataset.valor);
+      atualizarEstrelasOng(notaSelecionadaOng);
+    });
+  });
+
+  async function enviarAvaliacaoOng() {
+    if (!notaSelecionadaOng) {
+      alert('Selecione uma nota de 1 a 5 estrelas.');
+      return;
+    }
+
+    try {
+      const resposta = await fetch(`${API_BASE}/solicitacoes-ong/${codSolicitacaoAvaliandoOng}/avaliar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nota: notaSelecionadaOng })
+      });
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || resultado.erro) {
+        throw new Error(resultado.erro || 'Erro ao enviar avaliação.');
+      }
+
+      document.getElementById('modalAvaliacaoOng').style.display = 'none';
+      mostrarMensagemSalva('Avaliação enviada, obrigado!');
+      carregarServicosRecebidosOng();
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível enviar a avaliação.');
+    }
+  }
+
+  function gerarEstrelas(nota) {
+    if (!nota) return '<span style="font-size:0.8rem;color:#b0bfac;">Não avaliado</span>';
+    let html = '<div class="estrelas">';
+    for (let i = 1; i <= 5; i++) {
+      html += `<i class="bi bi-star${i <= nota ? '-fill' : ''}"></i>`;
+    }
+    return html + '</div>';
   }
 
   async function carregarServicosRecebidosOng() {
@@ -1623,6 +1700,7 @@
         <div class="corpo-historico">
           <h4>${s.nomeServico}</h4>
           <p class="participante"><i class="bi bi-person-fill"></i> Prestador: ${s.nomeVoluntario}</p>
+          ${gerarEstrelas(s.nota)}
           <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataConclusao || s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
         </div>
         <span class="pontos-historico negativo">−${s.pontos} pts</span>
