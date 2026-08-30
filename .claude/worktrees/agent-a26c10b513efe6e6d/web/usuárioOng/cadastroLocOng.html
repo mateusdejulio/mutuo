@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Cadastro ONG</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --green-main: #588157;
+      --green-dark: #3a5a40;
+      --green-light: #6b9e4a;
+      --cream: #E1DCD0
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-image: url("../imagens/fundo.png");
+      background-size: cover;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 60px
+    }
+
+    .topo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      animation: fadeDown 0.5s ease both
+    }
+
+    .topo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--cream);
+      padding: 8px;
+      object-fit: contain;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25)
+    }
+
+    .topo h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--cream);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      letter-spacing: 0.3px;
+      margin: 0
+    }
+
+    .card-form {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(88, 129, 87, 0.649);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(225, 220, 208, 0.2);
+      border-radius: 28px;
+      padding: 36px 32px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+      animation: fadeUp 0.5s ease 0.05s both
+    }
+
+    .campo {
+      margin-bottom: 20px
+    }
+
+    .campo label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 7px;
+      letter-spacing: 0.2px
+    }
+
+    .campo label i {
+      font-size: 0.95rem;
+      color: rgba(225, 220, 208, 0.6)
+    }
+
+    .campo label .spinner-cep {
+      display: none;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(225, 220, 208, 0.35);
+      border-top-color: var(--cream);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-left: 2px
+    }
+
+    .campo label .spinner-cep.ativo {
+      display: inline-block
+    }
+
+    .campo input {
+      width: 100%;
+      background: rgba(225, 220, 208, 0.92);
+      border: 2px solid transparent;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.92rem;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      color: #1a2e1b;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      outline: none
+    }
+
+    .campo input::placeholder {
+      color: rgba(30, 50, 30, 0.45)
+    }
+
+    .campo input:focus {
+      border-color: var(--green-light);
+      background: var(--cream);
+      box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.2)
+    }
+
+    .campo input:disabled {
+      opacity: 0.75;
+      cursor: not-allowed
+    }
+
+    .campo input.preenchido-auto {
+      border-color: var(--green-light)
+    }
+
+    .campos-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .divisor {
+      height: 1px;
+      background: rgba(225, 220, 208, 0.15);
+      margin: 8px 0 24px
+    }
+
+    .btn-confirmar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: var(--green-main);
+      color: var(--cream);
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(58, 90, 64, 0.4);
+      letter-spacing: 0.3px
+    }
+
+    .btn-confirmar:hover {
+      background: var(--green-dark);
+      box-shadow: 0 6px 22px rgba(58, 90, 64, 0.5);
+      color: var(--cream)
+    }
+
+    .btn-confirmar:active {
+      transform: scale(0.98)
+    }
+
+    .link-cancelar {
+      display: block;
+      text-align: center;
+      margin-top: 14px;
+      color: rgba(225, 220, 208, 0.55);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+      cursor: pointer
+    }
+
+    .link-cancelar:hover {
+      color: var(--cream)
+    }
+
+    .erro {
+      color: #ffb3b3;
+      font-size: 0.78rem;
+      margin-top: 6px;
+      padding-left: 4px;
+      font-weight: 600
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @media(max-width:480px) {
+      .card-form {
+        padding: 28px 20px
+      }
+
+      .campos-row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* ── ALERTA MÚTUO ── */
+    .mutuo-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 35, 20, 0.55);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease
+    }
+
+    .mutuo-overlay.show {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .mutuo-alert {
+      background: rgba(88, 129, 87, 0.92);
+      border: 1px solid rgba(225, 220, 208, 0.25);
+      border-radius: 28px;
+      padding: 40px 36px 32px;
+      width: 90%;
+      max-width: 340px;
+      text-align: center;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+      transform: translateY(18px) scale(0.97);
+      transition: transform 0.4s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    .mutuo-overlay.show .mutuo-alert {
+      transform: translateY(0) scale(1)
+    }
+
+    .mutuo-check-wrap {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px
+    }
+
+    .mutuo-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(183, 206, 143, 0.18);
+      border: 3px solid rgba(183, 206, 143, 0.5);
+      position: absolute;
+      inset: 0;
+      transform: scale(0.7);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(.22, 1, .36, 1), opacity 0.3s
+    }
+
+    .mutuo-circle.pulse {
+      transform: scale(1);
+      opacity: 1;
+      animation: pulse-ring 1.6s ease-out infinite
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        box-shadow: 0 0 0 0 rgba(183, 206, 143, 0.45)
+      }
+
+      70% {
+        box-shadow: 0 0 0 14px rgba(183, 206, 143, 0)
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(183, 206, 143, 0)
+      }
+    }
+
+    .mutuo-check {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .mutuo-check svg {
+      width: 36px;
+      height: 36px;
+      overflow: visible
+    }
+
+    .check-path {
+      fill: none;
+      stroke: #b7ce8f;
+      stroke-width: 3.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 40;
+      stroke-dashoffset: 40;
+      transition: stroke-dashoffset 0.55s cubic-bezier(.4, 0, .2, 1) 0.25s
+    }
+
+    .check-path.draw {
+      stroke-dashoffset: 0
+    }
+
+    .mutuo-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 6px
+    }
+
+    .mutuo-sub {
+      font-size: 0.85rem;
+      color: rgba(225, 220, 208, 0.75);
+      margin-bottom: 22px
+    }
+
+    .mutuo-bar-wrap {
+      height: 4px;
+      background: rgba(225, 220, 208, 0.15);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 10px
+    }
+
+    .mutuo-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #6b9e4a, #b7ce8f);
+      border-radius: 99px;
+      transition: width 1.85s linear
+    }
+
+    .mutuo-bar.go {
+      width: 100%
+    }
+
+    .mutuo-hint {
+      font-size: 0.75rem;
+      color: rgba(225, 220, 208, 0.45);
+      font-weight: 600;
+      letter-spacing: 0.3px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topo">
+    <img src="../imagens/logo.png" alt="Logo Mútuo" onerror="this.style.display='none'">
+    <h1>Cadastro de ONG</h1>
+  </div>
+  <div class="card-form">
+    <div class="campo">
+      <label for="cep"><i class="bi bi-mailbox-fill"></i> CEP <span class="spinner-cep" id="spinnerCep"></span></label>
+      <input type="text" id="cep" placeholder="00000-000" required autofocus>
+      <p class="erro" id="erroCep"></p>
+    </div>
+    <div class="campo">
+      <label for="endereco"><i class="bi bi-geo-alt-fill"></i> Endereço da ONG</label>
+      <input type="text" id="endereco" placeholder="Rua e N°" required>
+      <p class="erro" id="erroEndereco"></p>
+    </div>
+    <div class="campo">
+      <label for="bairro"><i class="bi bi-map-fill"></i> Bairro</label>
+      <input type="text" id="bairro" placeholder="Bairro" required>
+      <p class="erro" id="erroBairro"></p>
+    </div>
+    <div class="campo">
+      <label for="cidade"><i class="bi bi-buildings-fill"></i> Cidade</label>
+      <input type="text" id="cidade" placeholder="Cidade" required>
+      <p class="erro" id="erroCidade"></p>
+    </div>
+    <div class="campos-row">
+      <div class="campo">
+        <label for="estado"><i class="bi bi-map-fill"></i> Estado (UF)</label>
+        <input type="text" id="estado" placeholder="Ex: SP" maxlength="2" required>
+        <p class="erro" id="erroEstado"></p>
+      </div>
+    </div>
+    <div class="divisor"></div>
+    <button class="btn-confirmar" id="finalizar" type="button">
+      <i class="bi bi-check-circle-fill"></i> Finalizar cadastro
+    </button>
+    <a class="link-cancelar" onclick="window.location.href='cadastroOng1.html'">Voltar</a>
+  </div>
+
+  <!-- Alerta animado Mútuo -->
+  <div class="mutuo-overlay" id="mutuoOverlay">
+    <div class="mutuo-alert">
+      <div class="mutuo-check-wrap">
+        <div class="mutuo-circle" id="mutuoCircle"></div>
+        <div class="mutuo-check">
+          <svg viewBox="0 0 36 36">
+            <polyline class="check-path" id="mutuoCheckPath" points="7,19 15,27 29,11" />
+          </svg>
+        </div>
+      </div>
+      <p class="mutuo-title" id="mutuoAlertTitle">ONG cadastrada!</p>
+      <p class="mutuo-sub" id="mutuoAlertSub">Cadastro realizado com sucesso</p>
+      <div class="mutuo-bar-wrap">
+        <div class="mutuo-bar" id="mutuoBar"></div>
+      </div>
+      <p class="mutuo-hint">Redirecionando...</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('estado').addEventListener('input', function () {
+      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+    });
+
+    const inputCep      = document.getElementById('cep');
+    const inputEndereco = document.getElementById('endereco');
+    const inputBairro   = document.getElementById('bairro');
+    const inputCidade   = document.getElementById('cidade');
+    const inputEstado   = document.getElementById('estado');
+    const spinnerCep    = document.getElementById('spinnerCep');
+    const erroCepEl     = document.getElementById('erroCep');
+
+    inputCep.addEventListener('input', function () {
+      let v = this.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+      this.value = v;
+      erroCepEl.textContent = '';
+
+      const cepNums = v.replace(/\D/g, '');
+      if (cepNums.length === 8) {
+        buscarCep(cepNums);
+      }
+    });
+
+    async function buscarCep(cep) {
+      spinnerCep.classList.add('ativo');
+      [inputEndereco, inputBairro, inputCidade, inputEstado].forEach(el => el.disabled = true);
+
+      try {
+        const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        if (!resp.ok) throw new Error('Falha na consulta do CEP.');
+        const dados = await resp.json();
+
+        if (dados.erro) {
+          erroCepEl.textContent = 'CEP não encontrado.';
+          return;
+        }
+
+        inputEndereco.value = dados.logradouro || '';
+        inputBairro.value   = dados.bairro || '';
+        inputCidade.value   = dados.localidade || '';
+        inputEstado.value   = dados.uf || '';
+
+        [inputEndereco, inputBairro, inputCidade, inputEstado].forEach(el => {
+          el.classList.add('preenchido-auto');
+        });
+
+        inputEndereco.focus();
+        if (dados.logradouro) inputEndereco.select();
+
+      } catch (e) {
+        console.error('Erro ao buscar CEP:', e);
+        erroCepEl.textContent = 'Não foi possível buscar o CEP. Preencha manualmente.';
+      } finally {
+        spinnerCep.classList.remove('ativo');
+        [inputEndereco, inputBairro, inputCidade, inputEstado].forEach(el => el.disabled = false);
+      }
+    }
+
+    function mostrarAlertMutuo() {
+      const overlay = document.getElementById('mutuoOverlay');
+      const circle = document.getElementById('mutuoCircle');
+      const path = document.getElementById('mutuoCheckPath');
+      const bar = document.getElementById('mutuoBar');
+
+      // Reset das animações
+      circle.classList.remove('pulse');
+      path.classList.remove('draw');
+      bar.classList.remove('go');
+      void circle.offsetWidth;
+
+      overlay.classList.add('show');
+
+      setTimeout(() => {
+        circle.classList.add('pulse');
+        path.classList.add('draw');
+        bar.classList.add('go');
+      }, 80);
+    }
+
+    document.getElementById('finalizar').addEventListener('click', async () => {
+
+      const endereco = document.getElementById('endereco').value.trim();
+      const bairro   = document.getElementById('bairro').value.trim();
+      const cidade   = document.getElementById('cidade').value.trim();
+      const estado   = document.getElementById('estado').value.trim();
+      const cep      = document.getElementById('cep').value.trim();
+
+      document.getElementById('erroEndereco').textContent = '';
+      document.getElementById('erroBairro').textContent   = '';
+      document.getElementById('erroCidade').textContent   = '';
+      document.getElementById('erroEstado').textContent   = '';
+      document.getElementById('erroCep').textContent      = '';
+
+      let valido = true;
+
+      if (!endereco) { document.getElementById('erroEndereco').textContent = 'Digite o endereço.'; valido = false; }
+      if (!bairro)   { document.getElementById('erroBairro').textContent   = 'Digite o bairro.';   valido = false; }
+      if (!cidade)   { document.getElementById('erroCidade').textContent   = 'Digite a cidade.';   valido = false; }
+      if (!estado)   { document.getElementById('erroEstado').textContent   = 'Digite o estado.';   valido = false; }
+
+      const cepNums = cep.replace(/\D/g, '');
+      if (!cep) {
+        document.getElementById('erroCep').textContent = 'Digite o CEP.';
+        valido = false;
+      } else if (cepNums.length < 8) {
+        document.getElementById('erroCep').textContent = 'Digite um CEP válido.';
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      const dados = JSON.parse(sessionStorage.getItem('cadastroMutuo') || '{}');
+      dados.endereco = endereco;
+      dados.bairro   = bairro;
+      dados.cidade   = cidade;
+      dados.uf       = estado;
+      dados.cep      = cepNums;
+      dados.cadastro = new Date().toISOString().slice(0, 10);
+
+      console.log('DADOS ENVIADOS:', dados);
+
+      try {
+        // 1. Cadastra a ONG
+        const resp = await fetch('https://mutuo-api.onrender.com/ongs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+
+        const texto = await resp.text();
+        let resultado;
+        try { resultado = JSON.parse(texto); }
+        catch { throw new Error('API retornou resposta inválida: ' + texto); }
+
+        if (!resp.ok || !resultado.sucesso) {
+          alert(resultado.erro || resultado.mensagem || 'Erro ao cadastrar. Tente novamente.');
+          return;
+        }
+
+        // 2. Envia a foto se a ONG escolheu uma
+        if (dados.fotoBase64) {
+          const base64 = dados.fotoBase64.split(',')[1];
+          const mime   = dados.fotoBase64.split(';')[0].split(':')[1];
+          const bytes  = atob(base64);
+          const arr    = new Uint8Array(bytes.length);
+          for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+          const blob = new Blob([arr], { type: mime });
+
+          const formData = new FormData();
+          formData.append('cnpj', dados.cnpj);
+          formData.append('fotoPerfil', blob, 'foto.jpg');
+
+          await fetch('https://mutuo-api.onrender.com/perfil/foto/ong', {
+            method: 'POST',
+            body: formData
+          });
+        }
+
+        sessionStorage.removeItem('cadastroMutuo');
+
+ 
+  mostrarAlertMutuo();
+
+  setTimeout(() => {
+    window.location.href = '../login.html';
+  }, 2000);
+      } catch (e) {
+        console.error('ERRO COMPLETO:', e);
+        alert(e.message || 'Não foi possível conectar à API.');
+      }
+    });
+  </script>
+</body>
+
+</html>

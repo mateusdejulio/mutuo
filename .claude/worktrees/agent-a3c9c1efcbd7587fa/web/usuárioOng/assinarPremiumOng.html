@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Mútuo | Assinar Premium ONG</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+
+  <style>
+    :root {
+      --verde-escuro: #3a5a40;
+      --verde-medio: #588157;
+      --verde-claro: #b7ce8f;
+      --verde-palido: #eaf2e6;
+      --bege: #e1dcd0;
+      --vermelho: #c24a4a;
+      --altura-nav: 72px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      padding-top: var(--altura-nav);
+      font-family: "Quicksand", sans-serif;
+      background: #f9fbf9;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      height: var(--altura-nav);
+      padding: 0 2rem;
+      background-color: var(--verde-medio);
+      box-shadow: 0 2px 16px rgba(58, 90, 64, 0.25);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--bege);
+      font-size: 1.55rem;
+      letter-spacing: 0.4px;
+      text-decoration: none;
+    }
+
+    .nav-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+    }
+
+    .pagina-checkout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: start;
+      gap: 28px;
+      width: 100%;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 16px 80px;
+    }
+
+    .voltar-link {
+      display: inline-flex;
+      grid-column: 1 / -1;
+      align-items: center;
+      gap: 6px;
+      color: var(--verde-escuro);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .voltar-link:hover {
+      text-decoration: underline;
+    }
+
+    .card-checkout {
+      padding: 32px;
+      border: 1px solid #e4ebe2;
+      border-radius: 22px;
+      background: white;
+      box-shadow: 0 4px 24px rgba(58, 90, 64, 0.06);
+    }
+
+    .card-checkout h2 {
+      margin-bottom: 4px;
+      color: var(--verde-escuro);
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .card-checkout > p {
+      margin-bottom: 24px;
+      color: #8a9a86;
+      font-size: 0.85rem;
+    }
+
+    .aviso-simulacao {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding: 10px 14px;
+      border: 1px solid #ffe58f;
+      border-radius: 12px;
+      color: #8a6d00;
+      background: #fff8e1;
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .aviso-simulacao i {
+      flex-shrink: 0;
+      margin-top: 1px;
+      font-size: 1rem;
+    }
+
+    .campo {
+      margin-bottom: 18px;
+    }
+
+    .campo label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--verde-escuro);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .campo input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #dde5da;
+      border-radius: 12px;
+      outline: none;
+      color: #1a2e1b;
+      background: white;
+      font-family: "Quicksand", sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    }
+
+    .campo input:focus {
+      border-color: var(--verde-medio);
+      box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.15);
+    }
+
+    .campo input.invalido {
+      border-color: var(--vermelho);
+      box-shadow: 0 0 0 3px rgba(194, 74, 74, 0.1);
+    }
+
+    .campos-row-3 {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .cartao-visual {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 150px;
+      margin-bottom: 24px;
+      padding: 22px 24px;
+      overflow: hidden;
+      border-radius: 16px;
+      color: white;
+      background:
+        linear-gradient(
+          135deg,
+          var(--verde-medio) 0%,
+          var(--verde-escuro) 100%
+        );
+      box-shadow: 0 8px 24px rgba(58, 90, 64, 0.25);
+    }
+
+    .cartao-visual::after {
+      position: absolute;
+      top: -60px;
+      right: -45px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      content: "";
+    }
+
+    .cartao-visual .chip {
+      z-index: 1;
+      font-size: 1.6rem;
+      opacity: 0.85;
+    }
+
+    .cartao-visual .numero {
+      z-index: 1;
+      font-family: "Courier New", monospace;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
+
+    .rodape-cartao {
+      z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      opacity: 0.88;
+    }
+
+    .rodape-cartao span:first-child {
+      overflow: hidden;
+      max-width: 70%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rodape-cartao span:last-child {
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+    }
+
+    .mensagem-erro-checkout {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid #f5c6cb;
+      border-radius: 10px;
+      color: #9e2f2f;
+      background: #fdecea;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .mensagem-erro-checkout.visivel {
+      display: flex;
+    }
+
+    .btn-pagar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      color: white;
+      background: var(--verde-escuro);
+      font-family: "Quicksand", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        background 0.2s,
+        transform 0.15s;
+    }
+
+    .btn-pagar:hover:not(:disabled) {
+      background: var(--verde-medio);
+    }
+
+    .btn-pagar:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .btn-pagar:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: girar 0.7s linear infinite;
+    }
+
+    @keyframes girar {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .card-resumo {
+      position: sticky;
+      top: 92px;
+      padding: 28px;
+      border: 1px solid #e4ebe2;
+      border-radius: 22px;
+      background: white;
+      box-shadow: 0 4px 24px rgba(58, 90, 64, 0.04);
+    }
+
+    .card-resumo h3 {
+      margin-bottom: 18px;
+      color: var(--verde-escuro);
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .linha-resumo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      color: #3a4a3b;
+      font-size: 0.88rem;
+    }
+
+    .linha-resumo span:first-child {
+      color: #8a9a86;
+      font-weight: 600;
+    }
+
+    .divisor-resumo {
+      height: 1px;
+      margin: 16px 0;
+      background: #eef3ec;
+    }
+
+    .total-resumo {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .total-resumo span:first-child {
+      color: var(--verde-escuro);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .total-resumo span:last-child {
+      color: var(--verde-escuro);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .beneficios-resumo {
+      padding: 0;
+      list-style: none;
+    }
+
+    .beneficios-resumo li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: #3a4a3b;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .beneficios-resumo i {
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: var(--verde-medio);
+    }
+
+    .pagamento-seguro {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 20px;
+      color: #9baa97;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .overlay-sucesso {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(26, 46, 27, 0.55);
+      backdrop-filter: blur(3px);
+    }
+
+    .overlay-sucesso.visivel {
+      display: flex;
+    }
+
+    .modal-sucesso {
+      width: 100%;
+      max-width: 390px;
+      padding: 40px 32px;
+      border-radius: 24px;
+      background: white;
+      text-align: center;
+      box-shadow: 0 24px 70px rgba(26, 46, 27, 0.25);
+      animation: modalEntrando 0.35s ease both;
+    }
+
+    .icone-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      color: var(--verde-medio);
+      background: var(--verde-palido);
+      font-size: 2.3rem;
+    }
+
+    .modal-sucesso h3 {
+      margin-bottom: 8px;
+      color: var(--verde-escuro);
+      font-weight: 700;
+    }
+
+    .modal-sucesso p {
+      margin-bottom: 22px;
+      color: #7c8d79;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .spinner-redirect {
+      color: #a6b5a2;
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+
+    @keyframes modalEntrando {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @media (max-width: 760px) {
+      nav {
+        padding: 0 1rem;
+      }
+
+      .pagina-checkout {
+        grid-template-columns: 1fr;
+        padding-top: 28px;
+      }
+
+      .card-resumo {
+        position: static;
+      }
+
+      .campos-row-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .campo-cpf {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-checkout,
+      .card-resumo {
+        padding: 22px;
+      }
+
+      .campos-row-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .campo-cpf {
+        grid-column: auto;
+      }
+
+      .cartao-visual .numero {
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarOngResponsiva.js" defer></script>
+</head>
+
+<body>
+
+  <nav>
+    <a class="nav-brand" href="homeOngMutuo.html">
+      <img
+        src="../imagens/mutuoLogo.png"
+        alt="Logo Mútuo"
+        onerror="this.style.display='none'"
+      >
+
+      Mútuo
+    </a>
+  </nav>
+
+  <main class="pagina-checkout">
+    <a href="planosOng.html" class="voltar-link">
+      <i class="bi bi-arrow-left"></i>
+      Voltar para os planos
+    </a>
+
+    <section class="card-checkout">
+      <h2>Assinar Premium para ONG</h2>
+
+      <p>
+        Preencha os dados de pagamento para concluir sua assinatura
+      </p>
+
+      <div class="aviso-simulacao">
+        <i class="bi bi-info-circle-fill"></i>
+
+        <span>
+          Ambiente de simulação: nenhuma cobrança real será feita
+          e nenhum dado de cartão será armazenado.
+        </span>
+      </div>
+
+      <div
+        class="mensagem-erro-checkout"
+        id="mensagemErroCheckout"
+        role="alert"
+      >
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span id="textoErroCheckout"></span>
+      </div>
+
+      <div class="cartao-visual">
+        <span class="chip">
+          <i class="bi bi-cpu-fill"></i>
+        </span>
+
+        <span class="numero" id="cartaoVisualNumero">
+          •••• •••• •••• ••••
+        </span>
+
+        <div class="rodape-cartao">
+          <span id="cartaoVisualNome">
+            NOME NO CARTÃO
+          </span>
+
+          <span id="cartaoVisualValidade">
+            MM/AA
+          </span>
+        </div>
+      </div>
+
+      <form id="formCheckout" novalidate>
+        <div class="campo">
+          <label for="nomeCartao">
+            Nome impresso no cartão
+          </label>
+
+          <input
+            type="text"
+            id="nomeCartao"
+            placeholder="Ex.: MARIA S SILVA"
+            autocomplete="cc-name"
+            maxlength="60"
+            required
+          >
+        </div>
+
+        <div class="campo">
+          <label for="numeroCartao">
+            Número do cartão
+          </label>
+
+          <input
+            type="text"
+            id="numeroCartao"
+            placeholder="0000 0000 0000 0000"
+            inputmode="numeric"
+            maxlength="19"
+            autocomplete="cc-number"
+            required
+          >
+        </div>
+
+        <div class="campos-row-3">
+          <div class="campo">
+            <label for="validadeCartao">
+              Validade
+            </label>
+
+            <input
+              type="text"
+              id="validadeCartao"
+              placeholder="MM/AA"
+              inputmode="numeric"
+              maxlength="5"
+              autocomplete="cc-exp"
+              required
+            >
+          </div>
+
+          <div class="campo">
+            <label for="cvvCartao">
+              CVV
+            </label>
+
+            <input
+              type="password"
+              id="cvvCartao"
+              placeholder="123"
+              inputmode="numeric"
+              maxlength="4"
+              autocomplete="cc-csc"
+              required
+            >
+          </div>
+
+          <div class="campo campo-cpf">
+            <label for="cpfCartao">
+              CPF do titular
+            </label>
+
+            <input
+              type="text"
+              id="cpfCartao"
+              placeholder="000.000.000-00"
+              inputmode="numeric"
+              maxlength="14"
+              required
+            >
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn-pagar"
+          id="btnPagar"
+        >
+          <i class="bi bi-lock-fill"></i>
+          Confirmar assinatura — R$ 49,90/mês
+        </button>
+      </form>
+    </section>
+
+    <aside class="card-resumo">
+      <h3>Resumo do pedido</h3>
+
+      <div class="linha-resumo">
+        <span>Plano</span>
+        <span>Premium ONG</span>
+      </div>
+
+      <div class="linha-resumo">
+        <span>Cobrança</span>
+        <span>Mensal</span>
+      </div>
+
+      <div class="linha-resumo">
+        <span>Renovação</span>
+        <span>Automática</span>
+      </div>
+
+      <div class="divisor-resumo"></div>
+
+      <div class="total-resumo">
+        <span>Total mensal</span>
+        <span>R$ 49,90</span>
+      </div>
+
+      <ul class="beneficios-resumo">
+        <li>
+          <i class="bi bi-check-circle-fill"></i>
+          Pontos ilimitados
+        </li>
+
+        <li>
+          <i class="bi bi-check-circle-fill"></i>
+          Serviços ilimitados
+        </li>
+
+        <li>
+          <i class="bi bi-check-circle-fill"></i>
+          Visibilidade máxima na plataforma
+        </li>
+
+        <li>
+          <i class="bi bi-check-circle-fill"></i>
+          Prioridade nas solicitações
+        </li>
+
+        <li>
+          <i class="bi bi-check-circle-fill"></i>
+          Suporte prioritário 24 horas
+        </li>
+      </ul>
+
+      <div class="pagamento-seguro">
+        <i class="bi bi-shield-lock-fill"></i>
+        Ambiente seguro de simulação
+      </div>
+    </aside>
+  </main>
+
+  <div
+    class="overlay-sucesso"
+    id="overlaySucesso"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloSucesso"
+  >
+    <div class="modal-sucesso">
+      <div class="icone-check">
+        <i class="bi bi-check-lg"></i>
+      </div>
+
+      <h3 id="tituloSucesso">
+        Assinatura confirmada!
+      </h3>
+
+      <p>
+        Sua ONG agora possui o plano Premium.
+        Aproveite todos os novos benefícios.
+      </p>
+
+      <span class="spinner-redirect">
+        Redirecionando para o perfil da ONG...
+      </span>
+    </div>
+  </div>
+
+  <script>
+   
+    const API_BASE = "https://mutuo-api.onrender.com";
+
+    let ong = {};
+
+    try {
+      ong = JSON.parse(
+        sessionStorage.getItem("ongLogada") || "{}"
+      );
+    } catch (erro) {
+      console.error(
+        "Erro ao recuperar a sessão da ONG:",
+        erro
+      );
+
+      ong = {};
+    }
+
+    /*
+     * Mantém o CNPJ exatamente como está na sessão.
+     * Exemplo: 13.987.236/0086-14
+     */
+    const cnpjDaOng = String(
+      ong.cnpj || ""
+    ).trim();
+
+    if (!cnpjDaOng) {
+      window.location.replace("../login.html");
+    }
+
+    console.log(
+      "CNPJ da ONG usado no pagamento:",
+      cnpjDaOng
+    );
+
+    const form =
+      document.getElementById("formCheckout");
+
+    const btnPagar =
+      document.getElementById("btnPagar");
+
+    const mensagemErro =
+      document.getElementById("mensagemErroCheckout");
+
+    const textoErro =
+      document.getElementById("textoErroCheckout");
+
+    const overlaySucesso =
+      document.getElementById("overlaySucesso");
+
+    const inputNome =
+      document.getElementById("nomeCartao");
+
+    const inputNumero =
+      document.getElementById("numeroCartao");
+
+    const inputValidade =
+      document.getElementById("validadeCartao");
+
+    const inputCvv =
+      document.getElementById("cvvCartao");
+
+    const inputCpf =
+      document.getElementById("cpfCartao");
+
+    const visualNumero =
+      document.getElementById("cartaoVisualNumero");
+
+    const visualNome =
+      document.getElementById("cartaoVisualNome");
+
+    const visualValidade =
+      document.getElementById("cartaoVisualValidade");
+
+    inputNumero.addEventListener("input", function () {
+      const numeros = this.value
+        .replace(/\D/g, "")
+        .slice(0, 16);
+
+      this.value = numeros.replace(
+        /(\d{4})(?=\d)/g,
+        "$1 "
+      );
+
+      visualNumero.textContent =
+        criarNumeroVisualCartao(numeros);
+    });
+
+    inputNome.addEventListener("input", function () {
+      this.value = this.value
+        .toUpperCase()
+        .replace(/[0-9]/g, "")
+        .slice(0, 60);
+
+      visualNome.textContent =
+        this.value.trim() || "NOME NO CARTÃO";
+    });
+
+    inputValidade.addEventListener("input", function () {
+      let numeros = this.value
+        .replace(/\D/g, "")
+        .slice(0, 4);
+
+      if (numeros.length >= 3) {
+        numeros =
+          numeros.slice(0, 2) +
+          "/" +
+          numeros.slice(2);
+      }
+
+      this.value = numeros;
+
+      visualValidade.textContent =
+        numeros || "MM/AA";
+    });
+
+    inputCvv.addEventListener("input", function () {
+      this.value = this.value
+        .replace(/\D/g, "")
+        .slice(0, 4);
+    });
+
+    inputCpf.addEventListener("input", function () {
+      let numeros = this.value
+        .replace(/\D/g, "")
+        .slice(0, 11);
+
+      numeros = numeros
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+      this.value = numeros;
+    });
+
+    [
+      inputNome,
+      inputNumero,
+      inputValidade,
+      inputCvv,
+      inputCpf
+    ].forEach(function (campo) {
+      campo.addEventListener("input", function () {
+        this.classList.remove("invalido");
+        limparErro();
+      });
+    });
+
+    function criarNumeroVisualCartao(numeros) {
+      if (!numeros) {
+        return "•••• •••• •••• ••••";
+      }
+
+      return numeros
+        .padEnd(16, "•")
+        .replace(/(.{4})(?=.)/g, "$1 ");
+    }
+
+    function mostrarErro(texto, campo) {
+      textoErro.textContent = texto;
+      mensagemErro.classList.add("visivel");
+
+      if (campo) {
+        campo.classList.add("invalido");
+        campo.focus();
+      }
+    }
+
+    function limparErro() {
+      mensagemErro.classList.remove("visivel");
+      textoErro.textContent = "";
+    }
+
+    function limparCamposInvalidos() {
+      [
+        inputNome,
+        inputNumero,
+        inputValidade,
+        inputCvv,
+        inputCpf
+      ].forEach(function (campo) {
+        campo.classList.remove("invalido");
+      });
+    }
+
+    function validarFormulario() {
+      limparCamposInvalidos();
+
+      const nome = inputNome.value.trim();
+
+      const numero = inputNumero.value.replace(
+        /\D/g,
+        ""
+      );
+
+      const validade =
+        inputValidade.value.trim();
+
+      const cvv = inputCvv.value.replace(
+        /\D/g,
+        ""
+      );
+
+      const cpf = inputCpf.value.replace(
+        /\D/g,
+        ""
+      );
+
+      if (nome.length < 3) {
+        mostrarErro(
+          "Informe o nome impresso no cartão.",
+          inputNome
+        );
+
+        return false;
+      }
+
+      if (numero.length < 13 || numero.length > 16) {
+        mostrarErro(
+          "Informe um número de cartão válido.",
+          inputNumero
+        );
+
+        return false;
+      }
+
+      const validadeEncontrada =
+        validade.match(/^(\d{2})\/(\d{2})$/);
+
+      if (!validadeEncontrada) {
+        mostrarErro(
+          "Informe a validade no formato MM/AA.",
+          inputValidade
+        );
+
+        return false;
+      }
+
+      const mes = Number(validadeEncontrada[1]);
+      const ano = Number(validadeEncontrada[2]);
+
+      if (mes < 1 || mes > 12) {
+        mostrarErro(
+          "O mês de validade é inválido.",
+          inputValidade
+        );
+
+        return false;
+      }
+
+      const dataAtual = new Date();
+
+      const anoAtual = Number(
+        dataAtual
+          .getFullYear()
+          .toString()
+          .slice(-2)
+      );
+
+      const mesAtual = dataAtual.getMonth() + 1;
+
+      if (
+        ano < anoAtual ||
+        (ano === anoAtual && mes < mesAtual)
+      ) {
+        mostrarErro(
+          "O cartão informado está vencido.",
+          inputValidade
+        );
+
+        return false;
+      }
+
+      if (cvv.length < 3 || cvv.length > 4) {
+        mostrarErro(
+          "Informe um CVV válido.",
+          inputCvv
+        );
+
+        return false;
+      }
+
+      if (cpf.length !== 11) {
+        mostrarErro(
+          "Informe o CPF do titular com 11 números.",
+          inputCpf
+        );
+
+        return false;
+      }
+
+      return true;
+    }
+
+    form.addEventListener(
+      "submit",
+      processarAssinatura
+    );
+
+    async function processarAssinatura(evento) {
+      evento.preventDefault();
+      limparErro();
+
+      if (!cnpjDaOng) {
+        mostrarErro(
+          "Não foi possível identificar o CNPJ da ONG."
+        );
+
+        return;
+      }
+
+      if (!validarFormulario()) {
+        return;
+      }
+
+      definirBotaoProcessando(true);
+
+      await esperar(1200);
+
+      try {
+        const endereco = `${API_BASE}/ongs/${encodeURIComponent(cnpjDaOng)}/premium`;
+
+        console.log(
+          "Enviando assinatura para:",
+          endereco
+        );
+
+        const resposta = await fetch(endereco, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            premium: 1
+          })
+        });
+
+        const resultado =
+          await lerRespostaJson(resposta);
+
+        console.log(
+          "Resposta da assinatura:",
+          resultado
+        );
+
+        if (!resposta.ok) {
+          throw new Error(
+            resultado.erro ||
+            resultado.error ||
+            `Não foi possível confirmar a assinatura. Status: ${resposta.status}.`
+          );
+        }
+
+        if (
+          resultado.sucesso === false ||
+          resultado.success === false
+        ) {
+          throw new Error(
+            resultado.erro ||
+            resultado.error ||
+            "Não foi possível confirmar a assinatura."
+          );
+        }
+
+        ong.premium = 1;
+        delete ong.senha;
+
+        sessionStorage.setItem(
+          "ongLogada",
+          JSON.stringify(ong)
+        );
+
+        overlaySucesso.classList.add("visivel");
+
+        setTimeout(function () {
+          window.location.replace(
+            "perfilOngGMutuo.html"
+          );
+        }, 2200);
+      } catch (erro) {
+        console.error(
+          "Erro ao assinar Premium para ONG:",
+          erro
+        );
+
+        mostrarErro(
+          erro.message ||
+          "Não foi possível processar a assinatura."
+        );
+
+        definirBotaoProcessando(false);
+      }
+    }
+
+    function definirBotaoProcessando(processando) {
+      btnPagar.disabled = processando;
+
+      if (processando) {
+        btnPagar.innerHTML = `
+          <span
+            class="spinner"
+            aria-hidden="true"
+          ></span>
+          Processando pagamento...
+        `;
+      } else {
+        btnPagar.innerHTML = `
+          <i class="bi bi-lock-fill"></i>
+          Confirmar assinatura — R$ 49,90/mês
+        `;
+      }
+    }
+
+    async function lerRespostaJson(resposta) {
+      const texto = await resposta.text();
+
+      if (!texto) {
+        if (!resposta.ok) {
+          throw new Error(
+            `A API respondeu com o status ${resposta.status}.`
+          );
+        }
+
+        return {};
+      }
+
+      try {
+        return JSON.parse(texto);
+      } catch (erro) {
+        throw new Error(
+          `A API devolveu uma resposta inválida. Status: ${resposta.status}.`
+        );
+      }
+    }
+
+    function esperar(tempo) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, tempo);
+      });
+    }
+  </script>
+  <script src="../funcoes.js"></script>
+
+</body>
+</html>

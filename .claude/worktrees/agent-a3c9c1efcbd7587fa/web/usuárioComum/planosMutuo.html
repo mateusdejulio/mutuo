@@ -1,0 +1,1207 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Mútuo | Planos</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+
+  <style>
+    :root {
+      --verde-escuro: #3a5a40;
+      --verde-medio: #588157;
+      --verde-claro: #b7ce8f;
+      --bege: #e1dcd0;
+      --vermelho: #c24a4a;
+    }
+
+    body,
+    html {
+      min-height: 100%;
+      margin: 0;
+      font-family: "Quicksand", sans-serif;
+      background-color: #f9fbf9;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      background-color: var(--verde-medio);
+      box-shadow: 0 2px 16px rgba(58, 90, 64, 0.25);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-right: 2rem;
+      flex-shrink: 0;
+      color: var(--bege);
+      font-size: 1.55rem;
+      letter-spacing: 0.4px;
+      text-decoration: none;
+    }
+
+    .nav-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-links a {
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      color: rgba(225, 220, 208, 0.82);
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.18s, background 0.18s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--bege);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown > a {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dropdown-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      display: none;
+      min-width: 215px;
+      padding-top: 10px;
+    }
+
+    .dropdown-panel-inner {
+      overflow: hidden;
+      border: 1px solid rgba(225, 220, 208, 0.1);
+      border-radius: 12px;
+      background: var(--verde-escuro);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .nav-dropdown:hover .dropdown-panel {
+      display: block;
+    }
+
+    .dropdown-panel a {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0.65rem 1.1rem;
+      color: rgba(225, 220, 208, 0.8);
+      font-size: 0.84rem;
+    }
+
+    .dropdown-panel a:hover {
+      color: var(--bege);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .dropdown-panel a.danger {
+      color: rgba(255, 140, 140, 0.85);
+      border-top: 1px solid rgba(225, 220, 208, 0.1);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-left: auto;
+    }
+
+    .nav-bell {
+      position: relative;
+      color: var(--bege);
+      font-size: 1.25rem;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .nav-bell:hover {
+      opacity: 1;
+    }
+
+    .bell-badge {
+      position: absolute;
+      top: -5px;
+      right: -6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--verde-medio);
+      border-radius: 50%;
+      color: var(--verde-escuro);
+      background: var(--bege);
+      font-size: 0.6rem;
+      font-weight: 700;
+    }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--bege);
+      color: var(--verde-escuro);
+      border: 1px solid var(--verde-medio);
+      font-size: 0.62rem;
+      font-weight: 700;
+      min-width: 15px; height: 15px;
+      border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
+
+    .nav-profile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 5px 14px 5px 5px;
+      border: 1px solid rgba(225, 220, 208, 0.18);
+      border-radius: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .nav-profile:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .nav-profile img {
+      width: 36px;
+      height: 36px;
+      border: 2px solid rgba(225, 220, 208, 0.4);
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .nav-profile span {
+      overflow: hidden;
+      max-width: 150px;
+      color: var(--bege);
+      font-size: 0.84rem;
+      font-weight: 500;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .plans-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 110px 20px 50px;
+    }
+
+    .header-text {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .header-text h2 {
+      color: var(--verde-escuro);
+      font-weight: 700;
+    }
+
+    .cards-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .card-plano {
+      position: relative;
+      width: 350px;
+      padding: 40px 30px;
+      border: 2px solid var(--verde-claro);
+      border-radius: 30px;
+      background-color: var(--bege);
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      transition:
+        transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+    }
+
+    .card-plano:hover {
+      border-color: var(--verde-medio);
+      box-shadow: 0 20px 40px rgba(58, 90, 64, 0.2);
+      transform: scale(1.08);
+    }
+
+    .card-plano.premium {
+      z-index: 2;
+      border-color: var(--verde-medio);
+      background-color: #fff;
+      transform: scale(1.05);
+    }
+
+    .card-plano.premium:hover {
+      transform: scale(1.12);
+    }
+
+    .card-icon {
+      display: block;
+      margin-bottom: 15px;
+      color: var(--verde-escuro);
+      font-size: 50px;
+    }
+
+    .card-title {
+      margin-bottom: 10px;
+      color: var(--verde-escuro);
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .preco {
+      margin: 10px 0 20px;
+    }
+
+    .preco-valor {
+      color: var(--verde-escuro);
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+
+    .preco-periodo {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .feature-list {
+      margin-bottom: 30px;
+      padding: 0;
+      list-style: none;
+      text-align: left;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      color: var(--verde-escuro);
+      font-size: 0.95rem;
+    }
+
+    .feature-item i {
+      color: var(--verde-medio);
+      font-size: 1.1rem;
+    }
+
+    .btn-inscrever {
+      width: 100%;
+      padding: 12px 35px;
+      border: none;
+      border-radius: 50px;
+      color: white;
+      background-color: var(--verde-escuro);
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: 0.3s;
+    }
+
+    .btn-inscrever:hover:not(:disabled) {
+      color: #fff;
+      background-color: var(--verde-medio);
+      transform: translateY(-1px);
+    }
+
+    .btn-inscrever:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    #btnPlanoGratuito {
+      border: 2px solid var(--verde-escuro);
+      color: var(--verde-escuro);
+      background-color: transparent;
+    }
+
+    #btnCancelarPremium {
+      background-color: var(--vermelho);
+    }
+
+    #btnCancelarPremium:hover:not(:disabled) {
+      background-color: #a83e3e;
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      padding: 5px 20px;
+      border-radius: 20px;
+      color: white;
+      background: var(--verde-medio);
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      transform: translateX(-50%);
+    }
+
+    /* Modal */
+
+    .modal-cancelamento {
+      overflow: hidden;
+      border: none;
+      border-radius: 24px;
+      box-shadow: 0 24px 70px rgba(31, 55, 36, 0.28);
+    }
+
+    .icone-modal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 78px;
+      height: 78px;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      color: var(--vermelho);
+      background-color: #fce8e8;
+      font-size: 2rem;
+    }
+
+    .titulo-modal {
+      margin-bottom: 10px;
+      color: var(--verde-escuro);
+      font-size: 1.55rem;
+      font-weight: 700;
+    }
+
+    .texto-modal {
+      margin-bottom: 25px;
+      color: #6c757d;
+      line-height: 1.6;
+    }
+
+    .btn-manter {
+      padding: 11px 18px;
+      border: 2px solid var(--verde-medio);
+      border-radius: 50px;
+      color: var(--verde-escuro);
+      background: transparent;
+      font-weight: 700;
+    }
+
+    .btn-manter:hover {
+      color: var(--verde-escuro);
+      background: #edf4ed;
+    }
+
+    .btn-confirmar-cancelamento {
+      padding: 11px 18px;
+      border: 2px solid var(--vermelho);
+      border-radius: 50px;
+      color: white;
+      background: var(--vermelho);
+      font-weight: 700;
+    }
+
+    .btn-confirmar-cancelamento:hover {
+      color: white;
+      background: #a83e3e;
+      border-color: #a83e3e;
+    }
+
+    /* Notificação */
+
+    #mensagemPlano {
+      position: fixed;
+      top: 90px;
+      left: 50%;
+      z-index: 3000;
+      display: none;
+      width: min(90%, 480px);
+      transform: translateX(-50%);
+    }
+
+    .mensagem-conteudo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 12px 35px rgba(33, 53, 37, 0.2);
+    }
+
+    .mensagem-conteudo i {
+      font-size: 1.45rem;
+    }
+
+    .mensagem-conteudo span {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .mensagem-sucesso {
+      color: #24522d;
+      background: #e1f4e5;
+    }
+
+    .mensagem-erro {
+      color: #812f2f;
+      background: #fbe4e4;
+    }
+
+    .mensagem-entrando {
+      animation: mensagemEntrando 0.35s ease;
+    }
+
+    @keyframes mensagemEntrando {
+      from {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 850px) {
+      .plans-wrapper {
+        justify-content: flex-start;
+      }
+
+      .cards-container {
+        flex-direction: column;
+      }
+
+      .card-plano,
+      .card-plano:hover,
+      .card-plano.premium,
+      .card-plano.premium:hover {
+        transform: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .nav-profile span {
+        display: none;
+      }
+
+      .plans-wrapper {
+        min-height: calc(100vh - 64px);
+        padding: 34px 16px 48px;
+      }
+
+      .header-text {
+        width: 100%;
+        margin-bottom: 28px;
+        padding: 0 4px;
+      }
+
+      .header-text h2 {
+        margin-bottom: 10px;
+        font-size: clamp(1.55rem, 7vw, 2rem);
+        line-height: 1.2;
+      }
+
+      .header-text p {
+        margin-bottom: 0;
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+
+      .cards-container {
+        gap: 26px;
+      }
+
+      .card-plano {
+        width: 100%;
+        max-width: 380px;
+        padding: 34px 22px 28px;
+        border-radius: 24px;
+      }
+
+      .card-icon {
+        margin-bottom: 10px;
+        font-size: 44px;
+      }
+
+      .card-title {
+        font-size: 1.55rem;
+      }
+
+      .preco-valor {
+        font-size: 1.9rem;
+      }
+
+      .feature-list {
+        margin-bottom: 24px;
+      }
+
+      .feature-item {
+        align-items: flex-start;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .popular-badge {
+        max-width: calc(100% - 28px);
+        padding: 5px 16px;
+        font-size: 0.72rem;
+      }
+
+      #mensagemPlano {
+        top: 76px;
+        width: calc(100% - 24px);
+      }
+
+      .mensagem-conteudo {
+        padding: 13px 14px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .plans-wrapper {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+
+      .card-plano {
+        padding-right: 17px;
+        padding-left: 17px;
+      }
+
+      .btn-inscrever {
+        padding-right: 18px;
+        padding-left: 18px;
+        font-size: 0.86rem;
+      }
+
+      .modal-dialog {
+        margin: 12px;
+      }
+
+
+    }
+  </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarUsuarioResponsiva.js" defer></script>
+</head>
+
+<body>
+
+  <nav>
+    <a class="nav-brand" href="homeMutuo.html">
+      <img
+        src="../imagens/mutuoLogo.png"
+        alt="Logo"
+        onerror="this.style.display='none'"
+      >
+      Mútuo
+    </a>
+
+    <ul class="nav-links">
+      <li>
+        <a href="homeMutuo.html">Início</a>
+      </li>
+
+      <li>
+        <a href="serviçosMutuo.html">Serviços</a>
+      </li>
+
+      <li>
+        <a href="OngsMutuo.html">ONGs</a>
+      </li>
+
+      <li>
+        <a href="chatMutuo.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a>
+      </li>
+
+      <li class="nav-dropdown">
+        <a href="#">
+          Mais
+          <i class="bi bi-chevron-down" style="font-size: 0.68rem;"></i>
+        </a>
+
+        <div class="dropdown-panel">
+          <div class="dropdown-panel-inner">
+            <a href="planosMutuo.html" class="active">
+              <i class="bi bi-gem"></i>
+              Conheça nossos planos
+            </a>
+
+            <a href="certificadosMutuo.html">
+              <i class="bi bi-award"></i>
+              Certificados
+            </a>
+
+            <a href="contatoMutuo.html">
+              <i class="bi bi-envelope"></i>
+              Contato
+            </a>
+
+            <a href="comoUsarMutuo.html">
+              <i class="bi bi-question-circle"></i>
+              Como usar a plataforma
+            </a>
+
+            <a href="quemSomosMutuo.html">
+              <i class="bi bi-people"></i>
+              Quem somos
+            </a>
+
+            <a href="../login.html" class="danger">
+              <i class="bi bi-box-arrow-right"></i>
+              Sair da conta
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="notificacoesMutuo.html" class="nav-bell">
+        <i class="bi bi-bell-fill"></i>
+        <span class="bell-badge"></span>
+      </a>
+
+      <a href="perfilMutuo.html" class="nav-profile">
+        <img
+          id="fotoNavbarTopo"
+          src="../imagens/mutuoLogo.png"
+          alt="Foto de perfil"
+        >
+
+        <span id="nomeUsuario"></span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="plans-wrapper">
+    <div class="header-text">
+      <h2>Escolha o melhor plano para você</h2>
+
+      <p class="text-muted">
+        Potencialize seu impacto social com os benefícios Premium
+      </p>
+    </div>
+
+    <div class="cards-container">
+
+      <!-- Plano gratuito -->
+
+      <section class="card-plano">
+        <i class="bi bi-stars card-icon"></i>
+
+        <h3 class="card-title">Gratuito</h3>
+
+        <div class="preco">
+          <span class="preco-valor">R$ 0,00</span>
+          <span class="preco-periodo">/mês</span>
+        </div>
+
+        <ul class="feature-list">
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Até 3 serviços
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Suporte básico
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Visualização limitada dos serviços oferecidos
+          </li>
+        </ul>
+
+        <button
+          id="btnPlanoGratuito"
+          type="button"
+          class="btn-inscrever"
+          disabled
+        >
+          Verificando...
+        </button>
+      </section>
+
+      <!-- Plano Premium -->
+
+      <section class="card-plano premium">
+        <div class="popular-badge">MAIS RECOMENDADO</div>
+
+        <i class="bi bi-lightning-charge-fill card-icon"></i>
+
+        <h3 class="card-title">Premium</h3>
+
+        <div class="preco">
+          <span class="preco-valor">R$ 19,90</span>
+          <span class="preco-periodo">/mês</span>
+        </div>
+
+        <ul class="feature-list">
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Maior visibilidade nos resultados
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Prioridade nas solicitações de serviços
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Até 8 serviços
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Suporte prioritário 24h
+          </li>
+        </ul>
+
+        <div id="areaAcaoPremium">
+          <a
+            href="assinarPremium.html"
+            id="btnAssinarPremium"
+            class="btn-inscrever"
+            style="display: none; text-decoration: none; text-align: center;"
+          >
+            Assinar agora
+          </a>
+
+          <button
+            id="btnCancelarPremium"
+            type="button"
+            class="btn-inscrever"
+            style="display: none;"
+          >
+            Cancelar Premium
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Modal de confirmação -->
+
+  <div
+    class="modal fade"
+    id="modalCancelarPremium"
+    tabindex="-1"
+    aria-labelledby="tituloModalCancelar"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-cancelamento">
+        <div class="modal-body p-4 p-md-5 text-center">
+          <div class="icone-modal">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+          </div>
+
+          <h3 id="tituloModalCancelar" class="titulo-modal">
+            Cancelar plano Premium?
+          </h3>
+
+          <p class="texto-modal">
+            Você perderá os benefícios Premium e voltará imediatamente
+            para o plano gratuito. Deseja realmente continuar?
+          </p>
+
+          <div class="d-flex flex-column flex-sm-row gap-2">
+            <button
+              type="button"
+              class="btn btn-manter w-100"
+              data-bs-dismiss="modal"
+            >
+              Manter Premium
+            </button>
+
+            <button
+              type="button"
+              id="btnConfirmarCancelamento"
+              class="btn btn-confirmar-cancelamento w-100"
+            >
+              Sim, cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem de sucesso ou erro -->
+
+  <div id="mensagemPlano">
+    <div id="conteudoMensagemPlano" class="mensagem-conteudo">
+      <i id="iconeMensagemPlano" class="bi"></i>
+
+      <span id="textoMensagemPlano"></span>
+
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Fechar"
+        onclick="fecharMensagemPlano()"
+      ></button>
+    </div>
+  </div>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
+
+  <script>
+    const API_BASE = "https://mutuo-api.onrender.com";
+
+    let usuario = null;
+    let temporizadorMensagem = null;
+
+    try {
+      usuario = JSON.parse(
+        sessionStorage.getItem("usuarioLogado")
+      );
+    } catch (erro) {
+      console.error("Erro ao ler usuário da sessão:", erro);
+    }
+
+    const modalCancelarElemento =
+      document.getElementById("modalCancelarPremium");
+
+    const modalCancelar =
+      new bootstrap.Modal(modalCancelarElemento);
+
+    const btnCancelar =
+      document.getElementById("btnCancelarPremium");
+
+    const btnConfirmarCancelamento =
+      document.getElementById("btnConfirmarCancelamento");
+
+    iniciarPagina();
+
+    function iniciarPagina() {
+      if (!usuario || !usuario.cpf) {
+        atualizarInterfacePlano(false);
+
+        mostrarMensagemPlano(
+          "Não foi possível identificar o usuário conectado.",
+          "erro"
+        );
+
+        return;
+      }
+
+      document.getElementById("nomeUsuario").textContent =
+        usuario.nome || usuario.nome_usuario || "Usuário";
+
+      verificarPlanoAtual();
+
+      // Evita que a página pare caso carregarFoto não exista.
+      if (typeof carregarFoto === "function") {
+        carregarFoto();
+      }
+    }
+
+    async function verificarPlanoAtual() {
+      try {
+        const resposta = await fetch(
+          `${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}`
+        );
+
+        const dados = await lerRespostaJson(resposta);
+
+        if (!resposta.ok) {
+          throw new Error(
+            dados.erro ||
+            dados.error ||
+            "Não foi possível verificar seu plano."
+          );
+        }
+
+        let valorPremium = dados.premium;
+
+        // Compatibilidade caso o MySQL devolva BIT como Buffer.
+        if (
+          valorPremium &&
+          typeof valorPremium === "object" &&
+          Array.isArray(valorPremium.data)
+        ) {
+          valorPremium = valorPremium.data[0];
+        }
+
+        const premium =
+          Number(valorPremium) === 1 ||
+          valorPremium === true;
+
+        usuario.premium = premium ? 1 : 0;
+
+        sessionStorage.setItem(
+          "usuarioLogado",
+          JSON.stringify(usuario)
+        );
+
+        atualizarInterfacePlano(premium);
+      } catch (erro) {
+        console.error(
+          "Erro ao verificar plano do usuário:",
+          erro
+        );
+
+        mostrarMensagemPlano(
+          erro.message || "Não foi possível verificar seu plano.",
+          "erro"
+        );
+      }
+    }
+
+    function atualizarInterfacePlano(premium) {
+      const btnGratuito =
+        document.getElementById("btnPlanoGratuito");
+
+      const btnAssinar =
+        document.getElementById("btnAssinarPremium");
+
+      if (premium) {
+        btnGratuito.textContent = "Plano gratuito";
+        btnGratuito.disabled = true;
+
+        btnAssinar.style.display = "none";
+        btnCancelar.style.display = "block";
+      } else {
+        btnGratuito.textContent = "Plano atual";
+        btnGratuito.disabled = true;
+
+        btnAssinar.style.display = "block";
+        btnCancelar.style.display = "none";
+      }
+    }
+
+    btnCancelar.addEventListener("click", function () {
+      modalCancelar.show();
+    });
+
+    btnConfirmarCancelamento.addEventListener(
+      "click",
+      cancelarPremium
+    );
+
+    async function cancelarPremium() {
+      if (!usuario || !usuario.cpf) {
+        modalCancelar.hide();
+
+        mostrarMensagemPlano(
+          "Não foi possível identificar o usuário.",
+          "erro"
+        );
+
+        return;
+      }
+
+      btnConfirmarCancelamento.disabled = true;
+      btnConfirmarCancelamento.innerHTML = `
+        <span
+          class="spinner-border spinner-border-sm me-2"
+          aria-hidden="true"
+        ></span>
+        Cancelando...
+      `;
+
+      try {
+        const resposta = await fetch(
+          `${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}/premium`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              premium: 0
+            })
+          }
+        );
+
+        const resultado = await lerRespostaJson(resposta);
+
+        if (
+          !resposta.ok ||
+          resultado.error ||
+          resultado.erro ||
+          resultado.success === false ||
+          resultado.sucesso === false
+        ) {
+          throw new Error(
+            resultado.erro ||
+            resultado.error ||
+            "Não foi possível cancelar o plano."
+          );
+        }
+
+        usuario.premium = 0;
+
+        sessionStorage.setItem(
+          "usuarioLogado",
+          JSON.stringify(usuario)
+        );
+
+        modalCancelar.hide();
+        atualizarInterfacePlano(false);
+
+        mostrarMensagemPlano(
+          "Plano Premium cancelado! Você agora está no plano gratuito.",
+          "sucesso"
+        );
+      } catch (erro) {
+        console.error("Erro ao cancelar Premium:", erro);
+
+        modalCancelar.hide();
+
+        mostrarMensagemPlano(
+          erro.message ||
+          "Não foi possível cancelar o plano. Tente novamente.",
+          "erro"
+        );
+      } finally {
+        btnConfirmarCancelamento.disabled = false;
+        btnConfirmarCancelamento.textContent =
+          "Sim, cancelar";
+      }
+    }
+
+    async function lerRespostaJson(resposta) {
+      const texto = await resposta.text();
+
+      if (!texto) {
+        return {};
+      }
+
+      try {
+        return JSON.parse(texto);
+      } catch (erro) {
+        throw new Error(
+          "A API devolveu uma resposta inválida."
+        );
+      }
+    }
+
+    function mostrarMensagemPlano(texto, tipo) {
+      const mensagem =
+        document.getElementById("mensagemPlano");
+
+      const conteudo =
+        document.getElementById("conteudoMensagemPlano");
+
+      const icone =
+        document.getElementById("iconeMensagemPlano");
+
+      const textoElemento =
+        document.getElementById("textoMensagemPlano");
+
+      clearTimeout(temporizadorMensagem);
+
+      textoElemento.textContent = texto;
+
+      conteudo.className =
+        "mensagem-conteudo mensagem-entrando";
+
+      if (tipo === "sucesso") {
+        conteudo.classList.add("mensagem-sucesso");
+        icone.className =
+          "bi bi-check-circle-fill";
+      } else {
+        conteudo.classList.add("mensagem-erro");
+        icone.className =
+          "bi bi-exclamation-circle-fill";
+      }
+
+      mensagem.style.display = "block";
+
+      temporizadorMensagem = setTimeout(function () {
+        fecharMensagemPlano();
+      }, 5000);
+    }
+
+    function fecharMensagemPlano() {
+      const mensagem =
+        document.getElementById("mensagemPlano");
+
+      mensagem.style.display = "none";
+      clearTimeout(temporizadorMensagem);
+    }
+
+    window.addEventListener('load', () => {
+      carregarFoto();
+      atualizarBadgeNotificacoes();
+    });
+  </script>
+
+</body>
+</html>

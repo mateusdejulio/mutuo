@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Notificações</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --green-main: #588157;
+      --green-dark: #3a5a40;
+      --green-light: #6b9e4a;
+      --green-pale: #eaf2e6;
+      --green-badge: #b7ce8f;
+      --cream: #E1DCD0;
+      --nav-h: 72px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #f2f5f1;
+      color: #1a2e1b;
+      min-height: 100vh;
+      padding-top: var(--nav-h);
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background-color: var(--green-main);
+      height: var(--nav-h);
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem; 
+      color: var(--cream);
+      letter-spacing: 0.4px;
+      margin-right: 2rem;
+      flex-shrink: 0;
+    }
+    .nav-brand img { width: 38px; height: 38px; border-radius: 8px; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1; margin: 0; padding: 0;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      transition: color 0.18s, background 0.18s;
+      white-space: nowrap;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--cream); background: rgba(255,255,255,0.12); }
+
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a { display: flex; align-items: center; gap: 5px; }
+    .dropdown-panel { display: none; position: absolute; top: 100%; left: 0; padding-top: 10px; min-width: 215px; }
+    .dropdown-panel-inner { background: var(--green-dark); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,0.22); border: 1px solid rgba(225,220,208,0.1); }
+    .nav-dropdown:hover .dropdown-panel { display: block; }
+    .dropdown-panel a { display: flex; align-items: center; gap: 9px; color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem; font-size: 0.84rem; text-decoration: none; }
+    .dropdown-panel a:hover { background: rgba(255,255,255,0.08); color: var(--cream); }
+    .dropdown-panel a.danger { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .nav-bell { position: relative; cursor: pointer; color: var(--cream); font-size: 1.25rem; opacity: 0.8; transition: opacity 0.2s; text-decoration: none; }
+    .nav-bell:hover { opacity: 1; }
+    .bell-badge { position: absolute; top: -5px; right: -6px; background: var(--cream); color: var(--green-dark); font-size: 0.6rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--green-main); }
+    .nav-chat-badge { display: none; position: absolute; top: 2px; right: -10px; background: var(--cream); color: var(--green-dark); border: 1px solid var(--green-main); font-size: 0.62rem; font-weight: 700; min-width: 15px; height: 15px; border-radius: 8px; align-items: center; justify-content: center; padding: 0 4px; }
+    .nav-profile { display: flex; align-items: center; gap: 9px; text-decoration: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(225,220,208,0.18); border-radius: 40px; padding: 5px 14px 5px 5px; }
+    .nav-profile img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
+    .nav-profile span { color: var(--cream); font-size: 0.84rem; font-weight: 500; }
+
+   
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 16px 60px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      animation: fadeDown 0.4s ease both;
+    }
+
+    .page-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green-dark);
+    }
+
+    .counter-badge {
+      background: var(--green-badge);
+      color: var(--green-dark);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+
+   
+    .filters {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      animation: fadeDown 0.4s ease 0.05s both;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+
+    .filter-btn {
+      background: #fff;
+      border: 1px solid #dde8da;
+      color: #7a8c76;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s;
+      flex-shrink: 0;
+    }
+    .filter-btn:hover { border-color: var(--green-main); color: var(--green-main); }
+    .filter-btn.active {
+      background: var(--green-main);
+      border-color: var(--green-main);
+      color: #fff;
+    }
+
+    .notif-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeUp 0.4s ease 0.1s both;
+    }
+
+
+    .notif-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 16px;
+      padding: 16px;
+      transition: box-shadow 0.18s, transform 0.18s;
+      position: relative;
+      overflow: hidden;
+    }
+    .notif-card:hover { box-shadow: 0 4px 18px rgba(58,90,64,0.1); transform: translateY(-1px); }
+
+    .notif-card.unread {
+      background: var(--green-pale);
+      border-color: #c6dfc0;
+    }
+    .notif-card.unread::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--green-main);
+      border-radius: 16px 0 0 16px;
+    }
+
+    .notif-avatar {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .notif-avatar img {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e4ebe2;
+    }
+    .notif-avatar .type-icon {
+      position: absolute;
+      bottom: -2px; right: -2px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem;
+      border: 2px solid #fff;
+      color: #fff;
+    }
+    .type-icon.msg   { background: #588157; }
+    .type-icon.req   { background: #e08c2c; }
+    .type-icon.order { background: #3a7bbf; }
+
+
+    .notif-body { flex: 1; min-width: 0; }
+
+    .notif-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+      flex-wrap: wrap;
+    }
+
+    .notif-type {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #9aab96;
+    }
+
+    .status-pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 10px;
+    }
+    .status-pill.pendente { background: #fff3e0; color: #b36c00; }
+    .status-pill.aceito   { background: #e6f4ea; color: #2d6a4f; }
+    .status-pill.recusado { background: #fde8e8; color: #b00020; }
+
+    .notif-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1a2e1b;
+      margin-bottom: 2px;
+    }
+
+    .notif-service {
+      font-size: 0.8rem;
+      color: #7a8c76;
+      margin-bottom: 10px;
+    }
+    .notif-service i { margin-right: 4px; font-size: 0.75rem; }
+
+   
+    .notif-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.18s;
+    }
+    .action-btn.accept {
+      background: var(--green-main);
+      color: #fff;
+    }
+    .action-btn.accept:hover { background: var(--green-dark); }
+    .action-btn.decline {
+      background: #f0f4ef;
+      color: #7a8c76;
+    }
+    .action-btn.decline:hover { background: #e4ebe2; color: var(--green-dark); }
+    .action-btn.message {
+      background: #f0f4ef;
+      color: var(--green-dark);
+    }
+    .action-btn.message:hover { background: var(--green-pale); }
+    
+   
+    .notif-time {
+      font-size: 0.72rem;
+      color: #b0bfac;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    
+    .empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: #b0bfac;
+    }
+    .empty i { font-size: 2.5rem; margin-bottom: 12px; display: block; opacity: 0.4; }
+    .empty p { font-size: 0.9rem; font-weight: 600; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarUsuarioResponsiva.js" defer></script>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="nav-brand" href="#">
+      <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+      Mútuo
+    </a>
+    <ul class="nav-links">
+      <li><a href="homeMutuo.html">Início</a></li>
+      <li><a href="serviçosMutuo.html">Serviços</a></li>
+      <li><a href="OngsMutuo.html">ONGs</a></li>
+      <li><a href="chatMutuo.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a></li>
+      <li class="nav-dropdown">
+        <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+        <div class="dropdown-panel">
+          <div class="dropdown-panel-inner">
+            <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+            <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+            <a href="contatoMutuo.html"><i class="bi bi-envelope"></i> Contato</a>
+            <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+            <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+            <a href="../login.html" class="danger"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-right">
+      <a href="notificacoesOng.html" class="nav-bell active">
+        <i class="bi bi-bell-fill"></i>
+        <span class="bell-badge"></span>
+      </a>
+      <a href="perfilMutuo.html" class="nav-profile">
+         <img id="fotoNavbarTopo" src="../imagens/mutuoLogo.png" alt="Foto de perfil">
+         <span id="nomeUsuario"></span>
+      </a>
+    </div>
+  </nav>
+
+  
+  <div class="page">
+
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <h1>Notificações</h1>
+        <span class="counter-badge" id="counter-badge"></span>
+      </div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-target="todas">Todas</button>
+      <button class="filter-btn" data-target="recebidas">Recebidas</button>
+      <button class="filter-btn" data-target="meus-pedidos">Meus pedidos</button>
+      <button class="filter-btn" data-target="mensagens">Mensagens</button>
+    </div>
+
+    <div class="notif-list" id="todas"></div>
+<div class="notif-list" id="recebidas" style="display:none;"></div>
+<div class="notif-list" id="meus-pedidos" style="display:none;"></div>
+<div class="notif-list" id="mensagens" style="display:none;"></div>
+    
+<script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
+<script>
+  let recebidas = [];
+  let enviadas = [];
+  let mensagens = [];
+
+function statusClasse(status) {
+  if (status === 'Aceita') return 'aceito';
+  if (status === 'Recusada') return 'recusado';
+  return 'pendente';
+}
+
+function tempoRelativo(dataStr) {
+  const diffMs = Date.now() - new Date(dataStr).getTime();
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return 'Agora';
+  if (min < 60) return `Há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Há ${h} h`;
+  return `Há ${Math.floor(h / 24)} d`;
+}
+
+function cardRecebida(s) {
+  return `
+    <div class="notif-card ${s.lida ? '' : 'unread'}" data-id="${s.codSolicitacao}">
+      <div class="notif-avatar">
+        <img src="${resolverImagem(s.fotoSolicitador)}" alt="${s.nomeSolicitador}">
+        <span class="type-icon req"><i class="bi bi-person-fill"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Solicitação recebida</span>
+          <span class="status-pill ${statusClasse(s.statusSolicitacao)}">${s.statusSolicitacao}</span>
+        </div>
+        <p class="notif-name">${s.nomeSolicitador}</p>
+        <p class="notif-service"><i class="bi bi-briefcase-fill"></i> ${s.nomeServico}</p>
+        ${s.statusSolicitacao === 'Pendente' ? `
+          <div class="notif-actions">
+            <button class="action-btn accept" onclick="responderSolicitacao(${s.codSolicitacao}, true, ${s.pontos})"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
+            <button class="action-btn decline" onclick="responderSolicitacao(${s.codSolicitacao}, false, ${s.pontos})"><i class="bi bi-x-circle-fill"></i> Recusar</button>
+            <a href="${linkChat('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+          </div>` : `
+          <div class="notif-actions">
+            <a href="${linkChat('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+          </div>`}
+      </div>
+      <span class="notif-time" title="${new Date(s.dataSolicitacao).toLocaleString('pt-BR')}">${tempoRelativo(s.dataSolicitacao)}</span>
+    </div>`;
+}
+function cardEnviada(s) {
+  return `
+    <div class="notif-card" data-id="${s.codSolicitacao}">
+      <div class="notif-avatar">
+       <img src="${resolverImagem(s.fotoPrestador)}" alt="${s.nomePrestador}">
+        <span class="type-icon order"><i class="bi bi-arrow-down-up"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Seu pedido</span>
+          <span class="status-pill ${statusClasse(s.statusSolicitacao)}">${s.statusSolicitacao}</span>
+        </div>
+        <p class="notif-name">${s.nomePrestador}</p>
+        <p class="notif-service"><i class="bi bi-briefcase-fill"></i> ${s.nomeServico}</p>
+        <div class="notif-actions">
+          <a href="${linkChat('usuario', s.cpfPrestador, s.nomePrestador, s.fotoPrestador)}" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
+        </div>
+      </div>
+      <span class="notif-time">${tempoRelativo(s.dataSolicitacao)}</span>
+    </div>`;
+}
+
+function cardMensagem(c) {
+  const naoLida = Number(c.naoLidas) > 0;
+  return `
+    <div class="notif-card ${naoLida ? 'unread' : ''}" data-id="msg-${c.id}">
+      <div class="notif-avatar">
+        <img src="${resolverImagem(c.fotoOutraConta)}" alt="${c.nomeOutraConta || ''}">
+        <span class="type-icon msg"><i class="bi bi-chat-fill"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Nova mensagem</span>
+        </div>
+        <p class="notif-name">${c.nomeOutraConta || 'Conta'}</p>
+        <p class="notif-service"><i class="bi bi-chat-dots-fill"></i> ${c.ultimaMensagem || ''}</p>
+        <div class="notif-actions">
+          <a href="${linkChat(c.tipoOutraConta, c.idOutraConta, c.nomeOutraConta, c.fotoOutraConta)}" class="action-btn message"><i class="bi bi-chat-fill"></i> Abrir conversa</a>
+        </div>
+      </div>
+      <span class="notif-time" title="${new Date(c.ultimaMensagemEm).toLocaleString('pt-BR')}">${tempoRelativo(c.ultimaMensagemEm)}</span>
+    </div>`;
+}
+
+async function carregarSolicitacoes() {
+  const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+  const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+  if (!usuarioLogado || !usuarioLogado.cpf) return;
+
+  try {
+    const [respRecebidas, respEnviadas, respEnviadasOng, respConversas] = await Promise.all([
+      fetch(`${API_URL}/solicitacoes/prestador/${usuarioLogado.cpf}`),
+      fetch(`${API_URL}/solicitacoes/usuario/${usuarioLogado.cpf}`),
+      fetch(`${API_URL}/solicitacoes-ong/usuario/${usuarioLogado.cpf}`),
+      fetch(`${API_URL}/conversas/usuario/${usuarioLogado.cpf}`)
+    ]);
+    recebidas = await respRecebidas.json();
+    enviadas = await respEnviadas.json();
+    const enviadasOng = await respEnviadasOng.json();
+    const conversas = await respConversas.json();
+    // Histórico continua mostrando todas as conversas com mensagem, lidas ou não
+    // (só some se a própria conversa for apagada). "unread" nos cards usa o
+    // naoLidas de ANTES de marcar como lida aqui embaixo.
+    mensagens = (Array.isArray(conversas) ? conversas : []).filter(c => c.ultimaMensagem)
+      .sort((a, b) => new Date(b.ultimaMensagemEm) - new Date(a.ultimaMensagemEm));
+    // Só de entrar na página de notificações já conta como "visto": marca as
+    // conversas como lidas (recebidas seguem separadas, só somem ao aceitar/recusar).
+    mensagens.filter(c => Number(c.naoLidas) > 0).forEach(c => MutuoChat.marcarComoLida(c.id));
+
+    document.getElementById('recebidas').innerHTML = recebidas.map(cardRecebida).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
+    document.getElementById('mensagens').innerHTML = mensagens.map(cardMensagem).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma mensagem ainda.</p></div>';
+
+    const enviadosCombinados = [
+      ...enviadas.map(s => ({ ...s, _tipo: 'usuario' })),
+      ...enviadasOng.map(s => ({ ...s, _tipo: 'ong' }))
+    ].sort((a, b) => new Date(b.dataSolicitacao) - new Date(a.dataSolicitacao));
+
+    const htmlEnviados = enviadosCombinados.map(s => s._tipo === 'ong' ? cardEnviadaOng(s) : cardEnviada(s)).join('');
+    document.getElementById('meus-pedidos').innerHTML = htmlEnviados || '<div class="empty"><i class="bi bi-inbox"></i><p>Você ainda não fez pedidos.</p></div>';
+
+    const todasCombinadas = [
+      ...recebidas.map(s => ({ ...s, _tipo: 'recebida', _data: s.dataSolicitacao })),
+      ...enviadosCombinados.map(s => ({ ...s, _data: s.dataSolicitacao })),
+      ...mensagens.map(c => ({ ...c, _tipo: 'mensagem', _data: c.ultimaMensagemEm }))
+    ].sort((a, b) => new Date(b._data) - new Date(a._data));
+
+    const todasHtml = todasCombinadas.map(s => {
+      if (s._tipo === 'recebida') return cardRecebida(s);
+      if (s._tipo === 'ong') return cardEnviadaOng(s);
+      if (s._tipo === 'mensagem') return cardMensagem(s);
+      return cardEnviada(s);
+    }).join('');
+    document.getElementById('todas').innerHTML = todasHtml || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma notificação.</p></div>';
+
+    updateCounter();
+  } catch (err) {
+    console.error('Erro ao carregar solicitações:', err);
+  }
+}
+
+async function responderSolicitacao(cod, aceitar, pontos) {
+  try {
+    const resp = await fetch(`${API_URL}/solicitacoes/${cod}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        statusS: aceitar ? 'Aceita' : 'Recusada',
+        statusE: aceitar ? 'Não iniciado' : 'Cancelado',
+        pontos: pontos || 0
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    await carregarSolicitacoes();
+  } catch (err) {
+    console.error('Erro ao responder solicitação:', err);
+    alert('Não foi possível atualizar a solicitação.');
+  }
+}
+
+function updateCounter() {
+  const count = recebidas.filter(s => !s.lida).length; // mensagens já viram lidas ao entrar nessa página
+  const badge = document.getElementById('counter-badge');
+  const bellBadge = document.querySelector('.bell-badge');
+  if (count === 0) {
+    badge.style.display = 'none';
+    if (bellBadge) bellBadge.style.display = 'none';
+  } else {
+    badge.style.display = '';
+    badge.textContent = count + (count === 1 ? ' nova' : ' novas');
+    if (bellBadge) { bellBadge.style.display = ''; bellBadge.textContent = count; }
+  }
+}
+
+function markAllRead() {
+  document.querySelectorAll('.notif-card.unread').forEach(c => c.classList.remove('unread'));
+  updateCounter();
+}
+function resolverImagem(caminho) {
+  if (!caminho) return '../imagens/mutuoLogo.png';
+  if (caminho.startsWith('http')) return caminho;
+  return `${API_URL}${caminho}`;
+}
+
+function linkChat(tipo, id, nome, foto) {
+  const params = new URLSearchParams({ tipo, id: id || '', nome: nome || '', foto: resolverImagem(foto) });
+  return `chatMutuo.html?${params.toString()}`;
+}
+
+function tempoRelativo(dataStr) {
+  const data = new Date(dataStr);
+  const diffMs = Date.now() - data.getTime();
+  const min = Math.floor(diffMs / 60000);
+
+  if (min < 1) return 'Agora';
+  if (min < 60) return `Há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Há ${h} h`;
+
+  // depois de 24h, mostra a data certa em vez de "há X dias"
+  return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    + ' às ' + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function cardEnviadaOng(s) {
+  return `
+    <div class="notif-card" data-id="ong-${s.codSolicitacao}">
+      <div class="notif-avatar">
+        <img src="${resolverImagem(s.fotoOng)}" alt="${s.nomeOng}">
+        <span class="type-icon order"><i class="bi bi-heart-fill"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Sua oferta para ONG</span>
+          <span class="status-pill ${statusClasse(s.statusSolicitacao)}">${s.statusSolicitacao}</span>
+        </div>
+        <p class="notif-name">${s.nomeOng}</p>
+        <p class="notif-service"><i class="bi bi-briefcase-fill"></i> ${s.nomeServico}</p>
+      </div>
+      <span class="notif-time" title="${new Date(s.dataSolicitacao).toLocaleString('pt-BR')}">${tempoRelativo(s.dataSolicitacao)}</span>
+    </div>`;
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.notif-list').forEach(l => l.style.display = 'none');
+    document.getElementById(btn.dataset.target).style.display = 'flex';
+  });
+});
+
+MutuoChat.conectar();
+window.addEventListener('load', carregarSolicitacoes);
+ carregarFoto();
+ atualizarBadgeNotificacoes();
+ carregarSolicitacoes();
+ MutuoChat.onMensagemNova(carregarSolicitacoes);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,259 @@
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://mutuo-api.onrender.com';
+
+function atualizarTodasFotos(url) {
+  ['fotoTopo','fotoNavbarTopo', 'fotoPerfil', 'fotoDrawer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.src = url;
+  });
+}
+
+async function carregarFoto() {
+  const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+
+  if (!usuario.cpf) {
+    atualizarTodasFotos('../imagens/mutuoLogo.png');
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${API_URL}/perfil/foto/${usuario.cpf}`, { cache: 'no-store' });
+    const data = await res.json();
+
+    atualizarTodasFotos(
+      data.fotoPerfil ? API_URL + data.fotoPerfil : '../imagens/mutuoLogo.png'
+    );
+  } catch (e) {
+    console.error('Erro ao carregar foto:', e);
+    atualizarTodasFotos('../imagens/mutuoLogo.png');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const _usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+  if (_usuario.nome) {
+    const elNome = document.getElementById('nomeUsuario');
+    if (elNome) elNome.textContent = _usuario.nome;
+  }
+  if (sessionStorage.getItem('usuarioLogado')) carregarFoto();
+});
+
+
+async function enviarFoto(input) {
+  const arquivo = input.files[0];
+  if (!arquivo) return;
+
+  atualizarTodasFotos(URL.createObjectURL(arquivo));
+
+  const usuario = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+  if (!usuario.cpf) return alert('Sessão expirada.');
+
+  const formData = new FormData();
+  formData.append('cpf', usuario.cpf);
+  formData.append('fotoPerfil', arquivo);
+
+  try {
+    const res  = await fetch(`${API_URL}/perfil/foto`, { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!data.sucesso) alert('Erro: ' + (data.erro || 'falha no upload'));
+  } catch (e) {
+    alert('Falha ao enviar a foto.');
+  }
+}
+
+
+function atualizarTodasFotosOng(url) {
+  ['fotoTopo', 'fotoNavbarTopo', 'fotoPerfil', 'fotoDrawer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.src = url;
+  });
+}
+
+async function carregarFotoOng() {
+  const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
+  if (!ong.cnpj) {
+    atualizarTodasFotosOng('../imagens/mutuoLogo.png');
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${API_URL}/perfil/foto/ong/${encodeURIComponent(ong.cnpj)}`, { cache: 'no-store' });
+    const data = await res.json();
+
+    atualizarTodasFotosOng(
+      data.fotoPerfil ? API_URL + data.fotoPerfil : '../imagens/mutuoLogo.png'
+    );
+  } catch (e) {
+    console.error('Erro ao carregar foto:', e);
+    atualizarTodasFotosOng('../imagens/mutuoLogo.png');
+  }
+}
+
+carregarFotoOng();
+
+async function enviarFotoOng(input) {
+  const arquivo = input.files[0];
+  if (!arquivo) return;
+
+  atualizarTodasFotosOng(URL.createObjectURL(arquivo));
+
+  const ong = JSON.parse(sessionStorage.getItem('ongLogada') || '{}');
+  if (!ong.cnpj) return alert('Sessão expirada.');
+
+  const formData = new FormData();
+  formData.append('cnpj', ong.cnpj);
+  formData.append('fotoPerfil', arquivo);
+
+  try {
+    const res  = await fetch(`${API_URL}/perfil/fotoOng`, { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!data.sucesso) alert('Erro: ' + (data.erro || 'falha no upload'));
+  } catch (e) {
+    alert('Falha ao enviar a foto.');
+  }
+}
+// ===== Navbar da ONG (nome e foto) =====
+
+function pegarOngLogada() {
+  const raw = sessionStorage.getItem('ongLogada');
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function atualizarTituloOng(nomeOng) {
+  if (nomeOng) document.title = `Mútuo | ${nomeOng}`;
+}
+
+function urlDaFoto(nomeArquivo, nomeOngFallback) {
+  if (nomeArquivo) return `${API_URL}/uploads/fotos/${nomeArquivo}`;
+  return '../imagens/mutuoLogo.png';
+}
+
+function aplicarFotoEmTodosOsLugares(nomeArquivo, nomeOngFallback) {
+  const url = urlDaFoto(nomeArquivo, nomeOngFallback);
+  ['navFotoPerfil', 'drawerFotoPerfil'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.src = url;
+  });
+}
+
+async function carregarNavOng() {
+  const logada = pegarOngLogada();
+  if (!logada || !logada.cnpj) {
+    window.location.href = '../login.html';
+    return;
+  }
+
+  const navNome = document.getElementById('navNomeOng');
+  const drawerNome = document.getElementById('drawerNomeOng');
+
+  if (navNome) navNome.textContent = logada.nomeOng || 'ONG';
+  if (drawerNome) drawerNome.textContent = logada.nomeOng || 'ONG';
+  aplicarFotoEmTodosOsLugares(logada.foto_perfil, logada.nomeOng);
+
+  try {
+    const resposta = await fetch(`${API_URL}/ongs/${encodeURIComponent(logada.cnpj)}`);
+    if (!resposta.ok) throw new Error('Não foi possível carregar os dados da ONG.');
+
+    const ong = await resposta.json();
+
+    if (navNome) navNome.textContent = ong.nomeOng || 'ONG';
+    if (drawerNome) drawerNome.textContent = ong.nomeOng || 'ONG';
+    aplicarFotoEmTodosOsLugares(ong.foto_perfil, ong.nomeOng);
+
+    sessionStorage.setItem('ongLogada', JSON.stringify({
+      ...logada,
+      nomeOng: ong.nomeOng,
+      email: ong.email,
+      foco: ong.foco,
+      premium: ong.premium,
+      foto_perfil: ong.foto_perfil
+    }));
+
+  } catch (erro) {
+    console.error(erro);
+  }
+}
+
+// ── Inscrição em serviço (usado nas páginas de Serviços e Home) ──
+async function inscreverServico(cod, todosServicosRef) {
+  const s = todosServicosRef.find(item => item.cod === cod);
+  if (!s) return;
+
+  const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+  const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+
+  if (!usuarioLogado?.cpf) {
+    alert('Sessão expirada. Faça login novamente.');
+    return;
+  }
+
+  try {
+    const resposta = await fetch(`${API_URL}/solicitacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        codServico: s.cod,
+        codUsuario: usuarioLogado.cpf,
+        pontos: s.pontos || 0
+      })
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok || resultado.error) {
+      throw new Error(resultado.erro || resultado.error || 'Erro ao se inscrever no serviço.');
+    }
+
+    alert('Inscrição realizada com sucesso!');
+
+  } catch (erro) {
+    console.error(erro);
+    alert(erro.message || 'Não foi possível se inscrever no serviço.');
+  }
+}
+async function atualizarBadgeNotificacoes() {
+  const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+  const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+  if (!usuarioLogado || !usuarioLogado.cpf) return;
+
+  try {
+    const resposta = await fetch(`${API_URL}/solicitacoes/naolidas/${encodeURIComponent(usuarioLogado.cpf)}`);
+    const dados = await resposta.json();
+    const badge = document.querySelector('.bell-badge') || document.querySelector('.nav-bell .bell-badge');
+
+    if (!badge) return;
+
+    if (dados.total > 0) {
+      badge.textContent = dados.total;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (erro) {
+    console.error('Erro ao atualizar badge de notificações:', erro);
+  }
+}
+
+async function atualizarBadgeNotificacoesOng() {
+  const ongLogadaStr = sessionStorage.getItem('ongLogada');
+  const ongLogada = ongLogadaStr ? JSON.parse(ongLogadaStr) : null;
+  if (!ongLogada || !ongLogada.cnpj) return;
+
+  try {
+    const resposta = await fetch(`${API_URL}/solicitacoes-ong/naolidas/${encodeURIComponent(ongLogada.cnpj)}`);
+    const dados = await resposta.json();
+    const badge = document.querySelector('.badge-sino') || document.querySelector('.bell-badge');
+    if (!badge) return;
+
+    if (dados.total > 0) {
+      badge.textContent = dados.total;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (erro) {
+    console.error('Erro ao atualizar badge de notificações da ONG:', erro);
+  }
+}

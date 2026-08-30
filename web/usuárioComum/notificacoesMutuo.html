@@ -619,11 +619,12 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 MutuoChat.conectar();
-window.addEventListener('load', carregarSolicitacoes);
- carregarFoto();
- atualizarBadgeNotificacoes();
- carregarSolicitacoes();
- MutuoChat.onMensagemNova(carregarSolicitacoes);
+window.addEventListener('load', () => {
+  carregarFoto();
+  atualizarBadgeNotificacoes();
+  carregarSolicitacoes();
+  MutuoChat.onMensagemNova(carregarSolicitacoes);
+});
 </script>
 
 </body>
