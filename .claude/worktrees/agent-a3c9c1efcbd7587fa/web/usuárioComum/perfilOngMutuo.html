@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Perfil da ONG</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-principal: #588157;
+      --verde-escuro: #3a5a40;
+      --verde-palido: #eaf2e6;
+      --verde-badge: #b7ce8f;
+      --creme: #E1DCD0;
+      --altura-nav: 72px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #f2f5f1;
+      color: #1a2e1b;
+      min-height: 100vh;
+      padding-top: var(--altura-nav);
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background-color: var(--verde-principal);
+      height: var(--altura-nav);
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+    .marca-nav { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 1.55rem; color: var(--creme); letter-spacing: 0.4px; margin-right: 2rem; flex-shrink: 0; }
+    .marca-nav img { width: 38px; height: 38px; border-radius: 8px; }
+    .links-nav { display: flex; align-items: center; gap: 2px; list-style: none; flex: 1; margin: 0; padding: 0; }
+    .links-nav a { text-decoration: none; color: rgba(225,220,208,0.82); font-size: 0.875rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 8px; transition: color 0.18s, background 0.18s; white-space: nowrap; }
+    .links-nav a:hover, .links-nav a.ativo { color: var(--creme); background: rgba(255,255,255,0.12); }
+    .dropdown-nav { position: relative; }
+    .dropdown-nav > a { display: flex; align-items: center; gap: 5px; }
+    .painel-dropdown { display: none; position: absolute; top: 100%; left: 0; padding-top: 10px; min-width: 215px; }
+    .painel-dropdown-interno { background: var(--verde-escuro); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,0.22); border: 1px solid rgba(225,220,208,0.1); }
+    .dropdown-nav:hover .painel-dropdown { display: block; }
+    .painel-dropdown a { display: flex; align-items: center; gap: 9px; color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem; font-size: 0.84rem; text-decoration: none; }
+    .painel-dropdown a:hover { background: rgba(255,255,255,0.08); color: var(--creme); }
+    .painel-dropdown a.perigo { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+    .nav-direita { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .sino-nav { position: relative; cursor: pointer; color: var(--creme); font-size: 1.25rem; opacity: 0.8; transition: opacity 0.2s; text-decoration: none; }
+    .sino-nav:hover { opacity: 1; }
+    .badge-sino { position: absolute; top: -5px; right: -6px; background: var(--creme); color: var(--verde-escuro); font-size: 0.6rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--verde-principal); }
+    .nav-chat-badge { display: none; position: absolute; top: 2px; right: -10px; background: var(--creme); color: var(--verde-escuro); border: 1px solid var(--verde-principal); font-size: 0.62rem; font-weight: 700; min-width: 15px; height: 15px; border-radius: 8px; align-items: center; justify-content: center; padding: 0 4px; }
+    .perfil-nav { display: flex; align-items: center; gap: 9px; text-decoration: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(225,220,208,0.18); border-radius: 40px; padding: 5px 14px 5px 5px; }
+    .perfil-nav img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(225,220,208,0.4); }
+    .perfil-nav span { color: var(--creme); font-size: 0.84rem; font-weight: 500; }
+
+    
+    .capa-perfil {
+      width: 100%;
+      height: 260px;
+      overflow: hidden;
+      position: relative;
+    }
+    .capa-imagem {
+      width: 100%; height: 100%;
+      object-fit: cover;
+     
+    }
+    .capa-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(26,46,27,0.55));
+    }
+
+   
+    .container-perfil {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px 60px;
+    }
+
+  
+    .bloco-identidade {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 20px 24px 24px;
+      margin-top: -40px;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 16px;
+      animation: subirSuave 0.4s ease both;
+    }
+
+    .cabecalho-identidade {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .avatar-ong {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      margin-top: -50px;
+      flex-shrink: 0;
+    }
+
+    .identidade-texto { flex: 1; min-width: 0; }
+    .nome-ong {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a2e1b;
+      margin-bottom: 4px;
+    }
+    .slogan-ong {
+      font-size: 0.85rem;
+      color: #7a8c76;
+      font-weight: 500;
+    }
+
+    .linha-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .etiqueta-categoria {
+      background: var(--verde-palido);
+      color: var(--verde-escuro);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .grade-contatos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+    }
+    .item-contato {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: #4a6a4e;
+      font-weight: 500;
+    }
+    .item-contato i {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--verde-palido);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      color: var(--verde-principal);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 560px) {
+      .grade-contatos { grid-template-columns: 1fr; }
+      .cabecalho-identidade { flex-wrap: wrap; }
+    }
+
+    /* ── ABAS ── */
+    .barra-abas {
+      display: flex;
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 16px;
+      padding: 6px;
+      gap: 4px;
+      margin-bottom: 16px;
+      animation: subirSuave 0.4s ease 0.05s both;
+    }
+
+    .btn-aba {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #9aab96;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-aba:hover { color: var(--verde-escuro); background: var(--verde-palido); }
+    .btn-aba.ativo {
+      background: var(--verde-principal);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(88,129,87,0.3);
+    }
+
+   
+    .conteudo-aba {
+      animation: subirSuave 0.3s ease both;
+    }
+
+   
+    .bloco-sobre {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .titulo-secao {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #9aab96;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .texto-sobre {
+      font-size: 0.88rem;
+      color: #4a6a4e;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .texto-sobre:last-child { margin-bottom: 0; }
+
+
+    .grade-servicos {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-servico-ong {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: box-shadow 0.18s, transform 0.18s;
+    }
+    .card-servico-ong:hover { box-shadow: 0 6px 22px rgba(58,90,64,0.12); transform: translateY(-2px); }
+
+    .imagem-servico {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .corpo-servico {
+      padding: 18px;
+    }
+
+    .titulo-servico {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a2e1b;
+      margin-bottom: 6px;
+    }
+
+    .descricao-servico {
+      font-size: 0.82rem;
+      color: #7a8c76;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .info-ong-servico {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .foto-ong-mini {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e4ebe2;
+    }
+    .nome-ong-mini {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1a2e1b;
+    }
+    .avaliacao-servico {
+      font-size: 0.75rem;
+      color: #f5a623;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .avaliacao-servico span { color: #9aab96; }
+
+    .detalhes-servico {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .detalhe-item-servico {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #7a8c76;
+    }
+    .detalhe-item-servico i { font-size: 0.8rem; color: var(--verde-principal); }
+
+    .btn-saiba-mais {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      background: var(--verde-principal);
+      color: #fff;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.15s;
+    }
+    .btn-saiba-mais:hover { background: var(--verde-escuro); }
+    .btn-saiba-mais:active { transform: scale(0.98); }
+
+   
+    .sobreposicao-modal {
+      display: none; position: fixed; inset: 0; z-index: 2000;
+      background: rgba(26,46,27,0.55);
+      backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    .sobreposicao-modal.aberto { display: flex; }
+
+    .folha-modal {
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 640px;
+      max-height: 92vh; overflow-y: auto;
+      animation: deslizarCima 0.35s ease;
+      position: relative;
+    }
+    .folha-modal::-webkit-scrollbar { width: 4px; }
+    .folha-modal::-webkit-scrollbar-thumb { background: #cdd5c9; border-radius: 4px; }
+
+    @keyframes deslizarCima {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .imagem-modal {
+      width: 100%; height: 240px;
+      object-fit: cover;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .btn-fechar-modal {
+      position: absolute; top: 14px; right: 14px;
+      width: 36px; height: 36px;
+      background: rgba(26,46,27,0.6);
+      border: none; border-radius: 50%; cursor: pointer;
+      color: #fff; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+      z-index: 10;
+    }
+    .btn-fechar-modal:hover { background: rgba(26,46,27,0.9); }
+
+    .corpo-modal {
+      padding: 20px 22px 0;
+      margin-top: -18px;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      position: relative; z-index: 2;
+    }
+    .corpo-modal h3 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--verde-escuro); margin-bottom: 8px;
+    }
+    .corpo-modal .descricao-modal {
+      font-size: 0.86rem; color: #7a8c76;
+      line-height: 1.6; margin-bottom: 16px;
+    }
+
+    .linha-ong-modal {
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e4ebe2;
+      margin-bottom: 16px;
+    }
+    .esquerda-ong-modal { display: flex; align-items: center; gap: 10px; }
+    .esquerda-ong-modal img {
+      width: 42px; height: 42px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid #e4ebe2;
+    }
+    .nome-ong-modal { font-size: 0.9rem; font-weight: 700; color: var(--verde-escuro); }
+    .meta-ong-modal {
+      font-size: 0.75rem; color: #9aab96;
+      margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .meta-ong-modal span { display: flex; align-items: center; gap: 3px; }
+    .meta-ong-modal i { color: var(--verde-principal); }
+
+    .coluna-direita-modal {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 8px;
+    }
+    .etiqueta-pontos-modal {
+      background: var(--verde-palido);
+      color: var(--verde-escuro);
+      font-size: 0.78rem; font-weight: 700;
+      padding: 5px 12px; border-radius: 20px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .btn-conversa-modal {
+      display: flex; align-items: center; gap: 5px;
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 7px 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--verde-escuro); cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      text-decoration: none;
+    }
+    .btn-conversa-modal:hover { background: var(--verde-palido); border-color: var(--verde-principal); }
+
+   
+    .avaliacoes-modal h5 {
+      font-size: 0.95rem; font-weight: 700;
+      color: var(--verde-escuro); margin-bottom: 12px;
+    }
+    .caixa-avaliacao {
+      background: #f8faf7;
+      border: 1px solid #e4ebe2;
+      border-radius: 14px;
+      padding: 14px 16px; margin-bottom: 10px;
+    }
+    .nome-avaliador { font-size: 0.8rem; font-weight: 700; color: #1a2e1b; margin-bottom: 4px; }
+    .estrelas-avaliacao { color: #f5a623; font-size: 0.75rem; margin-bottom: 6px; }
+    .texto-avaliacao { font-size: 0.82rem; color: #4a6a4e; font-style: italic; margin-bottom: 6px; }
+    .data-avaliacao { font-size: 0.72rem; color: #b0bfac; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+    .rodape-modal {
+      padding: 16px 22px 24px;
+    }
+    .btn-inscrever {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--verde-principal); color: #fff;
+      border-radius: 14px; padding: 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-inscrever:hover { background: var(--verde-escuro); }
+    .btn-inscrever:active { transform: scale(0.98); }
+
+   
+    @keyframes subirSuave {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarUsuarioResponsiva.js" defer></script>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="marca-nav" href="#">
+      <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+      Mútuo
+    </a>
+    <ul class="links-nav">
+      <li><a href="homeMutuo.html">Início</a></li>
+      <li><a href="serviçosMutuo.html">Serviços</a></li>
+      <li><a href="OngsMutuo.html">ONGs</a></li>
+      <li><a href="chatMutuo.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a></li>
+      <li class="dropdown-nav">
+        <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+        <div class="painel-dropdown">
+          <div class="painel-dropdown-interno">
+            <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+            <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+            <a href="contatoMutuo.html"><i class="bi bi-envelope"></i> Contato</a>
+            <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+            <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+            <a href="login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-direita">
+      <a href="notificacoesMutuo.html" class="sino-nav">
+        <i class="bi bi-bell-fill"></i>
+        <span class="bell-badge"></span>
+      </a>
+      <a href="perfilMutuo.html" class="perfil-nav">
+        <img id="fotoNavbarTopo" src="../imagens/mutuoLogo.png" alt="Foto de perfil">
+         <span id="nomeUsuario"></span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- CAPA -->
+  <div class="capa-perfil">
+    <img id="capaOng" src="../imagens/mutuoLogo.png" class="capa-imagem" alt="Capa da ONG">
+    <div class="capa-overlay"></div>
+  </div>
+
+  <div class="container-perfil">
+
+    <!-- ── IDENTIDADE ── -->
+    <div class="cabecalho-identidade">
+      <img id="avatarOng" src="../imagens/mutuoLogo.png" class="avatar-ong" alt="Logo da ONG">
+      <div class="identidade-texto">
+        <h2 class="nome-ong" id="nomeOngPerfil">--</h2>
+        <p class="slogan-ong" id="localizacaoOng"></p>
+      </div>
+    </div>
+
+    <div class="linha-tags" id="tagsOng"></div>
+
+    <div class="grade-contatos">
+      <div class="item-contato"><i class="bi bi-geo-alt-fill"></i> <span id="enderecoOng"></span></div>
+      <div class="item-contato"><i class="bi bi-envelope-fill"></i> <span id="emailOng"></span></div>
+      <div class="item-contato"><i class="bi bi-telephone-fill"></i> <span id="telefoneOng"></span></div>
+    </div>
+
+    <!-- ── ABAS ── -->
+    <div class="barra-abas">
+      <button class="btn-aba ativo" data-alvo="sobre">
+        <i class="bi bi-info-circle"></i> Sobre
+      </button>
+      <button class="btn-aba" data-alvo="servicos">
+        <i class="bi bi-briefcase"></i> Serviços
+      </button>
+    </div>
+
+    <!-- ABA SOBRE -->
+    <div id="sobre" class="conteudo-aba">
+      <div class="bloco-sobre">
+        <p class="titulo-secao">Sobre</p>
+        <p class="texto-sobre" id="descricaoOng"></p>
+      </div>
+    </div>
+
+    <!-- ABA SERVIÇOS -->
+    <div id="servicos" class="conteudo-aba" style="display:none;">
+      <div class="grade-servicos" id="gradeServicosOng"></div>
+    </div>
+
+  </div>
+
+  <script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
+  <script>
+    // Abas
+    document.querySelectorAll('.btn-aba').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-aba').forEach(b => b.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        document.querySelectorAll('.conteudo-aba').forEach(c => c.style.display = 'none');
+        document.getElementById(btn.dataset.alvo).style.display = 'block';
+      });
+    });
+
+    // Modais
+    function abrirModal(id) {
+      document.getElementById(id).classList.add('aberto');
+      document.body.style.overflow = 'hidden';
+    }
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove('aberto');
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('.sobreposicao-modal').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) fecharModal(m.id); });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.sobreposicao-modal.aberto').forEach(m => fecharModal(m.id));
+      }
+    });
+
+    const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+
+if(usuario){
+    document.getElementById("nomeUsuario").textContent =
+        usuario.nome || usuario.nome_usuario;
+
+}
+
+const params = new URLSearchParams(window.location.search);
+const cnpjOng = params.get('cnpj');
+
+let dadosOng = null;
+let servicosOng = [];
+
+async function carregarPerfilOng() {
+  if (!cnpjOng) {
+    document.querySelector('.container-perfil').innerHTML = '<p style="padding:40px;text-align:center;color:#9aab96;">ONG não especificada.</p>';
+    return;
+  }
+
+  try {
+    const resposta = await fetch(`${API_URL_ONG}/ongs/${encodeURIComponent(cnpjOng)}`);
+    if (!resposta.ok) throw new Error('ONG não encontrada.');
+    const dados = await resposta.json();
+
+    dadosOng = dados;              // ← antes era dados.ong
+    servicosOng = dados.servicos;  // ← continua igual
+
+    preencherIdentidade(dadosOng);
+    preencherServicos(servicosOng);
+  } catch (erro) {
+    console.error('Erro ao carregar perfil da ONG:', erro);
+    document.querySelector('.container-perfil').innerHTML = '<p style="padding:40px;text-align:center;color:#9aab96;">Não foi possível carregar esta ONG.</p>';
+  }
+}
+
+function resolverImagemOng(caminho) {
+  if (!caminho) return '../imagens/mutuoLogo.png';
+  if (caminho.startsWith('http')) return caminho;
+  return `${API_URL}${caminho}`;
+}
+
+function preencherIdentidade(ong) {
+  document.title = 'Mútuo | ' + ong.nomeOng;
+  document.getElementById('nomeOngPerfil').textContent = ong.nomeOng;
+  document.getElementById('avatarOng').src = resolverImagemOng(ong.foto_perfil);
+  document.getElementById('capaOng').src = resolverImagemOng(ong.foto_perfil);
+  document.getElementById('localizacaoOng').textContent = `${ong.cidade || ''}${ong.estado ? ', ' + ong.estado : ''}`;
+  document.getElementById('enderecoOng').textContent = `${ong.endereco || ''}${ong.bairro ? ' - ' + ong.bairro : ''}`;
+  document.getElementById('emailOng').textContent = ong.email || 'Não informado';
+  document.getElementById('telefoneOng').textContent = ong.telefone || 'Não informado';
+  document.getElementById('descricaoOng').textContent = ong.descricao || 'Esta ONG ainda não adicionou uma descrição.';
+
+  const tagsContainer = document.getElementById('tagsOng');
+  tagsContainer.innerHTML = ong.foco
+    ? `<span class="etiqueta-categoria"><i class="bi bi-tag-fill"></i> ${ong.foco}</span>`
+    : '';
+}
+
+function preencherServicos(servicos) {
+  const grade = document.getElementById('gradeServicosOng');
+
+  if (!servicos.length) {
+    grade.innerHTML = '<p style="color:#9aab96;font-size:0.85rem;">Esta ONG ainda não cadastrou serviços.</p>';
+    return;
+  }
+
+  grade.innerHTML = servicos.map(s => `
+    <div class="card-servico-ong">
+      <img src="${resolverImagemOng(s.imagem)}" class="imagem-servico" alt="${s.nomeServico}">
+      <div class="corpo-servico">
+        <h3 class="titulo-servico">${s.nomeServico}</h3>
+        <p class="descricao-servico">${s.descricao || ''}</p>
+        <div class="detalhes-servico">
+          <div class="detalhe-item-servico"><i class="bi bi-clock-history"></i> ${s.horas}h</div>
+          <div class="detalhe-item-servico"><i class="bi bi-lightning-charge-fill"></i> ${s.pontos} pts</div>
+        </div>
+        <button class="btn-saiba-mais" onclick="abrirModalServico(${s.id})">
+          <i class="bi bi-arrow-right-circle-fill"></i> Saiba mais
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function abrirModalServico(id) {
+  const s = servicosOng.find(item => item.id === id);
+  if (!s) return;
+
+  // remove modal anterior, se existir, pra não empilhar
+  document.getElementById('modalDinamicoServico')?.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'sobreposicao-modal aberto';
+  modal.id = 'modalDinamicoServico';
+  modal.innerHTML = `
+    <div class="folha-modal">
+      <img src="${resolverImagemOng(s.imagem)}" class="imagem-modal" alt="${s.nomeServico}" onerror="this.style.display='none'">
+      <button class="btn-fechar-modal" onclick="document.getElementById('modalDinamicoServico').remove(); document.body.style.overflow='';"><i class="bi bi-x-lg"></i></button>
+      <div class="corpo-modal">
+        <h3>${s.nomeServico}</h3>
+        <p class="descricao-modal">${s.descricao || ''}</p>
+        <div class="linha-ong-modal">
+          <div class="esquerda-ong-modal">
+            <img src="${resolverImagemOng(dadosOng.foto_perfil)}" alt="${dadosOng.nomeOng}">
+            <div>
+              <p class="nome-ong-modal">${dadosOng.nomeOng}</p>
+              <div class="meta-ong-modal">
+                <span><i class="bi bi-geo-alt-fill"></i> ${dadosOng.cidade || ''}${dadosOng.estado ? ', ' + dadosOng.estado : ''}</span>
+                <span><i class="bi bi-clock-fill"></i> ${s.horas}h</span>
+              </div>
+            </div>
+          </div>
+          <div class="coluna-direita-modal">
+            <span class="etiqueta-pontos-modal"><i class="bi bi-lightning-charge-fill"></i> ${s.pontos} pontos</span>
+            <a href="chatMutuo.html" class="btn-conversa-modal"><i class="bi bi-chat-dots-fill"></i> Converse conosco</a>
+          </div>
+        </div>
+      </div>
+      <div class="rodape-modal">
+        <button class="btn-inscrever"><i class="bi bi-heart-fill"></i> Inscrever-me como voluntário</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.body.style.overflow = 'hidden';
+
+  modal.addEventListener('click', e => { if (e.target === modal) { modal.remove(); document.body.style.overflow = ''; } });
+}
+
+carregarPerfilOng();
+
+window.addEventListener('load', () => {
+  carregarFoto();
+  atualizarBadgeNotificacoes();
+});
+
+</script>
+</body>
+</html>

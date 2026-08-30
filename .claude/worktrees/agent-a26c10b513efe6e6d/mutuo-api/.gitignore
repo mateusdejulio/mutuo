@@ -1,0 +1,36 @@
+# ── Node.js (mutuo-api) ──
+node_modules/
+mutuo-api/cache/
+npm-debug.log*
+
+# ── Uploads (arquivos enviados pelos usuários, não deveriam ir pro repo) ──
+mutuo-api/uploads/
+
+# ── Flutter (mobile/mutuo) ──
+mobile/mutuo/.dart_tool/
+mobile/mutuo/.flutter-plugins
+mobile/mutuo/.flutter-plugins-dependencies
+mobile/mutuo/.packages
+mobile/mutuo/build/
+mobile/mutuo/.pub-cache/
+mobile/mutuo/.pub/
+mobile/mutuo/*.iml
+mobile/mutuo/android/.gradle/
+mobile/mutuo/android/local.properties
+mobile/mutuo/ios/Pods/
+mobile/mutuo/ios/.symlinks/
+
+# ── Electron (se tiver pasta própria, ajuste o caminho) ──
+node_modules/
+dist/
+out/
+build/
+*.exe
+*.dll
+*.pak
+
+# ── Editor / SO ──
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | ONGs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-principal: #588157;
+      --verde-escuro:    #3a5a40;
+      --creme:           #E1DCD0;
+      --creme-claro:     #f0ede6;
+      --branco:          #ffffff;
+      --texto-escuro:    #1e2e1f;
+      --texto-suave:     #7a8c78;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: var(--branco);
+      color: var(--texto-escuro);
+      padding-top: 72px;
+    }
+
+   
+    .barra-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background-color: var(--verde-principal);
+      height: 72px;
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+    .nav-marca {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem; color: var(--creme);
+      letter-spacing: 0.4px; margin-right: 2rem; flex-shrink: 0;
+    }
+    .nav-marca img { width: 38px; height: 38px; border-radius: 8px; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1;
+    }
+    .nav-links a {
+      text-decoration: none; color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem; border-radius: 8px;
+      transition: color 0.18s, background 0.18s; white-space: nowrap;
+    }
+    .nav-links a:hover, .nav-links a.ativo {
+      color: var(--creme); background: rgba(255,255,255,0.12);
+    }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a { display: flex; align-items: center; gap: 5px; }
+    .painel-dropdown {
+      display: none; position: absolute; top: 100%; left: 0;
+      padding-top: 10px; min-width: 215px;
+    }
+    .painel-dropdown-interno {
+      background: var(--verde-escuro); border-radius: 12px; overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+      border: 1px solid rgba(225,220,208,0.1);
+    }
+    .nav-dropdown:hover .painel-dropdown { display: block; }
+    .painel-dropdown a {
+      display: flex; align-items: center; gap: 9px;
+      color: rgba(225,220,208,0.8); padding: 0.65rem 1.1rem;
+      font-size: 0.84rem; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .painel-dropdown a:hover { background: rgba(255,255,255,0.08); color: var(--creme); }
+    .painel-dropdown a.perigo { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
+    .nav-direita { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .nav-sino {
+      position: relative; cursor: pointer;
+      color: var(--creme); font-size: 1.25rem; opacity: 0.8;
+      transition: opacity 0.2s; text-decoration: none;
+    }
+    .nav-sino:hover { opacity: 1; }
+    .sino-badge {
+      position: absolute; top: -5px; right: -6px;
+      background: var(--creme); color: var(--verde-escuro);
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--verde-principal);
+    }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--creme);
+      color: var(--verde-escuro);
+      border: 1px solid var(--verde-principal);
+      font-size: 0.62rem;
+      font-weight: 700;
+      min-width: 15px; height: 15px;
+      border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
+    .nav-perfil {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      border-radius: 40px; padding: 5px 14px 5px 5px;
+      transition: background 0.2s;
+    }
+    .nav-perfil:hover { background: rgba(255,255,255,0.16); }
+    .nav-perfil img {
+      width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.4);
+    }
+    .nav-perfil span {
+      color: var(--creme); font-size: 0.84rem; font-weight: 500;
+      white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;
+    }
+
+   
+    .heroi-busca {
+      background: var(--verde-principal);
+      padding: 3rem 2rem 3.5rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+      animation: descerFade 0.45s ease both;
+    }
+    .heroi-busca::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      background: rgba(58,90,64,0.3); border-radius: 50%;
+    }
+    .heroi-busca::after {
+      content: ''; position: absolute; bottom: -80px; left: 30%;
+      width: 300px; height: 300px;
+      background: rgba(58,90,64,0.15); border-radius: 50%;
+    }
+    .heroi-busca-interno {
+      position: relative; z-index: 1; max-width: 600px; margin: 0 auto;
+    }
+    .heroi-busca h2 { font-size: 1.9rem; color: var(--creme); margin-bottom: 0.5rem; }
+    .heroi-busca p { font-size: 0.92rem; color: rgba(225,220,208,0.75); margin-bottom: 1.75rem; }
+
+    .barra-busca {
+      display: flex; align-items: center;
+      background: var(--branco); border-radius: 50px;
+      padding: 6px 6px 6px 18px;
+      box-shadow: 0 4px 20px rgba(58,90,64,0.25);
+    }
+    .barra-busca i { color: var(--texto-suave); font-size: 1rem; margin-right: 8px; flex-shrink: 0; }
+    .barra-busca input {
+      flex: 1; border: none; outline: none;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.9rem; color: var(--texto-escuro);
+      background: transparent;
+    }
+    .barra-busca input::placeholder { color: var(--texto-suave); }
+    .botao-buscar {
+      background: var(--verde-principal); color: var(--creme);
+      border: none; border-radius: 40px;
+      padding: 10px 22px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.87rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .botao-buscar:hover { background: var(--verde-escuro); }
+
+   
+    .area-filtros {
+      margin: 1.5rem 2rem;
+      animation: subirFade 0.45s ease 0.05s both;
+    }
+    .topo-filtros {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;
+    }
+    .contador-resultados {
+      font-size: 0.9rem; font-weight: 600; color: var(--texto-suave);
+    }
+    .contador-resultados strong { color: var(--verde-escuro); }
+    .grupo-botoes-filtro { display: flex; gap: 8px; }
+    .botao-filtro {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--branco); color: var(--verde-escuro);
+      border: 1.5px solid var(--creme); border-radius: 10px;
+      padding: 7px 14px; font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .botao-filtro:hover { border-color: var(--verde-principal); background: var(--creme-claro); }
+    .botao-filtro.ativo { background: var(--verde-principal); color: var(--creme); border-color: var(--verde-principal); }
+    .painel-filtros {
+      display: none; grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px; padding: 16px; margin-bottom: 1rem;
+      background: var(--creme-claro); border: 1.5px solid var(--creme); border-radius: 14px;
+    }
+    .painel-filtros.aberto { display: grid; }
+    .campo-filtro { display: flex; flex-direction: column; gap: 5px; }
+    .campo-filtro label { font-size: 0.75rem; font-weight: 700; color: var(--verde-escuro); }
+    .campo-filtro select {
+      width: 100%; border: 1.5px solid var(--creme); border-radius: 9px;
+      padding: 9px 10px; background: var(--branco); color: var(--texto-escuro);
+      font-family: 'Quicksand', sans-serif; outline: none;
+    }
+    .campo-filtro select:focus { border-color: var(--verde-principal); }
+    .acoes-filtro { display: flex; align-items: flex-end; }
+    .botao-limpar {
+      width: 100%; border: 1.5px solid var(--verde-principal); border-radius: 9px;
+      padding: 9px 10px; background: transparent; color: var(--verde-escuro);
+      font-family: 'Quicksand', sans-serif; font-weight: 700; cursor: pointer;
+    }
+    .botao-limpar:hover { background: var(--branco); }
+
+    .categorias { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pilula-categoria {
+      background: var(--branco);
+      border: 1.5px solid var(--creme);
+      color: var(--verde-escuro); border-radius: 30px;
+      padding: 6px 16px; font-family: 'Quicksand', sans-serif;
+      font-size: 0.81rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pilula-categoria:hover { border-color: var(--verde-principal); background: var(--creme-claro); }
+    .pilula-categoria.ativa {
+      background: var(--verde-principal); color: var(--creme);
+      border-color: var(--verde-principal);
+    }
+
+   
+    .area-cartoes {
+      margin: 0 2rem 3rem;
+      animation: subirFade 0.5s ease 0.1s both;
+    }
+    .grade-cartoes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .cartao-servico {
+      background: var(--branco);
+      border-radius: 20px;
+      border: 1.5px solid var(--creme);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(88,129,87,0.07);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .cartao-servico:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(88,129,87,0.15);
+    }
+
+    .envoltorio-imagem { position: relative; height: 160px; overflow: hidden; flex-shrink: 0; }
+    .envoltorio-imagem img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .cartao-servico:hover .envoltorio-imagem img { transform: scale(1.05); }
+    .etiqueta-categoria {
+      position: absolute; top: 11px; left: 12px;
+      background: var(--verde-principal); color: var(--creme);
+      font-size: 0.7rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    .corpo-cartao {
+      padding: 1.1rem 1.2rem 1.2rem;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .corpo-cartao h3 { font-size: 1.05rem; color: var(--verde-escuro); margin-bottom: 0.3rem; }
+    .descricao-cartao { font-size: 0.81rem; color: var(--texto-suave); line-height: 1.5; margin-bottom: 0.9rem; }
+
+    .linha-ong {
+      display: flex; align-items: center; gap: 9px;
+      padding-bottom: 0.8rem;
+      border-bottom: 1.5px solid var(--creme);
+      margin-bottom: 0.8rem;
+    }
+    .linha-ong img {
+      width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--creme);
+    }
+    .nome-ong { font-size: 0.82rem; font-weight: 600; color: var(--verde-escuro); }
+
+    .metadados { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .item-metadado {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.78rem; color: var(--texto-suave);
+    }
+    .item-metadado i { color: var(--verde-principal); }
+
+    .botao-saiba-mais {
+      width: 100%; border: none; cursor: pointer;
+      background: var(--verde-principal); color: var(--creme);
+      border-radius: 10px; padding: 10px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.87rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: auto;
+    }
+    .botao-saiba-mais:hover { background: var(--verde-escuro); }
+    .botao-saiba-mais:active { transform: scale(0.98); }
+
+
+    @keyframes deslizarCima {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .corpo-modal p.descricao { font-size: 0.88rem; color: var(--texto-suave); line-height: 1.6; margin-bottom: 1.2rem; }
+
+
+
+
+    .etiqueta-pontos-cartao {
+    position: absolute; top: 11px; right: 12px;
+    background: var(--creme); color: var(--verde-escuro);
+    font-size: 0.7rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+}
+
+
+.grade-cartoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 1.1rem;
+  align-items: stretch;
+}
+
+.cartao-servico {
+  background: var(--branco);
+  border-radius: 20px;
+  border: 1.5px solid var(--creme);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(88,129,87,0.07);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex; flex-direction: column;
+  height: 100%;
+}
+
+.descricao-cartao {
+  font-size: 0.81rem; color: var(--texto-suave); line-height: 1.5; margin-bottom: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.botoes-cartao { display: flex; gap: 8px; margin-top: auto; }
+
+.botao-duvida,
+.botao-saiba-mais {
+  flex: 1;
+  border: none; cursor: pointer;
+  border-radius: 12px;
+  padding: 11px 10px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.82rem; font-weight: 700;
+  white-space: nowrap;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.2s, color 0.2s, transform 0.12s, box-shadow 0.2s;
+  margin-top: 0;
+}
+
+.botao-duvida {
+  background: var(--creme-claro);
+  color: var(--verde-escuro);
+  border: 1.5px solid var(--creme);
+}
+.botao-duvida:hover { background: var(--creme); border-color: var(--verde-principal); }
+.botao-duvida:active { transform: scale(0.97); }
+
+.botao-saiba-mais {
+  background: var(--verde-principal);
+  color: var(--creme);
+  box-shadow: 0 3px 10px rgba(88,129,87,0.3);
+}
+.botao-saiba-mais:hover { background: var(--verde-escuro); box-shadow: 0 4px 14px rgba(58,90,64,0.4); }
+.botao-saiba-mais:active { transform: scale(0.97); }
+
+.botao-duvida i, .botao-saiba-mais i { font-size: 0.85rem; }
+    
+    @keyframes descerFade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subirFade {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+   
+    @media (max-width: 768px) {
+      body { padding-top: 64px; }
+      .nav-links { display: none; }
+      .nav-perfil span { display: none; }
+      .area-filtros, .area-cartoes { margin-left: 1rem; margin-right: 1rem; }
+      .heroi-busca { padding: 2rem 1rem 2.5rem; }
+      .heroi-busca h2 { font-size: 1.45rem; }
+      .painel-filtros { grid-template-columns: 1fr; }
+      .grade-cartoes { grid-template-columns: 1fr; }
+    }
+
+    .link-sem-estilo {
+      color: inherit;
+      text-decoration: none;
+      display: block; /* garante que o link ocupe o espaço do bloco, se necessário */
+    }
+    .link-sem-estilo:hover {
+      color: inherit;
+    }
+
+  </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarUsuarioResponsiva.js" defer></script>
+</head>
+<body>
+
+
+<nav class="barra-nav">
+  <a class="nav-marca" href="#">
+    <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+    Mútuo
+  </a>
+  <ul class="nav-links">
+    <li><a href="homeMutuo.html">Início</a></li>
+    <li><a href="serviçosMutuo.html">Serviços</a></li>
+    <li><a href="OngsMutuo.html" class="ativo">ONGs</a></li>
+    <li><a href="chatMutuo.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a></li>
+    <li class="nav-dropdown">
+      <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+      <div class="painel-dropdown">
+        <div class="painel-dropdown-interno">
+          <a href="planosMutuo.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+          <a href="certificadosMutuo.html"><i class="bi bi-award"></i> Certificados</a>
+          <a href="contatoMutuo.html"><i class="bi bi-envelope"></i> Contato</a>
+          <a href="comoUsarMutuo.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+          <a href="quemSomosMutuo.html"><i class="bi bi-people"></i> Quem somos</a>
+          <a href="../login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-direita">
+    <a href="notificacoesMutuo.html" class="sino-nav">
+      <i class="bi bi-bell-fill"></i>
+      <span class="bell-badge"></span>
+    </a>
+    <a href="perfilMutuo.html" class="nav-perfil">
+     <img id="fotoNavbarTopo" src="../imagens/mutuoLogo.png" alt="Foto de perfil">
+       <span id="nomeUsuario"></span>
+    </a>
+  </div>
+</nav>
+
+
+<section class="heroi-busca">
+  <div class="heroi-busca-interno">
+    <h2>Encontre serviços solidários e apoie ONGs</h2>
+    <p>Troque serviços com ONGs e contribua para uma rede solidária que transforma ações voluntárias em impacto social real.</p>
+    <div class="barra-busca">
+      <i class="bi bi-search"></i>
+      <input type="text" id="campoBusca" placeholder="Buscar serviços..." oninput="filtrarCartoes()">
+      <button class="botao-buscar">Buscar</button>
+    </div>
+  </div>
+</section>
+
+
+<div class="area-filtros">
+  <div class="topo-filtros">
+    <span class="contador-resultados"><strong id="labelContador">5</strong> serviços encontrados</span>
+    <div class="grupo-botoes-filtro">
+      <button class="botao-filtro" id="botaoAbrirFiltros" type="button" onclick="alternarPainelFiltros()"><i class="bi bi-funnel"></i> Filtros</button>
+    </div>
+  </div>
+  <div class="painel-filtros" id="painelFiltros">
+    <div class="campo-filtro">
+      <label for="filtroLocalizacao">Localização</label>
+      <select id="filtroLocalizacao" onchange="aplicarFiltros()">
+        <option value="">Todas as localizações</option>
+      </select>
+    </div>
+    <div class="campo-filtro">
+      <label for="filtroDuracao">Duração</label>
+      <select id="filtroDuracao" onchange="aplicarFiltros()">
+        <option value="">Qualquer duração</option>
+        <option value="ate2">Até 2 horas</option>
+        <option value="3a5">De 3 a 5 horas</option>
+        <option value="mais5">Mais de 5 horas</option>
+      </select>
+    </div>
+    <div class="campo-filtro">
+      <label for="filtroPontos">Pontos necessários</label>
+      <select id="filtroPontos" onchange="aplicarFiltros()">
+        <option value="">Qualquer quantidade</option>
+        <option value="ate50">Até 50 pontos</option>
+        <option value="51a100">De 51 a 100 pontos</option>
+        <option value="mais100">Mais de 100 pontos</option>
+      </select>
+    </div>
+    <div class="campo-filtro">
+      <label for="filtroOrdenacao">Ordenar por</label>
+      <select id="filtroOrdenacao" onchange="aplicarFiltros()">
+        <option value="recentes">Mais recentes</option>
+        <option value="nome">Nome (A–Z)</option>
+        <option value="pontosMenor">Menos pontos</option>
+        <option value="pontosMaior">Mais pontos</option>
+        <option value="duracaoMenor">Menor duração</option>
+      </select>
+    </div>
+    <div class="acoes-filtro">
+      <button class="botao-limpar" type="button" onclick="limparFiltros()"><i class="bi bi-x-circle"></i> Limpar filtros</button>
+    </div>
+  </div>
+  <div class="categorias" id="listaCategorias">
+    <button class="pilula-categoria ativa" data-categoria="todos" onclick="filtrarCategoria(this)">Todos</button>
+    
+  </div>
+</div>
+
+
+<div class="area-cartoes">
+  <div class="grade-cartoes" id="gradeCartoes">
+    
+  </div>
+</div>
+
+<script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
+<script>
+
+  let todosServicos = [];
+  let categoriaAtiva = 'todos';
+
+  function resolverImagem(caminho) {
+    if (!caminho) return '../imagens/mutuoLogo.png';
+    if (caminho.startsWith('http')) return caminho;
+    return `${API_URL}${caminho}`;
+  }
+
+  async function carregarServicos() {
+    try {
+      const resp = await fetch(`${API_URL}/servicos-ong`);
+      if (!resp.ok) throw new Error('Erro ao buscar serviços');
+      todosServicos = await resp.json();
+
+      montarCategorias(todosServicos);
+      montarLocalizacoes(todosServicos);
+      aplicarFiltros();
+    } catch (err) {
+      console.error('Erro ao carregar serviços das ONGs:', err);
+      document.getElementById('gradeCartoes').innerHTML =
+        `<p style="color:var(--texto-suave)">Não foi possível carregar os serviços agora. Tente novamente mais tarde.</p>`;
+    }
+  }
+
+  function montarCategorias(servicos) {
+    const container = document.getElementById('listaCategorias');
+    const focosUnicos = [...new Set(servicos.map(s => s.foco).filter(Boolean))];
+
+    focosUnicos.forEach(foco => {
+      const btn = document.createElement('button');
+      btn.className = 'pilula-categoria';
+      btn.dataset.categoria = foco;
+      btn.textContent = foco;
+      btn.onclick = () => filtrarCategoria(btn);
+      container.appendChild(btn);
+    });
+  }
+
+  function filtrarCategoria(botao) {
+    document.querySelectorAll('.pilula-categoria').forEach(p => p.classList.remove('ativa'));
+    botao.classList.add('ativa');
+    categoriaAtiva = botao.dataset.categoria;
+    aplicarFiltros();
+  }
+
+  function filtrarCartoes() {
+    aplicarFiltros();
+  }
+
+  function montarLocalizacoes(servicos) {
+    const select = document.getElementById('filtroLocalizacao');
+    const locais = [...new Set(servicos.map(s => [s.cidade, s.estado].filter(Boolean).join(', ')).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    locais.forEach(local => {
+      const option = document.createElement('option');
+      option.value = local;
+      option.textContent = local;
+      select.appendChild(option);
+    });
+  }
+
+  function alternarPainelFiltros() {
+    const painel = document.getElementById('painelFiltros');
+    const aberto = painel.classList.toggle('aberto');
+    document.getElementById('botaoAbrirFiltros').classList.toggle('ativo', aberto);
+  }
+
+  function limparFiltros() {
+    document.getElementById('campoBusca').value = '';
+    document.getElementById('filtroLocalizacao').value = '';
+    document.getElementById('filtroDuracao').value = '';
+    document.getElementById('filtroPontos').value = '';
+    document.getElementById('filtroOrdenacao').value = 'recentes';
+    categoriaAtiva = 'todos';
+    document.querySelectorAll('.pilula-categoria').forEach(p => p.classList.toggle('ativa', p.dataset.categoria === 'todos'));
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    const termo = document.getElementById('campoBusca').value.toLocaleLowerCase('pt-BR').trim();
+    const localizacao = document.getElementById('filtroLocalizacao').value;
+    const duracao = document.getElementById('filtroDuracao').value;
+    const pontosSelecionados = document.getElementById('filtroPontos').value;
+    const ordenacao = document.getElementById('filtroOrdenacao').value;
+    const filtrados = todosServicos.filter(s => {
+      const bateCat = categoriaAtiva === 'todos' || s.foco === categoriaAtiva;
+      const bateTermo = !termo ||
+        (s.nomeServico || '').toLocaleLowerCase('pt-BR').includes(termo) ||
+        (s.descricao || '').toLocaleLowerCase('pt-BR').includes(termo) ||
+        (s.nomeOng || '').toLocaleLowerCase('pt-BR').includes(termo);
+      const localServico = [s.cidade, s.estado].filter(Boolean).join(', ');
+      const bateLocal = !localizacao || localServico === localizacao;
+      const horas = Number(s.horas) || 0;
+      const bateDuracao = !duracao ||
+        (duracao === 'ate2' && horas <= 2) ||
+        (duracao === '3a5' && horas >= 3 && horas <= 5) ||
+        (duracao === 'mais5' && horas > 5);
+      const pontos = Number(s.pontos) || 0;
+      const batePontos = !pontosSelecionados ||
+        (pontosSelecionados === 'ate50' && pontos <= 50) ||
+        (pontosSelecionados === '51a100' && pontos >= 51 && pontos <= 100) ||
+        (pontosSelecionados === 'mais100' && pontos > 100);
+      return bateCat && bateTermo && bateLocal && bateDuracao && batePontos;
+    });
+
+    filtrados.sort((a, b) => {
+      if (ordenacao === 'nome') return (a.nomeServico || '').localeCompare(b.nomeServico || '', 'pt-BR');
+      if (ordenacao === 'pontosMenor') return Number(a.pontos || 0) - Number(b.pontos || 0);
+      if (ordenacao === 'pontosMaior') return Number(b.pontos || 0) - Number(a.pontos || 0);
+      if (ordenacao === 'duracaoMenor') return Number(a.horas || 0) - Number(b.horas || 0);
+      return Number(b.id || 0) - Number(a.id || 0);
+    });
+    renderizarCards(filtrados);
+  }
+
+  function renderizarCards(servicos) {
+    const grade = document.getElementById('gradeCartoes');
+    document.getElementById('labelContador').textContent = servicos.length;
+
+    if (servicos.length === 0) {
+      grade.innerHTML = `<p style="color:var(--texto-suave)">Nenhum serviço encontrado.</p>`;
+      return;
+    }
+
+    grade.innerHTML = servicos.map(s => `
+      <div class="cartao-servico">
+        <div class="envoltorio-imagem">
+          <img src="${resolverImagem(s.imagem)}" alt="${s.nomeServico}">
+          <span class="etiqueta-categoria">${s.foco || ''}</span>
+          <span class="etiqueta-pontos-cartao"><i class="bi bi-star-fill"></i> ${s.pontos || 0} pts</span>
+        </div>
+        <div class="corpo-cartao">
+          <h3>${s.nomeServico}</h3>
+          <p class="descricao-cartao">${s.descricao || ''}</p>
+          <div class="linha-ong">
+            <img src="${resolverImagem(s.fotoOng)}" alt="${s.nomeOng}">
+            <div>
+              <a href="perfilOngMutuo.html?cnpj=${encodeURIComponent(s.cnpj)}" class="nome-ong link-sem-estilo">${s.nomeOng}</a>
+            </div>
+          </div>
+          <div class="metadados">
+            <span class="item-metadado"><i class="bi bi-geo-alt-fill"></i> ${s.cidade || ''}${s.estado ? ', ' + s.estado : ''}</span>
+            <span class="item-metadado"><i class="bi bi-clock-fill"></i> ${s.horas || ''}h</span>
+          </div>
+          <div class="botoes-cartao">
+            <button class="botao-duvida" onclick="tirarDuvidas(${s.id})"><i class="bi bi-chat-dots-fill"></i> Tirar dúvidas</button>
+            <button class="botao-saiba-mais" onclick="inscreverServico(${s.id})"><i class="bi bi-check-circle-fill"></i> Solicitar</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function tirarDuvidas(id) {
+    const s = todosServicos.find(item => item.id === id);
+    if (!s) { window.location.href = 'chatMutuo.html'; return; }
+    const params = new URLSearchParams({
+      tipo: 'ong',
+      id: s.cnpj,
+      nome: s.nomeOng || 'ONG',
+      foto: resolverImagem(s.fotoOng)
+    });
+    window.location.href = `chatMutuo.html?${params.toString()}`;
+  }
+
+  async function inscreverServico(id) {
+    const s = todosServicos.find(item => item.id === id);
+    if (!s) return;
+
+    const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
+    const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
+
+    if (!usuarioLogado?.cpf) {
+      alert('Sessão expirada. Faça login novamente.');
+      return;
+    }
+
+    try {
+      const resposta = await fetch(`${API_URL}/solicitacoes-ong`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codServico: s.id,
+          codUsuario: usuarioLogado.cpf,
+          pontos: s.pontos || 0
+        })
+      });
+
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || resultado.error) {
+        throw new Error(resultado.erro || resultado.error || 'Erro ao se inscrever no serviço.');
+      }
+
+      alert('Inscrição realizada com sucesso!');
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível se inscrever no serviço.');
+    }
+  }
+
+  window.addEventListener('load', () => {
+    carregarServicos();
+  });
+
+  const usuario = JSON.parse(sessionStorage.getItem("usuarioLogado"));
+
+  if (usuario) {
+    document.getElementById("nomeUsuario").textContent = usuario.nome || usuario.nome_usuario;
+  }
+  window.addEventListener('load', () => {
+    carregarFoto();
+    atualizarBadgeNotificacoes();
+  });
+</script>
+ 
+</body>
+</html>

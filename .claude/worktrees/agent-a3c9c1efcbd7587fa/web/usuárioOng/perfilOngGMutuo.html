@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Perfil ONG</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+  <style>
+    :root {
+      --verde-principal: #588157;
+      --verde-escuro: #3a5a40;
+      --verde-claro: #6b9e4a;
+      --verde-palido: #eaf2e6;
+      --verde-badge: #b7ce8f;
+      --creme: #E1DCD0;
+      --altura-nav: 72px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #f2f5f1;
+      color: #1a2e1b;
+      min-height: 100vh;
+      padding-top: var(--altura-nav);
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background-color: var(--verde-principal);
+      height: var(--altura-nav);
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      box-shadow: 0 2px 16px rgba(58,90,64,0.25);
+    }
+
+    .marca-nav {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.55rem; color: var(--creme);
+      letter-spacing: 0.4px;
+      margin-right: 2rem; flex-shrink: 0;
+    }
+    .marca-nav img { width: 38px; height: 38px; border-radius: 8px; }
+
+    .links-nav {
+      display: flex; align-items: center; gap: 2px;
+      list-style: none; flex: 1; margin: 0; padding: 0;
+    }
+    .links-nav a {
+      text-decoration: none;
+      color: rgba(225,220,208,0.82);
+      font-size: 0.875rem; font-weight: 500;
+      padding: 0.45rem 0.9rem; border-radius: 8px;
+      transition: color 0.18s, background 0.18s; white-space: nowrap;
+    }
+    .links-nav a:hover, .links-nav a.ativo {
+      color: var(--creme); background: rgba(255,255,255,0.12);
+    }
+
+    .dropdown-nav { position: relative; }
+    .dropdown-nav > a { display: flex; align-items: center; gap: 5px; }
+    .painel-dropdown {
+      display: none; position: absolute; top: 100%; left: 0;
+      padding-top: 10px; min-width: 215px;
+    }
+    .painel-dropdown-interno {
+      background: var(--verde-escuro); border-radius: 12px;
+      overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+      border: 1px solid rgba(225,220,208,0.1);
+    }
+    .dropdown-nav:hover .painel-dropdown { display: block; }
+    .painel-dropdown a {
+      display: flex; align-items: center; gap: 9px;
+      color: rgba(225,220,208,0.8);
+      padding: 0.65rem 1.1rem; font-size: 0.84rem; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .painel-dropdown a:hover { background: rgba(255,255,255,0.08); color: var(--creme); }
+    .painel-dropdown a.perigo { color: rgba(255,140,140,0.75); border-top: 1px solid rgba(225,220,208,0.1); }
+
+    .nav-direita { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
+    .sino-nav {
+      position: relative; cursor: pointer;
+      color: var(--creme); font-size: 1.25rem;
+      opacity: 0.8; transition: opacity 0.2s; text-decoration: none;
+    }
+    .sino-nav:hover { opacity: 1; }
+    .badge-sino {
+      position: absolute; top: -5px; right: -6px;
+      background: var(--creme); color: var(--verde-escuro);
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--verde-principal);
+    }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--creme);
+      color: var(--verde-escuro);
+      border: 1px solid var(--verde-principal);
+      font-size: 0.62rem;
+      font-weight: 700;
+      min-width: 15px; height: 15px;
+      border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
+
+    .perfil-nav {
+      display: flex; align-items: center; gap: 9px; text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      border-radius: 40px; padding: 5px 14px 5px 5px;
+      transition: background 0.2s;
+    }
+    .perfil-nav:hover { background: rgba(255,255,255,0.16); }
+    .perfil-nav img {
+      width: 36px; height: 36px; border-radius: 50%;
+      object-fit: cover; border: 2px solid rgba(225,220,208,0.4);
+    }
+    .perfil-nav span { color: var(--creme); font-size: 0.84rem; font-weight: 500; }
+
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(225,220,208,0.18);
+      transition: background 0.2s;
+      margin-left: auto;
+    }
+    .nav-hamburger:hover { background: rgba(255,255,255,0.16); }
+    .nav-hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--creme);
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-drawer {
+      display: none;
+      position: fixed;
+      top: var(--altura-nav); left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: var(--verde-escuro);
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 1rem 0 2rem;
+    }
+    .mobile-drawer.open { transform: translateX(0); }
+
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      top: var(--altura-nav); left: 0; right: 0; bottom: 0;
+      z-index: 98;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .drawer-overlay.open { opacity: 1; }
+
+    .drawer-profile {
+      display: flex; align-items: center; gap: 12px;
+      padding: 1.1rem 1.4rem 1.4rem;
+      border-bottom: 1px solid rgba(225,220,208,0.12);
+      margin-bottom: 0.5rem;
+    }
+    .drawer-profile img {
+      width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(225,220,208,0.35);
+    }
+    .drawer-profile-info strong {
+      display: block; color: var(--creme);
+      font-size: 0.92rem; font-weight: 600;
+    }
+    .drawer-profile-info small {
+      color: rgba(225,220,208,0.55); font-size: 0.75rem;
+    }
+
+    .drawer-nav-link {
+      display: flex; align-items: center; gap: 11px;
+      padding: 0.78rem 1.4rem;
+      color: rgba(225,220,208,0.8);
+      text-decoration: none;
+      font-size: 0.92rem; font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .drawer-nav-link:hover, .drawer-nav-link.active {
+      background: rgba(255,255,255,0.07); color: var(--creme);
+    }
+    .drawer-nav-link i {
+      font-size: 1rem; width: 20px; text-align: center;
+      color: rgba(225,220,208,0.55);
+    }
+    .drawer-nav-link.active i, .drawer-nav-link:hover i { color: var(--creme); }
+
+    .drawer-section-label {
+      padding: 1rem 1.4rem 0.35rem;
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: rgba(225,220,208,0.35);
+      display: block;
+    }
+
+    .drawer-divider {
+      height: 1px;
+      background: rgba(225,220,208,0.1);
+      margin: 0.5rem 1.4rem;
+    }
+
+    .drawer-nav-link.danger { color: rgba(255,140,140,0.7); }
+    .drawer-nav-link.danger:hover { color: rgba(255,140,140,0.95); background: rgba(255,100,100,0.06); }
+    .drawer-nav-link.danger i { color: rgba(255,140,140,0.5); }
+
+    .drawer-bell-badge {
+      margin-left: auto;
+      background: var(--creme); color: var(--verde-escuro);
+      font-size: 0.6rem; font-weight: 700;
+      min-width: 18px; height: 18px;
+      border-radius: 30px; padding: 0 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .links-nav   { display: none !important; }
+      .nav-direita { display: none !important; }
+      .nav-hamburger { display: flex; }
+      .mobile-drawer { display: block; }
+      .drawer-overlay { display: block; }
+      .marca-nav { margin-right: 0; font-size: 1.35rem; }
+    }
+
+    .pagina {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 16px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .bloco {
+      background: #fff;
+      border: 1px solid #e4ebe2;
+      border-radius: 20px;
+      padding: 24px;
+      animation: subirSuave 0.4s ease both;
+    }
+
+    .cabecalho-perfil {
+      display: flex; align-items: center; gap: 18px; margin-bottom: 16px;
+    }
+    .foto-perfil-wrap { position: relative; flex-shrink: 0; }
+    .foto-perfil {
+      width: 72px; height: 72px; border-radius: 50%;
+      object-fit: cover; border: 3px solid var(--verde-badge);
+    }
+    .badge-online {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 14px; height: 14px;
+      background: #4caf50; border-radius: 50%; border: 2px solid #fff;
+    }
+
+    .btn-trocar-foto {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--verde-escuro); color: #fff;
+      border: 2px solid #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; transition: background 0.18s, transform 0.15s;
+    }
+    .btn-trocar-foto:hover { background: var(--verde-principal); transform: scale(1.06); }
+
+    .info-perfil h2 { font-size: 1.15rem; font-weight: 700; color: #1a2e1b; margin-bottom: 2px; }
+    .info-perfil span { font-size: 0.82rem; color: #9aab96; font-weight: 600; }
+
+
+    .estatisticas-perfil { display: flex; gap: 0; }
+    .stat-item {
+      flex: 1; text-align: center; padding: 8px 4px;
+      border-right: 1px solid #f0f4ef;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-numero { font-size: 1.2rem; font-weight: 700; color: var(--verde-escuro); display: block; }
+    .stat-texto { font-size: 0.72rem; color: #9aab96; font-weight: 600; }
+
+    .campo-nome-edit {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    #exibNome{ color: var(--verde-escuro); }
+    #exibUser{ color: var(--verde-escuro); }
+
+    .editando-perfil .campo-nome-edit { display: flex; }
+    .editando-perfil .cabecalho-perfil-nome { display: none; }
+
+    .readonly .label-readonly { color: #666; font-size: 14px; }
+
+    .badge-readonly {
+      font-size: 11px;
+      background: #f4f4f0;
+      color: #999;
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin-left: 6px;
+      border: 1px solid #ddd;
+    }
+
+    .campo-edit { flex: 1; }
+
+    .campo-edit input {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 14px;
+    }
+
+    .campo-edit input:focus {
+      outline: none;
+      border-color: var(--verde-principal);
+    }
+
+    .prefixo-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .prefixo {
+      padding: 8px 10px;
+      background: #f4f4f0;
+      border-right: 1px solid #ddd;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .prefixo-wrap input {
+      border: none !important;
+      border-radius: 0 !important;
+    }
+
+
+    .tag-habilidade { display: flex; align-items: center; gap: 6px; }
+
+    .tag-habilidade .remover {
+      display: none;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .editando .tag-habilidade .remover { display: flex; }
+
+    .add-habilidade { display: none; align-items: center; gap: 6px; }
+    .editando .add-habilidade { display: flex; }
+
+    .add-habilidade input {
+      border: 1px dashed #bbb;
+      border-radius: 20px;
+      padding: 6px 12px;
+      background: transparent;
+    }
+
+    .add-habilidade button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 22px;
+      color: var(--verde-principal);
+    }
+
+    .acoes-edit {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-salvar {
+      border: none;
+      background: var(--verde-escuro);
+      color: white;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-cancelar {
+      border: 1px solid #ccc;
+      background: white;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .cabecalho-bloco {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 18px;
+    }
+    .cabecalho-bloco h3 { font-size: 1rem; font-weight: 700; color: var(--verde-escuro); margin-bottom: 2px; }
+    .cabecalho-bloco p { font-size: 0.78rem; color: #9aab96; font-weight: 500; }
+
+    .btn-editar {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--verde-palido); color: var(--verde-escuro);
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.8rem; font-weight: 700;
+      padding: 8px 16px; border-radius: 20px;
+      border: none; cursor: pointer; transition: background 0.18s; flex-shrink: 0;
+    }
+    .btn-editar:hover { background: var(--verde-badge); }
+
+    .lista-info { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+    .item-info {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.88rem; color: #3a4a3b; font-weight: 500;
+    }
+    .item-info i {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--verde-palido);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; color: var(--verde-principal); flex-shrink: 0;
+    }
+
+    .divisor { height: 1px; background: #f0f4ef; margin: 16px 0; }
+
+
+    .tag-habilidade {
+      background: var(--verde-palido); color: var(--verde-escuro);
+      font-size: 0.8rem; font-weight: 600;
+      padding: 6px 14px; border-radius: 20px;
+    }
+
+    .card-pontos {
+      background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
+      border-radius: 20px; padding: 24px; color: #fff;
+      animation: subirSuave 0.4s ease 0.05s both;
+    }
+    .topo-pontos {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 8px;
+    }
+    .topo-pontos h3 { font-size: 0.9rem; font-weight: 600; opacity: 0.85; }
+    .icone-pontos {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.15); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+    .valor-pontos { font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .subtitulo-pontos { font-size: 0.78rem; opacity: 0.7; margin-bottom: 18px; }
+    .linha-pontos { height: 1px; background: rgba(255,255,255,0.2); margin: 16px 0; }
+    .movimentacao-mes { display: flex; gap: 20px; }
+    .mov-label {
+      font-size: 0.72rem; opacity: 0.65; margin-bottom: 2px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .mov-valor { font-size: 1rem; font-weight: 700; }
+    .mov-valor.entrada { color: var(--verde-badge); }
+    .mov-valor.saida { color: rgba(255,255,255,0.6); }
+
+    .card-servico {
+      border: 1px solid #e4ebe2; border-radius: 16px;
+      padding: 18px; margin-top: 16px; transition: box-shadow 0.18s;
+    }
+    .card-servico:hover { box-shadow: 0 4px 14px rgba(58,90,64,0.1); }
+    .topo-servico { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .topo-servico h4 { font-size: 0.95rem; font-weight: 700; color: #1a2e1b; }
+    .tag-ativo {
+      font-size: 0.7rem; font-weight: 700;
+      background: #e6f4ea; color: #2d6a4f;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .descricao-servico { font-size: 0.82rem; color: #7a8c76; margin-bottom: 14px; }
+    .rodape-servico { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .avaliacao-servico {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.82rem; font-weight: 600; color: #f5a623;
+    }
+    .avaliacao-servico span { color: #7a8c76; }
+    .pontos-servico {
+      font-size: 0.82rem; font-weight: 700; color: var(--verde-principal);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .acoes-servico { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .btn-excluir {
+      font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 700;
+      background: #fde8e8; color: #b00020;
+      border: none; padding: 7px 16px; border-radius: 20px;
+      cursor: pointer; transition: background 0.18s;
+    }
+    .btn-excluir:hover { background: #fcc; }
+    .btn-editar-servico {
+      font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 700;
+      background: var(--verde-palido); color: var(--verde-escuro);
+      border: none; padding: 7px 16px; border-radius: 20px;
+      cursor: pointer; transition: background 0.18s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-editar-servico:hover { background: var(--verde-badge); }
+
+    .btn-adicionar {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--verde-principal); color: #fff;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 700;
+      padding: 8px 18px; border-radius: 20px;
+      text-decoration: none; transition: background 0.18s;
+    }
+    .btn-adicionar:hover { background: var(--verde-escuro); color: #fff; }
+
+    .badge-limite-servicos {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--verde-palido); color: var(--verde-escuro);
+      font-size: 0.75rem; font-weight: 700;
+      padding: 5px 11px; border-radius: 20px; margin-top: 6px;
+    }
+    .badge-limite-servicos.limite-atingido { background: #fdeeda; color: #b3690a; }
+    .badge-limite-servicos a { color: inherit; text-decoration: underline; font-weight: 700; }
+    .btn-adicionar.desabilitado { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+
+    .barra-filtros-historico {
+      display: flex; gap: 6px; margin: 16px 0;
+      overflow-x: auto; padding-bottom: 2px;
+    }
+    .barra-filtros-historico::-webkit-scrollbar { display: none; }
+
+    .btn-filtro-hist {
+      background: #f4f6f3; border: 1px solid #e4ebe2;
+      color: #7a8c76; font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      padding: 8px 18px; border-radius: 20px;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.18s; flex-shrink: 0;
+    }
+    .btn-filtro-hist:hover { border-color: var(--verde-principal); color: var(--verde-principal); }
+    .btn-filtro-hist.ativo { background: var(--verde-principal); border-color: var(--verde-principal); color: #fff; }
+
+    .lista-historico { display: flex; flex-direction: column; gap: 12px; }
+
+    .item-historico {
+      border: 1px solid #e4ebe2; border-radius: 16px;
+      padding: 16px 18px; display: flex;
+      align-items: flex-start; gap: 14px; transition: box-shadow 0.18s;
+    }
+    .item-historico:hover { box-shadow: 0 4px 12px rgba(58,90,64,0.08); }
+
+    .icone-historico {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .icone-historico.utilizado { background: #fffbe6; color: #f5a623; }
+    .icone-historico.confirmar { background: #e8f0fe; color: #3a7bbf; }
+
+    .corpo-historico { flex: 1; min-width: 0; }
+    .corpo-historico h4 { font-size: 0.92rem; font-weight: 700; color: #1a2e1b; margin-bottom: 2px; }
+    .corpo-historico .participante { font-size: 0.8rem; color: #7a8c76; font-weight: 600; margin-bottom: 8px; }
+    .estrelas { display: flex; gap: 2px; color: #f5a623; font-size: 0.78rem; margin-bottom: 6px; }
+    .comentario-historico { font-size: 0.82rem; color: #4a6a4e; font-style: italic; margin-bottom: 6px; }
+    .data-historico {
+      font-size: 0.75rem; color: #b0bfac; font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    .pontos-historico { font-size: 0.9rem; font-weight: 700; flex-shrink: 0; align-self: center; }
+    .pontos-historico.negativo { color: #9aab96; }
+
+    .btn-confirmar-servico {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Quicksand', sans-serif; font-size: 0.78rem; font-weight: 700;
+      background: var(--verde-principal); color: #fff;
+      border: none; padding: 8px 16px; border-radius: 20px;
+      cursor: pointer; transition: background 0.18s; margin-top: 8px;
+    }
+    .btn-confirmar-servico:hover { background: var(--verde-escuro); }
+
+    .link-comentario {
+      font-size: 0.78rem; color: var(--verde-principal); font-weight: 600;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+      margin-bottom: 6px;
+    }
+    .link-comentario:hover { text-decoration: underline; }
+
+    @keyframes subirSuave {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 560px) {
+      .estatisticas-perfil { gap: 0; }
+      .acoes-servico { margin-left: 0; width: 100%; }
+      .rodape-servico { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css">
+  <script src="../navbarOngResponsiva.js" defer></script>
+</head>
+<body>
+
+<nav>
+  <a class="marca-nav" href="#">
+    <img src="../imagens/mutuoLogo.png" alt="Logo" onerror="this.style.display='none'">
+    Mútuo
+  </a>
+
+  <ul class="links-nav">
+    <li><a href="homeOngMutuo.html">Início</a></li>
+    <li><a href="chatOng.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a></li>
+    <li class="dropdown-nav">
+      <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
+      <div class="painel-dropdown">
+        <div class="painel-dropdown-interno">
+          <a href="planosOng.html"><i class="bi bi-gem"></i> Conheça nossos planos</a>
+          <a href="certificadosOng.html"><i class="bi bi-award"></i> Certificados</a>
+          <a href="contatoOng.html"><i class="bi bi-envelope"></i> Contato</a>
+          <a href="comoUsarOng.html"><i class="bi bi-question-circle"></i> Como usar a plataforma</a>
+          <a href="quemSomosOng.html"><i class="bi bi-people"></i> Quem somos</a>
+          <a href="../login.html" class="perigo"><i class="bi bi-box-arrow-right"></i> Sair da conta</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="nav-direita">
+    <a href="notificacoesOng.html" class="sino-nav">
+      <i class="bi bi-bell-fill"></i>
+      <span class="badge-sino">3</span>
+    </a>
+    <a href="perfilOngGMutuo.html" class="perfil-nav">
+      <img src="../imagens/mutuoLogo.png" alt="perfil" id="navFotoPerfil">
+      <span id="navNomeOng"></span>
+    </a>
+  </div>
+
+  <button class="nav-hamburger" id="hamburger" aria-label="Abrir menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-profile">
+    <img src="../imagens/perfilOngI.png" alt="perfil" id="drawerFotoPerfil" onerror="this.style.background='#588157'">
+    <div class="drawer-profile-info">
+      <strong id="drawerNomeOng">Carregando...</strong>
+      <small>ONG verificada · São Paulo, SP</small>
+    </div>
+  </div>
+
+  <span class="drawer-section-label">Menu</span>
+  <a href="homeOngMutuo.html" class="drawer-nav-link">
+    <i class="bi bi-house-fill"></i> Início
+  </a>
+  <a href="chatOng.html" class="drawer-nav-link">
+    <i class="bi bi-chat-dots-fill"></i> Chat
+  </a>
+  <a href="notificacoesOng.html" class="drawer-nav-link">
+    <i class="bi bi-bell-fill"></i> Notificações
+    <span class="drawer-bell-badge"></span>
+  </a>
+  <a href="perfilOngGMutuo.html" class="drawer-nav-link active">
+    <i class="bi bi-person-fill"></i> Meu Perfil
+  </a>
+
+  <div class="drawer-divider"></div>
+  <span class="drawer-section-label">Mais opções</span>
+
+  <a href="planosOng.html" class="drawer-nav-link">
+    <i class="bi bi-gem"></i> Conheça nossos planos
+  </a>
+  <a href="certificadosOng.html" class="drawer-nav-link">
+    <i class="bi bi-award"></i> Certificados
+  </a>
+
+  <a href="contatoOng.html" class="drawer-nav-link">
+    <i class="bi bi-envelope"></i> Contato
+  </a>
+  <a href="comoUsarOng.html" class="drawer-nav-link">
+    <i class="bi bi-question-circle"></i> Como usar a plataforma
+  </a>
+  <a href="quemSomosOng.html" class="drawer-nav-link">
+    <i class="bi bi-people"></i> Quem somos
+  </a>
+
+  <div class="drawer-divider"></div>
+
+  <a href="../login.html" class="drawer-nav-link danger">
+    <i class="bi bi-box-arrow-right"></i> Sair da conta
+  </a>
+</div>
+
+<div class="pagina">
+
+  <div class="bloco">
+    <div class="cabecalho-perfil">
+      <div class="foto-perfil-wrap">
+        <img class="foto-perfil" id="cardFotoPerfil" src="../imagens/mutuoLogo.png" alt="Foto da ONG"
+          onerror="this.src='mutuoLogo.png'">
+        <span class="badge-online"></span>
+        <button type="button" class="btn-trocar-foto" id="btnTrocarFoto" title="Trocar foto de perfil">
+          <i class="bi bi-camera-fill"></i>
+        </button>
+      </div>
+      <div class="info-perfil">
+        <h2 id="cardNomeOng">Carregando...</h2>
+        <span id="cardUserHandle">@...</span>
+      </div>
+    </div>
+
+
+    <div class="estatisticas-perfil">
+      <div class="stat-item">
+        <span class="stat-numero" id="totalVoluntariosOng">0</span>
+        <span class="stat-texto">Voluntários</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-numero">5.0</span>
+        <span class="stat-texto">Média de avaliações</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-numero" id="tempoMembro">-</span>
+        <span class="stat-texto">No Mútuo</span>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="inputFotoPerfil" accept="image/jpeg,image/png,image/webp" hidden>
+
+    <div class="bloco">
+  <div class="cabecalho-bloco">
+    <div>
+      <h3>Dados do usuário</h3>
+      <p>Informações pessoais e preferências</p>
+    </div>
+
+    <button class="btn-editar" id="btnEditar" onclick="ativarEdicao()">
+      <i class="bi bi-pencil-fill"></i> Editar perfil
+    </button>
+  </div>
+
+  <div id="perfilWrap">
+
+    <div class="cabecalho-perfil">
+      <img class="foto-perfil" id="perfilFotoSecundaria"
+        src="../imagens/mutuoLogo.png"
+        alt="Foto da ONG"
+        onerror="this.src='mutuoLogo.png'">
+
+      <div class="info-nome cabecalho-perfil-nome">
+        <h3 id="exibNome">Carregando...</h3>
+        <span id="exibUser">@...</span>
+      </div>
+
+      <div class="campo-nome-edit">
+        <div class="campo-edit">
+          <input type="text" id="inputNome" placeholder="Nome da ONG">
+        </div>
+
+        <div class="campo-edit">
+          <div class="prefixo-wrap">
+            <span class="prefixo">@</span>
+            <input type="text" id="inputUser" placeholder="nome de usuário" disabled title="Gerado automaticamente a partir do nome da ONG">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lista-info" id="modoLeitura">
+      <div class="item-info">
+        <i class="bi bi-envelope-fill"></i>
+        <span id="exibEmail">-</span>
+      </div>
+
+      <div class="item-info">
+        <i class="bi bi-telephone-fill"></i>
+        <span id="exibTel">-</span>
+      </div>
+
+      <div class="item-info readonly">
+        <i class="bi bi-calendar3"></i>
+
+       <span class="label-readonly" id="exibCadastroEdit">Membro desde -</span>
+       
+      </div>
+
+      <div class="item-info readonly">
+        <i class="bi bi-gem"></i>
+        <span class="label-readonly" id="exibPlano">Plano gratuito</span>
+   
+      </div>
+    </div>
+
+    <div class="lista-info" id="modoEdicao" style="display:none">
+      <div class="item-info">
+        <i class="bi bi-envelope-fill"></i>
+
+        <div class="campo-edit">
+          <input type="email" id="inputEmail" placeholder="E-mail">
+        </div>
+      </div>
+
+      <div class="item-info">
+        <i class="bi bi-telephone-fill"></i>
+
+        <div class="campo-edit">
+          <input type="tel" id="inputTel" placeholder="Telefone">
+        </div>
+      </div>
+
+      <div class="item-info readonly">
+        <i class="bi bi-calendar3"></i>
+        <span class="label-readonly" id="exibCadastro">Membro desde -</span>
+        <span class="badge-readonly">Fixo</span>
+      </div>
+
+      <div class="item-info readonly">
+        <i class="bi bi-gem"></i>
+        <span class="label-readonly" id="exibPlanoEdit">Plano gratuito</span>
+        <span class="badge-readonly">Fixo</span>
+      </div>
+    </div>
+
+    <div class="divisor"></div>
+
+    <div class="acoes-edit" id="acoesEdit" style="display:none">
+      <button class="btn-cancelar" onclick="cancelarEdicao()">
+        Cancelar
+      </button>
+
+      <button class="btn-salvar" onclick="salvarEdicao()">
+        Salvar alterações
+      </button>
+    </div>
+
+  </div>
+</div>
+  <div class="card-pontos">
+    <div class="topo-pontos">
+      <h3>Saldo de pontos</h3>
+      <div class="icone-pontos"><i class="bi bi-lightning-charge-fill"></i></div>
+    </div>
+    <div class="valor-pontos" id="exibePontos">0</div>
+    <p class="subtitulo-pontos">Pontos disponíveis</p>
+    <div class="linha-pontos"></div>
+    <p style="font-size:0.72rem;opacity:0.6;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Este mês</p>
+    <div class="movimentacao-mes">
+      <div><p class="mov-label">Gastos</p><span class="mov-valor entrada" id="movGastosOng">--</span></div>
+      <div><p class="mov-label">Recebidos</p><span class="mov-valor saida" id="movRecebidosOng">--</span></div>
+    </div>
+  </div>
+
+  <div class="bloco">
+  <div class="cabecalho-bloco">
+    <div>
+      <h3>Meus serviços</h3>
+      <p>Serviços que você oferece na plataforma</p>
+      <span class="badge-limite-servicos" id="badgeLimiteServicosOng" style="display:none;"></span>
+    </div>
+    <a href="adicionarServicoOng.html" class="btn-adicionar" id="btnAdicionarServicoOng"><i class="bi bi-plus-lg"></i> Adicionar</a>
+  </div>
+
+  <div id="listaServicosOng">
+    <!-- Cards de serviço inseridos aqui dinamicamente via JS -->
+  </div>
+</div>
+
+  <div class="bloco">
+    <div class="cabecalho-bloco">
+      <div>
+        <h3>Histórico de trocas</h3>
+        <p>Serviços recebidos e confirmações</p>
+      </div>
+    </div>
+
+    <div class="barra-filtros-historico">
+      <button class="btn-filtro-hist ativo" data-alvo="utilizados">Serviços recebidos</button>
+      <button class="btn-filtro-hist" data-alvo="confirmar">Confirmar serviços</button>
+    </div>
+
+    <div class="lista-historico" id="utilizados"></div>
+
+    <div class="lista-historico" id="confirmar" style="display:none;"></div>
+  </div>
+
+</div>
+<script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
+<script>
+  const API_BASE = 'https://mutuo-api.onrender.com'
+
+  document.querySelectorAll('.btn-filtro-hist').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-filtro-hist').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      document.querySelectorAll('.lista-historico').forEach(l => l.style.display = 'none');
+      document.getElementById(btn.dataset.alvo).style.display = 'flex';
+    });
+  });
+
+
+  const hamburger    = document.getElementById('hamburger');
+  const mobileDrawer = document.getElementById('mobileDrawer');
+  const overlay      = document.getElementById('drawerOverlay');
+
+  function openDrawer() {
+    mobileDrawer.classList.add('open');
+    overlay.classList.add('open');
+    hamburger.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    mobileDrawer.classList.remove('open');
+    overlay.classList.remove('open');
+    hamburger.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  hamburger.addEventListener('click', () =>
+    mobileDrawer.classList.contains('open') ? closeDrawer() : openDrawer()
+  );
+
+  overlay.addEventListener('click', closeDrawer);
+
+  mobileDrawer.querySelectorAll('a').forEach(a =>
+    a.addEventListener('click', closeDrawer)
+  );
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) closeDrawer();
+  });
+
+  // ── Carregar dados da ONG logada (a partir do banco) ──
+  let ongAtual = null;
+
+  function pegarOngLogada() {
+    const raw = sessionStorage.getItem('ongLogada');
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+
+  function gerarHandle(nomeOng) {
+    if (!nomeOng) return '@ong';
+    return '@' + nomeOng
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toLowerCase();
+  }
+
+  function urlDaFoto(nomeArquivo, nomeOngFallback) {
+    if (nomeArquivo) return `${API_BASE}/uploads/fotos/${nomeArquivo}`;
+     return '../imagens/mutuoLogo.png';
+  }
+
+  function aplicarFotoEmTodosOsLugares(nomeArquivo, nomeOngFallback) {
+    const url = urlDaFoto(nomeArquivo, nomeOngFallback);
+    ['navFotoPerfil', 'drawerFotoPerfil', 'cardFotoPerfil', 'perfilFotoSecundaria'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.src = url;
+    });
+  }
+
+  function formatarData(dataStr) {
+    if (!dataStr) return null;
+    const normalizada = typeof dataStr === 'string' ? dataStr.replace(' ', 'T') : dataStr;
+    const d = new Date(normalizada);
+    if (isNaN(d)) return null;
+    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+
+  function mostrarCarregandoPerfil() {
+    document.getElementById('navNomeOng').textContent = 'Carregando...';
+    const nomeDrawerAntigo = document.getElementById('drawerNomeOng');
+    if (nomeDrawerAntigo) nomeDrawerAntigo.textContent = 'Carregando...';
+    document.getElementById('cardNomeOng').textContent = 'Carregando...';
+    document.getElementById('cardUserHandle').textContent = '@...';
+    document.getElementById('exibNome').textContent = 'Carregando...';
+    document.getElementById('exibUser').textContent = '@...';
+    document.getElementById('exibEmail').textContent = 'Carregando...';
+    document.getElementById('exibTel').textContent = 'Carregando...';
+    document.getElementById('exibCadastro').textContent = 'Carregando...';
+    document.getElementById('exibCadastroEdit').textContent = 'Carregando...';
+    document.getElementById('tempoMembro').textContent = '...';
+    document.getElementById('exibePontos').textContent = '...';
+  }
+
+  function preencherTela(ong) {
+    const handle = gerarHandle(ong.nomeOng);
+    atualizarTituloOng(ong.nomeOng);
+
+    document.getElementById('navNomeOng').textContent = ong.nomeOng || 'ONG';
+    const nomeDrawerAntigo = document.getElementById('drawerNomeOng');
+    if (nomeDrawerAntigo) nomeDrawerAntigo.textContent = ong.nomeOng || 'ONG';
+    const nomeDrawerAtual = document.querySelector('.ong-drawer-profile strong');
+    if (nomeDrawerAtual) nomeDrawerAtual.textContent = ong.nomeOng || 'ONG';
+
+    document.getElementById('cardNomeOng').textContent = ong.nomeOng || 'ONG';
+    document.getElementById('cardUserHandle').textContent = handle;
+
+    // Correção: "cardDescricao" não existe no HTML. Sem essa checagem,
+    // quando ong.descricao vinha preenchido do banco, essa linha lançava
+    // um TypeError e travava o restante da função preencherTela() —
+    // inclusive o preenchimento de "Membro desde".
+    const elDescricao = document.getElementById('cardDescricao');
+    if (ong.descricao && elDescricao) elDescricao.textContent = ong.descricao;
+
+    document.getElementById('exibNome').textContent = ong.nomeOng || '';
+    document.getElementById('exibUser').textContent = handle;
+    document.getElementById('exibEmail').textContent = ong.email || '-';
+    document.getElementById('exibTel').textContent = ong.telefone || 'Não informado';
+
+    const textoPlano = ong.premium ? 'Plano premium' : 'Plano gratuito';
+    document.getElementById('exibPlano').textContent = textoPlano;
+    document.getElementById('exibPlanoEdit').textContent = textoPlano;
+
+    document.getElementById('inputNome').value = ong.nomeOng || '';
+    document.getElementById('inputUser').value = handle.replace('@', '');
+    document.getElementById('inputEmail').value = ong.email || '';
+    document.getElementById('inputTel').value = ong.telefone || '';
+
+    if (ong.pontos !== undefined) {
+      document.getElementById('exibePontos').textContent = ong.pontos.toLocaleString('pt-BR');
+    }
+
+    const dataFormatada = formatarData(ong.cadastro);
+    const textoMembro = dataFormatada ? `Membro desde ${dataFormatada}` : 'Membro desde -';
+    document.getElementById('exibCadastro').textContent = textoMembro;
+    document.getElementById('exibCadastroEdit').textContent = textoMembro;
+    document.getElementById('tempoMembro').textContent = calcularTempoNoMutuo(ong.cadastro);
+
+    aplicarFotoEmTodosOsLugares(ong.foto_perfil, ong.nomeOng);
+    atualizarBadgeLimiteServicosOng(totalServicosOng);
+  }
+
+  async function carregarPerfilOng(tentativa = 1) {
+    const logada = pegarOngLogada();
+    if (!logada || !logada.cnpj) {
+      window.location.href = '../login.html';
+      return;
+    }
+
+    if (tentativa === 1) mostrarCarregandoPerfil();
+
+    try {
+      const cnpj = encodeURIComponent(logada.cnpj);
+      const [resposta, respostaVoluntarios] = await Promise.all([
+        fetch(`${API_BASE}/ongs/${cnpj}`),
+        fetch(`${API_BASE}/ongs/${cnpj}/voluntarios-realizados`)
+      ]);
+      if (!resposta.ok) throw new Error('Não foi possível carregar os dados da ONG.');
+
+      const ong = await resposta.json();
+      ongAtual = ong;
+      preencherTela(ong);
+
+      if (respostaVoluntarios.ok) {
+        const dadosVoluntarios = await respostaVoluntarios.json();
+        document.getElementById('totalVoluntariosOng').textContent =
+          Number(dadosVoluntarios.totalVoluntarios || 0).toLocaleString('pt-BR');
+      }
+
+      sessionStorage.setItem('ongLogada', JSON.stringify({
+        ...logada,
+        nomeOng: ong.nomeOng,
+        email: ong.email,
+        foco: ong.foco,
+        premium: ong.premium,
+        foto_perfil: ong.foto_perfil
+      }));
+
+    } catch (erro) {
+      console.error(erro);
+
+      // Servidor (Render free tier) pode estar "acordando" (cold start).
+      // Tenta de novo silenciosamente, sem alert, mantendo "Carregando...".
+      if (tentativa < 6) {
+        setTimeout(() => carregarPerfilOng(tentativa + 1), 4000);
+        return;
+      }
+
+      // Depois de várias tentativas, preenche com o que tem em cache
+      if (logada) {
+        ongAtual = logada;
+        preencherTela(logada);
+      }
+    }
+  }
+
+  // ── Trocar foto de perfil ──
+  const btnTrocarFoto   = document.getElementById('btnTrocarFoto');
+  const inputFotoPerfil = document.getElementById('inputFotoPerfil');
+
+  btnTrocarFoto.addEventListener('click', () => inputFotoPerfil.click());
+
+  inputFotoPerfil.addEventListener('change', async () => {
+    const arquivo = inputFotoPerfil.files[0];
+    if (!arquivo) return;
+
+    if (!ongAtual || !ongAtual.cnpj) return;
+
+    const tiposAceitos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!tiposAceitos.includes(arquivo.type)) {
+      inputFotoPerfil.value = '';
+      return;
+    }
+
+    if (arquivo.size > 3 * 1024 * 1024) {
+      inputFotoPerfil.value = '';
+      return;
+    }
+
+    btnTrocarFoto.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+    const formData = new FormData();
+    formData.append('cnpj', ongAtual.cnpj);
+    formData.append('fotoPerfil', arquivo);
+
+    try {
+      const resposta = await fetch(`${API_BASE}/perfil/foto/ong`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || !resultado.sucesso) {
+        throw new Error(resultado.erro || 'Erro ao enviar a foto.');
+      }
+
+      const nomeArquivo = resultado.fotoPerfil.split('/').pop();
+      aplicarFotoEmTodosOsLugares(nomeArquivo, ongAtual.nomeOng);
+      ongAtual.foto_perfil = nomeArquivo;
+
+      const logada = pegarOngLogada() || {};
+      sessionStorage.setItem('ongLogada', JSON.stringify({ ...logada, foto_perfil: nomeArquivo }));
+
+    } catch (erro) {
+      console.error(erro);
+    } finally {
+      btnTrocarFoto.innerHTML = '<i class="bi bi-camera-fill"></i>';
+      inputFotoPerfil.value = '';
+    }
+  });
+
+  // ── Edição de perfil ──
+  function ativarEdicao() {
+    document.getElementById('modoLeitura').style.display = 'none';
+    document.getElementById('modoEdicao').style.display = 'flex';
+    document.getElementById('acoesEdit').style.display = 'flex';
+    document.getElementById('btnEditar').style.display = 'none';
+    document.getElementById('perfilWrap').classList.add('editando-perfil');
+    // "habilidadesWrap" não existe nesta página (só na do usuário comum) —
+    // usar "?." evita que a função trave por causa de um elemento inexistente.
+    document.getElementById('habilidadesWrap')?.classList.add('editando');
+    document.querySelector('.campo-nome-edit').style.display = 'flex';
+    document.querySelector('.cabecalho-perfil-nome').style.display = 'none';
+    document.getElementById('inputNome').focus();
+  }
+
+  function cancelarEdicao() {
+    document.getElementById('modoEdicao').style.display = 'none';
+    document.getElementById('modoLeitura').style.display = 'flex';
+    document.getElementById('acoesEdit').style.display = 'none';
+    document.getElementById('btnEditar').style.display = 'flex';
+    document.getElementById('perfilWrap').classList.remove('editando-perfil');
+    document.getElementById('habilidadesWrap')?.classList.remove('editando');
+    document.querySelector('.campo-nome-edit').style.display = 'none';
+    document.querySelector('.cabecalho-perfil-nome').style.display = '';
+
+    if (ongAtual) preencherTela(ongAtual);
+  }
+
+  async function salvarEdicao() {
+    if (!ongAtual || !ongAtual.cnpj) return;
+
+    const nomeOng = document.getElementById('inputNome').value.trim();
+    const email   = document.getElementById('inputEmail').value.trim();
+    const tel     = document.getElementById('inputTel').value.trim();
+
+    if (!nomeOng || !email) return;
+
+    const btnSalvar = document.querySelector('.btn-salvar');
+    const textoOriginalBtn = btnSalvar.textContent;
+    btnSalvar.textContent = 'Salvando...';
+    btnSalvar.disabled = true;
+
+        try {
+      const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(ongAtual.cnpj)}/perfil`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nomeOng, email, telefone: tel })
+      });
+
+      const resultado = await resposta.json();
+      if (!resposta.ok || resultado.error) {
+        throw new Error(resultado.erro || resultado.error || 'Erro ao salvar.');
+      }
+
+      ongAtual.nomeOng = nomeOng;
+      ongAtual.email = email;
+      ongAtual.telefone = tel;
+      preencherTela(ongAtual);
+
+      const logada = pegarOngLogada() || {};
+      sessionStorage.setItem('ongLogada', JSON.stringify({ ...logada, nomeOng, email }));
+      atualizarTituloOng(nomeOng);
+
+      cancelarEdicao();
+      alert('Perfil atualizado com sucesso!');
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível salvar as alterações.');
+    } finally {
+      btnSalvar.textContent = textoOriginalBtn;
+      btnSalvar.disabled = false;
+    }
+  }
+
+  function removerTag(btn) {
+    btn.closest('.tag-habilidade').remove();
+  }
+
+  function adicionarTag() {
+    const inp = document.getElementById('inputTag');
+    const val = inp.value.trim();
+    if (!val) return;
+
+    const wrap = document.getElementById('habilidadesWrap');
+    const addDiv = wrap.querySelector('.add-habilidade');
+
+    const tag = document.createElement('span');
+    tag.className = 'tag-habilidade';
+    tag.dataset.tag = val;
+    tag.innerHTML = val + `
+      <button class="remover" onclick="removerTag(this)" aria-label="Remover ${val}">
+        <i class="bi bi-x"></i>
+      </button>`;
+
+    wrap.insertBefore(tag, addDiv);
+    inp.value = '';
+    inp.focus();
+  }
+
+  const containerServicos = document.getElementById('listaServicosOng');
+  let totalServicosOng = 0;
+
+  function criarCardServicoPerfil(servico) {
+    const div = document.createElement('div');
+    div.className = 'card-servico';
+
+    const nome = servico.nomeServico || 'Serviço sem nome';
+    const descricao = servico.descricao || '';
+    const ativo = servico.ativo === undefined ? true : !!servico.ativo;
+    const nota = servico.nota ? Number(servico.nota).toFixed(1) : '—';
+    const avaliacoes = servico.avaliacoes ?? 0;
+    const pontos = servico.pontos ?? 0;
+
+    div.innerHTML = `
+      <div class="topo-servico">
+        <h4>${nome}</h4>
+        <span class="tag-ativo" style="${ativo ? '' : 'background:#f4f4f0;color:#999;'}">
+          ${ativo ? 'Ativo' : 'Inativo'}
+        </span>
+      </div>
+      <p class="descricao-servico">${descricao}</p>
+      <div class="rodape-servico">
+        <div class="avaliacao-servico">
+          <i class="bi bi-star-fill"></i> ${nota} <span>(${avaliacoes} avaliações)</span>
+        </div>
+        <div class="pontos-servico">
+          <i class="bi bi-lightning-charge-fill"></i> ${pontos} pts/hora
+        </div>
+        <div class="acoes-servico">
+          <button class="btn-excluir" data-id="${servico.id}">
+            <i class="bi bi-trash3"></i> Excluir
+          </button>
+          <a href="editarServicoOng.html?id=${servico.id}" class="btn-editar-servico">
+            <i class="bi bi-pencil"></i> Editar
+          </a>
+        </div>
+      </div>
+    `;
+
+    div.querySelector('.btn-excluir').addEventListener('click', () => excluirServicoPerfil(servico.id, div));
+
+    return div;
+  }
+
+  async function excluirServicoPerfil(id, cardEl) {
+    if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/servicos/ong/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ativo: 0 })
+      });
+
+      const resultado = await resposta.json();
+      if (!resposta.ok || resultado.error) {
+        throw new Error(resultado.erro || resultado.error || 'Erro ao excluir serviço.');
+      }
+
+      cardEl.remove();
+      totalServicosOng = Math.max(0, totalServicosOng - 1);
+      atualizarBadgeLimiteServicosOng(totalServicosOng);
+
+      if (totalServicosOng === 0) {
+        containerServicos.innerHTML = `
+          <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+            Você ainda não cadastrou nenhum serviço.
+          </p>`;
+      }
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível excluir o serviço.');
+    }
+  }
+
+  async function carregarServicosPerfilOng() {
+    const logada = pegarOngLogada();
+    if (!logada || !logada.cnpj) return;
+
+    containerServicos.innerHTML = `
+      <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+        Carregando seus serviços...
+      </p>`;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/servicos/ong/${encodeURIComponent(logada.cnpj)}`);
+      if (!resposta.ok) throw new Error('Não foi possível carregar seus serviços.');
+
+      const servicos = await resposta.json();
+      const lista = Array.isArray(servicos) ? servicos : (servicos.servicos || []);
+      totalServicosOng = lista.length;
+
+      containerServicos.innerHTML = '';
+
+      if (lista.length === 0) {
+        containerServicos.innerHTML = `
+          <p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">
+            Você ainda não cadastrou nenhum serviço.
+          </p>`;
+      } else {
+        lista.forEach(servico => {
+          containerServicos.appendChild(criarCardServicoPerfil(servico));
+        });
+      }
+
+      atualizarBadgeLimiteServicosOng(totalServicosOng);
+
+    } catch (erro) {
+      console.error(erro);
+      containerServicos.innerHTML = `
+        <p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">
+          Erro ao carregar seus serviços.
+        </p>`;
+    }
+  }
+
+  function atualizarBadgeLimiteServicosOng(totalAtual) {
+    const badge = document.getElementById('badgeLimiteServicosOng');
+    const btnAdicionar = document.getElementById('btnAdicionarServicoOng');
+    if (!badge) return;
+
+    const logada = pegarOngLogada() || {};
+    let valorPremium = ongAtual?.premium ?? logada.premium;
+    if (valorPremium && typeof valorPremium === 'object' && Array.isArray(valorPremium.data)) {
+      valorPremium = valorPremium.data[0];
+    }
+    const premium = valorPremium === true || Number(valorPremium) === 1;
+    const limite = premium ? 10 : 5;
+    const atingiuLimite = totalAtual >= limite;
+
+    badge.style.display = 'inline-flex';
+    badge.classList.toggle('limite-atingido', atingiuLimite);
+
+    if (atingiuLimite && !premium) {
+      badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados — <a href="planosOng.html">vire Premium</a> para cadastrar até 10`;
+    } else if (atingiuLimite) {
+      badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados (limite Premium atingido)`;
+    } else {
+      badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${totalAtual}/${limite} serviços usados`;
+    }
+
+    if (btnAdicionar) {
+      btnAdicionar.classList.toggle('desabilitado', atingiuLimite);
+      btnAdicionar.title = atingiuLimite
+        ? (premium ? 'Limite de serviços Premium atingido.' : 'Limite atingido. Vire Premium para cadastrar mais.')
+        : '';
+    }
+  }
+
+  function calcularTempoNoMutuo(dataStr) {
+    if (!dataStr) return '-';
+
+    const normalizada =
+      typeof dataStr === 'string'
+        ? dataStr.replace(' ', 'T')
+        : dataStr;
+
+    const cadastro = new Date(normalizada);
+    const hoje = new Date();
+
+    if (Number.isNaN(cadastro.getTime()) || cadastro > hoje) {
+      return '-';
+    }
+
+    let meses =
+      (hoje.getFullYear() - cadastro.getFullYear()) * 12 +
+      hoje.getMonth() -
+      cadastro.getMonth();
+
+    if (hoje.getDate() < cadastro.getDate()) {
+      meses--;
+    }
+
+    if (meses < 1) {
+      const dias = Math.max(
+        0,
+        Math.floor((hoje - cadastro) / 86400000)
+      );
+
+      return `${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+    }
+
+    if (meses < 12) {
+      return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+    }
+
+    const anos = Math.floor(meses / 12);
+    const mesesRestantes = meses % 12;
+
+    if (mesesRestantes === 0) {
+      return `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+    }
+
+    return `${anos} ${anos === 1 ? 'ano' : 'anos'} e ` +
+      `${mesesRestantes} ${mesesRestantes === 1 ? 'mês' : 'meses'}`;
+  }
+
+  async function carregarMovimentacaoOng() {
+    const logada = pegarOngLogada();
+    if (!logada || !logada.cnpj) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(logada.cnpj)}/movimentacao`);
+      const dados = await resposta.json();
+      document.getElementById('movGastosOng').textContent = `−${dados.gastos} pts`;
+      document.getElementById('movRecebidosOng').textContent = `+${dados.recebidos} pts`;
+    } catch (erro) {
+      console.error('Erro ao carregar movimentação da ONG:', erro);
+    }
+  }
+
+  async function carregarConfirmarOng() {
+    const logada = pegarOngLogada();
+    const container = document.getElementById('confirmar');
+    if (!logada || !logada.cnpj) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/solicitacoes-ong/confirmar/${encodeURIComponent(logada.cnpj)}`);
+      const lista = await resposta.json();
+
+      if (!Array.isArray(lista) || lista.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">Nenhum serviço aguardando confirmação.</p>`;
+        return;
+      }
+
+      container.innerHTML = lista.map(s => `
+        <div class="item-historico">
+          <div class="icone-historico confirmar"><i class="bi bi-clock-history"></i></div>
+          <div class="corpo-historico">
+            <h4>${s.nomeServico}</h4>
+            <p class="participante"><i class="bi bi-person-fill"></i> Voluntário: ${s.nomeVoluntario}</p>
+            <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
+            <button class="btn-confirmar-servico" onclick="confirmarServicoOng(${s.codSolicitacao})">
+              <i class="bi bi-check-circle-fill"></i> Confirmar realização
+            </button>
+          </div>
+        </div>
+      `).join('');
+    } catch (erro) {
+      console.error('Erro ao carregar solicitações para confirmar:', erro);
+      container.innerHTML = `<p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">Erro ao carregar.</p>`;
+    }
+  }
+
+  async function confirmarServicoOng(cod) {
+    if (!confirm('Confirmar a realização deste serviço? Os pontos serão transferidos.')) return;
+
+    try {
+      const resposta = await fetch(`${API_BASE}/solicitacoes-ong/${cod}/confirmar`, { method: 'PUT' });
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || resultado.erro) {
+        throw new Error(resultado.erro || 'Erro ao confirmar serviço.');
+      }
+
+      carregarConfirmarOng();
+      carregarMovimentacaoOng();
+
+      // atualiza o saldo exibido
+      const respostaOng = await fetch(`${API_BASE}/ongs/${encodeURIComponent(ongAtual.cnpj)}`);
+      const dadosOng = await respostaOng.json();
+      ongAtual.pontos = dadosOng.pontos;
+      document.getElementById('exibePontos').textContent = ongAtual.pontos.toLocaleString('pt-BR');
+
+    } catch (erro) {
+      console.error(erro);
+      alert(erro.message || 'Não foi possível confirmar o serviço.');
+    }
+  }
+
+  async function carregarServicosRecebidosOng() {
+  const logada = pegarOngLogada();
+  const container = document.getElementById('utilizados');
+  if (!logada || !logada.cnpj) return;
+
+  try {
+    const resposta = await fetch(`${API_BASE}/solicitacoes-ong/recebidos/${encodeURIComponent(logada.cnpj)}`);
+    const lista = await resposta.json();
+
+    if (!Array.isArray(lista) || lista.length === 0) {
+      container.innerHTML = `<p style="font-size:0.85rem;color:#9aab96;text-align:center;padding:20px 0;">Nenhum serviço recebido ainda.</p>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(s => `
+      <div class="item-historico">
+        <div class="icone-historico utilizado"><i class="bi bi-arrow-down-left"></i></div>
+        <div class="corpo-historico">
+          <h4>${s.nomeServico}</h4>
+          <p class="participante"><i class="bi bi-person-fill"></i> Prestador: ${s.nomeVoluntario}</p>
+          <p class="data-historico"><i class="bi bi-calendar3"></i> ${new Date(s.dataConclusao || s.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
+        </div>
+        <span class="pontos-historico negativo">−${s.pontos} pts</span>
+      </div>
+    `).join('');
+  } catch (erro) {
+    console.error('Erro ao carregar serviços recebidos:', erro);
+    container.innerHTML = `<p style="font-size:0.85rem;color:#b00020;text-align:center;padding:20px 0;">Erro ao carregar.</p>`;
+  }
+}
+
+  window.addEventListener('load', () => {
+    carregarNavOng();
+    atualizarBadgeNotificacoesOng();
+    carregarPerfilOng();
+    carregarServicosPerfilOng();
+    carregarConfirmarOng();
+    carregarMovimentacaoOng();
+    carregarServicosRecebidosOng();
+  });
+  
+</script>
+    
+</body>
+</html>

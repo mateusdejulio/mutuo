@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Contet-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
+    <title>Início</title>
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!--<script src="../../node_modules/chart.js/dist/chart.umd.js" defer></script>-->
+    
+    
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #E1DCD0;
+            overflow-y: hidden;
+            padding: 10px;
+        }
+
+        #dashboard {
+            padding: 30px 40px;
+            overflow-y: auto;
+            height: calc(100vh - 80px);
+        }
+
+        @media (max-width: 1000px), (max-height: 680px){
+            #barra-lateral {
+                font-size: 12px;
+                width: 26.2% !important;
+                flex: 0 0 auto;
+            }
+
+            #sair {
+                width: 100px;
+            }
+
+            #nomeAdm {
+                font-size: 12px;
+            }
+
+            #emailAdm {
+                font-size: 10px;
+            }
+
+            #navbar {
+                width: 100%;
+            }
+
+            #meuGrafico {
+                width: 400px !important;
+                height: 200px !important;
+            }
+
+            .col-titulo, .col-texto {
+                font-size: 15px !important;
+            }
+
+            #mutuo {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .icone-barra {
+                height: 14px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body class="m-0 light" id="pagina">
+
+    <div class="wrapper fw-bold" id="barra-lateral">
+        <a href="inicio.html"><span class="btn_barra"><img src="../public/img/dashboard.png" class="icone-barra">Início</a><br><hr>
+        <a href="usuarios.html"><span class="btn_barra"><img src="../public/img/usuarios.png" class="icone-barra">Usuários</span></a><br><hr>
+        <a href="ongs.html"><span class="btn_barra"><img src="../public/img/ongs.png" class="icone-barra">ONGS</span></a><br><hr>
+        <a href="servicos.html"><span class="btn_barra"><img src="../public/img/servicos.png" class="icone-barra">Serviços</span></a><br><hr>
+        <a href="solicitacoes.html"><span class="btn_barra"><img src="../public/img/notificacao.png" class="icone-barra">Solicitações</span></a><br><hr>
+        <a href="premium.html"><span class="btn_barra"><img src="../public/img/premium.png" class="icone-barra">Premium</span></a><br>
+        <hr>
+        <table>
+            <tr>
+                <td rowspan="2"><img src="../public/img/A.png"></td>
+                <td><span id="nomeAdm"></span></td>
+            </tr>
+        </table>
+        <button id="sair" type="button">Sair</button>
+    </div> 
+
+    <div id="main-area">
+
+        <nav class="navbar" id="navbar">
+            <div class="container-fluid align-items-center">
+                <a class="navbar-brand d-flex align-items-center"><img src="../public/img/mutuo_fundo.png" alt="Logo" width="40" height="40" class="d-inline-block"><span id="mutuo">Mútuo</span></a>
+                
+                <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                    <a class="nav-link active" id="tema" aria-current="page" href="#"><img id="img-tema" src="../public/img/escuro.png" height="25px"></a>
+                    <a class="nav-link" href="#"><img src="../public/img/perfil.png" height="30px"></a>
+                </div>
+            </div>
+        </nav>
+
+        <div id="dashboard">
+            <div class="perfil-header">
+                <img src="../public/img/A2.png" class="perfil-avatar" alt="Avatar">
+                <h2 id="perfil-nome">Admin</h2>
+                <p class="perfil-cargo">Administrador do Sistema</p>
+            </div>
+
+            <div class="perfil-secao">
+                <h5 class="perfil-secao-titulo">Opções de Perfil</h5>
+                <div class="perfil-cards">
+
+                    <div class="perfil-card">
+                        <div class="perfil-card-icon">
+                            <img src="../public/img/usuarios.png" alt="Login">
+                        </div>
+                        <h6>Mudar Login</h6>
+                        <p>Altere seu nome de login atual.</p>
+                        <button class="btn-perfil" id="btn-alterar-login">
+                            Alterar Login
+                        </button>
+                    </div>
+
+                    <div class="perfil-card">
+                        <div class="perfil-card-icon">
+                            <img src="../public/img/notificacao.png" alt="Senha">
+                        </div>
+                        <h6>Mudar Senha</h6>
+                        <p>Altere sua senha de acesso.</p>
+                        <button class="btn-perfil" id="btn-alterar-senha">
+                            Alterar Senha
+                        </button>
+                    </div>
+
+                    <div class="perfil-card">
+                        <div class="perfil-card-icon">
+                            <img src="../public/img/usuarios.png" alt="Novo Admin">
+                        </div>
+                        <h6>Adicionar Administrador</h6>
+                        <p>Cadastre um novo administrador no sistema.</p>
+                        <button class="btn-perfil" id="btn-adicionar-admin">
+                            + Adicionar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    <link rel="stylesheet" href="../../node_modules/sweetalert2/dist/sweetalert2.min.css">
+
+    <!--<script src="../../renderer.js"></script>-->
+    <script src="../../node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+    <script src="../public/js/bootstrap.min.js"></script>
+    <script>
+
+        function getSwalBase() {
+            const isDark = document.getElementById('pagina').classList.contains('dark');
+            return isDark ? {
+                scrollbarPadding: false,
+                background: '#303030',
+                color: '#e0e0e0',
+                confirmButtonColor: '#4a7c4a',
+                cancelButtonColor: '#444',
+                customClass: { popup: 'swal-arredondado' }
+            } : {
+                scrollbarPadding: false,
+                background: '#ffffff',
+                color: '#1a1a1a',
+                confirmButtonColor: '#3a5c3a',
+                cancelButtonColor: '#aaa',
+                customClass: { popup: 'swal-arredondado' }
+            };
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+
+            const usuario = localStorage.getItem('usuarioLogado');
+
+            if (usuario) {
+                document.getElementById('nomeAdm').textContent = " " + usuario;
+                document.getElementById('perfil-nome').textContent = usuario;
+            }
+
+            document.getElementById('btn-alterar-login').addEventListener('click', () => {
+                Swal.fire({
+                    ...getSwalBase(),
+                    title: 'Alterar Login',
+                    html: `
+                        <input type="text" id="swal-login-novo" class="swal2-input" placeholder="Novo login">
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Salvar',
+                    cancelButtonText: 'Cancelar',
+                    preConfirm: () => {
+                        const novoLogin = document.getElementById('swal-login-novo').value.trim();
+                        if (!novoLogin) Swal.showValidationMessage('Informe o novo login!');
+                        return novoLogin;
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed && result.value) {
+                        const loginAtual = localStorage.getItem('usuarioLogado');
+                        const res = await window.api.alterarLoginAdm(loginAtual, result.value);
+
+                        if (res.error) {
+                            Swal.fire({ ...getSwalBase(), icon: 'error', title: 'Erro!', text: res.error });
+                        } else {
+                            localStorage.setItem('usuarioLogado', result.value);
+                            document.getElementById('nomeAdm').textContent = " " + result.value;
+                            document.getElementById('perfil-nome').textContent = result.value;
+                            Swal.fire({ ...getSwalBase(), icon: 'success', title: 'Login alterado!' });
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('btn-alterar-senha').addEventListener('click', () => {
+                Swal.fire({
+                    ...getSwalBase(),
+                    title: 'Alterar Senha',
+                    html: `
+                        <input type="password" id="swal-senha-atual" class="swal2-input" placeholder="Senha atual">
+                        <input type="password" id="swal-senha-nova" class="swal2-input" placeholder="Nova senha">
+                        <input type="password" id="swal-senha-conf" class="swal2-input" placeholder="Confirmar nova senha">
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Salvar',
+                    cancelButtonText: 'Cancelar',
+                    preConfirm: () => {
+                        const atual = document.getElementById('swal-senha-atual').value;
+                        const nova  = document.getElementById('swal-senha-nova').value;
+                        const conf  = document.getElementById('swal-senha-conf').value;
+                        if (!atual) return Swal.showValidationMessage('Informe a senha atual!');
+                        if (!nova)  return Swal.showValidationMessage('Informe a nova senha!');
+                        if (nova !== conf) return Swal.showValidationMessage('As senhas não coincidem!');
+                        return { atual, nova };
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const login = localStorage.getItem('usuarioLogado');
+                        const res = await window.api.alterarSenhaAdm(login, result.value.atual, result.value.nova);
+
+                        if (res.error) {
+                            Swal.fire({ ...getSwalBase(), icon: 'error', title: 'Erro!', text: res.error });
+                        } else {
+                            Swal.fire({ ...getSwalBase(), icon: 'success', title: 'Senha alterada!' });
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('btn-adicionar-admin').addEventListener('click', () => {
+                Swal.fire({
+                    ...getSwalBase(),
+                    title: 'Adicionar Administrador',
+                    html: `
+                        <input type="text"     id="swal-novo-login" class="swal2-input" placeholder="Login do novo admin">
+                        <input type="password" id="swal-novo-senha" class="swal2-input" placeholder="Senha">
+                        <input type="password" id="swal-novo-conf"  class="swal2-input" placeholder="Confirmar senha">
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Cadastrar',
+                    cancelButtonText: 'Cancelar',
+                    preConfirm: () => {
+                        const login = document.getElementById('swal-novo-login').value.trim();
+                        const senha = document.getElementById('swal-novo-senha').value;
+                        const conf  = document.getElementById('swal-novo-conf').value;
+                        if (!login) return Swal.showValidationMessage('Informe um login!');
+                        if (!senha) return Swal.showValidationMessage('Informe uma senha!');
+                        if (senha !== conf) return Swal.showValidationMessage('As senhas não coincidem!');
+                        return { login, senha };
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const res = await window.api.cadastrarAdm(result.value.login, result.value.senha);
+
+                        if (res.error) {
+                            Swal.fire({ ...getSwalBase(), icon: 'error', title: 'Erro!', text: res.error });
+                        } else {
+                            Swal.fire({ ...getSwalBase(), icon: 'success', title: 'Administrador cadastrado!' });
+                        }
+                    }
+                });
+            });
+
+        });
+
+        const buttonSair = document.getElementById('sair');
+        buttonSair.addEventListener('click', () => {
+            localStorage.removeItem('usuarioLogado');
+            window.api.abrirJanelaLogin();
+        });
+
+    </script>
+</body>
+
+</html>

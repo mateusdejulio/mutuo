@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Mútuo | Planos ONG</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="icon" href="../imagens/mutuoLogo.png">
+
+  <style>
+    :root {
+      --verde-escuro: #3a5a40;
+      --verde-medio: #588157;
+      --verde-claro: #b7ce8f;
+      --bege: #e1dcd0;
+      --vermelho: #c24a4a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body,
+    html {
+      min-height: 100%;
+      margin: 0;
+      font-size: 16px;
+      font-family: "Quicksand", sans-serif;
+      background-color: #f9fbf9;
+    }
+
+    body {
+      overflow-x: hidden;
+      line-height: normal;
+    }
+
+    /*
+     * Reset defensivo: o Bootstrap (carregado nesta página) redefine
+     * line-height/font-size em elementos genéricos. Isso não deveria
+     * afetar a nav (que tem tamanhos fixos em px/rem), mas alguns
+     * navegadores recalculam a altura de flex containers a partir do
+     * line-height do conteúdo quando não há "!important" reforçando o
+     * height. As regras acima e abaixo garantem que a nav sempre
+     * renderize com a mesma altura das demais páginas da ONG.
+     */
+
+    /* Navegação */
+
+    body > nav {
+      position: fixed !important;
+      top: 0 !important;
+      right: 0 !important;
+      left: 0 !important;
+      z-index: 1000 !important;
+      display: flex !important;
+      align-items: center !important;
+      height: 72px !important;
+      min-height: 72px !important;
+      max-height: 72px !important;
+      width: 100% !important;
+      padding: 0 2rem !important;
+      background-color: var(--verde-medio) !important;
+      box-shadow: 0 2px 16px rgba(58, 90, 64, 0.25) !important;
+      box-sizing: border-box !important;
+      font-family: "Quicksand", sans-serif !important;
+      font-size: 16px !important;
+      line-height: normal !important;
+      transform: none !important;
+    }
+
+    body > nav,
+    body > nav * {
+      box-sizing: border-box !important;
+    }
+
+    .nav-brand {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      flex-shrink: 0 !important;
+      margin-right: 2rem !important;
+      color: var(--bege) !important;
+      font-size: 1.55rem !important;
+      font-weight: 400 !important;
+      line-height: 1.2 !important;
+      letter-spacing: 0.4px !important;
+      text-decoration: none !important;
+    }
+
+    .nav-brand img {
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 8px !important;
+    }
+
+    .nav-links {
+      display: flex !important;
+      align-items: center !important;
+      gap: 2px !important;
+      flex: 1 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: none !important;
+    }
+
+    .nav-links > li > a {
+      display: flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      padding: 0.45rem 0.9rem !important;
+      border-radius: 8px !important;
+      color: rgba(225, 220, 208, 0.82) !important;
+      font-size: 0.875rem !important;
+      font-weight: 500 !important;
+      line-height: normal !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      transition:
+        color 0.18s,
+        background 0.18s;
+    }
+
+    .nav-links > li > a:hover,
+    .nav-links > li > a.active {
+      color: var(--bege) !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown > a {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dropdown-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 1010;
+      display: none;
+      min-width: 215px;
+      padding-top: 10px;
+    }
+
+    .dropdown-panel-inner {
+      overflow: hidden;
+      border: 1px solid rgba(225, 220, 208, 0.1);
+      border-radius: 12px;
+      background: var(--verde-escuro);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .nav-dropdown:hover .dropdown-panel {
+      display: block;
+    }
+
+    .dropdown-panel a {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0.65rem 1.1rem;
+      color: rgba(225, 220, 208, 0.8);
+      font-size: 0.84rem;
+      font-weight: 500;
+      line-height: normal;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .dropdown-panel a:hover {
+      color: var(--bege);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .dropdown-panel a.active {
+      color: var(--bege);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .dropdown-panel a.danger {
+      color: rgba(255, 140, 140, 0.85);
+      border-top: 1px solid rgba(225, 220, 208, 0.1);
+    }
+
+    .nav-right {
+      display: flex !important;
+      align-items: center !important;
+      gap: 1rem !important;
+      margin-left: auto !important;
+    }
+
+    .nav-bell {
+      position: relative;
+      color: var(--bege) !important;
+      font-size: 1.25rem !important;
+      line-height: normal !important;
+      text-decoration: none !important;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .nav-bell:hover {
+      opacity: 1;
+    }
+
+    .bell-badge {
+      position: absolute;
+      top: -5px;
+      right: -6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--verde-medio);
+      border-radius: 50%;
+      color: var(--verde-escuro);
+      background: var(--bege);
+      font-size: 0.6rem;
+      font-weight: 700;
+    }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--bege);
+      color: var(--verde-escuro);
+      border: 1px solid var(--verde-medio);
+      font-size: 0.62rem;
+      font-weight: 700;
+      min-width: 15px; height: 15px;
+      border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
+
+    .perfil-nav {
+      display: flex !important;
+      align-items: center !important;
+      gap: 9px !important;
+      padding: 5px 14px 5px 5px !important;
+      border: 1px solid rgba(225, 220, 208, 0.18) !important;
+      border-radius: 40px !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      text-decoration: none !important;
+      transition: background 0.2s;
+    }
+
+    .perfil-nav:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .perfil-nav img {
+      width: 36px !important;
+      height: 36px !important;
+      border: 2px solid rgba(225, 220, 208, 0.4) !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+
+    .perfil-nav span {
+      overflow: hidden;
+      max-width: 150px;
+      color: var(--bege) !important;
+      font-size: 0.84rem !important;
+      font-weight: 500 !important;
+      line-height: normal !important;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Área dos planos */
+
+    .plans-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 110px 20px 50px;
+    }
+
+    .header-text {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .header-text h2 {
+      color: var(--verde-escuro);
+      font-weight: 700;
+    }
+
+    .cards-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .card-plano {
+      position: relative;
+      width: 350px;
+      padding: 40px 30px;
+      border: 2px solid var(--verde-claro);
+      border-radius: 30px;
+      background-color: var(--bege);
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      transition:
+        transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+    }
+
+    .card-plano:hover {
+      border-color: var(--verde-medio);
+      box-shadow: 0 20px 40px rgba(58, 90, 64, 0.2);
+      transform: scale(1.08);
+    }
+
+    .card-plano.premium {
+      z-index: 2;
+      border-color: var(--verde-medio);
+      background-color: #fff;
+      transform: scale(1.05);
+    }
+
+    .card-plano.premium:hover {
+      transform: scale(1.12);
+    }
+
+    .card-icon {
+      display: block;
+      margin-bottom: 15px;
+      color: var(--verde-escuro);
+      font-size: 50px;
+    }
+
+    .card-title {
+      margin-bottom: 10px;
+      color: var(--verde-escuro);
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .preco {
+      margin: 10px 0 20px;
+    }
+
+    .preco-valor {
+      color: var(--verde-escuro);
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+
+    .preco-periodo {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .feature-list {
+      margin-bottom: 30px;
+      padding: 0;
+      list-style: none;
+      text-align: left;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      color: var(--verde-escuro);
+      font-size: 0.95rem;
+    }
+
+    .feature-item i {
+      flex-shrink: 0;
+      color: var(--verde-medio);
+      font-size: 1.1rem;
+    }
+
+    .btn-inscrever {
+      display: block;
+      width: 100%;
+      padding: 12px 35px;
+      border: none;
+      border-radius: 50px;
+      color: white;
+      background-color: var(--verde-escuro);
+      font-family: "Quicksand", sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition:
+        background 0.3s,
+        transform 0.2s;
+    }
+
+    .btn-inscrever:hover:not(:disabled) {
+      color: white;
+      background-color: var(--verde-medio);
+      transform: translateY(-1px);
+    }
+
+    .btn-inscrever:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    #btnPlanoGratuito {
+      border: 2px solid var(--verde-escuro);
+      color: var(--verde-escuro);
+      background-color: transparent;
+    }
+
+    #btnCancelarPremium {
+      background-color: var(--vermelho);
+    }
+
+    #btnCancelarPremium:hover:not(:disabled) {
+      background-color: #a83e3e;
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      padding: 5px 20px;
+      border-radius: 20px;
+      color: white;
+      background: var(--verde-medio);
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      transform: translateX(-50%);
+    }
+
+    /* Modal */
+
+    .modal-cancelamento {
+      overflow: hidden;
+      border: none;
+      border-radius: 24px;
+      box-shadow: 0 24px 70px rgba(31, 55, 36, 0.28);
+    }
+
+    .icone-modal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      color: var(--vermelho);
+      background: #fce8e8;
+      font-size: 2rem;
+    }
+
+    .titulo-modal {
+      margin-bottom: 10px;
+      color: var(--verde-escuro);
+      font-size: 1.55rem;
+      font-weight: 700;
+    }
+
+    .texto-modal {
+      margin-bottom: 25px;
+      color: #6c757d;
+      line-height: 1.6;
+    }
+
+    .btn-manter {
+      padding: 11px 18px;
+      border: 2px solid var(--verde-medio);
+      border-radius: 50px;
+      color: var(--verde-escuro);
+      background: transparent;
+      font-weight: 700;
+    }
+
+    .btn-manter:hover {
+      color: var(--verde-escuro);
+      background: #edf4ed;
+    }
+
+    .btn-confirmar-cancelamento {
+      padding: 11px 18px;
+      border: 2px solid var(--vermelho);
+      border-radius: 50px;
+      color: white;
+      background: var(--vermelho);
+      font-weight: 700;
+    }
+
+    .btn-confirmar-cancelamento:hover {
+      border-color: #a83e3e;
+      color: white;
+      background: #a83e3e;
+    }
+
+    /* Mensagem de resultado */
+
+    #mensagemPlano {
+      position: fixed;
+      top: 90px;
+      left: 50%;
+      z-index: 3000;
+      display: none;
+      width: min(90%, 480px);
+      transform: translateX(-50%);
+    }
+
+    .mensagem-plano {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      font-weight: 600;
+      box-shadow: 0 12px 35px rgba(33, 53, 37, 0.2);
+      animation: mensagemEntrando 0.35s ease;
+    }
+
+    .mensagem-sucesso {
+      color: #24522d;
+      background: #e1f4e5;
+    }
+
+    .mensagem-erro {
+      color: #812f2f;
+      background: #fbe4e4;
+    }
+
+    @keyframes mensagemEntrando {
+      from {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 850px) {
+      .plans-wrapper {
+        justify-content: flex-start;
+      }
+
+      .cards-container {
+        flex-direction: column;
+      }
+
+      .card-plano,
+      .card-plano:hover,
+      .card-plano.premium,
+      .card-plano.premium:hover {
+        transform: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body > nav {
+        height: 64px !important;
+        min-height: 64px !important;
+        max-height: 64px !important;
+        padding: 0 1rem !important;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .perfil-nav span {
+        display: none;
+      }
+
+      .plans-wrapper {
+        min-height: calc(100vh - 64px);
+        padding: 88px 16px 48px;
+      }
+
+      .header-text {
+        width: 100%;
+        margin-bottom: 28px;
+        padding: 0 4px;
+      }
+
+      .header-text h2 {
+        margin-bottom: 10px;
+        font-size: clamp(1.55rem, 7vw, 2rem);
+        line-height: 1.2;
+      }
+
+      .header-text p {
+        margin-bottom: 0;
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+
+      .cards-container {
+        gap: 26px;
+      }
+
+      .card-plano {
+        width: 100%;
+        max-width: 380px;
+        padding: 34px 22px 28px;
+        border-radius: 24px;
+      }
+
+      .card-icon {
+        margin-bottom: 10px;
+        font-size: 44px;
+      }
+
+      .card-title {
+        font-size: 1.55rem;
+      }
+
+      .preco-valor {
+        font-size: 1.9rem;
+      }
+
+      .feature-list {
+        margin-bottom: 24px;
+      }
+
+      .feature-item {
+        align-items: flex-start;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .popular-badge {
+        max-width: calc(100% - 28px);
+        padding: 5px 16px;
+        font-size: 0.72rem;
+      }
+
+      #mensagemPlano {
+        top: 76px;
+        width: calc(100% - 24px);
+      }
+
+      .mensagem-plano {
+        padding: 13px 14px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .plans-wrapper {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+
+      .card-plano {
+        padding-right: 17px;
+        padding-left: 17px;
+      }
+
+      .btn-inscrever {
+        padding-right: 18px;
+        padding-left: 18px;
+        font-size: 0.86rem;
+      }
+
+      .modal-dialog {
+        margin: 12px;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .modal-actions button {
+        width: 100% !important;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="../navbarOngResponsiva.css?v=20260827-1">
+  <style>
+    /* Ajuste exclusivo da página de planos, carregado após o CSS compartilhado. */
+    body.planos-ong-page > nav {
+      height: 82px !important;
+      min-height: 82px !important;
+      max-height: 82px !important;
+      padding: 0 2.25rem !important;
+    }
+
+    body.planos-ong-page > nav > .nav-brand {
+      font-size: 1.65rem !important;
+    }
+
+    body.planos-ong-page > nav > .nav-brand img {
+      width: 44px !important;
+      height: 44px !important;
+    }
+
+    body.planos-ong-page > nav > .nav-links > li > a {
+      padding: 0.55rem 1rem !important;
+      font-size: 0.92rem !important;
+    }
+
+    body.planos-ong-page > nav .nav-bell {
+      font-size: 1.35rem !important;
+    }
+
+    body.planos-ong-page > nav .perfil-nav {
+      padding: 6px 16px 6px 6px !important;
+    }
+
+    body.planos-ong-page > nav .perfil-nav img {
+      width: 40px !important;
+      height: 40px !important;
+    }
+
+    body.planos-ong-page > nav .perfil-nav span {
+      font-size: 0.9rem !important;
+    }
+
+    @media (max-width: 768px) {
+      body.planos-ong-page > nav {
+        height: 68px !important;
+        min-height: 68px !important;
+        max-height: 68px !important;
+        padding: 0 16px !important;
+      }
+
+      body.planos-ong-page > nav > .nav-brand {
+        font-size: 1.3rem !important;
+      }
+
+      body.planos-ong-page > nav > .nav-brand img {
+        width: 40px !important;
+        height: 40px !important;
+      }
+
+      body.planos-ong-page .ong-mobile-drawer {
+        top: 68px;
+      }
+    }
+  </style>
+  <script src="../navbarOngResponsiva.js?v=20260827-1" defer></script>
+</head>
+
+<body class="planos-ong-page">
+
+  <nav>
+    <a class="nav-brand" href="#">
+      <img
+        src="../imagens/mutuoLogo.png"
+        alt="Logo"
+        onerror="this.style.display='none'"
+      >
+
+      Mútuo
+    </a>
+
+    <ul class="nav-links">
+      <li>
+        <a href="homeOngMutuo.html">Início</a>
+      </li>
+
+      <li>
+        <a href="chatOng.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a>
+      </li>
+
+      <li class="nav-dropdown">
+        <a href="#">
+          Mais
+
+          <i
+            class="bi bi-chevron-down"
+            style="font-size: 0.68rem;"
+          ></i>
+        </a>
+
+        <div class="dropdown-panel">
+          <div class="dropdown-panel-inner">
+            <a href="planosOng.html" class="active">
+              <i class="bi bi-gem"></i>
+              Conheça nossos planos
+            </a>
+
+            <a href="certificadosOng.html">
+              <i class="bi bi-award"></i>
+              Certificados
+            </a>
+
+            <a href="contatoOng.html">
+              <i class="bi bi-envelope"></i>
+              Contato
+            </a>
+
+            <a href="comoUsarOng.html">
+              <i class="bi bi-question-circle"></i>
+              Como usar a plataforma
+            </a>
+
+            <a href="quemSomosOng.html">
+              <i class="bi bi-people"></i>
+              Quem somos
+            </a>
+
+            <a href="../login.html" class="danger">
+              <i class="bi bi-box-arrow-right"></i>
+              Sair da conta
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="notificacoesOng.html" class="nav-bell">
+        <i class="bi bi-bell-fill"></i>
+        <span class="bell-badge"></span>
+      </a>
+
+      <a href="perfilOngGMutuo.html" class="perfil-nav">
+        <img
+          src="../imagens/mutuoLogo.png"
+          alt="perfil"
+          id="navFotoPerfil"
+        >
+
+        <span id="navNomeOng"></span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="plans-wrapper">
+    <div class="header-text">
+      <h2>Escolha o melhor plano para sua ONG</h2>
+
+      <p class="text-muted">
+        Potencialize o impacto social da sua instituição
+      </p>
+    </div>
+
+    <div class="cards-container">
+
+      <!-- Plano gratuito -->
+
+      <section class="card-plano">
+        <i class="bi bi-stars card-icon"></i>
+
+        <h3 class="card-title">Gratuito</h3>
+
+        <div class="preco">
+          <span class="preco-valor">R$ 0,00</span>
+          <span class="preco-periodo">/mês</span>
+        </div>
+
+        <ul class="feature-list">
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            1500 pontos mensais
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Até 5 serviços ativos
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Suporte básico
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Visualização padrão
+          </li>
+        </ul>
+
+        <button
+          id="btnPlanoGratuito"
+          type="button"
+          class="btn-inscrever"
+          disabled
+        >
+          Verificando...
+        </button>
+      </section>
+
+      <!-- Plano Premium -->
+
+      <section class="card-plano premium">
+        <div class="popular-badge">
+          MAIS RECOMENDADO
+        </div>
+
+        <i
+          class="bi bi-lightning-charge-fill card-icon"
+        ></i>
+
+        <h3 class="card-title">Premium</h3>
+
+        <div class="preco">
+          <span class="preco-valor">R$ 49,90</span>
+          <span class="preco-periodo">/mês</span>
+        </div>
+
+        <ul class="feature-list">
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Pontos ilimitados
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Visibilidade máxima
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Serviços ilimitados
+          </li>
+
+          <li class="feature-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Suporte prioritário 24h
+          </li>
+        </ul>
+
+        <a
+          href="assinarPremiumOng.html"
+          id="btnAssinarPremium"
+          class="btn-inscrever"
+          style="
+            display: none;
+            text-decoration: none;
+            text-align: center;
+          "
+        >
+          Assinar agora
+        </a>
+
+        <button
+          id="btnCancelarPremium"
+          type="button"
+          class="btn-inscrever"
+          style="display: none;"
+        >
+          Cancelar Premium
+        </button>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Modal de confirmação -->
+
+  <div
+    class="modal fade"
+    id="modalCancelarPremium"
+    tabindex="-1"
+    aria-labelledby="tituloModalCancelar"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-cancelamento">
+        <div class="modal-body p-4 p-md-5 text-center">
+          <div class="icone-modal">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+          </div>
+
+          <h3
+            id="tituloModalCancelar"
+            class="titulo-modal"
+          >
+            Cancelar plano Premium?
+          </h3>
+
+          <p class="texto-modal">
+            Sua ONG perderá os benefícios Premium e voltará
+            imediatamente para o plano gratuito. Deseja realmente
+            continuar?
+          </p>
+
+          <div class="d-flex gap-2 modal-actions">
+            <button
+              type="button"
+              class="btn btn-manter w-50"
+              data-bs-dismiss="modal"
+            >
+              Manter Premium
+            </button>
+
+            <button
+              type="button"
+              id="btnConfirmarCancelamento"
+              class="btn btn-confirmar-cancelamento w-50"
+            >
+              Sim, cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem de sucesso ou erro -->
+
+  <div id="mensagemPlano">
+    <div
+      id="conteudoMensagemPlano"
+      class="mensagem-plano"
+    >
+      <i id="iconeMensagemPlano" class="bi fs-4"></i>
+
+      <span
+        id="textoMensagemPlano"
+        class="flex-grow-1"
+      ></span>
+
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Fechar"
+        onclick="fecharMensagemPlano()"
+      ></button>
+    </div>
+  </div>
+
+  
+
+  <script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const API_BASE = "https://mutuo-api.onrender.com";
+
+    let ong = null;
+    let temporizadorMensagem = null;
+
+    try {
+      ong = JSON.parse(
+        sessionStorage.getItem("ongLogada") || "{}"
+      );
+    } catch (erro) {
+      console.error(
+        "Erro ao ler os dados da ONG:",
+        erro
+      );
+
+      ong = {};
+    }
+
+    const modalCancelarElemento =
+      document.getElementById("modalCancelarPremium");
+
+    const modalCancelar =
+      new bootstrap.Modal(modalCancelarElemento);
+
+    iniciarPagina();
+
+    function iniciarPagina() {
+      if (!ong || !ong.cnpj) {
+        window.location.href = "../login.html";
+        return;
+      }
+
+      verificarPlanoAtual();
+    }
+
+    async function verificarPlanoAtual() {
+      try {
+        const resposta = await fetch(
+          `${API_BASE}/ongs/${encodeURIComponent(ong.cnpj)}`
+        );
+
+        const dados = await lerRespostaJson(resposta);
+
+        if (!resposta.ok) {
+          throw new Error(
+            dados.erro ||
+            dados.error ||
+            "Não foi possível verificar o plano da ONG."
+          );
+        }
+
+        let valorPremium = dados.premium;
+
+        /*
+         * Compatibilidade caso o MySQL devolva uma coluna BIT
+         * como um objeto Buffer.
+         */
+        if (
+          valorPremium &&
+          typeof valorPremium === "object" &&
+          Array.isArray(valorPremium.data)
+        ) {
+          valorPremium = valorPremium.data[0];
+        }
+
+        const premium =
+          Number(valorPremium) === 1 ||
+          valorPremium === true;
+
+        ong = {
+          ...ong,
+          ...dados,
+          premium: premium ? 1 : 0
+        };
+
+        // Nunca mantém a senha no sessionStorage.
+        delete ong.senha;
+
+        sessionStorage.setItem(
+          "ongLogada",
+          JSON.stringify(ong)
+        );
+
+        atualizarInterfacePlano(premium);
+      } catch (erro) {
+        console.error(
+          "Erro ao verificar plano da ONG:",
+          erro
+        );
+
+        mostrarMensagemPlano(
+          erro.message ||
+          "Não foi possível verificar o plano da ONG.",
+          "erro"
+        );
+
+        /*
+         * Caso a verificação falhe, mantém os botões escondidos
+         * para não apresentar um plano incorreto.
+         */
+        document.getElementById(
+          "btnPlanoGratuito"
+        ).textContent = "Não foi possível verificar";
+      }
+    }
+
+    function atualizarInterfacePlano(premium) {
+      const btnGratuito =
+        document.getElementById("btnPlanoGratuito");
+
+      const btnAssinar =
+        document.getElementById("btnAssinarPremium");
+
+      const btnCancelar =
+        document.getElementById("btnCancelarPremium");
+
+      if (premium) {
+        btnGratuito.textContent = "Plano gratuito";
+        btnGratuito.disabled = true;
+
+        btnAssinar.style.display = "none";
+        btnCancelar.style.display = "block";
+      } else {
+        btnGratuito.textContent = "Plano atual";
+        btnGratuito.disabled = true;
+
+        btnAssinar.style.display = "block";
+        btnCancelar.style.display = "none";
+      }
+    }
+
+    document
+      .getElementById("btnCancelarPremium")
+      .addEventListener("click", function () {
+        modalCancelar.show();
+      });
+
+    document
+      .getElementById("btnConfirmarCancelamento")
+      .addEventListener("click", cancelarPremium);
+
+    async function cancelarPremium() {
+      const btnConfirmar =
+        document.getElementById(
+          "btnConfirmarCancelamento"
+        );
+
+      btnConfirmar.disabled = true;
+      btnConfirmar.innerHTML = `
+        <span
+          class="spinner-border spinner-border-sm me-2"
+          aria-hidden="true"
+        ></span>
+        Cancelando...
+      `;
+
+      try {
+        const resposta = await fetch(
+          `${API_BASE}/ongs/${encodeURIComponent(ong.cnpj)}/premium`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              premium: 0
+            })
+          }
+        );
+
+        const resultado =
+          await lerRespostaJson(resposta);
+
+        if (
+          !resposta.ok ||
+          resultado.sucesso === false ||
+          resultado.success === false ||
+          resultado.erro ||
+          resultado.error
+        ) {
+          throw new Error(
+            resultado.erro ||
+            resultado.error ||
+            "Não foi possível cancelar o plano."
+          );
+        }
+
+        ong.premium = 0;
+
+        sessionStorage.setItem(
+          "ongLogada",
+          JSON.stringify(ong)
+        );
+
+        modalCancelar.hide();
+        atualizarInterfacePlano(false);
+
+        mostrarMensagemPlano(
+          "Plano Premium cancelado. Sua ONG agora está no plano gratuito.",
+          "sucesso"
+        );
+      } catch (erro) {
+        console.error(
+          "Erro ao cancelar Premium da ONG:",
+          erro
+        );
+
+        modalCancelar.hide();
+
+        mostrarMensagemPlano(
+          erro.message ||
+          "Não foi possível cancelar o plano. Tente novamente.",
+          "erro"
+        );
+      } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = "Sim, cancelar";
+      }
+    }
+
+    async function lerRespostaJson(resposta) {
+      const texto = await resposta.text();
+
+      if (!texto) {
+        return {};
+      }
+
+      try {
+        return JSON.parse(texto);
+      } catch (erro) {
+        throw new Error(
+          "A API devolveu uma resposta inválida."
+        );
+      }
+    }
+
+    function mostrarMensagemPlano(texto, tipo) {
+      clearTimeout(temporizadorMensagem);
+
+      const caixa =
+        document.getElementById("mensagemPlano");
+
+      const conteudo =
+        document.getElementById(
+          "conteudoMensagemPlano"
+        );
+
+      const icone =
+        document.getElementById(
+          "iconeMensagemPlano"
+        );
+
+      document.getElementById(
+        "textoMensagemPlano"
+      ).textContent = texto;
+
+      if (tipo === "sucesso") {
+        conteudo.className =
+          "mensagem-plano mensagem-sucesso";
+
+        icone.className =
+          "bi bi-check-circle-fill fs-4";
+      } else {
+        conteudo.className =
+          "mensagem-plano mensagem-erro";
+
+        icone.className =
+          "bi bi-exclamation-circle-fill fs-4";
+      }
+
+      caixa.style.display = "block";
+
+      temporizadorMensagem = setTimeout(
+        fecharMensagemPlano,
+        5000
+      );
+    }
+
+    function fecharMensagemPlano() {
+      document.getElementById(
+        "mensagemPlano"
+      ).style.display = "none";
+
+      clearTimeout(temporizadorMensagem);
+    }
+
+    window.addEventListener('load', () => {
+      carregarNavOng();
+      atualizarBadgeNotificacoesOng();
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 297mm;
+    height: 210mm;
+    font-family: 'Quicksand', sans-serif;
+    background: #f7f5ef;
+    position: relative;
+  }
+
+  .moldura {
+    position: absolute;
+    top: 14mm; left: 14mm; right: 14mm; bottom: 14mm;
+    border: 2px solid #588157;
+    padding: 6mm;
+  }
+  .moldura-interna {
+    height: 100%;
+    border: 1px solid #b7ce8f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10mm 18mm;
+    position: relative;
+  }
+
+  .cantos span {
+    position: absolute;
+    width: 18px; height: 18px;
+    border: 2px solid #3a5a40;
+  }
+  .cantos .tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .cantos .tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .cantos .bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .cantos .br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .icone {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: #eaf2e6;
+    border: 2px solid #588157;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .icone svg { width: 26px; height: 26px; }
+
+  .selo {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #7a8c76;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 2.6rem;
+    color: #3a5a40;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+  }
+
+  .texto {
+    font-size: 1rem;
+    color: #4a5a46;
+    line-height: 1.7;
+    max-width: 620px;
+  }
+
+  .nome-destaque {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.9rem;
+    color: #1a2e1b;
+    margin: 10px 0 6px;
+    border-bottom: 1px solid #b7ce8f;
+    display: inline-block;
+    padding-bottom: 4px;
+  }
+
+  .destaque-servico {
+    font-weight: 700;
+    color: #3a5a40;
+  }
+
+  .rodape {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 620px;
+    margin-top: 40px;
+  }
+
+  .bloco-assinatura {
+    text-align: center;
+  }
+  .linha-assinatura {
+    width: 170px;
+    border-top: 1px solid #7a8c76;
+    margin-bottom: 6px;
+  }
+  .bloco-assinatura p {
+    font-size: 0.72rem;
+    color: #7a8c76;
+    font-weight: 600;
+  }
+  .bloco-assinatura strong {
+    font-size: 0.8rem;
+    color: #1a2e1b;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .marca-dagua {
+    position: absolute;
+    bottom: 8mm;
+    font-size: 0.65rem;
+    color: #7e8d7a;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <div class="moldura">
+    <div class="moldura-interna">
+      <div class="cantos">
+        <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+      </div>
+
+      <div class="icone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#588157" stroke-width="2">
+          <path d="M12 2l2.4 6.8L21 9.3l-5.4 4.6L17.1 21 12 17.1 6.9 21l1.5-7.1L3 9.3l6.6-.5z"/>
+        </svg>
+      </div>
+
+      <p class="selo">Mútuo · Certificado de Voluntariado</p>
+      <h1>Certificado de Participação</h1>
+
+      <p class="texto">
+        Certificamos que
+        <span class="nome-destaque">{{nomeUsuario}}</span><br>
+        concluiu com dedicação o serviço voluntário
+        <span class="destaque-servico">"{{nomeServico}}"</span>,
+        realizado em parceria com <strong>{{nomeOng}}</strong>,
+        totalizando <strong>{{horas}} hora(s)</strong> de trabalho voluntário,
+        concluído em <strong>{{dataConclusao}}</strong>.
+      </p>
+
+      <div class="rodape">
+        <div class="bloco-assinatura">
+          <strong>{{nomeOng}}</strong>
+          <div class="linha-assinatura"></div>
+          <p>Organização parceira</p>
+        </div>
+        <div class="bloco-assinatura">
+          <strong>Mútuo</strong>
+          <div class="linha-assinatura"></div>
+          <p>Plataforma de voluntariado</p>
+        </div>
+      </div>
+
+      <p class="marca-dagua">
+        Código de verificação: {{codigoVerificacao}} · mutuo.com.br/verificar
+      </p>
+    </div>
+  </div>
+</body>
+</html>
