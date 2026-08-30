@@ -62,6 +62,34 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
+// Serve as imagens a partir do banco (persistente) quando disponível — no
+// Render (plano gratuito, sem disco persistente) o arquivo em uploads/ some
+// a cada reinício, mas os bytes salvos em imagem_dados/foto_perfil_dados
+// continuam lá. Se não achar no banco, cai pro arquivo em disco (uploads/
+// antigos, ou ambiente local) via express.static logo abaixo.
+app.get('/uploads/fotos/:nome', async (req, res, next) => {
+  try {
+    const imagem = await db.buscarImagemPerfilPorNome(req.params.nome);
+    if (!imagem) return next();
+    res.set('Content-Type', imagem.tipo || 'image/jpeg');
+    res.send(imagem.dados);
+  } catch (err) {
+    next();
+  }
+});
+
+app.get('/uploads/servicos/:nome', async (req, res, next) => {
+  try {
+    const imagem = await db.buscarImagemServicoPorNome(req.params.nome);
+    if (!imagem) return next();
+    res.set('Content-Type', imagem.tipo || 'image/jpeg');
+    res.send(imagem.dados);
+  } catch (err) {
+    next();
+  }
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const server = http.createServer(app);
@@ -357,9 +385,11 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
     }
 
     const imagem = req.file ? req.file.filename : null;
+    const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
+    const imagemTipo = req.file ? req.file.mimetype : null;
 
     const id = await db.cadastrarServicoOng({
-      nomeServico, cnpj, horas: duracao, descricao, foco, imagem,
+      nomeServico, cnpj, horas: duracao, descricao, foco, imagem, imagemDados, imagemTipo,
       pontos: pontosNum
     });
 
@@ -406,9 +436,11 @@ app.put('/servicos/:id', uploadServico.single('imagem'), async (req, res) => {
     }
 
     const imagem = req.file ? req.file.filename : null;
+    const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
+    const imagemTipo = req.file ? req.file.mimetype : null;
 
     await db.atualizarServico(req.params.id, {
-      nomeServico, descricao, foco, duracao, imagem,
+      nomeServico, descricao, foco, duracao, imagem, imagemDados, imagemTipo,
       pontos: pontosNum   // ← novo
     });
 
@@ -446,9 +478,11 @@ app.put('/servicos/ong/:id', uploadServico.single('imagem'), async (req, res) =>
   }
 
   const imagem = req.file ? req.file.filename : null;
+  const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
+  const imagemTipo = req.file ? req.file.mimetype : null;
   const resultado = await db.atualizarServicoOng(req.params.id, {
-    nomeServico, descricao, foco, horas: duracao, imagem,
-    pontos: pontosNum  
+    nomeServico, descricao, foco, horas: duracao, imagem, imagemDados, imagemTipo,
+    pontos: pontosNum
   });
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
   res.json({ sucesso: true });
@@ -525,7 +559,8 @@ app.post('/perfil/foto', upload.single('fotoPerfil'), async (req, res) => {
   if (!cpf) return res.status(400).json({ erro: 'CPF não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
-  const resultado = await db.atualizarFotoPerfil(cpf, req.file.filename);
+  const dados = fs.readFileSync(req.file.path);
+  const resultado = await db.atualizarFotoPerfil(cpf, req.file.filename, dados, req.file.mimetype);
   console.log(' Resultado do banco:', resultado);
 
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
@@ -546,7 +581,8 @@ app.post('/perfil/foto/ong', upload.single('fotoPerfil'), async (req, res) => {
   if (!cnpj) return res.status(400).json({ erro: 'CNPJ não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
-  const resultado = await db.atualizarFotoPerfilOng(cnpj, req.file.filename);
+  const dados = fs.readFileSync(req.file.path);
+  const resultado = await db.atualizarFotoPerfilOng(cnpj, req.file.filename, dados, req.file.mimetype);
   console.log(' Resultado do banco:', resultado);
 
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
@@ -894,9 +930,11 @@ app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
     }
 
     const imagem = req.file ? req.file.filename : null;
+    const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
+    const imagemTipo = req.file ? req.file.mimetype : null;
 
     const id = await db.cadastrarServico({
-      nomeServico, descricao, foco, duracao, cpf, imagem, pontos: pontosNum
+      nomeServico, descricao, foco, duracao, cpf, imagem, imagemDados, imagemTipo, pontos: pontosNum
     });
 
     res.json({ sucesso: true, id, imagem: imagem ? `/uploads/servicos/${imagem}` : null });
