@@ -222,10 +222,14 @@
             tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
 
             try {
-                //const servicos = await window.api.buscarServicos();
-                //if (servicos.error) throw new Error(servicos.error);
+                const resultado = await window.api.buscarServicos();
+                console.log('Resultado de buscarServicos:', resultado); // ← temporário, pra ver o formato real
 
-                listaServicos = await window.api.buscarServicos();
+                if (!Array.isArray(resultado)) {
+                    throw new Error(resultado?.error || resultado?.erro || 'Resposta inesperada do servidor.');
+                }
+
+                listaServicos = resultado;
                 renderizarTabela(listaServicos);
             }
             catch (err) {
