@@ -98,6 +98,20 @@
       display: flex; align-items: center; justify-content: center;
       border: 2px solid var(--verde-principal);
     }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--creme);
+      color: var(--verde-escuro);
+      border: 1px solid var(--verde-principal);
+      font-size: 0.62rem;
+      font-weight: 700;
+      min-width: 15px; height: 15px;
+      border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
 
     .perfil-nav {
       display: flex; align-items: center; gap: 9px; text-decoration: none;
@@ -619,7 +633,7 @@
 
   <ul class="links-nav">
     <li><a href="homeOngMutuo.html">Início</a></li>
-    <li><a href="chatOng.html">Chat</a></li>
+    <li><a href="chatOng.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a></li>
     <li class="dropdown-nav">
       <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
       <div class="painel-dropdown">
@@ -901,6 +915,8 @@
 
 </div>
 <script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
 <script>
   const API_BASE = 'https://mutuo-api.onrender.com'
 
