@@ -639,7 +639,7 @@ async function carregarPerfilOng() {
   }
 }
 
-function resolverImagemOng(caminho) {
+function resolverImagemPerfilOng(caminho) {
   if (!caminho) return '../imagens/mutuoLogo.png';
   if (caminho.startsWith('http')) return caminho;
   if (caminho.startsWith('/')) return `${API_URL_ONG}${caminho}`;
