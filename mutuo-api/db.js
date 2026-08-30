@@ -525,7 +525,7 @@ async function atualizarServico(id, servico) {
 async function getServicosOng(cnpj) {
   try {
     const [rows] = await pool.query(
-      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem, pontos FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1',
+      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem, pontos, nota, avaliacoes FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1',
       [cnpj]
     );
     return rows.map(servico => ({
