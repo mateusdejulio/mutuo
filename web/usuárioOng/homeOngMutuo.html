@@ -398,10 +398,7 @@ nav {
 .act-desc {
   font-size: 0.81rem; color: var(--text-muted);
   line-height: 1.5; margin-bottom: 0.9rem;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+  word-wrap: break-word;
   min-height: 2.4em;
 }
 
@@ -940,7 +937,7 @@ nav {
         valorPremiumAtivo(ongLogada.premium);
 
 
-      // Atualiza o plano da ONG usando os dados do banco
+      // Atualiza o plano (e a foto/nome/cidade) da ONG usando os dados do banco
       if (respostaOng.ok) {
         const dadosOng =
           await respostaOng.json();
@@ -950,11 +947,15 @@ nav {
 
         ongLogada.premium =
           premium ? 1 : 0;
+        ongLogada.foto_perfil =
+          dadosOng.foto_perfil;
 
         sessionStorage.setItem(
           'ongLogada',
           JSON.stringify(ongLogada)
         );
+
+        preencherPainelOng(dadosOng);
       }
 
 
