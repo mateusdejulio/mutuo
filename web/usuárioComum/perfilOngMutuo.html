@@ -651,7 +651,7 @@ function resolverImagemServico(caminho) {
   if (caminho.startsWith('http')) return caminho;
   if (caminho.startsWith('/')) return `${API_URL_ONG}${caminho}`;
   return `${API_URL_ONG}/uploads/servicos/${caminho}`;
-
+}
 
 function preencherIdentidade(ong) {
   document.title = 'Mútuo | ' + ong.nomeOng;
