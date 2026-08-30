@@ -1356,7 +1356,6 @@
     const nome = servico.nomeServico || 'Serviço sem nome';
     const descricao = servico.descricao || '';
     const ativo = servico.ativo === undefined ? true : !!servico.ativo;
-    const nota = servico.nota ? Number(servico.nota).toFixed(1) : '—';
     const totalRealizados = servico.totalRealizados ?? 0;
     const textoRealizados = totalRealizados === 1 ? '1 pessoa já realizou' : `${totalRealizados} pessoas já realizaram`;
     const pontos = servico.pontos ?? 0;
@@ -1371,7 +1370,7 @@
       <p class="descricao-servico">${descricao}</p>
       <div class="rodape-servico">
         <div class="avaliacao-servico">
-          <i class="bi bi-star-fill"></i> ${nota} <span>(${textoRealizados})</span>
+          <i class="bi bi-people-fill"></i> <span>${textoRealizados}</span>
         </div>
         <div class="pontos-servico">
           <i class="bi bi-lightning-charge-fill"></i> ${pontos} pts/hora
