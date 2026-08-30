@@ -243,6 +243,20 @@
       font-size: 0.6rem;
       font-weight: 700;
     }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--bege);
+      color: var(--verde-escuro);
+      border: 1px solid var(--verde-medio);
+      font-size: 0.62rem;
+      font-weight: 700;
+      min-width: 15px; height: 15px;
+      border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
 
     .perfil-nav {
       display: flex !important;
@@ -778,7 +792,7 @@
       </li>
 
       <li>
-        <a href="chatOng.html">Chat</a>
+        <a href="chatOng.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a>
       </li>
 
       <li class="nav-dropdown">
@@ -1043,6 +1057,8 @@
   
 
   <script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
