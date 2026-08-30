@@ -309,7 +309,7 @@
           </div>
           <div class="campo">
             <label for="cvvCartao">CVV</label>
-            <input type="text" id="cvvCartao" placeholder="123" inputmode="numeric" maxlength="4" autocomplete="cc-csc" required>
+            <input type="text" id="cvvCartao" placeholder="123" inputmode="numeric" maxlength="3" autocomplete="cc-csc" required>
           </div>
           <div class="campo">
             <label for="cpfCartao">CPF do titular</label>
@@ -404,7 +404,7 @@
     });
 
     inputCvv.addEventListener('input', function () {
-      this.value = this.value.replace(/\D/g, '').slice(0, 4);
+      this.value = this.value.replace(/\D/g, '').slice(0, 3);
     });
 
     inputCpf.addEventListener('input', function () {
