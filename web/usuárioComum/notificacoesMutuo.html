@@ -373,9 +373,7 @@
     <div class="notif-list" id="todas"></div>
 <div class="notif-list" id="recebidas" style="display:none;"></div>
 <div class="notif-list" id="meus-pedidos" style="display:none;"></div>
-<div class="notif-list" id="mensagens" style="display:none;">
-  <!-- mensagens continua estática até o chat ter backend -->
-</div>
+<div class="notif-list" id="mensagens" style="display:none;"></div>
     
 <script src="../funcoes.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -383,6 +381,7 @@
 <script>
   let recebidas = [];
   let enviadas = [];
+  let mensagens = [];
 
 function statusClasse(status) {
   if (status === 'Aceita') return 'aceito';
@@ -418,10 +417,10 @@ function cardRecebida(s) {
           <div class="notif-actions">
             <button class="action-btn accept" onclick="responderSolicitacao(${s.codSolicitacao}, true, ${s.pontos})"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
             <button class="action-btn decline" onclick="responderSolicitacao(${s.codSolicitacao}, false, ${s.pontos})"><i class="bi bi-x-circle-fill"></i> Recusar</button>
-            <a href="${linkChat('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="action-btn message" onclick="marcarComoLida(${s.codSolicitacao}); return true;"><i class="bi bi-chat-fill"></i> Mensagem</a>
+            <a href="${linkChat('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
           </div>` : `
           <div class="notif-actions">
-            <a href="${linkChat('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="action-btn message" onclick="marcarComoLida(${s.codSolicitacao})"><i class="bi bi-chat-fill"></i> Mensagem</a>
+            <a href="${linkChat('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="action-btn message"><i class="bi bi-chat-fill"></i> Mensagem</a>
           </div>`}
       </div>
       <span class="notif-time" title="${new Date(s.dataSolicitacao).toLocaleString('pt-BR')}">${tempoRelativo(s.dataSolicitacao)}</span>
@@ -449,22 +448,55 @@ function cardEnviada(s) {
     </div>`;
 }
 
+function cardMensagem(c) {
+  const naoLida = Number(c.naoLidas) > 0;
+  return `
+    <div class="notif-card ${naoLida ? 'unread' : ''}" data-id="msg-${c.id}">
+      <div class="notif-avatar">
+        <img src="${resolverImagem(c.fotoOutraConta)}" alt="${c.nomeOutraConta || ''}">
+        <span class="type-icon msg"><i class="bi bi-chat-fill"></i></span>
+      </div>
+      <div class="notif-body">
+        <div class="notif-top">
+          <span class="notif-type">Nova mensagem</span>
+        </div>
+        <p class="notif-name">${c.nomeOutraConta || 'Conta'}</p>
+        <p class="notif-service"><i class="bi bi-chat-dots-fill"></i> ${c.ultimaMensagem || ''}</p>
+        <div class="notif-actions">
+          <a href="${linkChat(c.tipoOutraConta, c.idOutraConta, c.nomeOutraConta, c.fotoOutraConta)}" class="action-btn message"><i class="bi bi-chat-fill"></i> Abrir conversa</a>
+        </div>
+      </div>
+      <span class="notif-time" title="${new Date(c.ultimaMensagemEm).toLocaleString('pt-BR')}">${tempoRelativo(c.ultimaMensagemEm)}</span>
+    </div>`;
+}
+
 async function carregarSolicitacoes() {
   const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
   const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
   if (!usuarioLogado || !usuarioLogado.cpf) return;
 
   try {
-    const [respRecebidas, respEnviadas, respEnviadasOng] = await Promise.all([
+    const [respRecebidas, respEnviadas, respEnviadasOng, respConversas] = await Promise.all([
       fetch(`${API_URL}/solicitacoes/prestador/${usuarioLogado.cpf}`),
       fetch(`${API_URL}/solicitacoes/usuario/${usuarioLogado.cpf}`),
-      fetch(`${API_URL}/solicitacoes-ong/usuario/${usuarioLogado.cpf}`)
+      fetch(`${API_URL}/solicitacoes-ong/usuario/${usuarioLogado.cpf}`),
+      fetch(`${API_URL}/conversas/usuario/${usuarioLogado.cpf}`)
     ]);
     recebidas = await respRecebidas.json();
     enviadas = await respEnviadas.json();
     const enviadasOng = await respEnviadasOng.json();
+    const conversas = await respConversas.json();
+    // Histórico continua mostrando todas as conversas com mensagem, lidas ou não
+    // (só some se a própria conversa for apagada). "unread" nos cards usa o
+    // naoLidas de ANTES de marcar como lida aqui embaixo.
+    mensagens = (Array.isArray(conversas) ? conversas : []).filter(c => c.ultimaMensagem)
+      .sort((a, b) => new Date(b.ultimaMensagemEm) - new Date(a.ultimaMensagemEm));
+    // Só de entrar na página de notificações já conta como "visto": marca as
+    // conversas como lidas (recebidas seguem separadas, só somem ao aceitar/recusar).
+    mensagens.filter(c => Number(c.naoLidas) > 0).forEach(c => MutuoChat.marcarComoLida(c.id));
 
     document.getElementById('recebidas').innerHTML = recebidas.map(cardRecebida).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
+    document.getElementById('mensagens').innerHTML = mensagens.map(cardMensagem).join('') || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma mensagem ainda.</p></div>';
 
     const enviadosCombinados = [
       ...enviadas.map(s => ({ ...s, _tipo: 'usuario' })),
@@ -475,13 +507,15 @@ async function carregarSolicitacoes() {
     document.getElementById('meus-pedidos').innerHTML = htmlEnviados || '<div class="empty"><i class="bi bi-inbox"></i><p>Você ainda não fez pedidos.</p></div>';
 
     const todasCombinadas = [
-      ...recebidas.map(s => ({ ...s, _tipo: 'recebida' })),
-      ...enviadosCombinados
-    ].sort((a, b) => new Date(b.dataSolicitacao) - new Date(a.dataSolicitacao));
+      ...recebidas.map(s => ({ ...s, _tipo: 'recebida', _data: s.dataSolicitacao })),
+      ...enviadosCombinados.map(s => ({ ...s, _data: s.dataSolicitacao })),
+      ...mensagens.map(c => ({ ...c, _tipo: 'mensagem', _data: c.ultimaMensagemEm }))
+    ].sort((a, b) => new Date(b._data) - new Date(a._data));
 
     const todasHtml = todasCombinadas.map(s => {
       if (s._tipo === 'recebida') return cardRecebida(s);
       if (s._tipo === 'ong') return cardEnviadaOng(s);
+      if (s._tipo === 'mensagem') return cardMensagem(s);
       return cardEnviada(s);
     }).join('');
     document.getElementById('todas').innerHTML = todasHtml || '<div class="empty"><i class="bi bi-inbox"></i><p>Nenhuma notificação.</p></div>';
@@ -513,7 +547,7 @@ async function responderSolicitacao(cod, aceitar, pontos) {
 }
 
 function updateCounter() {
-  const count = recebidas.filter(s => !s.lida).length; // conta só uma vez, direto do array
+  const count = recebidas.filter(s => !s.lida).length; // mensagens já viram lidas ao entrar nessa página
   const badge = document.getElementById('counter-badge');
   const bellBadge = document.querySelector('.bell-badge');
   if (count === 0) {
@@ -539,14 +573,6 @@ function resolverImagem(caminho) {
 function linkChat(tipo, id, nome, foto) {
   const params = new URLSearchParams({ tipo, id: id || '', nome: nome || '', foto: resolverImagem(foto) });
   return `chatMutuo.html?${params.toString()}`;
-}
-
-async function marcarComoLida(cod) {
-  try {
-    await fetch(`${API_URL}/solicitacoes/${cod}/lida`, { method: 'PUT' });
-  } catch (err) {
-    console.error('Erro ao marcar como lida:', err);
-  }
 }
 
 function tempoRelativo(dataStr) {
@@ -592,10 +618,12 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
+MutuoChat.conectar();
 window.addEventListener('load', carregarSolicitacoes);
  carregarFoto();
  atualizarBadgeNotificacoes();
  carregarSolicitacoes();
+ MutuoChat.onMensagemNova(carregarSolicitacoes);
 </script>
 
 </body>
