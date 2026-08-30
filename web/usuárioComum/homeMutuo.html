@@ -115,6 +115,20 @@
       display: flex; align-items: center; justify-content: center;
       border: 2px solid var(--green-main);
     }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--cream);
+      color: var(--green-dark);
+      border: 1px solid var(--green-main);
+      font-size: 0.62rem;
+      font-weight: 700;
+      min-width: 15px; height: 15px;
+      border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
 
     .nav-profile {
       display: flex; align-items: center; gap: 9px;
@@ -572,7 +586,7 @@
     <li><a href="homeMutuo.html" class="active">Início</a></li>
     <li><a href="serviçosMutuo.html">Serviços</a></li>
     <li><a href="OngsMutuo.html">ONGs</a></li>
-    <li><a href="chatMutuo.html">Chat</a></li>
+    <li><a href="chatMutuo.html" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a></li>
     <li class="nav-dropdown">
       <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
       <div class="dropdown-panel">
@@ -870,6 +884,8 @@
 </div>
 
 <script src="../funcoes.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
 <script>
 
   const quotes = [
@@ -971,7 +987,9 @@
   }
 
   // ── Vagas em destaque (usuários premium) ──
+  const servicosHomeMap = {};
   function criarCardDestaque(servico) {
+    servicosHomeMap[servico.cod] = servico;
     const div = document.createElement('div');
     div.className = 'act-card';
 
@@ -1065,7 +1083,15 @@
     }
   }
   function tirarDuvidasHome(cod) {
-  window.location.href = 'chatMutuo.html';
+  const s = servicosHomeMap[cod];
+  if (!s) { window.location.href = 'chatMutuo.html'; return; }
+  const params = new URLSearchParams({
+    tipo: 'usuario',
+    id: s.idUsuario,
+    nome: s.nomeUsuario || 'Usuário',
+    foto: s.fotoUsuario ? `${API_URL}${s.fotoUsuario}` : '../imagens/mutuoLogo.png'
+  });
+  window.location.href = `chatMutuo.html?${params.toString()}`;
 }
 
 async function inscreverServicoHome(cod) {
