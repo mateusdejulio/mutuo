@@ -444,9 +444,7 @@
     <!-- TODAS -->
     <div class="lista-notificacoes" id="todas"></div>
 <div class="lista-notificacoes" id="recebidas" style="display:none;"></div>
-<div class="lista-notificacoes" id="mensagens" style="display:none;">
-  
-</div>
+<div class="lista-notificacoes" id="mensagens" style="display:none;"></div>
 
   </div>
 <script src="../funcoes.js"></script>
@@ -455,6 +453,7 @@
   <script>
 
     let solicitacoesOngAtual = [];
+    let mensagensOngAtual = [];
 
 function classeStatus(status) {
   if (status === 'Aceita') return 'aceito';
@@ -511,20 +510,65 @@ function cardSolicitacao(s) {
     </div>`;
 }
 
+function cardMensagemOng(c) {
+  const naoLida = Number(c.naoLidas) > 0;
+  return `
+    <div class="card-notificacao ${naoLida ? 'nao-lida' : ''}" data-id="msg-${c.id}">
+      <div class="avatar-notificacao">
+        <img src="${resolverImagem(c.fotoOutraConta)}" alt="${c.nomeOutraConta || ''}">
+        <span class="icone-tipo mensagem"><i class="bi bi-chat-fill"></i></span>
+      </div>
+      <div class="corpo-notificacao">
+        <div class="topo-notificacao">
+          <span class="tipo-notificacao">Nova mensagem</span>
+        </div>
+        <p class="nome-notificacao">${c.nomeOutraConta || 'Conta'}</p>
+        <p class="servico-notificacao"><i class="bi bi-chat-dots-fill"></i> ${c.ultimaMensagem || ''}</p>
+        <div class="acoes-notificacao">
+          <a href="${linkChatOng(c.tipoOutraConta, c.idOutraConta, c.nomeOutraConta, c.fotoOutraConta)}" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Abrir conversa</a>
+        </div>
+      </div>
+      <span class="horario-notificacao">${tempoRelativo(c.ultimaMensagemEm)}</span>
+    </div>`;
+}
+
 async function carregarSolicitacoesOng() {
   const ongLogadaStr = sessionStorage.getItem('ongLogada');
   const ongLogada = ongLogadaStr ? JSON.parse(ongLogadaStr) : null;
   if (!ongLogada || !ongLogada.cnpj) return;
 
   try {
-    const resp = await fetch(`${API_URL}/solicitacoes-ong/prestador/${encodeURIComponent(ongLogada.cnpj)}`);
-    solicitacoesOngAtual = await resp.json();
+    const [respSolicitacoes, respConversas] = await Promise.all([
+      fetch(`${API_URL}/solicitacoes-ong/prestador/${encodeURIComponent(ongLogada.cnpj)}`),
+      fetch(`${API_URL}/conversas/ong/${encodeURIComponent(ongLogada.cnpj)}`)
+    ]);
+    solicitacoesOngAtual = await respSolicitacoes.json();
+    const conversas = await respConversas.json();
+    // Histórico continua mostrando todas as conversas com mensagem, lidas ou não
+    // (só some se a própria conversa for apagada). "nao-lida" nos cards usa o
+    // naoLidas de ANTES de marcar como lida aqui embaixo.
+    mensagensOngAtual = (Array.isArray(conversas) ? conversas : []).filter(c => c.ultimaMensagem)
+      .sort((a, b) => new Date(b.ultimaMensagemEm) - new Date(a.ultimaMensagemEm));
+    // Só de entrar na página de notificações já conta como "visto": marca as
+    // conversas como lidas (recebidas seguem separadas, só somem ao aceitar/recusar).
+    mensagensOngAtual.filter(c => Number(c.naoLidas) > 0).forEach(c => MutuoChat.marcarComoLida(c.id));
 
-    const html = solicitacoesOngAtual.map(cardSolicitacao).join('') ||
+    const htmlSolicitacoes = solicitacoesOngAtual.map(cardSolicitacao).join('') ||
       '<div class="estado-vazio"><i class="bi bi-inbox"></i><p>Nenhuma solicitação recebida.</p></div>';
+    const htmlMensagens = mensagensOngAtual.map(cardMensagemOng).join('') ||
+      '<div class="estado-vazio"><i class="bi bi-inbox"></i><p>Nenhuma mensagem ainda.</p></div>';
 
-    document.getElementById('recebidas').innerHTML = html;
-    document.getElementById('todas').innerHTML = html;
+    const todasCombinadas = [
+      ...solicitacoesOngAtual.map(s => ({ ...s, _tipo: 'solicitacao', _data: s.dataSolicitacao })),
+      ...mensagensOngAtual.map(c => ({ ...c, _tipo: 'mensagem', _data: c.ultimaMensagemEm }))
+    ].sort((a, b) => new Date(b._data) - new Date(a._data));
+
+    const htmlTodas = todasCombinadas.map(s => s._tipo === 'mensagem' ? cardMensagemOng(s) : cardSolicitacao(s)).join('') ||
+      '<div class="estado-vazio"><i class="bi bi-inbox"></i><p>Nenhuma notificação.</p></div>';
+
+    document.getElementById('recebidas').innerHTML = htmlSolicitacoes;
+    document.getElementById('mensagens').innerHTML = htmlMensagens;
+    document.getElementById('todas').innerHTML = htmlTodas;
 
     reativarCliqueLido();
     atualizarContador();
@@ -571,7 +615,7 @@ function marcarTodasLidas() {
 }
 
 function atualizarContador() {
-  const total = solicitacoesOngAtual.filter(s => s.statusSolicitacao === 'Pendente').length; // conta 1x, direto do array
+  const total = solicitacoesOngAtual.filter(s => s.statusSolicitacao === 'Pendente').length; // mensagens já viram lidas ao entrar nessa página
   const badgeContador = document.getElementById('badge-contador');
   const badgeSino = document.getElementById('badge-sino');
   if (total === 0) {
@@ -593,10 +637,12 @@ document.querySelectorAll('.btn-filtro').forEach(btn => {
   });
 });
 
+MutuoChat.conectar();
 window.addEventListener('load', () => {
   carregarNavOng();
   atualizarBadgeNotificacoesOng();
   carregarSolicitacoesOng();
+  MutuoChat.onMensagemNova(carregarSolicitacoesOng);
 });
 
 </script>
