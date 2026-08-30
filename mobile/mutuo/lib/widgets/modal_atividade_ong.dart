@@ -57,6 +57,9 @@ Future<void> abrirModalAtividadeOng({
   final duracaoCtrl = TextEditingController(
     text: atividade?['horas']?.toString() ?? '',
   );
+  final pontosCtrl = TextEditingController(
+    text: atividade?['pontos']?.toString() ?? '',
+  );
 
   // Normaliza o foco vindo do banco (evita mismatch de maiúscula/acento
   // com a lista fixa) e garante que o valor atual sempre exista na lista.
@@ -97,10 +100,21 @@ Future<void> abrirModalAtividadeOng({
             if (nomeCtrl.text.trim().isEmpty ||
                 descCtrl.text.trim().isEmpty ||
                 focoSelecionado == null ||
-                duracaoCtrl.text.trim().isEmpty) {
+                duracaoCtrl.text.trim().isEmpty ||
+                pontosCtrl.text.trim().isEmpty) {
               ScaffoldMessenger.of(modalContext).showSnackBar(
                 const SnackBar(
                   content: Text('Preencha todos os campos obrigatórios.'),
+                ),
+              );
+              return;
+            }
+
+            final pontos = int.tryParse(pontosCtrl.text.trim());
+            if (pontos == null || pontos < 10 || pontos > 50) {
+              ScaffoldMessenger.of(modalContext).showSnackBar(
+                const SnackBar(
+                  content: Text('Os pontos devem estar entre 10 e 50.'),
                 ),
               );
               return;
@@ -122,6 +136,7 @@ Future<void> abrirModalAtividadeOng({
                     descricao: descCtrl.text.trim(),
                     foco: focoSelecionado!,
                     duracao: duracaoCtrl.text.trim(),
+                    pontos: pontos.toString(),
                     imagemBytes: bytes,
                     imagemNome: nomeArquivo,
                   )
@@ -131,6 +146,7 @@ Future<void> abrirModalAtividadeOng({
                     descricao: descCtrl.text.trim(),
                     foco: focoSelecionado!,
                     duracao: duracaoCtrl.text.trim(),
+                    pontos: pontos.toString(),
                     imagemBytes: bytes,
                     imagemNome: nomeArquivo,
                   );
@@ -414,6 +430,15 @@ Future<void> abrirModalAtividadeOng({
                         ],
                       ),
 
+                      const SizedBox(height: 16),
+
+                      _modalLabel('Pontos', Icons.bolt_rounded),
+                      _modalInput(
+                        controller: pontosCtrl,
+                        hint: '10 a 50',
+                        keyboardType: TextInputType.number,
+                      ),
+
                       const SizedBox(height: 18),
                       const Divider(color: Colors.white24, height: 1),
                       const SizedBox(height: 18),
@@ -646,11 +671,13 @@ Widget _modalLabel(String texto, IconData icone) {
 Widget _modalInput({
   required TextEditingController controller,
   required String hint,
+  TextInputType? keyboardType,
 }) {
   return Container(
     margin: const EdgeInsets.only(top: 5),
     child: TextField(
       controller: controller,
+      keyboardType: keyboardType,
       style: GoogleFonts.quicksand(
         fontSize: 13,
         color: const Color(0xFF344E41),
