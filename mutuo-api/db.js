@@ -136,7 +136,7 @@ async function getUsuarioPorCpf(cpf) {
   }
 }
 
-// Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone, cidade)
+
 // Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone, cidade)
 async function atualizarDadosUsuario(cpf, { nome, email, telefone, cidade }) {
   try {
@@ -699,12 +699,22 @@ async function atualizarFotoPerfilOng(cnpj, nomeArquivo) {
   }
 }
 
-// Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone)
-async function atualizarDadosOng(cnpj, { nomeOng, email, telefone }) {
+// Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone, cidade)
+async function atualizarDadosOng(cnpj, { nomeOng, email, telefone, cidade }) {
   try {
+    const campos = ['nomeOng = ?', 'email = ?', 'telefone = ?'];
+    const valores = [nomeOng, email, telefone];
+
+    if (cidade !== undefined) {
+      campos.push('cidade = ?');
+      valores.push(cidade);
+    }
+
+    valores.push(cnpj);
+
     const [result] = await pool.query(
-      'UPDATE Mutuo_ONG SET nomeOng = ?, email = ?, telefone = ? WHERE cnpj = ?',
-      [nomeOng, email, telefone, cnpj]
+      `UPDATE Mutuo_ONG SET ${campos.join(', ')} WHERE cnpj = ?`,
+      valores
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {
