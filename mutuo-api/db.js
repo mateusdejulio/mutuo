@@ -126,9 +126,12 @@ async function getUsuarioPorCpf(cpf) {
     const [rows] = await pool.query('SELECT * FROM Mutuo_Usuario WHERE cpf = ?', [cpf]);
     if (rows.length === 0) return null;
 
-    // nunca devolve a senha pro front-end
+    // nunca devolve a senha pro front-end, nem os bytes da foto (pesado
+    // demais pra ir junto do perfil — a foto tem rota própria)
     const usuario = rows[0];
     delete usuario.senha;
+    delete usuario.foto_perfil_dados;
+    delete usuario.foto_perfil_tipo;
     return usuario;
   } catch (err) {
     console.error('Erro ao buscar usuário por cpf:', err.message);
@@ -397,8 +400,8 @@ async function cadastrarOng(ong) {
 async function cadastrarServico(servico) {
   const sql = `
     INSERT INTO Mutuo_Servico
-    (nome, descricao, foco, qtdHoras, idUsuario, imagem)
-    VALUES (?, ?, ?, ?, ?, ?)
+    (nome, descricao, foco, qtdHoras, idUsuario, imagem, imagem_dados, imagem_tipo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -407,7 +410,9 @@ async function cadastrarServico(servico) {
     normalizarFoco(servico.foco),
     servico.duracao,
     servico.cpf,
-    servico.imagem
+    servico.imagem,
+    servico.imagemDados,
+    servico.imagemTipo
   ];
 
   try {
@@ -423,8 +428,8 @@ async function cadastrarServico(servico) {
 async function cadastrarServicoOng(servico) {
   const sql = `
     INSERT INTO Mutuo_ServicoOng
-    (nomeServico, cnpj, horas, descricao, foco, imagem)
-    VALUES (?, ?, ?, ?, ?, ?)
+    (nomeServico, cnpj, horas, descricao, foco, imagem, imagem_dados, imagem_tipo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -433,7 +438,9 @@ async function cadastrarServicoOng(servico) {
     servico.horas,
     servico.descricao,
     normalizarFoco(servico.foco),
-    servico.imagem
+    servico.imagem,
+    servico.imagemDados,
+    servico.imagemTipo
   ];
 
   try {
@@ -495,8 +502,8 @@ async function atualizarServico(id, servico) {
   const valores = [servico.nomeServico, servico.descricao, normalizarFoco(servico.foco), servico.duracao];
 
   if (servico.imagem) {
-    campos.push('imagem = ?');
-    valores.push(servico.imagem);
+    campos.push('imagem = ?', 'imagem_dados = ?', 'imagem_tipo = ?');
+    valores.push(servico.imagem, servico.imagemDados, servico.imagemTipo);
   }
 
   valores.push(id);
@@ -636,16 +643,63 @@ async function getFotoPerfil(cpf) {
   }
 }
 
-async function atualizarFotoPerfil(cpf, nomeArquivo) {
+async function atualizarFotoPerfil(cpf, nomeArquivo, dados, tipo) {
   try {
     const [result] = await pool.query(
-      'UPDATE Mutuo_Usuario SET foto_perfil = ? WHERE cpf = ?',
-      [nomeArquivo, cpf]
+      'UPDATE Mutuo_Usuario SET foto_perfil = ?, foto_perfil_dados = ?, foto_perfil_tipo = ? WHERE cpf = ?',
+      [nomeArquivo, dados, tipo, cpf]
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {
     console.error('Erro ao atualizar foto:', err.message);
     return { error: err.message };
+  }
+}
+
+// Busca a foto de perfil (usuário ou ONG) pelo "nome" salvo em foto_perfil —
+// é assim que a rota que serve /uploads/fotos/:nome encontra os bytes certos,
+// já que as duas tabelas compartilham o mesmo espaço de nomes de arquivo.
+async function buscarImagemPerfilPorNome(nome) {
+  try {
+    const [usuarios] = await pool.query(
+      'SELECT foto_perfil_dados AS dados, foto_perfil_tipo AS tipo FROM Mutuo_Usuario WHERE foto_perfil = ?',
+      [nome]
+    );
+    if (usuarios.length > 0 && usuarios[0].dados) return usuarios[0];
+
+    const [ongs] = await pool.query(
+      'SELECT foto_perfil_dados AS dados, foto_perfil_tipo AS tipo FROM Mutuo_ONG WHERE foto_perfil = ?',
+      [nome]
+    );
+    if (ongs.length > 0 && ongs[0].dados) return ongs[0];
+
+    return null;
+  } catch (err) {
+    console.error('Erro ao buscar imagem de perfil:', err.message);
+    return null;
+  }
+}
+
+// Idem, pra imagem de serviço (usuário ou ONG) — usado pela rota que serve
+// /uploads/servicos/:nome.
+async function buscarImagemServicoPorNome(nome) {
+  try {
+    const [servicos] = await pool.query(
+      'SELECT imagem_dados AS dados, imagem_tipo AS tipo FROM Mutuo_Servico WHERE imagem = ?',
+      [nome]
+    );
+    if (servicos.length > 0 && servicos[0].dados) return servicos[0];
+
+    const [servicosOng] = await pool.query(
+      'SELECT imagem_dados AS dados, imagem_tipo AS tipo FROM Mutuo_ServicoOng WHERE imagem = ?',
+      [nome]
+    );
+    if (servicosOng.length > 0 && servicosOng[0].dados) return servicosOng[0];
+
+    return null;
+  } catch (err) {
+    console.error('Erro ao buscar imagem de serviço:', err.message);
+    return null;
   }
 }
 
@@ -659,9 +713,11 @@ async function getOngPorCnpj(cnpj) {
 
     if (rows.length === 0) return null;
 
-    // Nunca devolve a senha para o front-end
+    // Nunca devolve a senha para o front-end, nem os bytes da foto
     const ong = rows[0];
     delete ong.senha;
+    delete ong.foto_perfil_dados;
+    delete ong.foto_perfil_tipo;
 
     return ong;
   } catch (err) {
@@ -686,11 +742,11 @@ async function getFotoPerfilOng(cnpj) {
   }
 }
 
-async function atualizarFotoPerfilOng(cnpj, nomeArquivo) {
+async function atualizarFotoPerfilOng(cnpj, nomeArquivo, dados, tipo) {
   try {
     const [result] = await pool.query(
-      'UPDATE Mutuo_ONG SET foto_perfil = ? WHERE cnpj = ?',
-      [nomeArquivo, cnpj]
+      'UPDATE Mutuo_ONG SET foto_perfil = ?, foto_perfil_dados = ?, foto_perfil_tipo = ? WHERE cnpj = ?',
+      [nomeArquivo, dados, tipo, cnpj]
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {
@@ -731,10 +787,13 @@ async function getServicoOngPorId(id) {
   return servico;
 }
 
-async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem }) {
+async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem, imagemDados, imagemTipo }) {
   const campos = ['nomeServico = ?', 'descricao = ?', 'foco = ?', 'horas = ?'];
   const values = [nomeServico, descricao, normalizarFoco(foco), horas];
-  if (imagem) { campos.push('imagem = ?'); values.push(imagem); }
+  if (imagem) {
+    campos.push('imagem = ?', 'imagem_dados = ?', 'imagem_tipo = ?');
+    values.push(imagem, imagemDados, imagemTipo);
+  }
   values.push(id);
   const [result] = await pool.query(`UPDATE Mutuo_ServicoOng SET ${campos.join(', ')} WHERE id = ?`, values);
   return { success: result.affectedRows > 0 };
@@ -2087,6 +2146,8 @@ module.exports = {
   mediaNotas,
   getFotoPerfil,
   atualizarFotoPerfil,
+  buscarImagemPerfilPorNome,
+  buscarImagemServicoPorNome,
   getServicos,
   alterServico,
   getSolicitacoes,

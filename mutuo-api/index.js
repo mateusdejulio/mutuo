@@ -62,10 +62,29 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
+
+// As imagens são servidas direto do banco (ver comentário perto do multer),
+// não de arquivo — por isso essas rotas substituem o antigo
+// express.static('/uploads', ...). O ":nome" é o valor salvo em
+// foto_perfil/imagem, usado só como chave de busca.
+app.get('/uploads/fotos/:nome', async (req, res) => {
+  const imagem = await db.buscarImagemPerfilPorNome(req.params.nome);
+  if (!imagem) return res.status(404).end();
+  res.set('Content-Type', imagem.tipo || 'application/octet-stream');
+  res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  res.send(imagem.dados);
+});
+
+app.get('/uploads/servicos/:nome', async (req, res) => {
+  const imagem = await db.buscarImagemServicoPorNome(req.params.nome);
+  if (!imagem) return res.status(404).end();
+  res.set('Content-Type', imagem.tipo || 'application/octet-stream');
+  res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  res.send(imagem.dados);
+});
 
 // Dada uma conversa e a conta que está agindo nela, retorna { tipo, id } da outra conta.
 async function buscarOutroParticipante(conversaId, tipo, id) {
@@ -136,28 +155,24 @@ app.patch('/servicos/:id/status', async (req, res) => {
   }
 });
 
-// Garante que a pasta existe
-const pastaFotos = path.join(__dirname, 'uploads', 'fotos');
-if (!fs.existsSync(pastaFotos)) {
-  fs.mkdirSync(pastaFotos, { recursive: true });
-  console.log('Pasta criada:', pastaFotos);
+// As imagens (foto de perfil, foto de serviço) são guardadas no próprio banco
+// (colunas *_dados / *_tipo), não em arquivo — o Render (plano gratuito) não
+// tem disco persistente, então qualquer coisa salva em uploads/ some no
+// próximo deploy ou reinício. O multer só recebe o arquivo em memória
+// (req.file.buffer); quem persiste é a rota, via db.js.
+//
+// "nome" continua sendo um identificador tipo arquivo (ex: 123-169999.jpg)
+// só pra manter a mesma URL (/uploads/fotos/:nome) que o front já espera —
+// ele funciona como chave de busca no banco, não como caminho real em disco.
+function gerarNomeArquivo(req, file) {
+  const idBruto = req.body?.cnpj || req.body?.cpf || 'sem-id';
+  const id = idBruto.replace(/\D/g, '') || 'sem-id';
+  const ext = path.extname(file.originalname);
+  return `${id}-${Date.now()}${ext}`;
 }
 
-// Configuração do multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'uploads', 'fotos'));
-  },
-  filename: (req, file, cb) => {
-    const idBruto = req.body?.cnpj || req.body?.cpf || 'sem-id';
-    const id = idBruto.replace(/\D/g, '');
-    const ext = path.extname(file.originalname);
-    cb(null, `${id}-${Date.now()}${ext}`);
-  }
-});
-
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 3 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const tipos = ['image/jpeg', 'image/png', 'image/webp'];
@@ -166,27 +181,8 @@ const upload = multer({
   }
 });
 
-// ── Upload de imagem para Serviços de ONG (pasta separada) ──
-const pastaServicos = path.join(__dirname, 'uploads', 'servicos');
-if (!fs.existsSync(pastaServicos)) {
-  fs.mkdirSync(pastaServicos, { recursive: true });
-  console.log('Pasta criada:', pastaServicos);
-}
-
-const storageServico = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, pastaServicos);
-  },
-  filename: (req, file, cb) => {
-    const idBruto = req.body?.cnpj || req.body?.cpf || 'sem-id';
-    const id = idBruto.replace(/\D/g, ''); // deixa só os números
-    const ext = path.extname(file.originalname);
-    cb(null, `${id}-${Date.now()}${ext}`);
-  }
-});
-
 const uploadServico = multer({
-  storage: storageServico,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 3 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const tipos = ['image/jpeg', 'image/png', 'image/webp'];
@@ -351,7 +347,7 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
       });
     }
 
-    const imagem = req.file ? req.file.filename : null;
+    const imagem = req.file ? gerarNomeArquivo(req, req.file) : null;
 
     const id = await db.cadastrarServicoOng({
       nomeServico,
@@ -359,7 +355,9 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
       horas: duracao,
       descricao,
       foco,
-      imagem
+      imagem,
+      imagemDados: req.file ? req.file.buffer : null,
+      imagemTipo: req.file ? req.file.mimetype : null
     });
 
     res.json({
@@ -403,14 +401,16 @@ app.put('/servicos/:id', uploadServico.single('imagem'), async (req, res) => {
       return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
     }
 
-    const imagem = req.file ? req.file.filename : null;
+    const imagem = req.file ? gerarNomeArquivo(req, req.file) : null;
 
     await db.atualizarServico(req.params.id, {
       nomeServico,
       descricao,
       foco,
       duracao,
-      imagem
+      imagem,
+      imagemDados: req.file ? req.file.buffer : null,
+      imagemTipo: req.file ? req.file.mimetype : null
     });
 
     res.json({ sucesso: true });
@@ -439,8 +439,16 @@ app.put('/servicos/ong/:id', uploadServico.single('imagem'), async (req, res) =>
   if (!nomeServico || !descricao || !foco || !duracao) {
     return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
   }
-  const imagem = req.file ? req.file.filename : null;
-  const resultado = await db.atualizarServicoOng(req.params.id, { nomeServico, descricao, foco, horas: duracao, imagem });
+  const imagem = req.file ? gerarNomeArquivo(req, req.file) : null;
+  const resultado = await db.atualizarServicoOng(req.params.id, {
+    nomeServico,
+    descricao,
+    foco,
+    horas: duracao,
+    imagem,
+    imagemDados: req.file ? req.file.buffer : null,
+    imagemTipo: req.file ? req.file.mimetype : null
+  });
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
   res.json({ sucesso: true });
 });
@@ -509,18 +517,15 @@ app.get('/stats/:tipo', async (req, res) => {
 
 // ── Foto de Perfil (Usuário comum) ──
 app.post('/perfil/foto', upload.single('fotoPerfil'), async (req, res) => {
-  console.log(' CPF recebido:', req.body.cpf);
-  console.log(' Arquivo recebido:', req.file);
-
   const cpf = req.body.cpf;
   if (!cpf) return res.status(400).json({ erro: 'CPF não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
-  const resultado = await db.atualizarFotoPerfil(cpf, req.file.filename);
-  console.log(' Resultado do banco:', resultado);
+  const nomeArquivo = gerarNomeArquivo(req, req.file);
+  const resultado = await db.atualizarFotoPerfil(cpf, nomeArquivo, req.file.buffer, req.file.mimetype);
 
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
-  res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${req.file.filename}` });
+  res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${nomeArquivo}` });
 });
 
 app.get('/perfil/foto/:cpf', async (req, res) => {
@@ -530,18 +535,15 @@ app.get('/perfil/foto/:cpf', async (req, res) => {
 
 // ── Foto de Perfil (ONG) ──
 app.post('/perfil/foto/ong', upload.single('fotoPerfil'), async (req, res) => {
-  console.log(' CNPJ recebido:', req.body.cnpj);
-  console.log(' Arquivo recebido:', req.file);
-
   const cnpj = req.body.cnpj;
   if (!cnpj) return res.status(400).json({ erro: 'CNPJ não informado' });
   if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
 
-  const resultado = await db.atualizarFotoPerfilOng(cnpj, req.file.filename);
-  console.log(' Resultado do banco:', resultado);
+  const nomeArquivo = gerarNomeArquivo(req, req.file);
+  const resultado = await db.atualizarFotoPerfilOng(cnpj, nomeArquivo, req.file.buffer, req.file.mimetype);
 
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
-  res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${req.file.filename}` });
+  res.json({ sucesso: true, fotoPerfil: `/uploads/fotos/${nomeArquivo}` });
 });
 
 app.get('/perfil/foto/ong/:cnpj', async (req, res) => {
@@ -879,7 +881,7 @@ app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
       });
     }
 
-    const imagem = req.file ? req.file.filename : null;
+    const imagem = req.file ? gerarNomeArquivo(req, req.file) : null;
 
     const id = await db.cadastrarServico({
       nomeServico,
@@ -887,7 +889,9 @@ app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
       foco,
       duracao,
       cpf,
-      imagem
+      imagem,
+      imagemDados: req.file ? req.file.buffer : null,
+      imagemTipo: req.file ? req.file.mimetype : null
     });
 
     res.json({
