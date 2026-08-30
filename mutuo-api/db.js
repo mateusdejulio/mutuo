@@ -525,7 +525,12 @@ async function atualizarServico(id, servico) {
 async function getServicosOng(cnpj) {
   try {
     const [rows] = await pool.query(
-      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem, pontos, nota, avaliacoes FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1',
+      `SELECT s.id, s.nomeServico, s.cnpj, s.horas, s.descricao, s.foco, s.imagem, s.pontos, s.nota,
+         (SELECT COUNT(DISTINCT SOL.codUsuario)
+            FROM Mutuo_SolicitacaoONG SOL
+           WHERE SOL.codServico = s.id AND SOL.statusExecucao = 'Realizada') AS totalRealizados
+       FROM Mutuo_ServicoOng s
+       WHERE s.cnpj = ? AND s.ativo = 1`,
       [cnpj]
     );
     return rows.map(servico => ({
