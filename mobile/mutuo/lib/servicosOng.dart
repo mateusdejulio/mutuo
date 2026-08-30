@@ -40,8 +40,10 @@ class _ServicosOngState extends State<ServicosOng> {
   static const _fundo = Color(0xFFEDEAE5);
   static const _branco = Colors.white;
 
+  // Plano gratuito: até 5 atividades ativas. ONGs premium podem cadastrar
+  // até 10 — limite já aplicado no backend (rota POST /servicos/ong).
   bool get _limiteAtingido =>
-      (_ong?['premium'] != 1) && _atividades.length >= 3;
+      (_ong?['premium'] != 1) && _atividades.length >= 5;
 
   List<String> get _categorias {
     final focosUnicos =
@@ -303,7 +305,7 @@ class _ServicosOngState extends State<ServicosOng> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Limite de 3 atividades do plano gratuito consumido. Faça upgrade pra cadastrar mais.',
+                                    'Limite de 5 atividades do plano gratuito consumido. Faça upgrade pra cadastrar mais.',
                                     style: GoogleFonts.quicksand(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,

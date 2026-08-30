@@ -93,10 +93,10 @@ class _InicialOngState extends State<InicialOng> {
 
   String get _inicial => _nomeOng.isNotEmpty ? _nomeOng[0].toUpperCase() : "O";
 
-  // Plano gratuito: até 3 atividades ativas. ONGs premium (campo `premium`
-  // vindo do banco) não têm esse limite.
+  // Plano gratuito: até 5 atividades ativas. ONGs premium podem cadastrar
+  // até 10 — limite já aplicado no backend (rota POST /servicos/ong).
   bool get _limiteAtingido =>
-      (_ong?['premium'] != 1) && _atividades.length >= 3;
+      (_ong?['premium'] != 1) && _atividades.length >= 5;
 
   String get _localizacao {
     final cidade = _ong?['cidade']?.toString() ?? '';
@@ -1086,7 +1086,7 @@ class _InicialOngState extends State<InicialOng> {
           const SizedBox(height: 4),
           Text(
             limiteAtingido
-                ? "Seu plano gratuito permite até 3 atividades ativas. Faça upgrade pra cadastrar mais."
+                ? "Seu plano gratuito permite até 5 atividades ativas. Faça upgrade pra cadastrar mais."
                 : "Crie uma nova oportunidade de voluntariado para engajar mais pessoas na sua causa.",
             textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(
@@ -1096,7 +1096,7 @@ class _InicialOngState extends State<InicialOng> {
           ),
           const SizedBox(height: 10),
           Text(
-            "Plano gratuito: ${_atividades.length}/3 atividades",
+            "Plano gratuito: ${_atividades.length}/5 atividades",
             style: GoogleFonts.quicksand(
               fontSize: 11,
               fontWeight: FontWeight.w700,

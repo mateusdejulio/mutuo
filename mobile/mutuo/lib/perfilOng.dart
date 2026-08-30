@@ -83,10 +83,10 @@ class _PerfilOngState extends State<PerfilOng> {
     return nome.isNotEmpty ? nome[0].toUpperCase() : 'O';
   }
 
-  // Plano gratuito: até 3 atividades ativas. ONGs premium (campo `premium`
-  // vindo do banco) não têm esse limite.
+  // Plano gratuito: até 5 atividades ativas. ONGs premium podem cadastrar
+  // até 10 — limite já aplicado no backend (rota POST /servicos/ong).
   bool get _limiteAtingido =>
-      (_ong?['premium'] != 1) && _atividades.length >= 3;
+      (_ong?['premium'] != 1) && _atividades.length >= 5;
 
   // handle "@..." só pra exibição — não existe campo de usuário/handle
   // no banco pra ONG, então derivo a partir do nome.
@@ -900,7 +900,7 @@ class _PerfilOngState extends State<PerfilOng> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Limite de 3 atividades do plano gratuito consumido. Faça upgrade pra cadastrar mais.',
+                      'Limite de 5 atividades do plano gratuito consumido. Faça upgrade pra cadastrar mais.',
                       style: GoogleFonts.quicksand(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
