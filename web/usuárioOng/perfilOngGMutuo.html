@@ -807,11 +807,6 @@
         <span id="exibTel">-</span>
       </div>
 
-      <div class="item-info">
-        <i class="bi bi-geo-alt-fill"></i>
-        <span id="exibCidade">-</span>
-      </div>
-
       <div class="item-info readonly">
         <i class="bi bi-calendar3"></i>
 
@@ -840,14 +835,6 @@
 
         <div class="campo-edit">
           <input type="tel" id="inputTel" placeholder="Telefone">
-        </div>
-      </div>
-
-      <div class="item-info">
-        <i class="bi bi-geo-alt-fill"></i>
-
-        <div class="campo-edit">
-          <input type="text" id="inputCidade" placeholder="Cidade">
         </div>
       </div>
 
@@ -1023,7 +1010,6 @@
     document.getElementById('exibUser').textContent = '@...';
     document.getElementById('exibEmail').textContent = 'Carregando...';
     document.getElementById('exibTel').textContent = 'Carregando...';
-    document.getElementById('exibCidade').textContent = 'Carregando...';
     document.getElementById('exibCadastro').textContent = 'Carregando...';
     document.getElementById('exibCadastroEdit').textContent = 'Carregando...';
     document.getElementById('tempoMembro').textContent = '...';
@@ -1054,7 +1040,6 @@
     document.getElementById('exibUser').textContent = handle;
     document.getElementById('exibEmail').textContent = ong.email || '-';
     document.getElementById('exibTel').textContent = ong.telefone || 'Não informado';
-    document.getElementById('exibCidade').textContent = ong.cidade || 'Não informada';
 
     const textoPlano = ong.premium ? 'Plano premium' : 'Plano gratuito';
     document.getElementById('exibPlano').textContent = textoPlano;
@@ -1064,7 +1049,6 @@
     document.getElementById('inputUser').value = handle.replace('@', '');
     document.getElementById('inputEmail').value = ong.email || '';
     document.getElementById('inputTel').value = ong.telefone || '';
-    document.getElementById('inputCidade').value = ong.cidade || '';
 
     if (ong.pontos !== undefined) {
       document.getElementById('exibePontos').textContent = ong.pontos.toLocaleString('pt-BR');
@@ -1224,7 +1208,6 @@
     const nomeOng = document.getElementById('inputNome').value.trim();
     const email   = document.getElementById('inputEmail').value.trim();
     const tel     = document.getElementById('inputTel').value.trim();
-    const cidade  = document.getElementById('inputCidade').value.trim();
 
     if (!nomeOng || !email) return;
 
@@ -1237,7 +1220,7 @@
       const resposta = await fetch(`${API_BASE}/ongs/${ongAtual.cnpj}/perfil`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomeOng, email, telefone: tel, cidade })
+        body: JSON.stringify({ nomeOng, email, telefone: tel })
       });
 
       const resultado = await resposta.json();
@@ -1248,7 +1231,6 @@
       ongAtual.nomeOng = nomeOng;
       ongAtual.email = email;
       ongAtual.telefone = tel;
-      ongAtual.cidade = cidade;
       preencherTela(ongAtual);
 
       const logada = pegarOngLogada() || {};
