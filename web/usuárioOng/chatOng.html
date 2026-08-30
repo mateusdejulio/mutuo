@@ -110,6 +110,17 @@
       display: flex; align-items: center; justify-content: center;
       border: 2px solid #588157;
     }
+    .nav-chat-badge {
+      display: none;
+      position: absolute;
+      top: 2px; right: -10px;
+      background: var(--cream); color: #3a5a40;
+      font-size: 0.62rem; font-weight: 700;
+      min-width: 15px; height: 15px; border-radius: 8px;
+      align-items: center; justify-content: center;
+      padding: 0 4px;
+      border: 1px solid #588157;
+    }
 
 
     .perfil-nav {
@@ -334,6 +345,35 @@
     }
     .header-btn:hover { background: #eaf2e6; color: var(--green-dark); }
 
+    .header-menu { position: relative; }
+    .header-menu-panel {
+      display: none;
+      position: absolute;
+      top: 110%; right: 0;
+      background: #fff;
+      border: 1px solid #e4e8e3;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+      overflow: hidden;
+      min-width: 180px;
+      z-index: 10;
+    }
+    .header-menu-panel.open { display: block; }
+    .header-menu-panel button {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%;
+      padding: 11px 14px;
+      border: none;
+      background: transparent;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #b00020;
+      cursor: pointer;
+      text-align: left;
+    }
+    .header-menu-panel button:hover { background: #fdeaea; }
+
     /* ── MENSAGENS ── */
     .messages-area {
       flex: 1;
@@ -413,20 +453,6 @@
       gap: 10px;
       flex-shrink: 0;
     }
-    .attach-btn {
-      width: 38px; height: 38px;
-      border: 1px solid #dde3da;
-      border-radius: 10px;
-      background: transparent;
-      color: #9aab96;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.15s, color 0.15s;
-      flex-shrink: 0;
-    }
-    .attach-btn:hover { background: #f4f6f3; color: var(--green-dark); }
-
     .msg-input-wrap {
       flex: 1;
       position: relative;
@@ -507,7 +533,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="homeOngMutuo.html">Início</a></li>
-      <li><a href="chatOng.html" class="active">Chat</a></li>
+      <li><a href="chatOng.html" class="active" style="position:relative;">Chat<span class="chat-badge nav-chat-badge"></span></a></li>
       <li class="nav-dropdown">
         <a href="#">Mais <i class="bi bi-chevron-down" style="font-size:.68rem"></i></a>
         <div class="dropdown-panel">
@@ -543,54 +569,11 @@
         <h5>Mensagens</h5>
         <div class="search-wrap">
           <i class="bi bi-search"></i>
-          <input type="text" placeholder="Buscar conversas...">
+          <input type="text" id="search-input" placeholder="Buscar conversas..." oninput="atualizarSidebar()">
         </div>
       </div>
 
-      <div class="chat-list">
-
-        <a href="#" class="chat-item active" onclick="openChat('Mariana Lopes','../imagens/perfil1.png',true); return false;">
-          <div class="chat-avatar">
-            <img src="../imagens/perfil1.png" alt="Mariana" onerror="this.src='https://ui-avatars.com/api/?name=Mariana+Lopes&background=588157&color=fff'">
-            <span class="online-dot"></span>
-          </div>
-          <div class="chat-meta">
-            <div class="chat-meta-top">
-              <span>Mariana Lopes</span>
-              <small>10:30</small>
-            </div>
-            <p class="chat-preview">Quais são as matérias que serão ensinadas?</p>
-          </div>
-          <span class="unread-badge">2</span>
-        </a>
-
-        <a href="#" class="chat-item" onclick="openChat('Lucas Oliveira','../imagens/perfil2.png',false); return false;">
-          <div class="chat-avatar">
-            <img src="../imagens/perfil2.png" alt="Lucas" onerror="this.src='https://ui-avatars.com/api/?name=Lucas+Oliveira&background=588157&color=fff'">
-          </div>
-          <div class="chat-meta">
-            <div class="chat-meta-top">
-              <span>Lucas Oliveira</span>
-              <small>Ontem</small>
-            </div>
-            <p class="chat-preview">Que horas eu posso ir?</p>
-          </div>
-        </a>
-
-        <a href="#" class="chat-item" onclick="openChat('Fernanda Costa','../imagens/perfil1.png',false); return false;">
-          <div class="chat-avatar">
-            <img src="../imagens/perfil1.png" alt="Fernanda" onerror="this.src='https://ui-avatars.com/api/?name=Fernanda+Costa&background=3a5a40&color=fff'">
-          </div>
-          <div class="chat-meta">
-            <div class="chat-meta-top">
-              <span>Fernanda Costa</span>
-              <small>Seg</small>
-            </div>
-            <p class="chat-preview">Obrigada pela oportunidade!</p>
-          </div>
-        </a>
-
-      </div>
+      <div class="chat-list" id="chat-list"></div>
     </div>
 
     <!-- ÁREA PRINCIPAL -->
@@ -611,8 +594,12 @@
           <span id="header-status">Online agora</span>
         </div>
         <div class="chat-header-actions">
-          <button class="header-btn" title="Perfil do voluntário"><i class="bi bi-person"></i></button>
-          <button class="header-btn" title="Mais opções"><i class="bi bi-three-dots"></i></button>
+          <div class="header-menu" id="header-menu">
+            <button class="header-btn" title="Mais opções" onclick="toggleHeaderMenu()"><i class="bi bi-three-dots"></i></button>
+            <div class="header-menu-panel" id="header-menu-panel">
+              <button onclick="apagarConversaAtual()"><i class="bi bi-trash3"></i> Apagar conversa</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -621,7 +608,6 @@
 
       <!-- Input (oculto inicialmente) -->
       <div class="input-area" id="input-area" style="display:none;">
-        <button class="attach-btn" title="Anexar arquivo"><i class="bi bi-paperclip"></i></button>
         <div class="msg-input-wrap">
           <input class="msg-input" type="text" id="msg-input" placeholder="Digite uma mensagem..." onkeydown="handleKey(event)">
         </div>
@@ -631,93 +617,242 @@
     </div>
   </div>
  <script src="../funcoes.js"></script>
-  
-  <script>
-    
-    const conversations = {
-      'Mariana Lopes': {
-        avatar: '../imagens/perfil1.png',
-        online: true,
-        messages: [
-          { mine: false, text: 'Olá! Vi que vocês têm um programa de aulas de reforço. Quais matérias serão ensinadas?', time: '10:28' },
-          { mine: true,  text: 'Oi, Mariana! Temos reforço de Português, Matemática e Ciências. As aulas são às terças e quintas, das 14h às 16h.', time: '10:30' },
-          { mine: false, text: 'Ótimo! Tenho experiência com Matemática e adoraria ajudar 😊', time: '10:32' },
-          { mine: true,  text: 'Que incrível! Vou te enviar o formulário de cadastro de voluntários. Pode esperar?', time: '10:33' },
-        ]
-      },
-      'Lucas Oliveira': {
-        avatar: '../imagens/perfil2.png',
-        online: false,
-        messages: [
-          { mine: false, text: 'Boa tarde! Que horas eu posso ir amanhã?', time: 'Ontem' },
-          { mine: true,  text: 'Oi, Lucas! Pode vir a partir das 13h. Qualquer dúvida é só chamar!', time: 'Ontem' },
-        ]
-      },
-      'Fernanda Costa': {
-        avatar: '../imagens/perfil1.png',
-        online: false,
-        messages: [
-          { mine: false, text: 'Obrigada pela oportunidade! Foi uma experiência incrível.', time: 'Seg' },
-          { mine: true,  text: 'Que ótimo ouvir isso, Fernanda! Você foi incrível com as crianças 💚', time: 'Seg' },
-        ]
-      }
-    };
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="../chat-socket.js"></script>
 
-    function openChat(name, avatarSrc, online) {
-      const conv = conversations[name];
-      const avatar = conv ? conv.avatar : avatarSrc;
-      const isOnline = conv ? conv.online : online;
+  <script>
+    let ong = null;
+    let conversas = [];
+    let conversaAbertaId = null;
+    let conversaAbertaNome = '';
+    let conversaAbertaFoto = '';
+
+    function resolverImagem(caminho) {
+      if (!caminho) return '../imagens/mutuoLogo.png';
+      if (caminho.startsWith('http')) return caminho;
+      return `${API_URL}${caminho}`;
+    }
+
+    function iniciaisUrl(nome) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(nome || '?')}&background=588157&color=fff`;
+    }
+
+    function formatarHora(dataStr) {
+      if (!dataStr) return '';
+      const d = new Date(dataStr);
+      const h = d.getHours().toString().padStart(2, '0');
+      const m = d.getMinutes().toString().padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function conversasFiltradas() {
+      const termo = (document.getElementById('search-input').value || '').trim().toLowerCase();
+      if (!termo) return conversas;
+      return conversas.filter(c => (c.nomeOutraConta || '').toLowerCase().includes(termo));
+    }
+
+    function atualizarSidebar() {
+      renderSidebar(conversasFiltradas());
+    }
+
+    function renderSidebar(lista) {
+      const container = document.getElementById('chat-list');
+
+      if (!lista.length) {
+        container.innerHTML = `<p style="padding:20px;color:#9aab96;font-size:0.85rem;text-align:center;">Nenhuma conversa ainda.</p>`;
+        return;
+      }
+
+      container.innerHTML = lista.map(c => `
+        <a href="#" class="chat-item${c.id === conversaAbertaId ? ' active' : ''}" data-conversa-id="${c.id}">
+          <div class="chat-avatar">
+            <img src="${resolverImagem(c.fotoOutraConta)}" alt="${c.nomeOutraConta || ''}" onerror="this.src='${iniciaisUrl(c.nomeOutraConta)}'">
+          </div>
+          <div class="chat-meta">
+            <div class="chat-meta-top">
+              <span>${c.nomeOutraConta || 'Conta'}</span>
+              <small>${formatarHora(c.ultimaMensagemEm)}</small>
+            </div>
+            <p class="chat-preview">${c.ultimaMensagem || 'Nenhuma mensagem ainda'}</p>
+          </div>
+          ${c.naoLidas > 0 ? `<span class="unread-badge">${c.naoLidas}</span>` : ''}
+        </a>
+      `).join('');
+
+      container.querySelectorAll('.chat-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = Number(el.dataset.conversaId);
+          const conv = conversas.find(c => c.id === id);
+          if (conv) abrirConversa(conv.id, conv.nomeOutraConta, resolverImagem(conv.fotoOutraConta));
+        });
+      });
+    }
+
+    async function carregarConversas() {
+      try {
+        const resp = await fetch(`${API_URL}/conversas/ong/${encodeURIComponent(ong.cnpj)}`);
+        const dados = await resp.json();
+        conversas = Array.isArray(dados) ? dados : [];
+        atualizarSidebar();
+      } catch (err) {
+        console.error('Erro ao carregar conversas:', err);
+      }
+    }
+
+    async function abrirConversaViaQuery() {
+      const params = new URLSearchParams(location.search);
+      const tipo = params.get('tipo');
+      const id = params.get('id');
+      const nome = params.get('nome');
+      const foto = params.get('foto');
+      if (!tipo || !id) return;
+
+      try {
+        const resp = await fetch(`${API_URL}/conversas`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo1: 'ong', id1: ong.cnpj, tipo2: tipo, id2: id })
+        });
+        const dados = await resp.json();
+        if (!dados.sucesso) throw new Error(dados.erro || 'Erro ao abrir conversa.');
+
+        const conversaId = dados.conversa.id;
+        const existente = conversas.find(c => c.id === conversaId);
+        const nomeFinal = existente?.nomeOutraConta || nome || 'Conta';
+        const fotoFinal = existente ? resolverImagem(existente.fotoOutraConta) : (foto || '../imagens/mutuoLogo.png');
+
+        await abrirConversa(conversaId, nomeFinal, fotoFinal);
+      } catch (err) {
+        console.error('Erro ao abrir conversa via query string:', err);
+      } finally {
+        history.replaceState({}, '', location.pathname);
+      }
+    }
+
+    function criarBubbleHtml(m) {
+      const mine = m.tipo_remetente === 'ong' && String(m.id_remetente) === String(ong.cnpj);
+      const hora = formatarHora(m.enviada_em);
+
+      if (mine) {
+        return `<div class="msg-row mine"><div class="bubble mine">${m.conteudo}<div class="bubble-time">${hora} <i class="bi bi-check2"></i></div></div></div>`;
+      }
+
+      const avatar = conversaAbertaFoto || '../imagens/mutuoLogo.png';
+      return `<div class="msg-row">
+        <img class="msg-avatar" src="${avatar}" onerror="this.src='${iniciaisUrl(conversaAbertaNome)}'" alt="${conversaAbertaNome}">
+        <div class="bubble theirs">${m.conteudo}<div class="bubble-time">${hora}</div></div>
+      </div>`;
+    }
+
+    let ultimoDivisorKey = null;
+
+    function chaveData(dataStr) {
+      return new Date(dataStr).toDateString();
+    }
+
+    function formatarDivisorData(dataStr) {
+      const data = new Date(dataStr);
+      const hoje = new Date();
+      const ontem = new Date();
+      ontem.setDate(hoje.getDate() - 1);
+
+      if (chaveData(dataStr) === chaveData(hoje)) return 'Hoje';
+      if (chaveData(dataStr) === chaveData(ontem)) return 'Ontem';
+
+      const opcoes = data.getFullYear() === hoje.getFullYear()
+        ? { day: 'numeric', month: 'long' }
+        : { day: 'numeric', month: 'long', year: 'numeric' };
+      return data.toLocaleDateString('pt-BR', opcoes);
+    }
+
+    function bubbleComDivisor(m) {
+      let html = '';
+      const chave = chaveData(m.enviada_em);
+      if (chave !== ultimoDivisorKey) {
+        html += `<div class="date-divider"><span>${formatarDivisorData(m.enviada_em)}</span></div>`;
+        ultimoDivisorKey = chave;
+      }
+      return html + criarBubbleHtml(m);
+    }
+
+    function renderMensagens(mensagens) {
+      const area = document.getElementById('messages-area');
+      ultimoDivisorKey = null;
+      area.innerHTML = mensagens.map(bubbleComDivisor).join('');
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function anexarMensagem(m) {
+      const area = document.getElementById('messages-area');
+      area.insertAdjacentHTML('beforeend', bubbleComDivisor(m));
+      area.scrollTop = area.scrollHeight;
+    }
+
+    async function abrirConversa(conversaId, nome, fotoUrl) {
+      conversaAbertaId = conversaId;
+      conversaAbertaNome = nome;
+      conversaAbertaFoto = fotoUrl;
 
       document.getElementById('empty-state').style.display = 'none';
       document.getElementById('chat-header').style.display = 'flex';
       document.getElementById('messages-area').style.display = 'flex';
       document.getElementById('input-area').style.display = 'flex';
 
-      document.getElementById('header-name').textContent = name;
+      document.getElementById('header-name').textContent = nome;
       const img = document.getElementById('header-avatar');
-      img.src = avatar;
-      img.onerror = () => img.src ='../imagens/mutuoLogo.png' ;
+      img.onerror = () => img.src = iniciaisUrl(nome);
+      img.src = fotoUrl || '../imagens/mutuoLogo.png';
+      document.getElementById('header-status').style.display = 'none';
 
-      const statusEl = document.getElementById('header-status');
-      statusEl.textContent = isOnline ? 'Online agora' : 'Visto por último ontem';
-      statusEl.style.color = isOnline ? '#4caf50' : '#9aab96';
+      atualizarSidebar();
 
-      const area = document.getElementById('messages-area');
-      area.innerHTML = '<div class="date-divider"><span>Hoje</span></div>';
+      document.getElementById('messages-area').innerHTML = '';
 
-      if (conv) {
-        conv.messages.forEach(m => {
-          const row = document.createElement('div');
-          row.className = `msg-row${m.mine ? ' mine' : ''}`;
-          row.innerHTML = m.mine
-            ? `<div class="bubble mine">${m.text}<div class="bubble-time">${m.time} <i class="bi bi-check2-all"></i></div></div>`
-            : `<img class="msg-avatar" src="${avatar}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=588157&color=fff'" alt="${name}">
-               <div class="bubble theirs">${m.text}<div class="bubble-time">${m.time}</div></div>`;
-          area.appendChild(row);
-        });
+      try {
+        const resp = await fetch(`${API_URL}/conversas/${conversaId}/mensagens?tipo=ong&id=${encodeURIComponent(ong.cnpj)}`);
+        const mensagens = await resp.json();
+        renderMensagens(Array.isArray(mensagens) ? mensagens : []);
+      } catch (err) {
+        console.error('Erro ao carregar mensagens:', err);
       }
 
-      area.scrollTop = area.scrollHeight;
+      const conv = conversas.find(c => c.id === conversaId);
+      if (conv) conv.naoLidas = 0;
+      atualizarSidebar();
 
-      document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      MutuoChat.marcarComoLida(conversaId);
+    }
+
+    function atualizarPreviewConversa(mensagem, { incrementarNaoLidas }) {
+      const index = conversas.findIndex(c => c.id === mensagem.conversa_id);
+      if (index === -1) { carregarConversas(); return; }
+
+      const atual = conversas.splice(index, 1)[0];
+      atual.ultimaMensagem = mensagem.conteudo;
+      atual.ultimaMensagemEm = mensagem.enviada_em;
+      if (incrementarNaoLidas) atual.naoLidas = (Number(atual.naoLidas) || 0) + 1;
+      conversas.unshift(atual);
+      atualizarSidebar();
     }
 
     function sendMessage() {
       const input = document.getElementById('msg-input');
-      const text = input.value.trim();
-      if (!text) return;
+      const texto = input.value.trim();
+      if (!texto || !conversaAbertaId) return;
 
-      const area = document.getElementById('messages-area');
-      const now = new Date();
-      const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-
-      const row = document.createElement('div');
-      row.className = 'msg-row mine';
-      row.innerHTML = `<div class="bubble mine">${text}<div class="bubble-time">${time} <i class="bi bi-check2"></i></div></div>`;
-      area.appendChild(row);
-      area.scrollTop = area.scrollHeight;
+      const otimista = {
+        conversa_id: conversaAbertaId,
+        tipo_remetente: 'ong',
+        id_remetente: ong.cnpj,
+        conteudo: texto,
+        enviada_em: new Date().toISOString()
+      };
+      anexarMensagem(otimista);
+      MutuoChat.enviarMensagem(conversaAbertaId, texto);
       input.value = '';
+
+      atualizarPreviewConversa(otimista, { incrementarNaoLidas: false });
     }
 
     function handleKey(e) {
@@ -726,11 +861,73 @@
         sendMessage();
       }
     }
-    
-    window.addEventListener('load', () => {
+
+    function toggleHeaderMenu() {
+      document.getElementById('header-menu-panel').classList.toggle('open');
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('header-menu');
+      if (menu && !menu.contains(e.target)) {
+        document.getElementById('header-menu-panel').classList.remove('open');
+      }
+    });
+
+    async function apagarConversaAtual() {
+      document.getElementById('header-menu-panel').classList.remove('open');
+      if (!conversaAbertaId) return;
+
+      const confirmou = confirm('As mensagens vão desaparecer só do seu lado. A outra conta continua vendo o histórico normalmente. Deseja apagar esta conversa?');
+      if (!confirmou) return;
+
+      try {
+        const resp = await fetch(`${API_URL}/conversas/${conversaAbertaId}/limpar`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo: 'ong', id: ong.cnpj })
+        });
+        const dados = await resp.json();
+        if (!dados.sucesso) throw new Error(dados.erro || 'Erro ao apagar conversa.');
+
+        document.getElementById('messages-area').innerHTML = '';
+        const conv = conversas.find(c => c.id === conversaAbertaId);
+        if (conv) { conv.ultimaMensagem = null; conv.naoLidas = 0; }
+        atualizarSidebar();
+      } catch (err) {
+        console.error('Erro ao apagar conversa:', err);
+        alert('Não foi possível apagar a conversa.');
+      }
+    }
+
+    async function iniciar() {
+      ong = JSON.parse(sessionStorage.getItem('ongLogada') || 'null');
+      if (!ong || !ong.cnpj) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      MutuoChat.conectar();
+      MutuoChat.onMensagemNova((mensagem) => {
+        if (mensagem.conversa_id === conversaAbertaId) {
+          anexarMensagem(mensagem);
+          MutuoChat.marcarComoLida(conversaAbertaId);
+          atualizarPreviewConversa(mensagem, { incrementarNaoLidas: false });
+        } else {
+          atualizarPreviewConversa(mensagem, { incrementarNaoLidas: true });
+        }
+      });
+      MutuoChat.onMensagemEnviada((mensagem) => {
+        atualizarPreviewConversa(mensagem, { incrementarNaoLidas: false });
+      });
+
+      await carregarConversas();
+      await abrirConversaViaQuery();
+
       carregarNavOng();
       atualizarBadgeNotificacoesOng();
-    });
+    }
+
+    window.addEventListener('load', iniciar);
   </script>
 </body>
 </html>
