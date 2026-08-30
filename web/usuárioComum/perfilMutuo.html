@@ -612,6 +612,10 @@
             <i class="bi bi-telephone-fill"></i>
             <span id="exibTel"></span>
           </div>
+          <div class="item-info">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span id="exibCidade"></span>
+          </div>
           <div class="item-info readonly">
             <i class="bi bi-calendar3"></i>
             <span class="label-readonly">Membro desde <span id="exibCadastro"></span></span>
@@ -634,6 +638,12 @@
             <i class="bi bi-telephone-fill"></i>
             <div class="campo-edit">
               <input type="tel" id="inputTel2" placeholder="Telefone">
+            </div>
+          </div>
+          <div class="item-info">
+            <i class="bi bi-geo-alt-fill"></i>
+            <div class="campo-edit">
+              <input type="text" id="inputCidade" placeholder="Cidade">
             </div>
           </div>
           <div class="item-info readonly">
@@ -770,6 +780,7 @@
       document.getElementById('exibEmail').textContent = usuario.email || '';
       document.getElementById('exibEmailLeitura').textContent = usuario.email || '';
       document.getElementById('exibTel').textContent = usuario.telefone || '';
+      document.getElementById('exibCidade').textContent = usuario.cidade || '';
 
   
      // data de cadastro
@@ -791,6 +802,7 @@
       document.getElementById('inputNome').value  = usuario.nome;
       document.getElementById('inputEmail').value = usuario.email || '';
       document.getElementById('inputTel2').value  = usuario.telefone || '';
+      document.getElementById('inputCidade').value = usuario.cidade || '';
 
       document.title = 'Mútuo | ' + usuario.nome;
     }
@@ -840,9 +852,10 @@
 }
 
     async function salvarEdicao() {
-  const nome  = document.getElementById('inputNome').value.trim()  || usuario.nome;
-  const email = document.getElementById('inputEmail').value.trim();
-  const tel   = document.getElementById('inputTel2').value.trim();
+  const nome   = document.getElementById('inputNome').value.trim()  || usuario.nome;
+  const email  = document.getElementById('inputEmail').value.trim();
+  const tel    = document.getElementById('inputTel2').value.trim();
+  const cidade = document.getElementById('inputCidade').value.trim();
 
   if (!nome || !email) {
     alert('Nome e e-mail são obrigatórios.');
@@ -857,7 +870,7 @@
     const resposta = await fetch(`${API_BASE}/usuarios/${encodeURIComponent(usuario.cpf)}/perfil`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, telefone: tel })
+      body: JSON.stringify({ nome, email, telefone: tel, cidade })
     });
 
     const resultado = await resposta.json();
@@ -871,6 +884,7 @@
     document.getElementById('exibEmail').textContent        = email;
     document.getElementById('exibEmailLeitura').textContent = email;
     document.getElementById('exibTel').textContent          = tel;
+    document.getElementById('exibCidade').textContent       = cidade;
 
     // atualiza navbar e topo
     document.getElementById('nomeNavbar').textContent    = nome;
@@ -882,6 +896,7 @@
     usuario.nome = nome;
     usuario.email = email;
     usuario.telefone = tel;
+    usuario.cidade = cidade;
     sessionStorage.setItem('usuarioLogado', JSON.stringify(usuario));
 
    cancelarEdicao();

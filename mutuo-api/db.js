@@ -136,12 +136,12 @@ async function getUsuarioPorCpf(cpf) {
   }
 }
 
-// Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone)
-async function atualizarDadosUsuario(cpf, { nome, email, telefone }) {
+// Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone, cidade)
+async function atualizarDadosUsuario(cpf, { nome, email, telefone, cidade }) {
   try {
     const [result] = await pool.query(
-      'UPDATE Mutuo_Usuario SET nome = ?, email = ?, telefone = ? WHERE cpf = ?',
-      [nome, email, telefone, cpf]
+      'UPDATE Mutuo_Usuario SET nome = ?, email = ?, telefone = ?, cidade = ? WHERE cpf = ?',
+      [nome, email, telefone, cidade, cpf]
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {
