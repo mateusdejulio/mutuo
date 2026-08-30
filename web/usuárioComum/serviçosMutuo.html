@@ -558,6 +558,15 @@ nav {
     return `${API_URL}${caminho}`;
   }
 
+  // Normaliza cidade pra "Primeira Letra Maiúscula" e monta "Cidade, UF",
+  // assim "Campinas" e "campinas" caem no mesmo filtro em vez de duplicar.
+  function formatarLocal(cidade, estado) {
+    const cidadeFormatada = (cidade || '').trim().replace(/\s+/g, ' ')
+      .toLowerCase()
+      .replace(/(^|\s)\p{L}/gu, letra => letra.toUpperCase());
+    return [cidadeFormatada, estado].filter(Boolean).join(', ');
+  }
+
   async function carregarServicos() {
   try {
     const resp = await fetch(`${API_URL}/servicos-usuario`);
@@ -610,7 +619,7 @@ nav {
 
   function montarLocalizacoes(servicos) {
     const select = document.getElementById('filtroLocalizacao');
-    const locais = [...new Set(servicos.map(s => [s.cidade, s.estado].filter(Boolean).join(', ')).filter(Boolean))]
+    const locais = [...new Set(servicos.map(s => formatarLocal(s.cidade, s.estado)).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
     locais.forEach(local => {
@@ -651,7 +660,7 @@ nav {
         (s.nome || '').toLocaleLowerCase('pt-BR').includes(termo) ||
         (s.descricao || '').toLocaleLowerCase('pt-BR').includes(termo) ||
         (s.nomeUsuario || '').toLocaleLowerCase('pt-BR').includes(termo);
-      const localServico = [s.cidade, s.estado].filter(Boolean).join(', ');
+      const localServico = formatarLocal(s.cidade, s.estado);
       const bateLocal = !localizacao || localServico === localizacao;
       const horas = Number(s.qtdHoras) || 0;
       const bateDuracao = !duracao ||
