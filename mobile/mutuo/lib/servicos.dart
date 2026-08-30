@@ -553,6 +553,7 @@ class _ServicosState extends State<Servicos> {
       _todosServicos = dados
           .whereType<Map<String, dynamic>>()
           .map((json) => Servico.fromJson(json))
+          .where((s) => s.autorId != widget.cpf)
           .toList();
       _carregando = false;
 
