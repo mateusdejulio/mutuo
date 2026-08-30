@@ -651,7 +651,7 @@
               id="cvvCartao"
               placeholder="123"
               inputmode="numeric"
-              maxlength="4"
+              maxlength="3"
               autocomplete="cc-csc"
               required
             >
@@ -890,7 +890,7 @@
     inputCvv.addEventListener("input", function () {
       this.value = this.value
         .replace(/\D/g, "")
-        .slice(0, 4);
+        .slice(0, 3);
     });
 
     inputCpf.addEventListener("input", function () {
@@ -1044,7 +1044,7 @@
         return false;
       }
 
-      if (cvv.length < 3 || cvv.length > 4) {
+      if (cvv.length < 3 || cvv.length > 3) {
         mostrarErro(
           "Informe um CVV válido.",
           inputCvv
