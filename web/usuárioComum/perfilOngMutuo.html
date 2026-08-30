@@ -613,6 +613,8 @@ const cnpjOng = params.get('cnpj');
 let dadosOng = null;
 let servicosOng = [];
 
+const API_URL_ONG = 'https://mutuo-api.onrender.com';
+
 async function carregarPerfilOng() {
   if (!cnpjOng) {
     document.querySelector('.container-perfil').innerHTML = '<p style="padding:40px;text-align:center;color:#9aab96;">ONG não especificada.</p>';
@@ -638,7 +640,7 @@ async function carregarPerfilOng() {
 function resolverImagemOng(caminho) {
   if (!caminho) return '../imagens/mutuoLogo.png';
   if (caminho.startsWith('http')) return caminho;
-  return `${API_URL}${caminho}`;
+  return `${API_URL_ONG}${caminho}`;
 }
 
 function preencherIdentidade(ong) {
