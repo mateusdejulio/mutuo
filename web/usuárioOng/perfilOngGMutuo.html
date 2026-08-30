@@ -1216,8 +1216,8 @@
     btnSalvar.textContent = 'Salvando...';
     btnSalvar.disabled = true;
 
-    try {
-      const resposta = await fetch(`${API_BASE}/ongs/${ongAtual.cnpj}/perfil`, {
+        try {
+      const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(ongAtual.cnpj)}/perfil`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nomeOng, email, telefone: tel })
