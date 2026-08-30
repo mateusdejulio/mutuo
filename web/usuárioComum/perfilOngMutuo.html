@@ -111,6 +111,8 @@
       box-shadow: 0 2px 12px rgba(0,0,0,0.15);
       margin-top: -50px;
       flex-shrink: 0;
+      position: relative;   /* ← nova linha */
+      z-index: 3; 
     }
 
     .identidade-texto { flex: 1; min-width: 0; }
@@ -640,7 +642,8 @@ async function carregarPerfilOng() {
 function resolverImagemOng(caminho) {
   if (!caminho) return '../imagens/mutuoLogo.png';
   if (caminho.startsWith('http')) return caminho;
-  return `${API_URL_ONG}${caminho}`;
+  if (caminho.startsWith('/')) return `${API_URL_ONG}${caminho}`;
+  return `${API_URL_ONG}/uploads/fotos/${caminho}`;   // ← novo caso: só o nome do arquivo
 }
 
 function preencherIdentidade(ong) {
