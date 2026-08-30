@@ -323,7 +323,7 @@
 
       <div class="campo">
         <label for="pontos-servico"><i class="bi bi-lightning-charge-fill"></i> Pontos</label>
-        <input type="number" id="pontos-servico" name="pontos" min="10" max="30" placeholder="10 a 30" required>
+        <input type="number" id="pontos-servico" name="pontos" min="10" max="50" placeholder="10 a 50" required>
       </div>
     </div>
 
@@ -395,8 +395,8 @@
       }
 
       const pontos = Number(document.getElementById('pontos-servico').value);
-      if (!pontos || pontos < 10 || pontos > 30) {
-        mostrarMensagem('Os pontos devem estar entre 10 e 30.', 'erro');
+      if (!pontos || pontos < 10 || pontos > 50) {
+        mostrarMensagem('Os pontos devem estar entre 10 e 50.', 'erro');
         return;
       }
 

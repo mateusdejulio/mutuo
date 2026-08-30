@@ -490,6 +490,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
           servico?['duracao']?.toString() ??
           '',
     );
+    final pontosCtrl = TextEditingController(
+      text: servico?['pontos']?.toString() ?? '',
+    );
 
     // Normaliza o foco vindo do banco (evita mismatch de maiúscula/acento
     // com a lista fixa) e garante que o valor atual sempre exista na lista.
@@ -531,10 +534,21 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
               if (nomeCtrl.text.trim().isEmpty ||
                   descCtrl.text.trim().isEmpty ||
                   focoSelecionado == null ||
-                  duracaoCtrl.text.trim().isEmpty) {
+                  duracaoCtrl.text.trim().isEmpty ||
+                  pontosCtrl.text.trim().isEmpty) {
                 ScaffoldMessenger.of(modalContext).showSnackBar(
                   const SnackBar(
                     content: Text('Preencha todos os campos obrigatórios.'),
+                  ),
+                );
+                return;
+              }
+
+              final pontos = int.tryParse(pontosCtrl.text.trim());
+              if (pontos == null || pontos < 10 || pontos > 50) {
+                ScaffoldMessenger.of(modalContext).showSnackBar(
+                  const SnackBar(
+                    content: Text('Os pontos devem estar entre 10 e 50.'),
                   ),
                 );
                 return;
@@ -556,6 +570,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                       descricao: descCtrl.text.trim(),
                       foco: focoSelecionado!,
                       duracao: duracaoCtrl.text.trim(),
+                      pontos: pontos.toString(),
                       imagemBytes: bytes,
                       imagemNome: nomeArquivo,
                     )
@@ -565,6 +580,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                       descricao: descCtrl.text.trim(),
                       foco: focoSelecionado!,
                       duracao: duracaoCtrl.text.trim(),
+                      pontos: pontos.toString(),
                       imagemBytes: bytes,
                       imagemNome: nomeArquivo,
                     );
@@ -776,6 +792,15 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                             ),
                           ),
                         ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _modalLabel('Pontos', Icons.bolt_rounded),
+                      _modalInput(
+                        controller: pontosCtrl,
+                        hint: '10 a 50',
+                        keyboardType: TextInputType.number,
                       ),
 
                       const SizedBox(height: 18),
@@ -998,11 +1023,13 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
   Widget _modalInput({
     required TextEditingController controller,
     required String hint,
+    TextInputType? keyboardType,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 5),
       child: TextField(
         controller: controller,
+        keyboardType: keyboardType,
         style: GoogleFonts.quicksand(
           fontSize: 13,
           color: const Color(0xFF344E41),

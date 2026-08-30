@@ -339,8 +339,8 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
     }
 
     const pontosNum = Number(pontos);
-    if (pontosNum < 10 || pontosNum > 30) {
-      return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 30.' });
+    if (pontosNum < 10 || pontosNum > 50) {
+      return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 50.' });
     }
 
     // ── Checagem do limite de serviços por plano ──
@@ -401,8 +401,8 @@ app.put('/servicos/:id', uploadServico.single('imagem'), async (req, res) => {
     }
 
     const pontosNum = Number(pontos);
-    if (pontosNum < 10 || pontosNum > 30) {
-      return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 30.' });
+    if (pontosNum < 10 || pontosNum > 50) {
+      return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 50.' });
     }
 
     const imagem = req.file ? req.file.filename : null;
@@ -441,8 +441,8 @@ app.put('/servicos/ong/:id', uploadServico.single('imagem'), async (req, res) =>
   }
 
   const pontosNum = Number(pontos);
-  if (pontosNum < 10 || pontosNum > 30) {
-    return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 30.' });
+  if (pontosNum < 10 || pontosNum > 50) {
+    return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 50.' });
   }
 
   const imagem = req.file ? req.file.filename : null;
@@ -876,8 +876,8 @@ app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
     }
 
     const pontosNum = Number(pontos);
-    if (pontosNum < 10 || pontosNum > 30) {
-      return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 30.' });
+    if (pontosNum < 10 || pontosNum > 50) {
+      return res.status(400).json({ erro: 'Os pontos devem estar entre 10 e 50.' });
     }
 
     // ── Checagem do limite de serviços por plano ──

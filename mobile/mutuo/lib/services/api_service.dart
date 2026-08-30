@@ -575,6 +575,7 @@ class ApiService {
     required String descricao,
     required String foco,
     required String duracao,
+    required String pontos,
     List<int>? imagemBytes,
     String? imagemNome,
   }) async {
@@ -586,6 +587,7 @@ class ApiService {
       request.fields['descricao'] = descricao;
       request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
+      request.fields['pontos'] = pontos;
 
       if (imagemBytes != null && imagemNome != null) {
         request.files.add(
@@ -669,6 +671,7 @@ class ApiService {
     required String descricao,
     required String foco,
     required String duracao,
+    required String pontos,
     List<int>? imagemBytes,
     String? imagemNome,
   }) async {
@@ -679,6 +682,7 @@ class ApiService {
       request.fields['descricao'] = descricao;
       request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
+      request.fields['pontos'] = pontos;
 
       if (imagemBytes != null && imagemNome != null) {
         request.files.add(
@@ -871,6 +875,7 @@ class ApiService {
     required String descricao,
     required String foco,
     required String duracao,
+    required String pontos,
     List<int>? imagemBytes,
     String? imagemNome,
   }) async {
@@ -882,6 +887,7 @@ class ApiService {
       request.fields['descricao'] = descricao;
       request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
+      request.fields['pontos'] = pontos;
 
       if (imagemBytes != null && imagemNome != null) {
         request.files.add(
@@ -914,6 +920,7 @@ class ApiService {
     required String descricao,
     required String foco,
     required String duracao,
+    required String pontos,
     List<int>? imagemBytes,
     String? imagemNome,
   }) async {
@@ -924,6 +931,7 @@ class ApiService {
       request.fields['descricao'] = descricao;
       request.fields['foco'] = foco.trim().toLowerCase();
       request.fields['duracao'] = duracao;
+      request.fields['pontos'] = pontos;
 
       if (imagemBytes != null && imagemNome != null) {
         request.files.add(
