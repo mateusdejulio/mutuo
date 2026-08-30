@@ -15,9 +15,11 @@ process.on('unhandledRejection', (err) => {
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('node:path')
 //const db = require('./mutuo-api/db');
-const API_URL = process.env.NODE_ENV === 'production'
+/*const API_URL = process.env.NODE_ENV === 'production'
 ? 'https://mutuo-api.onrender.com'
-: 'http://localhost:3000';
+: 'http://localhost:3000';*/
+
+const API_URL = 'https://mutuo-api.onrender.com';
 
 //variáveis
 let win;
