@@ -27,7 +27,7 @@ const List<String> _focosServicoOng = [
 /// recarregar a lista dela.
 ///
 /// [totalAtividades] e [ongPremium] são usados para verificar o limite
-/// do plano gratuito (3 atividades) DENTRO do próprio modal, então a
+/// do plano gratuito (5 atividades) DENTRO do próprio modal, então a
 /// checagem não depende só do botão que abriu o modal.
 Future<void> abrirModalAtividadeOng({
   required BuildContext context,
@@ -44,7 +44,9 @@ Future<void> abrirModalAtividadeOng({
 
   // Limite só se aplica a cadastro de atividade NOVA. Editar uma
   // atividade que já existe não conta como "atividade a mais".
-  final limiteAtingido = !editando && !ongPremium && totalAtividades >= 3;
+  // Plano gratuito: até 5 atividades ativas (10 no premium) — mesmo limite
+  // aplicado no backend (rota POST /servicos/ong).
+  final limiteAtingido = !editando && !ongPremium && totalAtividades >= 5;
 
   final nomeCtrl = TextEditingController(
     text: atividade?['nomeServico']?.toString() ?? '',
@@ -258,7 +260,7 @@ Future<void> abrirModalAtividadeOng({
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Seu plano gratuito permite até 3 atividades ativas. Faça upgrade para o plano Premium para cadastrar mais atividades.',
+                              'Seu plano gratuito permite até 5 atividades ativas. Faça upgrade para o plano Premium para cadastrar mais atividades.',
                               style: GoogleFonts.quicksand(
                                 fontSize: 12,
                                 color: Colors.white.withOpacity(0.85),
