@@ -756,11 +756,11 @@ async function atualizarFotoPerfilOng(cnpj, nomeArquivo, dados, tipo) {
 }
 
 // Atualiza os campos editáveis na tela "Dados do usuário" (nome, email, telefone)
-async function atualizarDadosOng(cnpj, { nomeOng, email, telefone }) {
+async function atualizarDadosOng(cnpj, { nomeOng, email, telefone, cidade }) {
   try {
     const [result] = await pool.query(
-      'UPDATE Mutuo_ONG SET nomeOng = ?, email = ?, telefone = ? WHERE cnpj = ?',
-      [nomeOng, email, telefone, cnpj]
+      'UPDATE Mutuo_ONG SET nomeOng = ?, email = ?, telefone = ?, cidade = ? WHERE cnpj = ?',
+      [nomeOng, email, telefone, cidade, cnpj]
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {

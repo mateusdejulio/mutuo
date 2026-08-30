@@ -313,11 +313,11 @@ app.put('/ongs/:cnpj', async (req, res) => {
 
 // Atualiza os campos editáveis do perfil da ONG (nome, email, telefone)
 app.put('/ongs/:cnpj/perfil', async (req, res) => {
-  const { nomeOng, email, telefone } = req.body;
+  const { nomeOng, email, telefone, cidade } = req.body;
   if (!nomeOng || !email) {
     return res.status(400).json({ erro: 'Nome e e-mail são obrigatórios' });
   }
-  const resultado = await db.atualizarDadosOng(req.params.cnpj, { nomeOng, email, telefone });
+  const resultado = await db.atualizarDadosOng(req.params.cnpj, { nomeOng, email, telefone, cidade });
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
   res.json(resultado);
 });
