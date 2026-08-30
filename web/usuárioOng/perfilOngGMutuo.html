@@ -619,6 +619,31 @@
       .acoes-servico { margin-left: 0; width: 100%; }
       .rodape-servico { flex-direction: column; align-items: flex-start; }
     }
+
+    .mensagem-salva {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--verde-escuro);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 14px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.86rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 500;
+    }
+    .mensagem-salva.visivel {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
   <link rel="stylesheet" href="../navbarOngResponsiva.css">
   <script src="../navbarOngResponsiva.js" defer></script>
@@ -807,6 +832,11 @@
         <span id="exibTel">-</span>
       </div>
 
+      <div class="item-info">
+        <i class="bi bi-geo-alt-fill"></i>
+        <span id="exibCidade">-</span>
+      </div>
+
       <div class="item-info readonly">
         <i class="bi bi-calendar3"></i>
 
@@ -835,6 +865,14 @@
 
         <div class="campo-edit">
           <input type="tel" id="inputTel" placeholder="Telefone">
+        </div>
+      </div>
+
+      <div class="item-info">
+        <i class="bi bi-geo-alt-fill"></i>
+
+        <div class="campo-edit">
+          <input type="text" id="inputCidade" placeholder="Cidade">
         </div>
       </div>
 
@@ -914,6 +952,12 @@
   </div>
 
 </div>
+
+<div class="mensagem-salva" id="mensagemSalva">
+  <i class="bi bi-check-circle-fill"></i>
+  <span id="mensagemSalvaTexto">Alterações salvas com sucesso!</span>
+</div>
+
 <script src="../funcoes.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="../chat-socket.js"></script>
@@ -1010,6 +1054,7 @@
     document.getElementById('exibUser').textContent = '@...';
     document.getElementById('exibEmail').textContent = 'Carregando...';
     document.getElementById('exibTel').textContent = 'Carregando...';
+    document.getElementById('exibCidade').textContent = 'Carregando...';
     document.getElementById('exibCadastro').textContent = 'Carregando...';
     document.getElementById('exibCadastroEdit').textContent = 'Carregando...';
     document.getElementById('tempoMembro').textContent = '...';
@@ -1040,6 +1085,7 @@
     document.getElementById('exibUser').textContent = handle;
     document.getElementById('exibEmail').textContent = ong.email || '-';
     document.getElementById('exibTel').textContent = ong.telefone || 'Não informado';
+    document.getElementById('exibCidade').textContent = ong.cidade || 'Não informada';
 
     const textoPlano = ong.premium ? 'Plano premium' : 'Plano gratuito';
     document.getElementById('exibPlano').textContent = textoPlano;
@@ -1049,6 +1095,7 @@
     document.getElementById('inputUser').value = handle.replace('@', '');
     document.getElementById('inputEmail').value = ong.email || '';
     document.getElementById('inputTel').value = ong.telefone || '';
+    document.getElementById('inputCidade').value = ong.cidade || '';
 
     if (ong.pontos !== undefined) {
       document.getElementById('exibePontos').textContent = ong.pontos.toLocaleString('pt-BR');
@@ -1202,12 +1249,21 @@
     if (ongAtual) preencherTela(ongAtual);
   }
 
+  function mostrarMensagemSalva(texto) {
+    const mensagem = document.getElementById('mensagemSalva');
+    document.getElementById('mensagemSalvaTexto').textContent = texto;
+    mensagem.classList.add('visivel');
+    clearTimeout(mensagem._timeout);
+    mensagem._timeout = setTimeout(() => mensagem.classList.remove('visivel'), 3000);
+  }
+
   async function salvarEdicao() {
     if (!ongAtual || !ongAtual.cnpj) return;
 
     const nomeOng = document.getElementById('inputNome').value.trim();
     const email   = document.getElementById('inputEmail').value.trim();
     const tel     = document.getElementById('inputTel').value.trim();
+    const cidade  = document.getElementById('inputCidade').value.trim();
 
     if (!nomeOng || !email) return;
 
@@ -1220,7 +1276,7 @@
       const resposta = await fetch(`${API_BASE}/ongs/${encodeURIComponent(ongAtual.cnpj)}/perfil`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomeOng, email, telefone: tel })
+        body: JSON.stringify({ nomeOng, email, telefone: tel, cidade })
       });
 
       const resultado = await resposta.json();
@@ -1231,6 +1287,7 @@
       ongAtual.nomeOng = nomeOng;
       ongAtual.email = email;
       ongAtual.telefone = tel;
+      ongAtual.cidade = cidade;
       preencherTela(ongAtual);
 
       const logada = pegarOngLogada() || {};
@@ -1238,7 +1295,7 @@
       atualizarTituloOng(nomeOng);
 
       cancelarEdicao();
-      alert('Perfil atualizado com sucesso!');
+      mostrarMensagemSalva('Perfil atualizado com sucesso!');
 
     } catch (erro) {
       console.error(erro);
