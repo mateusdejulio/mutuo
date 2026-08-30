@@ -113,29 +113,10 @@ class DetalheVaga extends StatelessWidget {
                           height: 280,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 280,
-                              width: double.infinity,
-                              color: const Color(0xFFB7D5B0),
-                              child: const Icon(
-                                Icons.broken_image,
-                                color: Colors.white,
-                                size: 50,
-                              ),
-                            );
-                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              _semFotoServico(height: 280),
                         )
-                      : Container(
-                          height: 280,
-                          width: double.infinity,
-                          color: const Color(0xFFB7D5B0),
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: Colors.white,
-                            size: 50,
-                          ),
-                        ),
+                      : _semFotoServico(height: 280),
                 ),
                 Positioned(
                   top: 8,
@@ -1441,25 +1422,10 @@ class _InicialUsuarioState extends State<InicialUsuario> {
                             height: 140,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              height: 140,
-                              color: const Color(0xFFB7D5B0),
-                              child: const Icon(
-                                Icons.image_not_supported_outlined,
-                                color: Colors.white54,
-                                size: 40,
-                              ),
-                            ),
+                            errorBuilder: (_, __, ___) =>
+                                _semFotoServico(height: 140),
                           )
-                        : Container(
-                            height: 140,
-                            color: const Color(0xFFB7D5B0),
-                            child: const Icon(
-                              Icons.image_not_supported_outlined,
-                              color: Colors.white54,
-                              size: 40,
-                            ),
-                          ),
+                        : _semFotoServico(height: 140),
                   ),
                   Positioned(
                     top: 12,
@@ -1633,6 +1599,22 @@ class _InicialUsuarioState extends State<InicialUsuario> {
       ),
     );
   }
+}
+
+// ─── Placeholder exibido quando o serviço não tem foto cadastrada ───
+Widget _semFotoServico({double height = 280}) {
+  return Container(
+    height: height,
+    width: double.infinity,
+    color: const Color(0xFFB7D5B0),
+    alignment: Alignment.center,
+    child: Image.asset(
+      'assets/images/mutuoLogo.png',
+      width: height * 0.4,
+      height: height * 0.4,
+      fit: BoxFit.contain,
+    ),
+  );
 }
 
 // ─── NAV ITEM AUXILIAR ────────────────────────────────────

@@ -676,27 +676,9 @@ class _ServicosOngState extends State<ServicosOng> {
                     height: 130,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 130,
-                      width: double.infinity,
-                      color: _bege,
-                      child: const Icon(
-                        Icons.volunteer_activism_outlined,
-                        color: _verde,
-                        size: 36,
-                      ),
-                    ),
+                    errorBuilder: (_, __, ___) => _semFotoServico(height: 130),
                   )
-                : Container(
-                    height: 130,
-                    width: double.infinity,
-                    color: _bege,
-                    child: const Icon(
-                      Icons.volunteer_activism_outlined,
-                      color: _verde,
-                      size: 36,
-                    ),
-                  ),
+                : _semFotoServico(height: 130),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -916,6 +898,22 @@ class _ServicosOngState extends State<ServicosOng> {
       ),
     );
   }
+}
+
+// ─── Placeholder exibido quando a atividade não tem foto cadastrada ───
+Widget _semFotoServico({double height = 130}) {
+  return Container(
+    height: height,
+    width: double.infinity,
+    color: const Color(0xFFB7D5B0),
+    alignment: Alignment.center,
+    child: Image.asset(
+      'assets/images/mutuoLogo.png',
+      width: height * 0.4,
+      height: height * 0.4,
+      fit: BoxFit.contain,
+    ),
+  );
 }
 
 class _NavItemServicosOng {

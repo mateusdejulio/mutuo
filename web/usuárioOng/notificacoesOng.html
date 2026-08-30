@@ -487,7 +487,7 @@ function cardSolicitacao(s) {
   return `
     <div class="card-notificacao ${pendente ? 'nao-lida' : ''}" data-id="${s.codSolicitacao}">
       <div class="avatar-notificacao">
-        <img src="${s.fotoSolicitador || '../imagens/mutuoLogo.png'}" alt="${s.nomeSolicitador}">
+        <img src="${resolverImagem(s.fotoSolicitador)}" alt="${s.nomeSolicitador}">
         <span class="icone-tipo solicitacao"><i class="bi bi-person-fill"></i></span>
       </div>
       <div class="corpo-notificacao">
@@ -501,6 +501,7 @@ function cardSolicitacao(s) {
           <div class="acoes-notificacao">
             <button class="btn-acao aceitar" onclick="responderSolicitacaoOng(${s.codSolicitacao}, true, ${s.pontos})"><i class="bi bi-check-circle-fill"></i> Aceitar</button>
             <button class="btn-acao recusar" onclick="responderSolicitacaoOng(${s.codSolicitacao}, false, ${s.pontos})"><i class="bi bi-x-circle-fill"></i> Recusar</button>
+            <a href="${linkChatOng('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>
           </div>` : `
           <div class="acoes-notificacao">
             <a href="${linkChatOng('usuario', s.cpfSolicitador, s.nomeSolicitador, s.fotoSolicitador)}" class="btn-acao mensagem"><i class="bi bi-chat-fill"></i> Mensagem</a>
