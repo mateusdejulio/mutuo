@@ -264,6 +264,7 @@ app.put('/usuarios/:cpf', async (req, res) => {
   res.json(await db.alterUsuario(req.params.cpf, ativo, pontos, horas));
 });
 
+
 // Atualiza os campos editáveis do perfil do usuário (nome, email, telefone, cidade)
 app.put('/usuarios/:cpf/perfil', async (req, res) => {
   const { nome, email, telefone, cidade } = req.body;
