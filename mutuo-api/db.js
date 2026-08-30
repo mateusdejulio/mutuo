@@ -458,7 +458,7 @@ async function cadastrarServicoOng(servico) {
 async function getServicosUsuario(cpf) {
   try {
     const [rows] = await pool.query(
-      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS horas, imagem, ativo
+      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS horas, imagem, ativo, nota, avaliacoes, pontos
        FROM Mutuo_Servico
        WHERE idUsuario = ? AND ativo = 1`,
       [cpf]
@@ -525,7 +525,7 @@ async function atualizarServico(id, servico) {
 async function getServicosOng(cnpj) {
   try {
     const [rows] = await pool.query(
-      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1',
+      'SELECT id, nomeServico, cnpj, horas, descricao, foco, imagem, pontos FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1',
       [cnpj]
     );
     return rows.map(servico => ({
