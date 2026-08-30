@@ -646,11 +646,18 @@ function resolverImagemOng(caminho) {
   return `${API_URL_ONG}/uploads/fotos/${caminho}`;   // ← novo caso: só o nome do arquivo
 }
 
+function resolverImagemServico(caminho) {
+  if (!caminho) return '../imagens/mutuoLogo.png';
+  if (caminho.startsWith('http')) return caminho;
+  if (caminho.startsWith('/')) return `${API_URL_ONG}${caminho}`;
+  return `${API_URL_ONG}/uploads/servicos/${caminho}`;
+
+
 function preencherIdentidade(ong) {
   document.title = 'Mútuo | ' + ong.nomeOng;
   document.getElementById('nomeOngPerfil').textContent = ong.nomeOng;
-  document.getElementById('avatarOng').src = resolverImagemOng(ong.foto_perfil);
-  document.getElementById('capaOng').src = resolverImagemOng(ong.foto_perfil);
+  document.getElementById('avatarOng').src = resolverImagemPerfilOng(ong.foto_perfil);
+document.getElementById('capaOng').src = resolverImagemPerfilOng(ong.foto_perfil);
   document.getElementById('localizacaoOng').textContent = `${ong.cidade || ''}${ong.estado ? ', ' + ong.estado : ''}`;
   document.getElementById('enderecoOng').textContent = `${ong.endereco || ''}${ong.bairro ? ' - ' + ong.bairro : ''}`;
   document.getElementById('emailOng').textContent = ong.email || 'Não informado';
@@ -673,7 +680,7 @@ function preencherServicos(servicos) {
 
   grade.innerHTML = servicos.map(s => `
     <div class="card-servico-ong">
-      <img src="${resolverImagemOng(s.imagem)}" class="imagem-servico" alt="${s.nomeServico}">
+      <img src="${resolverImagemServico(s.imagem)}" class="imagem-servico" alt="${s.nomeServico}">
       <div class="corpo-servico">
         <h3 class="titulo-servico">${s.nomeServico}</h3>
         <p class="descricao-servico">${s.descricao || ''}</p>
@@ -701,14 +708,14 @@ function abrirModalServico(id) {
   modal.id = 'modalDinamicoServico';
   modal.innerHTML = `
     <div class="folha-modal">
-      <img src="${resolverImagemOng(s.imagem)}" class="imagem-modal" alt="${s.nomeServico}" onerror="this.style.display='none'">
+      <img src="${resolverImagemServico(s.imagem)}" class="imagem-modal" alt="${s.nomeServico}" onerror="this.style.display='none'">
       <button class="btn-fechar-modal" onclick="document.getElementById('modalDinamicoServico').remove(); document.body.style.overflow='';"><i class="bi bi-x-lg"></i></button>
       <div class="corpo-modal">
         <h3>${s.nomeServico}</h3>
         <p class="descricao-modal">${s.descricao || ''}</p>
         <div class="linha-ong-modal">
           <div class="esquerda-ong-modal">
-            <img src="${resolverImagemOng(dadosOng.foto_perfil)}" alt="${dadosOng.nomeOng}">
+            <img src="${resolverImagemPerfilOng(dadosOng.foto_perfil)}" alt="${dadosOng.nomeOng}">
             <div>
               <p class="nome-ong-modal">${dadosOng.nomeOng}</p>
               <div class="meta-ong-modal">
