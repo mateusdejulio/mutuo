@@ -261,6 +261,24 @@ async function countPremium() {
   return rows[0].total;
 }
 
+async function getContasPremium() {
+  const sql = `
+    SELECT cpf AS id, nome, email, 'Usuário' AS tipo
+    FROM Mutuo_Usuario WHERE premium = 1
+    UNION ALL
+    SELECT cnpj AS id, nomeOng AS nome, email, 'ONG' AS tipo
+    FROM Mutuo_ONG WHERE premium = 1
+    ORDER BY nome
+  `;
+  try {
+    const [rows] = await pool.query(sql);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar contas premium:', err.message);
+    return { error: err.message };
+  }
+}
+
 async function countServicosCadastrados() {
   const [rows] = await pool.query('SELECT COUNT(*) AS total FROM Mutuo_Servico WHERE ativo = 1');
   return rows[0].total;
@@ -2254,6 +2272,7 @@ module.exports = {
   atualizarServico,
   getServicosOng,
   getPremium,
+  getContasPremium,
   countPremiumTotal,
   countAtrasadas,
   countReceita,

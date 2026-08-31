@@ -155,6 +155,14 @@ ipcMain.handle('alterar-senha-adm', (e, login, senhaAtual, novaSenha) =>
 ipcMain.handle('cadastrar-adm', (e, novoLogin, novaSenha) =>
     apiFetch('/adm/cadastrar', 'POST', { novoLogin, novaSenha }));
 
+ipcMain.handle('buscar-contas-premium', () => apiFetch('/premium/contas'));
+
+ipcMain.handle('remover-premium-usuario', (e, cpf) =>
+  apiFetch(`/usuarios/${encodeURIComponent(cpf)}/premium`, 'PUT', { premium: 0 }));
+
+ipcMain.handle('remover-premium-ong', (e, cnpj) =>
+  apiFetch(`/ongs/${encodeURIComponent(cnpj)}/premium`, 'PUT', { premium: 0 }));
+
 // abertura de janelas
 ipcMain.on('abrir-janela-inicio', () => {
   inicioWindow();
