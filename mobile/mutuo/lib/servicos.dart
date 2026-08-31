@@ -641,12 +641,6 @@ class _ServicosState extends State<Servicos> {
                             label: "Filtros",
                             onTap: () {},
                           ),
-                          const SizedBox(width: 8),
-                          _chipAcao(
-                            icone: Icons.swap_vert_rounded,
-                            label: "Ordenar",
-                            onTap: () {},
-                          ),
                         ],
                       ),
                     ),

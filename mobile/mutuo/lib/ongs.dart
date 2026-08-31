@@ -593,12 +593,6 @@ class _OngsState extends State<Ongs> {
                             label: "Filtros",
                             onTap: () {},
                           ),
-                          const SizedBox(width: 8),
-                          _chipAcao(
-                            icone: Icons.swap_vert_rounded,
-                            label: "Ordenar",
-                            onTap: () {},
-                          ),
                         ],
                       ),
                     ),
