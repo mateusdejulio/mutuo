@@ -1296,10 +1296,45 @@ async function buscarCertificadosPorOng(cnpj) {
   };
 }
 
-// Lista serviços em destaque — apenas de usuários premium, excluindo o próprio usuário
+// Colunas de Mutuo_ServicoOng + Mutuo_ONG mapeadas pro mesmo formato dos
+// serviços de usuário, pra poder misturar os dois tipos numa lista só.
+function _sqlAtividadesOng(filtroExtra) {
+  return `
+    SELECT
+      s.id AS cod,
+      s.nomeServico AS nome,
+      s.descricao,
+      s.foco,
+      s.horas AS qtdHoras,
+      s.imagem,
+      s.pontos,
+      s.cnpj AS idUsuario,
+      o.nomeOng AS nomeUsuario,
+      o.cidade,
+      o.estado,
+      o.foto_perfil AS fotoUsuario
+    FROM Mutuo_ServicoOng AS s
+    JOIN Mutuo_ONG AS o ON s.cnpj = o.cnpj
+    WHERE s.ativo = 1 AND o.ativo = 1 AND o.premium = 1
+      ${filtroExtra || ''}
+    ORDER BY s.id DESC
+  `;
+}
+
+function _mapearServicoDestaque(servico, tipo) {
+  return {
+    ...servico,
+    tipo,
+    imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
+    fotoUsuario: servico.fotoUsuario ? `/uploads/fotos/${servico.fotoUsuario}` : null
+  };
+}
+
+// Lista serviços em destaque — de usuários e ONGs premium, excluindo o
+// próprio usuário logado (ONGs nunca são o próprio "usuário" aqui).
 async function getServicosDestaque(cpfExcluir) {
-  const sql = `
-    SELECT 
+  const sqlUsuario = `
+    SELECT
       s.cod,
       s.nome,
       s.descricao,
@@ -1319,23 +1354,25 @@ async function getServicosDestaque(cpfExcluir) {
     ORDER BY s.cod DESC
   `;
   try {
-    const params = cpfExcluir ? [cpfExcluir] : [];
-    const [rows] = await pool.query(sql, params);
-    return rows.map(servico => ({
-      ...servico,
-      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
-      fotoUsuario: servico.fotoUsuario ? `/uploads/fotos/${servico.fotoUsuario}` : null
-    }));
+    const paramsUsuario = cpfExcluir ? [cpfExcluir] : [];
+    const [rowsUsuario] = await pool.query(sqlUsuario, paramsUsuario);
+    const [rowsOng] = await pool.query(_sqlAtividadesOng());
+
+    return [
+      ...rowsUsuario.map(s => _mapearServicoDestaque(s, 'usuario')),
+      ...rowsOng.map(s => _mapearServicoDestaque(s, 'ong'))
+    ];
   } catch (err) {
     console.error('Erro ao buscar serviços em destaque:', err.message);
     return { error: err.message };
   }
 }
 
-// Lista serviços de usuários premium na mesma cidade, excluindo o próprio usuário
+// Lista serviços de usuários e ONGs premium na mesma cidade, excluindo o
+// próprio usuário logado.
 async function getServicosPertoDeVoce(cidade, cpfExcluir) {
-  const sql = `
-    SELECT 
+  const sqlUsuario = `
+    SELECT
       s.cod,
       s.nome,
       s.descricao,
@@ -1355,13 +1392,14 @@ async function getServicosPertoDeVoce(cidade, cpfExcluir) {
     ORDER BY s.cod DESC
   `;
   try {
-    const params = cpfExcluir ? [cidade, cpfExcluir] : [cidade];
-    const [rows] = await pool.query(sql, params);
-    return rows.map(servico => ({
-      ...servico,
-      imagem: servico.imagem ? `/uploads/servicos/${servico.imagem}` : null,
-      fotoUsuario: servico.fotoUsuario ? `/uploads/fotos/${servico.fotoUsuario}` : null
-    }));
+    const paramsUsuario = cpfExcluir ? [cidade, cpfExcluir] : [cidade];
+    const [rowsUsuario] = await pool.query(sqlUsuario, paramsUsuario);
+    const [rowsOng] = await pool.query(_sqlAtividadesOng('AND o.cidade = ?'), [cidade]);
+
+    return [
+      ...rowsUsuario.map(s => _mapearServicoDestaque(s, 'usuario')),
+      ...rowsOng.map(s => _mapearServicoDestaque(s, 'ong'))
+    ];
   } catch (err) {
     console.error('Erro ao buscar serviços perto de você:', err.message);
     return { error: err.message };

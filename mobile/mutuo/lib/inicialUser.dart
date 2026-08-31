@@ -34,6 +34,7 @@ class Vaga {
   final double avaliacao;
   final int totalAvaliacoes;
   final int pontos;
+  final String tipo; // 'usuario' ou 'ong'
 
   Vaga({
     this.id,
@@ -50,6 +51,7 @@ class Vaga {
     this.avaliacao = 4.0,
     this.totalAvaliacoes = 0,
     this.pontos = 0,
+    this.tipo = 'usuario',
   });
 
   factory Vaga.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,7 @@ class Vaga {
     final caminhoImagem = json['imagem']?.toString();
     return Vaga(
       id: json['cod']?.toString(),
+      tipo: json['tipo']?.toString() ?? 'usuario',
       titulo: json['nome']?.toString() ?? '',
       descricao: json['descricao']?.toString() ?? '',
       local: [
@@ -406,7 +409,7 @@ class DetalheVaga extends StatelessWidget {
     final resultado = await ApiService().buscarOuCriarConversa(
       tipo1: "usuario",
       id1: meuCpf,
-      tipo2: "usuario",
+      tipo2: vaga.tipo,
       id2: autorId,
     );
     if (!context.mounted) return;

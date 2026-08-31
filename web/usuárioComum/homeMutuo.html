@@ -693,7 +693,7 @@
     </a>
     <a href="notificacoesMutuo.html" class="action-tile">
       <div class="action-ico"><i class="bi bi-bell-fill"></i></div>
-      <span class="action-lbl">Notificações <span style="color:var(--green-main);font-weight:700">3</span></span>
+      <span class="action-lbl">Notificações <span style="color:var(--green-main);font-weight:700"></span></span>
     </a>
     <a href="planosMutuo.html" class="action-tile">
       <div class="action-ico"><i class="bi bi-graph-up-arrow"></i></div>
@@ -989,7 +989,10 @@
   // ── Vagas em destaque (usuários premium) ──
   const servicosHomeMap = {};
   function criarCardDestaque(servico) {
-    servicosHomeMap[servico.cod] = servico;
+    // Chave composta: serviços de usuário e atividades de ONG têm sequências
+    // de id independentes, então o mesmo "cod" pode existir nos dois tipos.
+    const chave = `${servico.tipo || 'usuario'}_${servico.cod}`;
+    servicosHomeMap[chave] = servico;
     const div = document.createElement('div');
     div.className = 'act-card';
 
@@ -1017,8 +1020,8 @@
           ${duracao ? `<span class="act-meta-i"><i class="bi bi-clock-fill"></i> ${duracao}</span>` : ''}
         </div>
         <div class="act-btns">
-        <button class="btn-duvida" onclick="tirarDuvidasHome(${servico.cod})"><i class="bi bi-chat-dots-fill"></i> Tirar dúvidas</button>
-        <button class="btn-saiba" onclick="inscreverServicoHome(${servico.cod})"><i class="bi bi-check-circle-fill"></i> Solicitar</button>
+        <button class="btn-duvida" onclick="tirarDuvidasHome('${chave}')"><i class="bi bi-chat-dots-fill"></i> Tirar dúvidas</button>
+        <button class="btn-saiba" onclick="inscreverServicoHome('${chave}')"><i class="bi bi-check-circle-fill"></i> Solicitar</button>
         </div>
       </div>
     `;
@@ -1082,11 +1085,11 @@
       track.innerHTML = `<p style="padding:1rem;color:#b00020;font-size:0.85rem;">Não foi possível carregar os serviços perto de você.</p>`;
     }
   }
-  function tirarDuvidasHome(cod) {
-  const s = servicosHomeMap[cod];
+  function tirarDuvidasHome(chave) {
+  const s = servicosHomeMap[chave];
   if (!s) { window.location.href = 'chatMutuo.html'; return; }
   const params = new URLSearchParams({
-    tipo: 'usuario',
+    tipo: s.tipo || 'usuario',
     id: s.idUsuario,
     nome: s.nomeUsuario || 'Usuário',
     foto: s.fotoUsuario ? `${API_URL}${s.fotoUsuario}` : '../imagens/mutuoLogo.png'
@@ -1094,7 +1097,7 @@
   window.location.href = `chatMutuo.html?${params.toString()}`;
 }
 
-async function inscreverServicoHome(cod) {
+async function inscreverServicoHome(chave) {
   const usuarioLogadoStr = sessionStorage.getItem('usuarioLogado');
   const usuarioLogado = usuarioLogadoStr ? JSON.parse(usuarioLogadoStr) : null;
 
@@ -1103,13 +1106,18 @@ async function inscreverServicoHome(cod) {
     return;
   }
 
+  const s = servicosHomeMap[chave];
+  if (!s) { alert('Não foi possível enviar a solicitação.'); return; }
+  const rota = s.tipo === 'ong' ? '/solicitacoes-ong' : '/solicitacoes';
+
   try {
-    const resp = await fetch(`${API_URL}/solicitacoes`, {
+    const resp = await fetch(`${API_URL}${rota}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        codServico: cod,
-        codUsuario: usuarioLogado.cpf
+        codServico: s.cod,
+        codUsuario: usuarioLogado.cpf,
+        pontos: s.pontos
       })
     });
 
