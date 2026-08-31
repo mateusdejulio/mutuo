@@ -32,6 +32,7 @@ class _InicialOngState extends State<InicialOng> {
   Map<String, dynamic>? _ong;
   List<dynamic> _atividades = [];
   int _totalVoluntarios = 0;
+  int _totalRealizadas = 0;
   bool _carregando = true;
   String? _fotoUrl;
   int _bottomNavIndex = 0;
@@ -78,10 +79,16 @@ class _InicialOngState extends State<InicialOng> {
         .where((cpf) => cpf != null && cpf.isNotEmpty)
         .toSet();
 
+    final totalRealizadas = solicitacoes
+        .whereType<Map<String, dynamic>>()
+        .where((s) => s['statusExecucao']?.toString() == 'Realizada')
+        .length;
+
     setState(() {
       _ong = ong;
       _atividades = atividades;
       _totalVoluntarios = cpfsUnicos.length;
+      _totalRealizadas = totalRealizadas;
       _fotoUrl = foto;
       _carregando = false;
     });
@@ -603,8 +610,7 @@ class _InicialOngState extends State<InicialOng> {
           Row(
             children: [
               _statTopoOng(valor: "$_totalVoluntarios", label: "VOLUNTÁRIOS"),
-              // Avaliação média ainda não tem coluna/rota no backend pra serviços de ONG.
-              _statTopoOng(valor: "—", label: "AVALIAÇÃO"),
+              _statTopoOng(valor: "$_totalRealizadas", label: "REALIZADOS"),
             ],
           ),
           const SizedBox(height: 14),
