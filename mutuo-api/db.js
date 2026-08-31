@@ -237,7 +237,23 @@ async function countServicos() {
 }
 
 async function countHoras() {
-  const [rows] = await pool.query('SELECT SUM(horasVoluntarias) AS total FROM Mutuo_Usuario');
+  const [rows] = await pool.query(`
+    SELECT (
+      COALESCE((
+        SELECT SUM(s.qtdHoras)
+        FROM Mutuo_Solicitacao sol
+        JOIN Mutuo_Servico s ON sol.codServico = s.cod
+        WHERE sol.statusExecucao = 'Realizada'
+      ), 0)
+      +
+      COALESCE((
+        SELECT SUM(so.horas)
+        FROM Mutuo_SolicitacaoONG solOng
+        JOIN Mutuo_ServicoOng so ON solOng.codServico = so.id
+        WHERE solOng.statusExecucao = 'Realizada'
+      ), 0)
+    ) AS total
+  `);
   return rows[0].total;
 }
 
