@@ -126,9 +126,9 @@
                         <span class="col-texto"><img src="../public/img/usuarios_claro.png" height="25px" class="icone_card"><span id="totalUsuariosPremium">--</span></span>
                     </div>
                     <div class="col">
-                        <span class="col-titulo">Receita Total</span>
+                        <span class="col-titulo">Receita Mensal</span>
                         <br>
-                        <span class="col-texto"><img src="../public/img/servicos_claro.png" height="25px" class="icone_card"><span style="font-size:0.8em;color:#999;">Em breve</span></span>
+                        <span class="col-texto"><img src="../public/img/servicos_claro.png" height="25px" class="icone_card"><span id="receitaTotal">--</span></span>
                     </div>
                 </div>
             </div>
@@ -175,25 +175,35 @@
         let contasPremium = [];
 
         async function carregarContasPremium() {
-    const corpo = document.getElementById('tbody');
-    try {
-        contasPremium = await window.api.buscarContasPremium();
+            const corpo = document.getElementById('tbody');
+            try {
+                contasPremium = await window.api.buscarContasPremium();
 
-        if (!Array.isArray(contasPremium)) throw new Error(contasPremium?.erro || 'Erro ao carregar dados.');
+                if (!Array.isArray(contasPremium)) throw new Error(contasPremium?.erro || 'Erro ao carregar dados.');
 
-        atualizarContadores(contasPremium);
-        renderizarTabelaPremium(contasPremium);
-    } catch (erro) {
-        console.error('Erro ao buscar contas premium:', erro);
-        corpo.innerHTML = `<tr><td colspan="4" class="tdTabela">Erro ao carregar dados: ${erro.message}</td></tr>`;
-    }
-}
+                atualizarContadores(contasPremium);
+                renderizarTabelaPremium(contasPremium);
+            } catch (erro) {
+                console.error('Erro ao buscar contas premium:', erro);
+                corpo.innerHTML = `<tr><td colspan="4" class="tdTabela">Erro ao carregar dados: ${erro.message}</td></tr>`;
+            }
+        }
+
+        const PRECO_PREMIUM_USUARIO = 19.90;
+        const PRECO_PREMIUM_ONG = 49.90;
 
         function atualizarContadores(lista) {
             const totalOngs = lista.filter(c => c.tipo === 'ONG').length;
             const totalUsuarios = lista.filter(c => c.tipo === 'Usuário').length;
+
             document.getElementById('totalOngsPremium').textContent = totalOngs;
             document.getElementById('totalUsuariosPremium').textContent = totalUsuarios;
+
+            const receita = (totalUsuarios * PRECO_PREMIUM_USUARIO) + (totalOngs * PRECO_PREMIUM_ONG);
+            document.getElementById('receitaTotal').textContent = receita.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
         }
 
         function renderizarTabelaPremium(lista) {
