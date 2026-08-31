@@ -133,8 +133,8 @@
                 </div>
             </div>
 
-            <div class="container" style="margin-top: 20px;">
-                <table class="table" id="tabela-premium">
+            <div id="divTabela">
+                <table id="tabela">
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -143,8 +143,8 @@
                             <th>Ação</th>
                         </tr>
                     </thead>
-                    <tbody id="corpo-tabela-premium">
-                        <tr><td colspan="4">Carregando...</td></tr>
+                    <tbody id="tbody">
+
                     </tbody>
                 </table>
             </div>
@@ -175,19 +175,19 @@
         let contasPremium = [];
 
         async function carregarContasPremium() {
-            const corpo = document.getElementById('corpo-tabela-premium');
-            try {
-                contasPremium = await window.api.buscarContasPremium();
+    const corpo = document.getElementById('tbody');
+    try {
+        contasPremium = await window.api.buscarContasPremium();
 
-                if (!Array.isArray(contasPremium)) throw new Error(contasPremium?.erro || 'Erro ao carregar dados.');
+        if (!Array.isArray(contasPremium)) throw new Error(contasPremium?.erro || 'Erro ao carregar dados.');
 
-                atualizarContadores(contasPremium);
-                renderizarTabelaPremium(contasPremium);
-            } catch (erro) {
-                console.error('Erro ao buscar contas premium:', erro);
-                corpo.innerHTML = `<tr><td colspan="4">Erro ao carregar dados: ${erro.message}</td></tr>`;
-            }
-        }
+        atualizarContadores(contasPremium);
+        renderizarTabelaPremium(contasPremium);
+    } catch (erro) {
+        console.error('Erro ao buscar contas premium:', erro);
+        corpo.innerHTML = `<tr><td colspan="4" class="tdTabela">Erro ao carregar dados: ${erro.message}</td></tr>`;
+    }
+}
 
         function atualizarContadores(lista) {
             const totalOngs = lista.filter(c => c.tipo === 'ONG').length;
@@ -197,21 +197,23 @@
         }
 
         function renderizarTabelaPremium(lista) {
-            const corpo = document.getElementById('corpo-tabela-premium');
+            const corpo = document.getElementById('tbody');
             corpo.innerHTML = '';
 
             if (lista.length === 0) {
-                corpo.innerHTML = '<tr><td colspan="4">Nenhuma conta premium encontrada.</td></tr>';
+                corpo.innerHTML = '<tr><td colspan="4" class="tdTabela">Nenhuma conta premium encontrada.</td></tr>';
                 return;
             }
 
             for (const conta of lista) {
                 const linha = document.createElement('tr');
                 linha.innerHTML = `
-                    <td>${conta.nome}</td>
-                    <td>${conta.tipo}</td>
-                    <td>${conta.email || '-'}</td>
-                    <td><button class="btn btn-sm btn-outline-danger btn-remover-premium" data-id="${conta.id}" data-tipo="${conta.tipo}">Remover Premium</button></td>
+                    <td class="tdTabela">${conta.nome}</td>
+                    <td class="tdTabela">${conta.tipo}</td>
+                    <td class="tdTabela">${conta.email || '-'}</td>
+                    <td class="tdTabela" style="width: 140px;">
+                        <button class="btn-remover-premium" data-id="${conta.id}" data-tipo="${conta.tipo}">Remover</button>
+                    </td>
                 `;
                 corpo.appendChild(linha);
             }
