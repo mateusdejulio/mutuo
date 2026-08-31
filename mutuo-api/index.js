@@ -526,6 +526,11 @@ app.put('/solicitacoes/:cod', async (req, res) => {
 
 // ── Rotas Premium ──
 app.get('/premium', async (req, res) => res.json(await db.getPremium()));
+app.get('/premium/contas', async (req, res) => {
+  const contas = await db.getContasPremium();
+  if (contas.error) return res.status(500).json({ erro: contas.error });
+  res.json(contas);
+});
 app.get('/stats/premium-total', async (req, res) => res.json(await db.countPremiumTotal()));
 app.get('/stats/atrasadas', async (req, res) => res.json(await db.countAtrasadas()));
 app.get('/stats/receita', async (req, res) => res.json(await db.countReceita()));

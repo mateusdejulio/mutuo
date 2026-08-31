@@ -116,23 +116,40 @@
             <div class="container text-center">
                 <div class="row">
                     <div class="col">
-                        <span class="col-titulo">Total Premium</span>
+                        <span class="col-titulo">ONGs Premium</span>
                         <br>
-                        <span class="col-texto"><img src="../public/img/usuarios_claro.png" height="25px" class="icone_card"><span id="totalONG"></span>
+                        <span class="col-texto"><img src="../public/img/ongs_claro.png" height="25px" class="icone_card"><span id="totalOngsPremium">--</span></span>
                     </div>
                     <div class="col">
-                        <span class="col-titulo">Pagamento atrasado</span>
+                        <span class="col-titulo">Usuários Premium</span>
                         <br>
-                        <span class="col-texto"><img src="../public/img/ongs_claro.png" height="25px" class="icone_card"><span id="totalInativa"></span></span>
+                        <span class="col-texto"><img src="../public/img/usuarios_claro.png" height="25px" class="icone_card"><span id="totalUsuariosPremium">--</span></span>
                     </div>
                     <div class="col">
                         <span class="col-titulo">Receita Total</span>
                         <br>
-                        <span class="col-texto"><img src="../public/img/servicos_claro.png" height="25px" class="icone_card"><span id="totalPremium"></span></span>
+                        <span class="col-texto"><img src="../public/img/servicos_claro.png" height="25px" class="icone_card"><span style="font-size:0.8em;color:#999;">Em breve</span></span>
                     </div>
                 </div>
             </div>
-            <form id="form-cadastro-usuario">
+
+            <div class="container" style="margin-top: 20px;">
+                <table class="table" id="tabela-premium">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>E-mail</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela-premium">
+                        <tr><td colspan="4">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
             
             
 
@@ -151,7 +168,95 @@
                 document.getElementById('nomeAdm').textContent = " " + usuario;
             }
 
+            carregarContasPremium();
+
         })
+
+        let contasPremium = [];
+
+        async function carregarContasPremium() {
+            const corpo = document.getElementById('corpo-tabela-premium');
+            try {
+                contasPremium = await window.api.buscarContasPremium();
+
+                if (!Array.isArray(contasPremium)) throw new Error(contasPremium?.erro || 'Erro ao carregar dados.');
+
+                atualizarContadores(contasPremium);
+                renderizarTabelaPremium(contasPremium);
+            } catch (erro) {
+                console.error('Erro ao buscar contas premium:', erro);
+                corpo.innerHTML = `<tr><td colspan="4">Erro ao carregar dados: ${erro.message}</td></tr>`;
+            }
+        }
+
+        function atualizarContadores(lista) {
+            const totalOngs = lista.filter(c => c.tipo === 'ONG').length;
+            const totalUsuarios = lista.filter(c => c.tipo === 'Usuário').length;
+            document.getElementById('totalOngsPremium').textContent = totalOngs;
+            document.getElementById('totalUsuariosPremium').textContent = totalUsuarios;
+        }
+
+        function renderizarTabelaPremium(lista) {
+            const corpo = document.getElementById('corpo-tabela-premium');
+            corpo.innerHTML = '';
+
+            if (lista.length === 0) {
+                corpo.innerHTML = '<tr><td colspan="4">Nenhuma conta premium encontrada.</td></tr>';
+                return;
+            }
+
+            for (const conta of lista) {
+                const linha = document.createElement('tr');
+                linha.innerHTML = `
+                    <td>${conta.nome}</td>
+                    <td>${conta.tipo}</td>
+                    <td>${conta.email || '-'}</td>
+                    <td><button class="btn btn-sm btn-outline-danger btn-remover-premium" data-id="${conta.id}" data-tipo="${conta.tipo}">Remover Premium</button></td>
+                `;
+                corpo.appendChild(linha);
+            }
+
+            document.querySelectorAll('.btn-remover-premium').forEach(btn => {
+                btn.addEventListener('click', () => removerPremium(btn.dataset.id, btn.dataset.tipo, btn));
+            });
+        }
+
+        async function removerPremium(id, tipo, botao) {
+            const confirmar = await Swal.fire({
+                title: 'Remover Premium?',
+                text: 'Essa conta perderá os benefícios do plano Premium.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Remover',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!confirmar.isConfirmed) return;
+
+            botao.disabled = true;
+            botao.textContent = 'Removendo...';
+
+            try {
+                if (tipo === 'ONG') {
+                    await window.api.removerPremiumOng(id);
+                } else {
+                    await window.api.removerPremiumUsuario(id);
+                }
+                await carregarContasPremium();
+            } catch (erro) {
+                console.error('Erro ao remover premium:', erro);
+                Swal.fire('Erro', 'Não foi possível remover o Premium.', 'error');
+                botao.disabled = false;
+                botao.textContent = 'Remover Premium';
+            }
+        }
+
+        // Busca por nome (reaproveita o input#search que já existe na navbar)
+        document.getElementById('search')?.addEventListener('input', function () {
+            const termo = this.value.toLowerCase();
+            const filtrado = contasPremium.filter(c => c.nome.toLowerCase().includes(termo));
+            renderizarTabelaPremium(filtrado);
+        });
 
         const buttonSair = document.getElementById('sair');
 
