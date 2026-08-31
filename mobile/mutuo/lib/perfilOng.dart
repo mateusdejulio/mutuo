@@ -46,6 +46,11 @@ class _PerfilOngState extends State<PerfilOng> {
   List<dynamic> _solicitacoes = [];
   String? _fotoUrl;
 
+  int get _totalAtividadesRealizadas => _solicitacoes
+      .whereType<Map<String, dynamic>>()
+      .where((s) => s['statusExecucao']?.toString() == 'Realizada')
+      .length;
+
   final _nomeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _telefoneCtrl = TextEditingController();
@@ -529,8 +534,7 @@ class _PerfilOngState extends State<PerfilOng> {
             children: [
               _statTopo('${_atividades.length}', 'Atividades ativas'),
               _divisorVertical(),
-              // Sem coluna de avaliação positiva/negativa pra ONG no banco ainda.
-              _statTopo('—', 'Avaliações positivas'),
+              _statTopo('$_totalAtividadesRealizadas', 'Atividades realizadas'),
               _divisorVertical(),
               _statTopo(
                 _tempoNoMutuo(_ong?['cadastro']?.toString()),
