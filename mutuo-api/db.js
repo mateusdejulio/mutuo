@@ -170,7 +170,9 @@ async function getONGs() {
 }
 
 async function getServicos() {
-  const [rows] = await pool.query('SELECT s.cod, s.nome, s.foco, s.qtdHoras, s.ativo, s.avaliacao, s.idUsuario, u.nome AS nomeCriador FROM Mutuo_Servico AS s JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf');
+  const [rows] = await pool.query(
+    'SELECT s.cod, s.nome, s.foco, s.qtdHoras, s.ativo, s.nota AS avaliacao, s.idUsuario, u.nome AS nomeCriador FROM Mutuo_Servico AS s JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf'
+  );
   return rows;
 }
 
