@@ -224,8 +224,15 @@ async function countONGs() {
   return rows[0].total;
 }
 
+// ATENÇÃO: countServicos na verdade conta a quantidade de solicitações concluídas (a função é antiga, e não estavam ainda definidas as nomenclaturas)
 async function countServicos() {
-  const [rows] = await pool.query('SELECT SUM(realizado) AS total FROM Mutuo_Servico');
+  const [rows] = await pool.query(`
+    SELECT (
+      (SELECT COUNT(*) FROM Mutuo_Solicitacao WHERE statusExecucao = 'Realizada')
+      +
+      (SELECT COUNT(*) FROM Mutuo_SolicitacaoONG WHERE statusExecucao = 'Realizada')
+    ) AS total
+  `);
   return rows[0].total;
 }
 
@@ -299,7 +306,7 @@ async function alterONG(cnpj, ativo, responsavel, foco) {
 }
 
 async function mediaNotas() {
-  const [rows] = await pool.query('SELECT AVG(avaliacao) AS total FROM Mutuo_Servico');
+  const [rows] = await pool.query('SELECT AVG(nota) AS total FROM Mutuo_Servico');
   return rows[0].total;
 }
 
