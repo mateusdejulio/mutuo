@@ -1356,6 +1356,13 @@
     const nome = servico.nomeServico || 'Serviço sem nome';
     const descricao = servico.descricao || '';
     const ativo = servico.ativo === undefined ? true : !!servico.ativo;
+    // Status da moderação tem prioridade sobre o "ativo": em análise não está publicado
+    const etiquetas = {
+      REVISAO: { texto: 'Em análise', estilo: 'background:#fff4e0;color:#b26a00;' },
+      BLOQUEADO: { texto: 'Rejeitado', estilo: 'background:#fdeaea;color:#c0392b;' }
+    };
+    const etiqueta = etiquetas[servico.moderacao_status]
+      || (ativo ? { texto: 'Ativo', estilo: '' } : { texto: 'Inativo', estilo: 'background:#f4f4f0;color:#999;' });
     const totalRealizados = servico.totalRealizados ?? 0;
     const textoRealizados = totalRealizados === 1 ? '1 pessoa já realizou' : `${totalRealizados} pessoas já realizaram`;
     const pontos = servico.pontos ?? 0;
@@ -1363,8 +1370,8 @@
     div.innerHTML = `
       <div class="topo-servico">
         <h4>${nome}</h4>
-        <span class="tag-ativo" style="${ativo ? '' : 'background:#f4f4f0;color:#999;'}">
-          ${ativo ? 'Ativo' : 'Inativo'}
+        <span class="tag-ativo" style="${etiqueta.estilo}">
+          ${etiqueta.texto}
         </span>
       </div>
       <p class="descricao-servico">${descricao}</p>
