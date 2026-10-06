@@ -156,16 +156,33 @@ Future<void> abrirModalAtividadeOng({
             if (resultado['sucesso'] == true) {
               if (!context.mounted) return;
               Navigator.pop(modalContext);
+              final emRevisao = resultado['status'] == 'REVISAO';
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    editando
-                        ? 'Atividade atualizada com sucesso!'
-                        : 'Atividade cadastrada com sucesso!',
+                    emRevisao
+                        ? 'Serviço enviado para análise. Ele ficará disponível após a conclusão da revisão.'
+                        : editando
+                            ? 'Atividade atualizada com sucesso!'
+                            : 'Atividade cadastrada com sucesso!',
                   ),
                 ),
               );
               onSucesso();
+            } else if (resultado['moderacao'] == true) {
+              // Bloqueado pela moderação: mostra a mensagem da API + texto de apoio
+              if (!modalContext.mounted) return;
+              final mensagem = resultado['mensagem']?.toString() ?? '';
+              const apoio =
+                  'Não foi possível publicar este serviço. O conteúdo informado pode violar as diretrizes do Mútuo. Revise as informações e tente novamente.';
+              ScaffoldMessenger.of(modalContext).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    mensagem.isNotEmpty ? '$mensagem\n$apoio' : apoio,
+                  ),
+                  backgroundColor: Colors.redAccent,
+                ),
+              );
             } else {
               ScaffoldMessenger.of(modalContext).showSnackBar(
                 SnackBar(

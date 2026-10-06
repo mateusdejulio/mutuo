@@ -38,4 +38,6 @@ contextBridge.exposeInMainWorld('api', {
     alterarLoginAdm: (loginAntigo, novoLogin) => ipcRenderer.invoke('alterar-login-adm', loginAntigo, novoLogin),
     alterarSenhaAdm: (login, senhaAtual, novaSenha) => ipcRenderer.invoke('alterar-senha-adm', login, senhaAtual, novaSenha),
     cadastrarAdm: (novoLogin, novaSenha) => ipcRenderer.invoke('cadastrar-adm', novoLogin, novaSenha),
+    buscarServicosRevisao: () => ipcRenderer.invoke('buscar-servicos-revisao'),
+    moderarServico: (tipo, id, acao, admLogin) => ipcRenderer.invoke('moderar-servico', tipo, id, acao, admLogin),
 })

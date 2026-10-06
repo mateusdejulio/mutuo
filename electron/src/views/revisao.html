@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Contet-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
+    <title>Revisão</title>
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #E1DCD0;
+            overflow-y: hidden;
+            padding: 10px;
+        }
+
+        @media (max-width: 1000px) or (max-height: 680px) {
+            #barra-lateral {
+                font-size: 12px;
+                width: 30% !important;
+            }
+
+            #sair {
+                width: 100px;
+            }
+
+            #nomeAdm {
+                font-size: 12px;
+            }
+
+            #emailAdm {
+                font-size: 10px;
+            }
+
+            #navbar {
+                width: 100%;
+            }
+
+            .col-titulo, .col-texto {
+                font-size: 15px !important;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            #search {
+                width: 180px;
+                height: 25px;
+            }
+
+            #mutuo {
+                font-size: 20px;
+            }
+
+            #tabela {
+                /*width: 90%;*/
+                font-size: 12px;
+            }
+
+            #divTabela {
+                height: 37vh !important;
+                width: 65.5vw;
+            }
+
+            .col {
+                height: 18vh !important;
+            }
+
+            .icone-barra {
+                height: 14px;
+            }
+        }
+
+    </style>
+</head>
+<body class="m-0 light" id="pagina">
+
+    <div class="wrapper fw-bold" id="barra-lateral">
+        <a href="inicio.html"><span class="btn_barra"><img src="../public/img/dashboard.png" class="icone-barra">Início</a><br><hr>
+        <a href="usuarios.html"><span class="btn_barra"><img src="../public/img/usuarios.png" class="icone-barra">Usuários</span></a><br><hr>
+        <a href="ongs.html"><span class="btn_barra"><img src="../public/img/ongs.png" class="icone-barra">ONGS</span></a><br><hr>
+        <a href="servicos.html"><span class="btn_barra"><img src="../public/img/servicos.png" class="icone-barra">Serviços</span></a><br><hr>
+        <a href="solicitacoes.html"><span class="btn_barra"><img src="../public/img/notificacao.png" class="icone-barra">Solicitações</span></a><br><hr>
+        <a href="#"><span class="btn_barra" style="background-color: #b7ce8fb3;"><img src="../public/img/notificacao.png" class="icone-barra">Revisão</span></a><br><hr>
+        <a href="premium.html"><span class="btn_barra"><img src="../public/img/premium.png" class="icone-barra">Premium</span></a><br>
+        <hr>
+        <table>
+            <tr>
+                <td rowspan="2"><img src="../public/img/A.png"></td>
+                <td><span id="nomeAdm"></span></td>
+            </tr>
+        </table>
+        <button id="sair" type="button">Sair</button>
+    </div> 
+
+    <div id="main-area">
+
+        <nav class="navbar" id="navbar">
+            <div class="container-fluid align-items-center">
+                <a class="navbar-brand d-flex align-items-center"><img src="../public/img/mutuo_fundo.png" alt="Logo" width="40" height="40" class="d-inline-block"><span id="mutuo">Mútuo</span></a>
+                <form class="d-flex mx-auto w-50" role="search">
+                    <input class="form-control me-2" id="search" type="search" placeholder="Buscar por Serviço" aria-label="Search"/>
+                </form>
+                <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                    <a class="nav-link active" id="tema" aria-current="page" href="#"><img id="img-tema" src="../public/img/escuro.png" height="25px"></a>
+                    <a class="nav-link" href="perfil.html"><img src="../public/img/perfil.png" height="30px"></a>
+                </div>
+            </div>
+        </nav>
+
+        <div id="dashboard">
+            <h2>Revisão de Serviços</h2>
+            <br>
+            <div id="divTabela">
+                <table id="tabela">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Serviço</th>
+                            <th>Criador</th>
+                            <th>Tipo</th>
+                            <th>Foco</th>
+                            <th>Horas</th>
+                            <th>Descrição</th>
+                            <th>Categoria (IA)</th>
+                            <th>Motivo (IA)</th>
+                            <th>Confiança</th>
+                            <th>Data</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+
+    <link rel="stylesheet" href="../../node_modules/sweetalert2/dist/sweetalert2.min.css">
+
+    <script src="../../node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+    <script src="../public/js/bootstrap.min.js"></script>
+    <script>
+
+        // Mesma base usada pelo main.js para chamar a API (imagens vêm de lá)
+        const API_URL = 'https://mutuo-api.onrender.com';
+        const tbody = document.getElementById('tbody');
+        const admLogin = localStorage.getItem('usuarioLogado');
+        const COLS = 12;
+        let listaServicos = [];
+
+        // Esta tela exibe exatamente o conteúdo suspeito: todo texto vindo da API é escapado.
+        const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+        ));
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (admLogin) {
+                document.getElementById('nomeAdm').textContent = " " + admLogin;
+            }
+            carregarTabela();
+        });
+
+        async function carregarTabela() {
+            tbody.innerHTML = `<tr><td colspan="${COLS}">Carregando...</td></tr>`;
+            try {
+                const servicos = await window.api.buscarServicosRevisao();
+                if (!Array.isArray(servicos)) throw new Error(servicos?.erro || servicos?.error || 'Resposta inesperada.');
+                listaServicos = servicos;
+                renderizarTabela(listaServicos);
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="${COLS}">Erro ao carregar: ${esc(err.message)}</td></tr>`;
+            }
+        }
+
+        function renderizarTabela(servicos) {
+            if (servicos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${COLS}">Nenhum serviço pendente.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = servicos.map(s => `
+                <tr>
+                    <td class="tdTabela">${s.imagem ? `<img src="${esc(API_URL + s.imagem)}" style="max-width:80px">` : '-'}</td>
+                    <td class="tdTabela">${esc(s.nomeServico)}</td>
+                    <td class="tdTabela">${esc(s.nomeCriador)}</td>
+                    <td class="tdTabela">${s.tipo === 'ong' ? 'ONG' : 'Usuário'}</td>
+                    <td class="tdTabela">${esc(s.foco)}</td>
+                    <td class="tdTabela">${esc(s.horas)}</td>
+                    <td class="tdTabela">${esc(s.descricao)}</td>
+                    <td class="tdTabela">${esc(s.moderacao_categoria || '-')}</td>
+                    <td class="tdTabela">${esc(s.moderacao_motivo || '-')}</td>
+                    <td class="tdTabela">${esc(s.moderacao_confianca ?? '-')}</td>
+                    <td class="tdTabela">${s.moderacao_data ? esc(new Date(s.moderacao_data).toLocaleDateString('pt-BR')) : '-'}</td>
+                    <td>
+                        <button class="save-btn" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="APROVAR">Aprovar</button>
+                        <button class="save-btn" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="REJEITAR">Rejeitar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // data-* em vez de onclick com valores interpolados (escape HTML não protege dentro de JS inline)
+        tbody.addEventListener('click', (e) => {
+            const botao = e.target.closest('button[data-acao]');
+            if (botao) moderar(botao.dataset.tipo, botao.dataset.id, botao.dataset.acao);
+        });
+
+        async function moderar(tipo, id, acao) {
+            const confirmado = await Swal.fire({
+                title: acao === 'APROVAR' ? 'Aprovar serviço?' : 'Rejeitar serviço?',
+                icon: 'warning', showCancelButton: true, confirmButtonText: 'Confirmar', cancelButtonText: 'Cancelar'
+            });
+            if (!confirmado.isConfirmed) return;
+
+            try {
+                const resultado = await window.api.moderarServico(tipo, id, acao, admLogin);
+                if (resultado?.sucesso) {
+                    Swal.fire('Feito!', '', 'success');
+                    carregarTabela();
+                } else {
+                    Swal.fire('Erro', resultado?.erro || resultado?.error || 'Não foi possível concluir.', 'error');
+                }
+            } catch (err) {
+                Swal.fire('Erro', err.message || 'Não foi possível concluir.', 'error');
+            }
+        }
+
+        const buttonSair = document.getElementById('sair');
+
+        buttonSair.addEventListener('click', () => {
+            localStorage.removeItem('usuarioLogado');
+            window.api.abrirJanelaLogin();
+        });
+
+        const inputBusca = document.getElementById('search');
+
+        let timeout;
+
+        inputBusca.addEventListener('input', function () {
+            clearTimeout(timeout);
+
+            timeout = setTimeout(() => {
+                const texto = this.value.toLowerCase().trim();
+
+                const filtrados = listaServicos.filter(servico =>
+                    String(servico.nomeServico || '').toLowerCase().includes(texto)
+                );
+
+                renderizarTabela(filtrados);
+            }, 300);
+        });
+    </script>
+</body>
+</html>

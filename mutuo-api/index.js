@@ -8,6 +8,7 @@ const { Server } = require('socket.io');
 const { initializeApp: initializeFirebaseApp, cert } = require('firebase-admin/app');
 const { getMessaging } = require('firebase-admin/messaging');
 const db = require('./db');
+const { avaliarServico } = require('./moderation/moderationService');
 const nodemailer = require('nodemailer');
 
 // Push é acessório: se a credencial não estiver presente (ex: ambiente de
@@ -388,12 +389,30 @@ app.post('/servicos/ong', uploadServico.single('imagem'), async (req, res) => {
     const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
     const imagemTipo = req.file ? req.file.mimetype : null;
 
-    const id = await db.cadastrarServicoOng({
-      nomeServico, cnpj, horas: duracao, descricao, foco, imagem, imagemDados, imagemTipo,
-      pontos: pontosNum
+    const moderacao = await avaliarServico({
+      nome: nomeServico, descricao, foco, imagemBuffer: imagemDados, imagemMime: imagemTipo
     });
 
-    res.json({ sucesso: true, id, imagem: imagem ? `/uploads/servicos/${imagem}` : null });
+    if (moderacao.status === 'BLOQUEADO') {
+      // Não grava nada: apaga a imagem que o multer já salvou em disco.
+      if (req.file?.path) { try { fs.unlinkSync(req.file.path); } catch (e) { /* ignora */ } }
+      return res.json({ sucesso: false, moderacao: true, status: 'BLOQUEADO', mensagem: moderacao.mensagemUsuario });
+    }
+
+    const id = await db.cadastrarServicoOng({
+      nomeServico, cnpj, horas: duracao, descricao, foco, imagem, imagemDados, imagemTipo,
+      pontos: pontosNum, moderacao
+    });
+
+    console.log('[moderacao]', JSON.stringify({
+      servicoId: id, tipoCriador: 'ong', status: moderacao.status,
+      categoria: moderacao.categoria, confianca: moderacao.confianca
+    }));
+
+    res.json({
+      sucesso: true, id, imagem: imagem ? `/uploads/servicos/${imagem}` : null,
+      status: moderacao.status, mensagem: moderacao.mensagemUsuario
+    });
   } catch (e) {
     res.status(500).json({ sucesso: false, erro: e.message });
   }
@@ -438,13 +457,31 @@ app.put('/servicos/:id', uploadServico.single('imagem'), async (req, res) => {
     const imagem = req.file ? req.file.filename : null;
     const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
     const imagemTipo = req.file ? req.file.mimetype : null;
+    const atual = await db.getServicoPorId(req.params.id);
+
+    // O banco guarda o foco normalizado: compara normalizado pra não reavaliar à toa
+    const norm = (v) => String(v ?? '').trim().toLowerCase();
+    const mudouConteudo = !atual || atual.nomeServico !== nomeServico
+      || atual.descricao !== descricao || norm(atual.foco) !== norm(foco) || !!imagem;
+
+    let moderacao = null;
+    if (mudouConteudo) {
+      moderacao = await avaliarServico({
+        nome: nomeServico, descricao, foco, imagemBuffer: imagemDados, imagemMime: imagemTipo
+      });
+      if (moderacao.status === 'BLOQUEADO') {
+        if (req.file?.path) { try { fs.unlinkSync(req.file.path); } catch (e) { /* ignora */ } }
+        return res.json({ sucesso: false, moderacao: true, status: 'BLOQUEADO', mensagem: moderacao.mensagemUsuario });
+      }
+    }
 
     await db.atualizarServico(req.params.id, {
       nomeServico, descricao, foco, duracao, imagem, imagemDados, imagemTipo,
-      pontos: pontosNum   // ← novo
+      pontos: pontosNum,   // ← novo
+      moderacao
     });
 
-    res.json({ sucesso: true });
+    res.json({ sucesso: true, status: moderacao?.status, mensagem: moderacao?.mensagemUsuario });
   } catch (e) {
     res.status(500).json({ sucesso: false, erro: e.message });
   }
@@ -480,12 +517,30 @@ app.put('/servicos/ong/:id', uploadServico.single('imagem'), async (req, res) =>
   const imagem = req.file ? req.file.filename : null;
   const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
   const imagemTipo = req.file ? req.file.mimetype : null;
+  const atual = await db.getServicoOngPorId(req.params.id);
+
+  // O banco guarda o foco normalizado: compara normalizado pra não reavaliar à toa
+  const norm = (v) => String(v ?? '').trim().toLowerCase();
+  const mudouConteudo = !atual || atual.nomeServico !== nomeServico
+    || atual.descricao !== descricao || norm(atual.foco) !== norm(foco) || !!imagem;
+
+  let moderacao = null;
+  if (mudouConteudo) {
+    moderacao = await avaliarServico({
+      nome: nomeServico, descricao, foco, imagemBuffer: imagemDados, imagemMime: imagemTipo
+    });
+    if (moderacao.status === 'BLOQUEADO') {
+      if (req.file?.path) { try { fs.unlinkSync(req.file.path); } catch (e) { /* ignora */ } }
+      return res.json({ sucesso: false, moderacao: true, status: 'BLOQUEADO', mensagem: moderacao.mensagemUsuario });
+    }
+  }
+
   const resultado = await db.atualizarServicoOng(req.params.id, {
     nomeServico, descricao, foco, horas: duracao, imagem, imagemDados, imagemTipo,
-    pontos: pontosNum
+    pontos: pontosNum, moderacao
   });
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
-  res.json({ sucesso: true });
+  res.json({ sucesso: true, status: moderacao?.status, mensagem: moderacao?.mensagemUsuario });
 });
 
 // Muda o status "ativo" do serviço da ONG (soft delete: ativo 1 -> 0)
@@ -539,6 +594,31 @@ app.get('/stats/receita', async (req, res) => res.json(await db.countReceita()))
 app.put('/adm/login', async (req, res) => { const { loginAntigo, novoLogin } = req.body; res.json(await db.alterarLoginAdm(loginAntigo, novoLogin)); });
 app.put('/adm/senha', async (req, res) => { const { login, senhaAtual, novaSenha } = req.body; res.json(await db.alterarSenhaAdm(login, senhaAtual, novaSenha)); });
 app.post('/adm/cadastrar', async (req, res) => { const { novoLogin, novaSenha } = req.body; res.json(await db.cadastrarAdm(novoLogin, novaSenha)); });
+
+// ── Moderação — fila de revisão ──
+app.get('/moderacao/servicos', async (req, res) => {
+  const servicos = await db.getServicosParaRevisao();
+  if (servicos.error) return res.status(500).json({ erro: servicos.error });
+  res.json(servicos);
+});
+
+app.put('/moderacao/servicos/:tipo/:id', async (req, res) => {
+  const { tipo, id } = req.params;
+  const { acao, admLogin } = req.body || {};
+
+  if (!['usuario', 'ong'].includes(tipo)) {
+    return res.status(400).json({ erro: 'Tipo inválido.' });
+  }
+  if (!['APROVAR', 'REJEITAR'].includes(acao)) {
+    return res.status(400).json({ erro: 'Ação inválida.' });
+  }
+
+  // A IA nunca bane usuário: a decisão do admin afeta só o serviço.
+  const novoStatus = acao === 'APROVAR' ? 'APROVADO' : 'BLOQUEADO';
+  const resultado = await db.atualizarModeracaoServico(tipo, id, novoStatus, admLogin || 'desconhecido');
+  if (resultado.error) return res.status(500).json({ erro: resultado.error });
+  res.json({ sucesso: true });
+});
 
 // ── Rotas de Estatísticas ──
 app.get('/stats/:tipo', async (req, res) => {
@@ -938,11 +1018,29 @@ app.post('/servicos', uploadServico.single('imagem'), async (req, res) => {
     const imagemDados = req.file ? fs.readFileSync(req.file.path) : null;
     const imagemTipo = req.file ? req.file.mimetype : null;
 
-    const id = await db.cadastrarServico({
-      nomeServico, descricao, foco, duracao, cpf, imagem, imagemDados, imagemTipo, pontos: pontosNum
+    const moderacao = await avaliarServico({
+      nome: nomeServico, descricao, foco, imagemBuffer: imagemDados, imagemMime: imagemTipo
     });
 
-    res.json({ sucesso: true, id, imagem: imagem ? `/uploads/servicos/${imagem}` : null });
+    if (moderacao.status === 'BLOQUEADO') {
+      // Não grava nada: apaga a imagem que o multer já salvou em disco.
+      if (req.file?.path) { try { fs.unlinkSync(req.file.path); } catch (e) { /* ignora */ } }
+      return res.json({ sucesso: false, moderacao: true, status: 'BLOQUEADO', mensagem: moderacao.mensagemUsuario });
+    }
+
+    const id = await db.cadastrarServico({
+      nomeServico, descricao, foco, duracao, cpf, imagem, imagemDados, imagemTipo, pontos: pontosNum, moderacao
+    });
+
+    console.log('[moderacao]', JSON.stringify({
+      servicoId: id, tipoCriador: 'usuario', status: moderacao.status,
+      categoria: moderacao.categoria, confianca: moderacao.confianca
+    }));
+
+    res.json({
+      sucesso: true, id, imagem: imagem ? `/uploads/servicos/${imagem}` : null,
+      status: moderacao.status, mensagem: moderacao.mensagemUsuario
+    });
   } catch (e) {
     res.status(500).json({ sucesso: false, erro: e.message });
   }

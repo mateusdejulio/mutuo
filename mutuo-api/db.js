@@ -441,10 +441,12 @@ async function cadastrarOng(ong) {
 
 // ── Cadastro de serviço oferecido por usuário ──
 async function cadastrarServico(servico) {
+  const mod = servico.moderacao || { status: 'APROVADO', categoria: null, motivo: null, confianca: null };
   const sql = `
     INSERT INTO Mutuo_Servico
-    (nome, descricao, foco, qtdHoras, idUsuario, imagem, imagem_dados, imagem_tipo, pontos)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (nome, descricao, foco, qtdHoras, idUsuario, imagem, imagem_dados, imagem_tipo, pontos,
+     moderacao_status, moderacao_categoria, moderacao_motivo, moderacao_confianca, moderacao_data)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
   `;
 
   const values = [
@@ -456,7 +458,8 @@ async function cadastrarServico(servico) {
     servico.imagem,
     servico.imagemDados,
     servico.imagemTipo,
-    servico.pontos
+    servico.pontos,
+    mod.status, mod.categoria, mod.motivo, mod.confianca
   ];
 
   try {
@@ -470,10 +473,12 @@ async function cadastrarServico(servico) {
 
 // ── Cadastro de serviço oferecido pela ONG ──
 async function cadastrarServicoOng(servico) {
+  const mod = servico.moderacao || { status: 'APROVADO', categoria: null, motivo: null, confianca: null };
   const sql = `
     INSERT INTO Mutuo_ServicoOng
-    (nomeServico, cnpj, horas, descricao, foco, imagem, imagem_dados, imagem_tipo, pontos)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (nomeServico, cnpj, horas, descricao, foco, imagem, imagem_dados, imagem_tipo, pontos,
+     moderacao_status, moderacao_categoria, moderacao_motivo, moderacao_confianca, moderacao_data)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
   `;
 
   const values = [
@@ -485,7 +490,8 @@ async function cadastrarServicoOng(servico) {
     servico.imagem,
     servico.imagemDados,
     servico.imagemTipo,
-    servico.pontos
+    servico.pontos,
+    mod.status, mod.categoria, mod.motivo, mod.confianca
   ];
 
   try {
@@ -549,6 +555,11 @@ async function atualizarServico(id, servico) {
   if (servico.imagem) {
     campos.push('imagem = ?', 'imagem_dados = ?', 'imagem_tipo = ?');
     valores.push(servico.imagem, servico.imagemDados, servico.imagemTipo);
+  }
+
+  if (servico.moderacao) {
+    campos.push('moderacao_status = ?', 'moderacao_categoria = ?', 'moderacao_motivo = ?', 'moderacao_confianca = ?', 'moderacao_data = NOW()');
+    valores.push(servico.moderacao.status, servico.moderacao.categoria, servico.moderacao.motivo, servico.moderacao.confianca);
   }
 
   valores.push(id);
@@ -837,12 +848,16 @@ async function getServicoOngPorId(id) {
   return servico;
 }
 
-async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem, imagemDados, imagemTipo, pontos }) {
+async function atualizarServicoOng(id, { nomeServico, descricao, foco, horas, imagem, imagemDados, imagemTipo, pontos, moderacao }) {
   const campos = ['nomeServico = ?', 'descricao = ?', 'foco = ?', 'horas = ?', 'pontos = ?'];
   const values = [nomeServico, descricao, normalizarFoco(foco), horas, pontos];
   if (imagem) {
     campos.push('imagem = ?', 'imagem_dados = ?', 'imagem_tipo = ?');
     values.push(imagem, imagemDados, imagemTipo);
+  }
+  if (moderacao) {
+    campos.push('moderacao_status = ?', 'moderacao_categoria = ?', 'moderacao_motivo = ?', 'moderacao_confianca = ?', 'moderacao_data = NOW()');
+    values.push(moderacao.status, moderacao.categoria, moderacao.motivo, moderacao.confianca);
   }
   values.push(id);
   const [result] = await pool.query(`UPDATE Mutuo_ServicoOng SET ${campos.join(', ')} WHERE id = ?`, values);
@@ -880,7 +895,7 @@ async function getServicosOngTodos() {
       o.foto_perfil AS fotoOng
     FROM Mutuo_ServicoOng AS s
     JOIN Mutuo_ONG AS o ON s.cnpj = o.cnpj
-    WHERE s.ativo = 1 AND o.ativo = 1
+    WHERE s.ativo = 1 AND o.ativo = 1 AND s.moderacao_status = 'APROVADO'
     ORDER BY s.id DESC
   `;
   try {
@@ -914,7 +929,7 @@ async function getServicosUsuarioTodos() {
       u.foto_perfil AS fotoUsuario
     FROM Mutuo_Servico AS s
     JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
-    WHERE s.ativo = 1 AND u.ativo = 1
+    WHERE s.ativo = 1 AND u.ativo = 1 AND s.moderacao_status = 'APROVADO'
     ORDER BY s.cod DESC
   `;
   try {
@@ -1358,7 +1373,7 @@ function _sqlAtividadesOng(filtroExtra) {
       o.foto_perfil AS fotoUsuario
     FROM Mutuo_ServicoOng AS s
     JOIN Mutuo_ONG AS o ON s.cnpj = o.cnpj
-    WHERE s.ativo = 1 AND o.ativo = 1 AND o.premium = 1
+    WHERE s.ativo = 1 AND o.ativo = 1 AND o.premium = 1 AND s.moderacao_status = 'APROVADO'
       ${filtroExtra || ''}
     ORDER BY s.id DESC
   `;
@@ -1392,7 +1407,7 @@ async function getServicosDestaque(cpfExcluir) {
       u.foto_perfil AS fotoUsuario
     FROM Mutuo_Servico AS s
     JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
-    WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1
+    WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1 AND s.moderacao_status = 'APROVADO'
       ${cpfExcluir ? 'AND s.idUsuario != ?' : ''}
     ORDER BY s.cod DESC
   `;
@@ -1430,7 +1445,7 @@ async function getServicosPertoDeVoce(cidade, cpfExcluir) {
       u.foto_perfil AS fotoUsuario
     FROM Mutuo_Servico AS s
     JOIN Mutuo_Usuario AS u ON s.idUsuario = u.cpf
-    WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1 AND u.cidade = ?
+    WHERE s.ativo = 1 AND u.ativo = 1 AND u.premium = 1 AND u.cidade = ? AND s.moderacao_status = 'APROVADO'
       ${cpfExcluir ? 'AND s.idUsuario != ?' : ''}
     ORDER BY s.cod DESC
   `;
@@ -1997,7 +2012,7 @@ async function buscarServicosAtivosOng(cnpj) {
   try {
     const [servicos] = await pool.query(
       `SELECT id, nomeServico, horas, descricao, foco, imagem, pontos
-       FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1`,
+       FROM Mutuo_ServicoOng WHERE cnpj = ? AND ativo = 1 AND moderacao_status = 'APROVADO'`,
       [cnpj]
     );
     return servicos;
@@ -2246,6 +2261,50 @@ async function removerTokensInvalidos(tokens) {
   }
 }
 
+// ── Moderação — usado pela tela de revisão do Electron ──
+async function getServicosParaRevisao() {
+  try {
+    const [usuarios] = await pool.query(`
+      SELECT s.cod AS id, 'usuario' AS tipo, s.nome AS nomeServico, u.nome AS nomeCriador,
+             s.descricao, s.foco, s.qtdHoras AS horas, s.imagem,
+             s.moderacao_categoria, s.moderacao_motivo, s.moderacao_confianca, s.moderacao_data
+      FROM Mutuo_Servico s
+      JOIN Mutuo_Usuario u ON s.idUsuario = u.cpf
+      WHERE s.moderacao_status = 'REVISAO'
+    `);
+    const [ongs] = await pool.query(`
+      SELECT s.id AS id, 'ong' AS tipo, s.nomeServico, o.nomeOng AS nomeCriador,
+             s.descricao, s.foco, s.horas, s.imagem,
+             s.moderacao_categoria, s.moderacao_motivo, s.moderacao_confianca, s.moderacao_data
+      FROM Mutuo_ServicoOng s
+      JOIN Mutuo_ONG o ON s.cnpj = o.cnpj
+      WHERE s.moderacao_status = 'REVISAO'
+    `);
+    return [...usuarios, ...ongs].map(s => ({
+      ...s,
+      imagem: s.imagem ? `/uploads/servicos/${s.imagem}` : null
+    }));
+  } catch (err) {
+    console.error('Erro ao buscar serviços para revisão:', err.message);
+    return { error: err.message };
+  }
+}
+
+async function atualizarModeracaoServico(tipo, id, novoStatus, admLogin) {
+  const tabela = tipo === 'ong' ? 'Mutuo_ServicoOng' : 'Mutuo_Servico';
+  const coluna = tipo === 'ong' ? 'id' : 'cod';
+  try {
+    const [result] = await pool.query(
+      `UPDATE ${tabela} SET moderacao_status = ?, moderacao_revisado_por = ?, moderacao_data_revisao = NOW() WHERE ${coluna} = ?`,
+      [novoStatus, admLogin, id]
+    );
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Erro ao atualizar moderação do serviço:', err.message);
+    return { error: err.message };
+  }
+}
+
 module.exports = {
   getUsuarios,
   getUsuarioPorCpf,
@@ -2355,5 +2414,7 @@ module.exports = {
   confirmarSolicitacaoOng,
   verificarBonusMensalOng,
   getMovimentacaoMensalOng,
-  getServicosRecebidosOng
+  getServicosRecebidosOng,
+  getServicosParaRevisao,
+  atualizarModeracaoServico,
 };
