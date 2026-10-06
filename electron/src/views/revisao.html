@@ -81,6 +81,137 @@
             }
         }
 
+
+        /* ── Tela de Revisão ── */
+        #divTabela {
+            align-items: flex-start;
+        }
+
+        #tabela th {
+            text-align: left;
+            white-space: nowrap;
+            padding: 8px 10px;
+            font-size: 14px;
+            border-bottom: 2px solid var(--verde1);
+            position: sticky;
+            top: -30px;
+            background-color: var(--white);
+            z-index: 1;
+        }
+
+        #tabela td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .servico-cel {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 200px;
+        }
+
+        .servico-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+            cursor: zoom-in;
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .servico-thumb.sem-imagem {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bege);
+            cursor: default;
+        }
+
+        .servico-thumb.sem-imagem img {
+            width: 24px;
+            opacity: 0.6;
+        }
+
+        .servico-nome {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .servico-info {
+            font-size: 12px;
+            opacity: 0.75;
+            margin-top: 2px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .tag-usuario { background-color: #e6f4ea; color: #2d6a4f; }
+        .tag-ong { background-color: #e3ecf7; color: #2b5a8c; }
+        .tag-categoria { background-color: #fdeaea; color: #c0392b; }
+        .tag-indisponivel { background-color: #fff4e0; color: #b26a00; }
+
+        .descricao-cel {
+            max-width: 280px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .descricao-cel:hover {
+            text-decoration: underline dotted;
+        }
+
+        .ia-motivo {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
+            max-width: 260px;
+        }
+
+        .ia-confianca {
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .acoes-cel {
+            white-space: nowrap;
+        }
+
+        .btn-moderar {
+            border: none;
+            border-radius: 10px;
+            padding: 5px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 2px 2px 4px -1px rgba(0, 0, 0, 0.21);
+            transition: filter 0.2s;
+        }
+
+        .btn-moderar:hover { filter: brightness(0.92); }
+        .btn-moderar:disabled { opacity: 0.6; cursor: wait; }
+        .btn-aprovar { background-color: #b7ce8f; color: #344e41; }
+        .btn-rejeitar { background-color: #f2c4bf; color: #8e2a20; margin-left: 6px; }
+
+        .linha-vazia td {
+            text-align: center;
+            padding: 30px !important;
+            opacity: 0.8;
+        }
+
     </style>
 </head>
 <body class="m-0 light" id="pagina">
@@ -120,22 +251,35 @@
 
         <div id="dashboard">
             <h2>Revisão de Serviços</h2>
+            <div class="container text-center">
+                <div class="row">
+                    <div class="col">
+                        <span class="col-titulo">Pendentes</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/notificacao_claro.png" height="25px" class="icone_card"><span id="totalPendentes">--</span></span>
+                    </div>
+                    <div class="col">
+                        <span class="col-titulo">De usuários</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/usuarios_claro.png" height="25px" class="icone_card"><span id="totalUsuarios">--</span></span>
+                    </div>
+                    <div class="col">
+                        <span class="col-titulo">De ONGs</span>
+                        <br>
+                        <span class="col-texto"><img src="../public/img/ongs_claro.png" height="25px" class="icone_card"><span id="totalOngs">--</span></span>
+                    </div>
+                </div>
+            </div>
             <br>
             <div id="divTabela">
                 <table id="tabela">
                     <thead>
                         <tr>
-                            <th>Imagem</th>
                             <th>Serviço</th>
                             <th>Criador</th>
-                            <th>Tipo</th>
-                            <th>Foco</th>
-                            <th>Horas</th>
                             <th>Descrição</th>
-                            <th>Categoria (IA)</th>
-                            <th>Motivo (IA)</th>
-                            <th>Confiança</th>
-                            <th>Data</th>
+                            <th>Análise da IA</th>
+                            <th>Enviado em</th>
                             <th>Ação</th>
                         </tr>
                     </thead>
@@ -159,13 +303,18 @@
         const API_URL = 'https://mutuo-api.onrender.com';
         const tbody = document.getElementById('tbody');
         const admLogin = localStorage.getItem('usuarioLogado');
-        const COLS = 12;
+        const COLS = 6;
         let listaServicos = [];
 
         // Esta tela exibe exatamente o conteúdo suspeito: todo texto vindo da API é escapado.
         const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => (
             { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
         ));
+
+        const NOMES_CATEGORIA = {
+            VIOLENCIA: 'Violência', SEXUAL: 'Conteúdo sexual', EXPLORACAO: 'Exploração',
+            DISCRIMINACAO: 'Discriminação', PERIGOSO: 'Perigoso', ILICITO: 'Ilícito', SPAM: 'Spam'
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
             if (admLogin) {
@@ -174,39 +323,80 @@
             carregarTabela();
         });
 
+        function linhaAviso(texto) {
+            tbody.innerHTML = `<tr class="linha-vazia"><td colspan="${COLS}">${esc(texto)}</td></tr>`;
+        }
+
+        function atualizarCards() {
+            const usuarios = listaServicos.filter(s => s.tipo !== 'ong').length;
+            document.getElementById('totalPendentes').textContent = listaServicos.length;
+            document.getElementById('totalUsuarios').textContent = usuarios;
+            document.getElementById('totalOngs').textContent = listaServicos.length - usuarios;
+        }
+
         async function carregarTabela() {
-            tbody.innerHTML = `<tr><td colspan="${COLS}">Carregando...</td></tr>`;
+            linhaAviso('Carregando...');
             try {
                 const servicos = await window.api.buscarServicosRevisao();
                 if (!Array.isArray(servicos)) throw new Error(servicos?.erro || servicos?.error || 'Resposta inesperada.');
-                listaServicos = servicos;
+                // Mais antigos primeiro: quem esperou mais é analisado antes
+                listaServicos = servicos.sort((a, b) => new Date(a.moderacao_data || 0) - new Date(b.moderacao_data || 0));
+                atualizarCards();
                 renderizarTabela(listaServicos);
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="${COLS}">Erro ao carregar: ${esc(err.message)}</td></tr>`;
+                linhaAviso('Erro ao carregar: ' + err.message);
             }
+        }
+
+        function celulaServico(s) {
+            const info = [s.foco, s.horas ? `${s.horas}h` : ''].filter(Boolean).join(' · ');
+            const imagem = s.imagem
+                ? `<img class="servico-thumb" src="${esc(API_URL + s.imagem)}" data-imagem="${esc(API_URL + s.imagem)}" alt="">`
+                : `<div class="servico-thumb sem-imagem"><img src="../public/img/servicos.png" alt=""></div>`;
+            return `
+                <div class="servico-cel">
+                    ${imagem}
+                    <div>
+                        <div class="servico-nome">${esc(s.nomeServico)}</div>
+                        <div class="servico-info">${esc(info)}</div>
+                    </div>
+                </div>`;
+        }
+
+        function celulaIA(s) {
+            const confianca = s.moderacao_confianca != null
+                ? `<div class="ia-confianca">Confiança: ${Math.round(Number(s.moderacao_confianca) * 100)}%</div>`
+                : '';
+            const tag = s.moderacao_categoria
+                ? `<span class="tag tag-categoria">${esc(NOMES_CATEGORIA[s.moderacao_categoria] || s.moderacao_categoria)}</span>`
+                : `<span class="tag tag-indisponivel">Sem análise da IA</span>`;
+            return `${tag}${confianca}<div class="ia-motivo">${esc(s.moderacao_motivo || '')}</div>`;
+        }
+
+        function formatarData(valor) {
+            if (!valor) return '-';
+            const d = new Date(valor);
+            return `${d.toLocaleDateString('pt-BR')}<br><span class="servico-info">${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>`;
         }
 
         function renderizarTabela(servicos) {
             if (servicos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${COLS}">Nenhum serviço pendente.</td></tr>`;
+                linhaAviso(listaServicos.length === 0 ? 'Nenhum serviço pendente de revisão. 🎉' : 'Nenhum serviço encontrado na busca.');
                 return;
             }
             tbody.innerHTML = servicos.map(s => `
                 <tr>
-                    <td class="tdTabela">${s.imagem ? `<img src="${esc(API_URL + s.imagem)}" style="max-width:80px">` : '-'}</td>
-                    <td class="tdTabela">${esc(s.nomeServico)}</td>
-                    <td class="tdTabela">${esc(s.nomeCriador)}</td>
-                    <td class="tdTabela">${s.tipo === 'ong' ? 'ONG' : 'Usuário'}</td>
-                    <td class="tdTabela">${esc(s.foco)}</td>
-                    <td class="tdTabela">${esc(s.horas)}</td>
-                    <td class="tdTabela">${esc(s.descricao)}</td>
-                    <td class="tdTabela">${esc(s.moderacao_categoria || '-')}</td>
-                    <td class="tdTabela">${esc(s.moderacao_motivo || '-')}</td>
-                    <td class="tdTabela">${esc(s.moderacao_confianca ?? '-')}</td>
-                    <td class="tdTabela">${s.moderacao_data ? esc(new Date(s.moderacao_data).toLocaleDateString('pt-BR')) : '-'}</td>
-                    <td>
-                        <button class="save-btn" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="APROVAR">Aprovar</button>
-                        <button class="save-btn" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="REJEITAR">Rejeitar</button>
+                    <td class="tdTabela">${celulaServico(s)}</td>
+                    <td class="tdTabela">
+                        <div class="servico-nome">${esc(s.nomeCriador)}</div>
+                        <span class="tag ${s.tipo === 'ong' ? 'tag-ong' : 'tag-usuario'}">${s.tipo === 'ong' ? 'ONG' : 'Usuário'}</span>
+                    </td>
+                    <td class="tdTabela"><div class="descricao-cel" title="Clique para ler tudo" data-descricao-id="${esc(s.tipo)}-${esc(s.id)}">${esc(s.descricao)}</div></td>
+                    <td class="tdTabela">${celulaIA(s)}</td>
+                    <td class="tdTabela">${formatarData(s.moderacao_data)}</td>
+                    <td class="tdTabela acoes-cel">
+                        <button class="btn-moderar btn-aprovar" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="APROVAR">Aprovar</button>
+                        <button class="btn-moderar btn-rejeitar" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="REJEITAR">Rejeitar</button>
                     </td>
                 </tr>
             `).join('');
@@ -215,25 +405,48 @@
         // data-* em vez de onclick com valores interpolados (escape HTML não protege dentro de JS inline)
         tbody.addEventListener('click', (e) => {
             const botao = e.target.closest('button[data-acao]');
-            if (botao) moderar(botao.dataset.tipo, botao.dataset.id, botao.dataset.acao);
+            if (botao) return moderar(botao.dataset.tipo, botao.dataset.id, botao.dataset.acao, botao);
+
+            const thumb = e.target.closest('img[data-imagem]');
+            if (thumb) return Swal.fire({ imageUrl: thumb.dataset.imagem, imageAlt: 'Imagem do serviço', showConfirmButton: false, showCloseButton: true, customClass: { popup: 'swal-arredondado' } });
+
+            const descricao = e.target.closest('[data-descricao-id]');
+            if (descricao) {
+                const s = listaServicos.find(x => `${x.tipo}-${x.id}` === descricao.dataset.descricaoId);
+                // title/text do Swal são inseridos como texto puro (sem HTML)
+                if (s) Swal.fire({ title: s.nomeServico, text: s.descricao, confirmButtonText: 'Fechar', confirmButtonColor: '#588157', customClass: { popup: 'swal-arredondado' } });
+            }
         });
 
-        async function moderar(tipo, id, acao) {
+        async function moderar(tipo, id, acao, botao) {
+            const aprovar = acao === 'APROVAR';
             const confirmado = await Swal.fire({
-                title: acao === 'APROVAR' ? 'Aprovar serviço?' : 'Rejeitar serviço?',
-                icon: 'warning', showCancelButton: true, confirmButtonText: 'Confirmar', cancelButtonText: 'Cancelar'
+                title: aprovar ? 'Aprovar serviço?' : 'Rejeitar serviço?',
+                text: aprovar
+                    ? 'O serviço será publicado e ficará visível para todos.'
+                    : 'O serviço não será publicado. O criador continuará vendo-o como "Rejeitado".',
+                icon: aprovar ? 'question' : 'warning',
+                showCancelButton: true,
+                confirmButtonText: aprovar ? 'Aprovar' : 'Rejeitar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: aprovar ? '#588157' : '#c0392b',
+                customClass: { popup: 'swal-arredondado' }
             });
             if (!confirmado.isConfirmed) return;
 
+            const botoes = botao.closest('td').querySelectorAll('button');
+            botoes.forEach(b => b.disabled = true);
             try {
                 const resultado = await window.api.moderarServico(tipo, id, acao, admLogin);
                 if (resultado?.sucesso) {
-                    Swal.fire('Feito!', '', 'success');
+                    Swal.fire({ title: aprovar ? 'Serviço aprovado!' : 'Serviço rejeitado.', icon: 'success', timer: 1500, showConfirmButton: false, customClass: { popup: 'swal-arredondado' } });
                     carregarTabela();
                 } else {
+                    botoes.forEach(b => b.disabled = false);
                     Swal.fire('Erro', resultado?.erro || resultado?.error || 'Não foi possível concluir.', 'error');
                 }
             } catch (err) {
+                botoes.forEach(b => b.disabled = false);
                 Swal.fire('Erro', err.message || 'Não foi possível concluir.', 'error');
             }
         }
@@ -256,7 +469,8 @@
                 const texto = this.value.toLowerCase().trim();
 
                 const filtrados = listaServicos.filter(servico =>
-                    String(servico.nomeServico || '').toLowerCase().includes(texto)
+                    [servico.nomeServico, servico.nomeCriador, servico.descricao]
+                        .some(campo => String(campo || '').toLowerCase().includes(texto))
                 );
 
                 renderizarTabela(filtrados);
