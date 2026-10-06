@@ -1,4 +1,20 @@
-
+# ── Dependências (todas as pastas) ──
+node_modules/
 
 # ── Segredos ──
 .env
+*.env.local
+
+# ── API ──
+mutuo-api/cache/
+# Fotos enviadas pelos usuários. As que já estão versionadas continuam
+# (ainda são usadas em produção); novas não entram mais no repositório.
+mutuo-api/uploads/
+
+# ── Ferramentas / editor / SO ──
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+npm-debug.log*
