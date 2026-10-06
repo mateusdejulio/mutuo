@@ -507,7 +507,7 @@ async function cadastrarServicoOng(servico) {
 async function getServicosUsuario(cpf) {
   try {
     const [rows] = await pool.query(
-      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS horas, imagem, ativo, nota, avaliacoes, pontos
+      `SELECT cod AS id, nome AS nomeServico, descricao, foco, qtdHoras AS horas, imagem, ativo, nota, avaliacoes, pontos, moderacao_status
        FROM Mutuo_Servico
        WHERE idUsuario = ? AND ativo = 1`,
       [cpf]
@@ -579,7 +579,7 @@ async function atualizarServico(id, servico) {
 async function getServicosOng(cnpj) {
   try {
     const [rows] = await pool.query(
-      `SELECT s.id, s.nomeServico, s.cnpj, s.horas, s.descricao, s.foco, s.imagem, s.pontos, s.nota,
+      `SELECT s.id, s.nomeServico, s.cnpj, s.horas, s.descricao, s.foco, s.imagem, s.pontos, s.nota, s.moderacao_status,
          (SELECT COUNT(DISTINCT SOL.codUsuario)
             FROM Mutuo_SolicitacaoONG SOL
            WHERE SOL.codServico = s.id AND SOL.statusExecucao = 'Realizada') AS totalRealizados

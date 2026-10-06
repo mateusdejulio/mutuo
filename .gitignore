@@ -1,8 +1,9 @@
 # ── Dependências (todas as pastas) ──
 node_modules/
 
-# ── Segredos ──
-.env
+# ── Configuração ──
+# O mutuo-api/.env É versionado de propósito: a equipe trabalha em computadores
+# públicos e precisa que o projeto funcione logo após o clone.
 *.env.local
 
 # ── API ──

@@ -948,6 +948,31 @@ class _PerfilOngState extends State<PerfilOng> {
     );
   }
 
+  // Aviso de moderação: atividade em análise ou rejeitada não está publicada
+  List<Widget> _avisoModeracao(Map<String, dynamic> atividade) {
+    final status = atividade['moderacao_status'];
+    if (status != 'REVISAO' && status != 'BLOQUEADO') return [];
+    final emAnalise = status == 'REVISAO';
+    return [
+      const SizedBox(height: 4),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        decoration: BoxDecoration(
+          color: emAnalise ? const Color(0xFFFFF4E0) : const Color(0xFFFDEAEA),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          emAnalise ? 'Em análise' : 'Rejeitado',
+          style: GoogleFonts.quicksand(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: emAnalise ? const Color(0xFFB26A00) : const Color(0xFFC0392B),
+          ),
+        ),
+      ),
+    ];
+  }
+
   Widget _linhaAtividade(Map<String, dynamic> atividade, int index) {
     final nome = atividade['nomeServico']?.toString() ?? 'Atividade sem nome';
     final descricao = atividade['descricao']?.toString() ?? '';
@@ -974,6 +999,7 @@ class _PerfilOngState extends State<PerfilOng> {
                     color: const Color(0xFF1A2E1B),
                   ),
                 ),
+                ..._avisoModeracao(atividade),
                 const SizedBox(height: 3),
                 Text(
                   descricao,

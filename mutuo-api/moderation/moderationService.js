@@ -3,10 +3,15 @@
 
 const { validarRegrasLocais } = require('./rules');
 
-const GEMINI_MODEL = 'gemini-3.6-flash'; // gemini-2.5-flash saiu de linha para chaves novas
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const TIMEOUT_MS = 8000;
+// Modelo principal + reserva (usado quando o principal está sobrecarregado,
+// sem cota ou indisponível). gemini-2.5-flash saiu de linha para chaves novas.
+const GEMINI_MODELOS = ['gemini-3.6-flash', 'gemini-3.1-flash-lite'];
+const urlDoModelo = (modelo) => `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
+// Modelos 3.x "pensam" antes de responder; com imagem passam fácil de 8 s.
+const TIMEOUT_MS = 20000;
 const ESPERA_RETRY_MS = 1500;
+// Erros em que vale tentar de novo / trocar de modelo (sobrecarga, cota, modelo indisponível)
+const STATUS_TROCA_MODELO = [404, 429, 500, 503];
 
 // Categorias que o prompt pode retornar nesta fase (segurança geral —
 // NÃO inclui fraude/documento falso, isso é Camada 3).
@@ -61,23 +66,12 @@ function validarRespostaGemini(objeto) {
 }
 
 /**
- * Chama o Gemini com o texto do serviço e, opcionalmente, a imagem.
- * Nunca lança erro pro chamador — retorna { erro: true } pra quem chamou
- * decidir o fallback (ver avaliarServico).
+ * Uma chamada a um modelo específico. Nunca lança erro — retorna
+ * { erro: true, causa, httpStatus? } ou { erro: false, ...resposta }.
  */
-async function chamarGemini({ texto, imagemBuffer, imagemMime }, tentativa = 1) {
-  const parts = [{ text: `${PROMPT_SISTEMA}\n\nServiço a analisar:\n${texto}` }];
-  if (imagemBuffer) {
-    parts.push({
-      inlineData: {
-        mimeType: imagemMime || 'image/jpeg',
-        data: imagemBuffer.toString('base64')
-      }
-    });
-  }
-
+async function chamarModelo(modelo, parts) {
   try {
-    const resposta = await comTimeout((signal) => fetch(GEMINI_URL, {
+    const resposta = await comTimeout((signal) => fetch(urlDoModelo(modelo), {
       method: 'POST',
       signal,
       headers: {
@@ -91,37 +85,88 @@ async function chamarGemini({ texto, imagemBuffer, imagemMime }, tentativa = 1) 
     }), TIMEOUT_MS);
 
     if (!resposta.ok) {
-      console.error('Gemini API respondeu erro HTTP:', resposta.status);
-      // 503 costuma ser passageiro: uma nova tentativa. 429 (limite) NÃO repete — vai pra REVISAO.
-      if (resposta.status === 503 && tentativa < 2) {
-        await new Promise(r => setTimeout(r, ESPERA_RETRY_MS));
-        return chamarGemini({ texto, imagemBuffer, imagemMime }, tentativa + 1);
-      }
-      return { erro: true };
+      // Mensagem de erro do Google (não contém a chave) ajuda a diagnosticar nos logs do Render
+      const corpo = await resposta.text().catch(() => '');
+      let mensagem = '';
+      try { mensagem = JSON.parse(corpo).error?.message || ''; } catch (e) { /* corpo não-JSON */ }
+      console.error(`Gemini (${modelo}) respondeu HTTP ${resposta.status}:`, mensagem.slice(0, 200));
+      return { erro: true, httpStatus: resposta.status, causa: `HTTP ${resposta.status}` };
     }
 
     const dados = await resposta.json();
-    const textoResposta = dados.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!textoResposta) return { erro: true };
+    // Modelos com raciocínio podem mandar partes de "pensamento" antes da resposta
+    const textoResposta = (dados.candidates?.[0]?.content?.parts || [])
+      .find(p => typeof p.text === 'string' && !p.thought)?.text;
+    if (!textoResposta) {
+      console.error(`Gemini (${modelo}) respondeu sem texto. finishReason:`, dados.candidates?.[0]?.finishReason);
+      return { erro: true, causa: 'resposta vazia' };
+    }
 
-    const objeto = JSON.parse(textoResposta);
+    let objeto;
+    try {
+      objeto = JSON.parse(textoResposta);
+    } catch (e) {
+      console.error(`Gemini (${modelo}) retornou texto que não é JSON.`);
+      return { erro: true, causa: 'resposta não é JSON' };
+    }
     if (!validarRespostaGemini(objeto)) {
-      console.error('Gemini retornou JSON fora do formato esperado.');
-      return { erro: true };
+      console.error(`Gemini (${modelo}) retornou JSON fora do formato esperado.`);
+      return { erro: true, causa: 'JSON fora do formato' };
     }
 
     return { erro: false, ...objeto };
   } catch (err) {
-    console.error('Falha ao chamar Gemini API:', err.message);
-    return { erro: true };
+    const causa = err.name === 'AbortError' ? `timeout de ${TIMEOUT_MS / 1000}s` : 'falha de rede';
+    console.error(`Falha ao chamar Gemini (${modelo}):`, err.message);
+    return { erro: true, causa };
   }
 }
 
-function registrarLog(origem, r) {
+/**
+ * Chama o Gemini com o texto do serviço e, opcionalmente, a imagem.
+ * 503 no modelo principal: 1 nova tentativa. Persistindo (ou 404/429/500/timeout),
+ * tenta o modelo reserva. Nunca lança erro pro chamador — retorna { erro: true, causa }
+ * pra quem chamou decidir o fallback (ver avaliarServico).
+ */
+async function chamarGemini({ texto, imagemBuffer, imagemMime }) {
+  if (!process.env.GEMINI_API_KEY) {
+    console.error('GEMINI_API_KEY não configurada no ambiente.');
+    return { erro: true, causa: 'GEMINI_API_KEY não configurada' };
+  }
+
+  const parts = [{ text: `${PROMPT_SISTEMA}\n\nServiço a analisar:\n${texto}` }];
+  if (imagemBuffer) {
+    parts.push({
+      inlineData: {
+        mimeType: imagemMime || 'image/jpeg',
+        data: imagemBuffer.toString('base64')
+      }
+    });
+  }
+
+  const causas = [];
+  for (const modelo of GEMINI_MODELOS) {
+    let r = await chamarModelo(modelo, parts);
+    if (r.erro && r.httpStatus === 503) {
+      await new Promise(res => setTimeout(res, ESPERA_RETRY_MS));
+      r = await chamarModelo(modelo, parts);
+    }
+    if (!r.erro) return { ...r, modelo };
+
+    causas.push(`${modelo}: ${r.causa}`);
+    // Erros que não se resolvem trocando de modelo (ex.: 400 chave inválida, 403) param aqui
+    const trocaResolve = r.httpStatus === undefined || STATUS_TROCA_MODELO.includes(r.httpStatus);
+    if (!trocaResolve) break;
+  }
+  return { erro: true, causa: causas.join('; ') };
+}
+
+function registrarLog(origem, r, modelo = null) {
   // Sem texto do serviço, sem chave. Útil pra diagnóstico e pro TCC.
   console.log('[moderacao]', JSON.stringify({
-    origem, modelo: GEMINI_MODEL, status: r.status, categoria: r.categoria,
-    confianca: r.confianca, data: new Date().toISOString()
+    origem, modelo, status: r.status, categoria: r.categoria,
+    confianca: r.confianca, motivo: origem === 'gemini' ? undefined : r.motivo,
+    data: new Date().toISOString()
   }));
 }
 
@@ -156,7 +201,8 @@ async function avaliarServico({ nome, descricao, foco, imagemBuffer, imagemMime 
       status: 'REVISAO',
       categoria: null,
       confianca: null,
-      motivo: 'Verificação automática indisponível no momento do cadastro.',
+      // A causa aparece na tela "Revisão" do Electron (ajuda a diagnosticar)
+      motivo: `Verificação automática indisponível no momento do cadastro (${resultado.causa}).`,
       mensagemUsuario: 'Seu serviço foi enviado para análise antes da publicação.'
     };
     registrarLog('fallback-ia-indisponivel', r);
@@ -175,7 +221,7 @@ async function avaliarServico({ nome, descricao, foco, imagemBuffer, imagemMime 
           ? 'Seu serviço foi enviado para análise antes da publicação.'
           : null)
   };
-  registrarLog('gemini', r);
+  registrarLog('gemini', r, resultado.modelo);
   return r;
 }
 

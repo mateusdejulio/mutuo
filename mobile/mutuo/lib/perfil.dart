@@ -2025,6 +2025,9 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
   Widget _cardServicoItem(dynamic servico, int index) {
     final nome = servico['nomeServico']?.toString() ?? 'Serviço sem nome';
     final descricao = servico['descricao']?.toString() ?? '';
+    // Status da moderação tem prioridade sobre o "ativo": em análise não está publicado
+    final emAnalise = servico['moderacao_status'] == 'REVISAO';
+    final rejeitado = servico['moderacao_status'] == 'BLOQUEADO';
     final ativo = servico['ativo'] == null
         ? true
         : (servico['ativo'] == true || servico['ativo'] == 1);
@@ -2063,19 +2066,33 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: ativo
-                      ? const Color(0xFFE6F4EA)
-                      : const Color(0xFFF4F4F0),
+                  color: emAnalise
+                      ? const Color(0xFFFFF4E0)
+                      : rejeitado
+                          ? const Color(0xFFFDEAEA)
+                          : ativo
+                              ? const Color(0xFFE6F4EA)
+                              : const Color(0xFFF4F4F0),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  ativo ? 'Ativo' : 'Inativo',
+                  emAnalise
+                      ? 'Em análise'
+                      : rejeitado
+                          ? 'Rejeitado'
+                          : ativo
+                              ? 'Ativo'
+                              : 'Inativo',
                   style: GoogleFonts.quicksand(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: ativo
-                        ? const Color(0xFF2D6A4F)
-                        : const Color(0xFF999999),
+                    color: emAnalise
+                        ? const Color(0xFFB26A00)
+                        : rejeitado
+                            ? const Color(0xFFC0392B)
+                            : ativo
+                                ? const Color(0xFF2D6A4F)
+                                : const Color(0xFF999999),
                   ),
                 ),
               ),
