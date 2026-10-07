@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mutuo/services/api_service.dart';
+import 'package:mutuo/widgets/moderacao_dialogs.dart';
 
 const _verde = Color(0xFF3A5A40);
 const _verdeMedio = Color(0xFF588157);
@@ -129,8 +130,10 @@ Future<void> abrirModalAtividadeOng({
               nomeArquivo = imagemSelecionada!.name;
             }
 
-            final resultado = editando
-                ? await api.atualizarServicoOng(
+            final resultado = await comProcessamentoModeracao(
+              modalContext,
+              () => editando
+                ? api.atualizarServicoOng(
                     id: atividade!['id'].toString(),
                     nomeServico: nomeCtrl.text.trim(),
                     descricao: descCtrl.text.trim(),
@@ -140,7 +143,7 @@ Future<void> abrirModalAtividadeOng({
                     imagemBytes: bytes,
                     imagemNome: nomeArquivo,
                   )
-                : await api.cadastrarServicoOng(
+                : api.cadastrarServicoOng(
                     cnpj: cnpj,
                     nomeServico: nomeCtrl.text.trim(),
                     descricao: descCtrl.text.trim(),
@@ -149,7 +152,8 @@ Future<void> abrirModalAtividadeOng({
                     pontos: pontos.toString(),
                     imagemBytes: bytes,
                     imagemNome: nomeArquivo,
-                  );
+                  ),
+            );
 
             setModalState(() => enviando = false);
 
@@ -170,18 +174,11 @@ Future<void> abrirModalAtividadeOng({
               );
               onSucesso();
             } else if (resultado['moderacao'] == true) {
-              // Bloqueado pela moderação: mostra a mensagem da API + texto de apoio
+              // Bloqueado pela moderação: popup por cima do formulário
               if (!modalContext.mounted) return;
-              final mensagem = resultado['mensagem']?.toString() ?? '';
-              const apoio =
-                  'Não foi possível publicar este serviço. O conteúdo informado pode violar as diretrizes do Mútuo. Revise as informações e tente novamente.';
-              ScaffoldMessenger.of(modalContext).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    mensagem.isNotEmpty ? '$mensagem\n$apoio' : apoio,
-                  ),
-                  backgroundColor: Colors.redAccent,
-                ),
+              await mostrarBloqueioModeracao(
+                modalContext,
+                mensagem: resultado['mensagem']?.toString(),
               );
             } else {
               ScaffoldMessenger.of(modalContext).showSnackBar(

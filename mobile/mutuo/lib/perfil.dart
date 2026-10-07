@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:mutuo/widgets/chat_badge_icon.dart';
+import 'package:mutuo/widgets/moderacao_dialogs.dart';
 import 'package:mutuo/widgets/notificacao_badge_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mutuo/login.dart';
@@ -563,8 +564,10 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 nomeArquivo = imagemSelecionada!.name;
               }
 
-              final resultado = editando
-                  ? await _api.atualizarServico(
+              final resultado = await comProcessamentoModeracao(
+                modalContext,
+                () => editando
+                  ? _api.atualizarServico(
                       id: servico!['id'].toString(),
                       nomeServico: nomeCtrl.text.trim(),
                       descricao: descCtrl.text.trim(),
@@ -574,7 +577,7 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                       imagemBytes: bytes,
                       imagemNome: nomeArquivo,
                     )
-                  : await _api.cadastrarServico(
+                  : _api.cadastrarServico(
                       cpf: widget.cpf,
                       nomeServico: nomeCtrl.text.trim(),
                       descricao: descCtrl.text.trim(),
@@ -583,7 +586,8 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                       pontos: pontos.toString(),
                       imagemBytes: bytes,
                       imagemNome: nomeArquivo,
-                    );
+                    ),
+              );
 
               setModalState(() => enviando = false);
 
@@ -604,18 +608,11 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
                 );
                 _carregarServicos();
               } else if (resultado['moderacao'] == true) {
-                // Bloqueado pela moderação: mostra a mensagem da API + texto de apoio
+                // Bloqueado pela moderação: popup por cima do formulário
                 if (!modalContext.mounted) return;
-                final mensagem = resultado['mensagem']?.toString() ?? '';
-                const apoio =
-                    'Não foi possível publicar este serviço. O conteúdo informado pode violar as diretrizes do Mútuo. Revise as informações e tente novamente.';
-                ScaffoldMessenger.of(modalContext).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      mensagem.isNotEmpty ? '$mensagem\n$apoio' : apoio,
-                    ),
-                    backgroundColor: Colors.redAccent,
-                  ),
+                await mostrarBloqueioModeracao(
+                  modalContext,
+                  mensagem: resultado['mensagem']?.toString(),
                 );
               } else {
                 ScaffoldMessenger.of(modalContext).showSnackBar(
