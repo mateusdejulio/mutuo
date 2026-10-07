@@ -68,8 +68,9 @@
     <script>
 
         document.getElementById('logar').addEventListener('click', async () => {
-            const loginValue = document.getElementById('login').value;
-            const senhaValue = document.getElementById('senha').value;
+            // Espaços no começo/fim (digitados ou colados sem querer) faziam o login falhar
+            const loginValue = document.getElementById('login').value.trim();
+            const senhaValue = document.getElementById('senha').value.trim();
             if(!loginValue || !senhaValue) {
                 Swal.fire({
                     icon: 'warning',
@@ -93,8 +94,7 @@
                             confirmButtonColor: '#3a5a40',
                             heightAuto: false
                         });
-                        const login = document.getElementById('login').value;
-                        localStorage.setItem('usuarioLogado', login);
+                        localStorage.setItem('usuarioLogado', loginValue);
                         window.api.abrirJanelaInicio();
                     } else {
                         Swal.fire({

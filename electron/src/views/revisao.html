@@ -9,7 +9,7 @@
     <script src="tema.js"></script>
     <link rel="stylesheet" href="../public/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
-    
+
 
     <style>
 
@@ -21,6 +21,295 @@
             background-color: #E1DCD0;
             overflow-y: hidden;
             padding: 10px;
+        }
+
+        #main-area {
+            min-width: 0;
+        }
+
+        #dashboard {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        /* ── Cabeçalho: título, contador e recarregar ── */
+        #cabecalho-revisao {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 10px;
+        }
+
+        #cabecalho-revisao h2 {
+            margin: 0;
+        }
+
+        #contador {
+            background-color: var(--verde3);
+            color: #fff;
+            border-radius: 20px;
+            padding: 2px 12px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        #btnRecarregar {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            border-radius: 15px;
+            padding: 8px 18px;
+            font-weight: 700;
+            color: var(--verde3);
+            background: linear-gradient(158deg, rgba(183, 206, 143, 1) 0%, rgba(126, 150, 86, 1) 100%);
+            box-shadow: 4px 4px 5px -1px rgba(0,0,0,0.21);
+            cursor: pointer;
+        }
+
+        #btnRecarregar:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        #btnRecarregar svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        #btnRecarregar.girando svg {
+            animation: girar 0.8s linear infinite;
+        }
+
+        @keyframes girar { to { transform: rotate(360deg); } }
+
+        /* ── Lista de cartões (mesmo painel branco das outras telas) ── */
+        #listaRevisao {
+            margin: 10px;
+            padding: 20px;
+            border-radius: 30px;
+            background-color: var(--white);
+            color: var(--verde4);
+            flex-grow: 1;
+            min-height: 0;
+            overflow-y: auto;
+            box-shadow: 8px 8px 10px -1px rgba(0,0,0,0.21);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .estado-lista {
+            margin: auto;
+            text-align: center;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .card-revisao {
+            display: grid;
+            grid-template-columns: 110px minmax(0, 1fr) minmax(0, 300px);
+            gap: 20px;
+            padding: 18px;
+            border: 1px solid var(--bege);
+            border-radius: 20px;
+        }
+
+        .card-imagem {
+            width: 110px;
+            height: 110px;
+            border-radius: 16px;
+            object-fit: cover;
+            background-color: var(--bege);
+        }
+
+        .card-sem-imagem {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .card-titulo {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 4px;
+            overflow-wrap: anywhere;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .etiqueta {
+            border-radius: 20px;
+            padding: 2px 10px;
+            background-color: var(--bege);
+            color: var(--verde4);
+            font-weight: 600;
+        }
+
+        .etiqueta.ong {
+            background-color: var(--verde1);
+            color: #344e41;
+        }
+
+        .card-descricao {
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        /* ── Análise da IA ── */
+        .card-ia {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 14px;
+            border-radius: 16px;
+            background-color: var(--bege2);
+            font-size: 13px;
+        }
+
+        .ia-rotulo {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.75;
+        }
+
+        .ia-categoria {
+            align-self: flex-start;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-weight: 700;
+            background-color: #f3d9a4;
+            color: #6b4a00;
+        }
+
+        .ia-confianca {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .barra {
+            flex-grow: 1;
+            height: 8px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .barra span {
+            display: block;
+            height: 100%;
+            border-radius: 8px;
+            background-color: var(--verde2);
+        }
+
+        .ia-confianca strong {
+            min-width: 42px;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .ia-motivo {
+            margin: 0;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+
+        .ia-data {
+            font-size: 12px;
+            opacity: 0.75;
+        }
+
+        .card-acoes {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 4px;
+        }
+
+        .btn-acao {
+            flex: 1;
+            border-radius: 12px;
+            padding: 7px 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-aprovar {
+            border: none;
+            background-color: var(--verde3);
+            color: #fff;
+        }
+
+        .btn-aprovar:hover {
+            background-color: var(--verde2);
+        }
+
+        .btn-rejeitar {
+            border: 2px solid #c0392b;
+            background-color: transparent;
+            color: #c0392b;
+        }
+
+        .btn-rejeitar:hover {
+            background-color: #c0392b;
+            color: #fff;
+        }
+
+        body.dark #contador {
+            background-color: var(--verde1);
+            color: #344e41;
+        }
+
+        body.dark .ia-categoria {
+            background-color: #5c4a1f;
+            color: #f3d9a4;
+        }
+
+        body.dark .barra {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        body.dark .btn-rejeitar {
+            border-color: #ff8a80;
+            color: #ff8a80;
+        }
+
+        body.dark .btn-rejeitar:hover {
+            background-color: #ff8a80;
+            color: #303030;
+        }
+
+        @media (max-width: 1200px) {
+            .card-revisao {
+                grid-template-columns: 90px minmax(0, 1fr);
+            }
+
+            .card-imagem {
+                width: 90px;
+                height: 90px;
+            }
+
+            .card-ia {
+                grid-column: 1 / -1;
+            }
         }
 
         @media (max-width: 1000px) or (max-height: 680px) {
@@ -45,10 +334,6 @@
                 width: 100%;
             }
 
-            .col-titulo, .col-texto {
-                font-size: 15px !important;
-            }
-
             h2 {
                 font-size: 20px;
             }
@@ -60,20 +345,6 @@
 
             #mutuo {
                 font-size: 20px;
-            }
-
-            #tabela {
-                /*width: 90%;*/
-                font-size: 12px;
-            }
-
-            #divTabela {
-                height: 37vh !important;
-                width: 65.5vw;
-            }
-
-            .col {
-                height: 18vh !important;
             }
 
             .icone-barra {
@@ -101,7 +372,7 @@
             </tr>
         </table>
         <button id="sair" type="button">Sair</button>
-    </div> 
+    </div>
 
     <div id="main-area">
 
@@ -119,31 +390,18 @@
         </nav>
 
         <div id="dashboard">
-            <h2>Revisão de Serviços</h2>
-            <br>
-            <div id="divTabela">
-                <table id="tabela">
-                    <thead>
-                        <tr>
-                            <th>Imagem</th>
-                            <th>Serviço</th>
-                            <th>Criador</th>
-                            <th>Tipo</th>
-                            <th>Foco</th>
-                            <th>Horas</th>
-                            <th>Descrição</th>
-                            <th>Categoria (IA)</th>
-                            <th>Motivo (IA)</th>
-                            <th>Confiança</th>
-                            <th>Data</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody">
-
-                    </tbody>
-                </table>
+            <div id="cabecalho-revisao">
+                <h2>Revisão de Serviços</h2>
+                <span id="contador" hidden></span>
+                <button id="btnRecarregar" type="button" title="Buscar serviços pendentes novamente">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/>
+                    </svg>
+                    Recarregar
+                </button>
             </div>
+
+            <div id="listaRevisao"></div>
         </div>
 
     </div>
@@ -157,84 +415,155 @@
 
         // Mesma base usada pelo main.js para chamar a API (imagens vêm de lá)
         const API_URL = 'https://mutuo-api.onrender.com';
-        const tbody = document.getElementById('tbody');
+        const lista = document.getElementById('listaRevisao');
+        const contador = document.getElementById('contador');
+        const btnRecarregar = document.getElementById('btnRecarregar');
+        const inputBusca = document.getElementById('search');
         const admLogin = localStorage.getItem('usuarioLogado');
-        const COLS = 12;
         let listaServicos = [];
+
+        const CATEGORIAS = {
+            VIOLENCIA: 'Violência',
+            SEXUAL: 'Conteúdo sexual',
+            EXPLORACAO: 'Exploração',
+            DISCRIMINACAO: 'Discriminação',
+            PERIGOSO: 'Atividade perigosa',
+            ILICITO: 'Atividade ilícita',
+            SPAM: 'Spam',
+        };
 
         // Esta tela exibe exatamente o conteúdo suspeito: todo texto vindo da API é escapado.
         const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => (
             { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
         ));
 
+        // A IA devolve a confiança entre 0 e 1 (o MySQL pode mandar como texto)
+        function confiancaEmPorcentagem(valor) {
+            if (valor === null || valor === undefined || valor === '') return null;
+            const numero = Number(valor);
+            if (!Number.isFinite(numero)) return null;
+            return Math.round(Math.min(Math.max(numero, 0), 1) * 100);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             if (admLogin) {
                 document.getElementById('nomeAdm').textContent = " " + admLogin;
             }
-            carregarTabela();
+            carregarLista();
         });
 
-        async function carregarTabela() {
-            tbody.innerHTML = `<tr><td colspan="${COLS}">Carregando...</td></tr>`;
+        btnRecarregar.addEventListener('click', carregarLista);
+
+        async function carregarLista() {
+            btnRecarregar.disabled = true;
+            btnRecarregar.classList.add('girando');
+            lista.innerHTML = '<p class="estado-lista">Carregando serviços pendentes...</p>';
             try {
                 const servicos = await window.api.buscarServicosRevisao();
                 if (!Array.isArray(servicos)) throw new Error(servicos?.erro || servicos?.error || 'Resposta inesperada.');
                 listaServicos = servicos;
-                renderizarTabela(listaServicos);
+                contador.textContent = `${servicos.length} pendente${servicos.length === 1 ? '' : 's'}`;
+                contador.hidden = false;
+                aplicarBusca();
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="${COLS}">Erro ao carregar: ${esc(err.message)}</td></tr>`;
+                contador.hidden = true;
+                lista.innerHTML = `<p class="estado-lista">Erro ao carregar: ${esc(err.message)}</p>`;
+            } finally {
+                btnRecarregar.disabled = false;
+                btnRecarregar.classList.remove('girando');
             }
         }
 
-        function renderizarTabela(servicos) {
+        function renderizarLista(servicos) {
             if (servicos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${COLS}">Nenhum serviço pendente.</td></tr>`;
+                lista.innerHTML = listaServicos.length === 0
+                    ? '<p class="estado-lista">Nenhum serviço pendente de revisão. 🎉</p>'
+                    : '<p class="estado-lista">Nenhum serviço encontrado para essa busca.</p>';
                 return;
             }
-            tbody.innerHTML = servicos.map(s => `
-                <tr>
-                    <td class="tdTabela">${s.imagem ? `<img src="${esc(API_URL + s.imagem)}" style="max-width:80px">` : '-'}</td>
-                    <td class="tdTabela">${esc(s.nomeServico)}</td>
-                    <td class="tdTabela">${esc(s.nomeCriador)}</td>
-                    <td class="tdTabela">${s.tipo === 'ong' ? 'ONG' : 'Usuário'}</td>
-                    <td class="tdTabela">${esc(s.foco)}</td>
-                    <td class="tdTabela">${esc(s.horas)}</td>
-                    <td class="tdTabela">${esc(s.descricao)}</td>
-                    <td class="tdTabela">${esc(s.moderacao_categoria || '-')}</td>
-                    <td class="tdTabela">${esc(s.moderacao_motivo || '-')}</td>
-                    <td class="tdTabela">${esc(s.moderacao_confianca ?? '-')}</td>
-                    <td class="tdTabela">${s.moderacao_data ? esc(new Date(s.moderacao_data).toLocaleDateString('pt-BR')) : '-'}</td>
-                    <td>
-                        <button class="save-btn" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="APROVAR">Aprovar</button>
-                        <button class="save-btn" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="REJEITAR">Rejeitar</button>
-                    </td>
-                </tr>
-            `).join('');
+
+            lista.innerHTML = servicos.map(s => {
+                const confianca = confiancaEmPorcentagem(s.moderacao_confianca);
+                const categoria = s.moderacao_categoria
+                    ? (CATEGORIAS[s.moderacao_categoria] || s.moderacao_categoria)
+                    : null;
+
+                return `
+                <article class="card-revisao">
+                    ${s.imagem
+                        ? `<img class="card-imagem" src="${esc(API_URL + s.imagem)}" alt="">`
+                        : '<div class="card-imagem card-sem-imagem">Sem imagem</div>'}
+
+                    <div>
+                        <h3 class="card-titulo">${esc(s.nomeServico)}</h3>
+                        <div class="card-meta">
+                            <span class="etiqueta ${s.tipo === 'ong' ? 'ong' : ''}">${s.tipo === 'ong' ? 'ONG' : 'Usuário'}</span>
+                            <span class="etiqueta">${esc(s.nomeCriador || '-')}</span>
+                            ${s.foco ? `<span class="etiqueta">${esc(s.foco)}</span>` : ''}
+                            ${s.horas ? `<span class="etiqueta">${esc(s.horas)} h</span>` : ''}
+                        </div>
+                        <p class="card-descricao">${esc(s.descricao || 'Sem descrição.')}</p>
+                    </div>
+
+                    <div class="card-ia">
+                        <span class="ia-rotulo">Análise da IA</span>
+                        ${categoria ? `<span class="ia-categoria">${esc(categoria)}</span>` : ''}
+                        <div class="ia-confianca" title="Confiança da IA na própria análise">
+                            <span>Confiança</span>
+                            ${confianca === null
+                                ? '<strong style="margin-left:auto">-</strong>'
+                                : `<div class="barra"><span style="width:${confianca}%"></span></div><strong>${confianca}%</strong>`}
+                        </div>
+                        <p class="ia-motivo">${esc(s.moderacao_motivo || 'A IA não informou um motivo.')}</p>
+                        ${s.moderacao_data
+                            ? `<span class="ia-data">Analisado em ${esc(new Date(s.moderacao_data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }))}</span>`
+                            : ''}
+                        <div class="card-acoes">
+                            <button class="btn-acao btn-aprovar" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="APROVAR">Aprovar</button>
+                            <button class="btn-acao btn-rejeitar" data-tipo="${esc(s.tipo)}" data-id="${esc(s.id)}" data-acao="REJEITAR">Rejeitar</button>
+                        </div>
+                    </div>
+                </article>`;
+            }).join('');
         }
 
         // data-* em vez de onclick com valores interpolados (escape HTML não protege dentro de JS inline)
-        tbody.addEventListener('click', (e) => {
+        lista.addEventListener('click', (e) => {
             const botao = e.target.closest('button[data-acao]');
             if (botao) moderar(botao.dataset.tipo, botao.dataset.id, botao.dataset.acao);
         });
 
         async function moderar(tipo, id, acao) {
+            const aprovar = acao === 'APROVAR';
             const confirmado = await Swal.fire({
-                title: acao === 'APROVAR' ? 'Aprovar serviço?' : 'Rejeitar serviço?',
-                icon: 'warning', showCancelButton: true, confirmButtonText: 'Confirmar', cancelButtonText: 'Cancelar'
+                title: aprovar ? 'Aprovar serviço?' : 'Rejeitar serviço?',
+                text: aprovar
+                    ? 'O serviço será publicado e ficará visível para todos.'
+                    : 'O serviço não será publicado.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: aprovar ? 'Aprovar' : 'Rejeitar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: aprovar ? '#3a5a40' : '#c0392b',
+                heightAuto: false
             });
             if (!confirmado.isConfirmed) return;
 
             try {
                 const resultado = await window.api.moderarServico(tipo, id, acao, admLogin);
                 if (resultado?.sucesso) {
-                    Swal.fire('Feito!', '', 'success');
-                    carregarTabela();
+                    Swal.fire({
+                        title: aprovar ? 'Serviço aprovado!' : 'Serviço rejeitado.',
+                        icon: 'success',
+                        confirmButtonColor: '#3a5a40',
+                        heightAuto: false
+                    });
+                    carregarLista();
                 } else {
-                    Swal.fire('Erro', resultado?.erro || resultado?.error || 'Não foi possível concluir.', 'error');
+                    Swal.fire({ title: 'Erro', text: resultado?.erro || resultado?.error || 'Não foi possível concluir.', icon: 'error', confirmButtonColor: '#3a5a40', heightAuto: false });
                 }
             } catch (err) {
-                Swal.fire('Erro', err.message || 'Não foi possível concluir.', 'error');
+                Swal.fire({ title: 'Erro', text: err.message || 'Não foi possível concluir.', icon: 'error', confirmButtonColor: '#3a5a40', heightAuto: false });
             }
         }
 
@@ -245,22 +574,19 @@
             window.api.abrirJanelaLogin();
         });
 
-        const inputBusca = document.getElementById('search');
+        function aplicarBusca() {
+            const texto = inputBusca.value.toLowerCase().trim();
+            const filtrados = listaServicos.filter(servico =>
+                String(servico.nomeServico || '').toLowerCase().includes(texto)
+            );
+            renderizarLista(filtrados);
+        }
 
         let timeout;
 
-        inputBusca.addEventListener('input', function () {
+        inputBusca.addEventListener('input', () => {
             clearTimeout(timeout);
-
-            timeout = setTimeout(() => {
-                const texto = this.value.toLowerCase().trim();
-
-                const filtrados = listaServicos.filter(servico =>
-                    String(servico.nomeServico || '').toLowerCase().includes(texto)
-                );
-
-                renderizarTabela(filtrados);
-            }, 300);
+            timeout = setTimeout(aplicarBusca, 300);
         });
     </script>
 </body>
