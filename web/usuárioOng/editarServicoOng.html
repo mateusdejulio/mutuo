@@ -607,10 +607,10 @@
       btnConfirmar.innerHTML = 'Salvando...';
 
       try {
-        const resposta = await fetch(`${API_URL}/servicos/ong/${servicoId}`, {
+        const resposta = await MutuoModeracao.comProcessamento(() => fetch(`${API_URL}/servicos/ong/${servicoId}`, {
           method: 'PUT',
           body: dados
-        });
+        }));
 
         // Cold start do Render pode devolver HTML em vez de JSON
         const tipoConteudo = resposta.headers.get('content-type') || '';
@@ -622,8 +622,10 @@
 
         // Bloqueado pela moderação automática (HTTP 200 com sucesso: false)
         if (resultado.moderacao) {
-          const mensagem = resultado.mensagem ? `${resultado.mensagem} ` : '';
-          throw new Error(`${mensagem}Não foi possível publicar este serviço. O conteúdo informado pode violar as diretrizes do Mútuo. Revise as informações e tente novamente.`);
+          await MutuoModeracao.mostrarBloqueio(resultado.mensagem);
+          btnConfirmar.disabled = false;
+          btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Salvar alterações';
+          return;
         }
 
         if (!resposta.ok) {
@@ -685,5 +687,6 @@
 
     carregarServico();
   </script>
+  <script src="../moderacao.js"></script>
 </body>
 </html>
