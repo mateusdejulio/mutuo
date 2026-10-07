@@ -111,17 +111,17 @@
 
         .card-revisao {
             display: grid;
-            grid-template-columns: 110px minmax(0, 1fr) minmax(0, 300px);
-            gap: 20px;
-            padding: 18px;
+            grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1.1fr);
+            gap: 28px;
+            padding: 24px;
             border: 1px solid var(--bege);
-            border-radius: 20px;
+            border-radius: 24px;
         }
 
         .card-imagem {
-            width: 110px;
-            height: 110px;
-            border-radius: 16px;
+            width: 150px;
+            height: 150px;
+            border-radius: 18px;
             object-fit: cover;
             background-color: var(--bege);
         }
@@ -130,28 +130,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 14px;
             opacity: 0.7;
         }
 
         .card-titulo {
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 700;
-            margin: 0 0 4px;
+            margin: 0 0 10px;
             overflow-wrap: anywhere;
         }
 
         .card-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 10px;
-            font-size: 13px;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 15px;
         }
 
         .etiqueta {
             border-radius: 20px;
-            padding: 2px 10px;
+            padding: 4px 14px;
             background-color: var(--bege);
             color: var(--verde4);
             font-weight: 600;
@@ -162,9 +162,19 @@
             color: #344e41;
         }
 
+        .secao-rotulo {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.7;
+        }
+
         .card-descricao {
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 17px;
+            line-height: 1.6;
             margin: 0;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
@@ -174,25 +184,38 @@
         .card-ia {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 14px;
-            border-radius: 16px;
+            gap: 14px;
+            padding: 22px 24px;
+            border-radius: 20px;
             background-color: var(--bege2);
-            font-size: 13px;
+            border-left: 5px solid var(--verde2);
+            font-size: 16px;
+        }
+
+        .card-ia.alerta {
+            border-left-color: #d4a017;
+        }
+
+        .ia-topo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .ia-rotulo {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
             opacity: 0.75;
         }
 
         .ia-categoria {
-            align-self: flex-start;
             border-radius: 20px;
-            padding: 2px 10px;
+            padding: 4px 14px;
+            font-size: 15px;
             font-weight: 700;
             background-color: #f3d9a4;
             color: #6b4a00;
@@ -201,13 +224,14 @@
         .ia-confianca {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 14px;
+            font-weight: 600;
         }
 
         .barra {
             flex-grow: 1;
-            height: 8px;
-            border-radius: 8px;
+            height: 12px;
+            border-radius: 12px;
             background-color: rgba(0, 0, 0, 0.12);
             overflow: hidden;
         }
@@ -215,41 +239,43 @@
         .barra span {
             display: block;
             height: 100%;
-            border-radius: 8px;
+            border-radius: 12px;
             background-color: var(--verde2);
         }
 
         .ia-confianca strong {
-            min-width: 42px;
+            min-width: 56px;
             text-align: right;
-            font-size: 14px;
+            font-size: 22px;
         }
 
         .ia-motivo {
             margin: 0;
-            line-height: 1.45;
+            font-size: 16px;
+            line-height: 1.55;
             overflow-wrap: anywhere;
         }
 
         .ia-data {
-            font-size: 12px;
+            font-size: 14px;
             opacity: 0.75;
         }
 
         .card-acoes {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             margin-top: auto;
-            padding-top: 4px;
+            padding-top: 6px;
         }
 
         .btn-acao {
             flex: 1;
-            border-radius: 12px;
-            padding: 7px 10px;
+            border-radius: 14px;
+            padding: 12px 16px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
         }
 
         .btn-aprovar {
@@ -299,12 +325,12 @@
 
         @media (max-width: 1200px) {
             .card-revisao {
-                grid-template-columns: 90px minmax(0, 1fr);
+                grid-template-columns: 110px minmax(0, 1fr);
             }
 
             .card-imagem {
-                width: 90px;
-                height: 90px;
+                width: 110px;
+                height: 110px;
             }
 
             .card-ia {
@@ -502,12 +528,15 @@
                             ${s.foco ? `<span class="etiqueta">${esc(s.foco)}</span>` : ''}
                             ${s.horas ? `<span class="etiqueta">${esc(s.horas)} h</span>` : ''}
                         </div>
+                        <span class="secao-rotulo">Descrição</span>
                         <p class="card-descricao">${esc(s.descricao || 'Sem descrição.')}</p>
                     </div>
 
-                    <div class="card-ia">
-                        <span class="ia-rotulo">Análise da IA</span>
-                        ${categoria ? `<span class="ia-categoria">${esc(categoria)}</span>` : ''}
+                    <div class="card-ia ${categoria ? 'alerta' : ''}">
+                        <div class="ia-topo">
+                            <span class="ia-rotulo">Análise da IA</span>
+                            ${categoria ? `<span class="ia-categoria">${esc(categoria)}</span>` : ''}
+                        </div>
                         <div class="ia-confianca" title="Confiança da IA na própria análise">
                             <span>Confiança</span>
                             ${confianca === null
