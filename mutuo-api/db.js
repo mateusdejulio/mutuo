@@ -2,7 +2,8 @@ const mysql = require('mysql2/promise');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+// .env.local (não versionado) guarda segredos como a GEMINI_API_KEY e tem prioridade.
+require('dotenv').config({ path: [path.resolve(__dirname, '.env.local'), path.resolve(__dirname, '.env')] });
 
 console.log("Tentando conectar ao banco:", process.env.DB_HOST);
 

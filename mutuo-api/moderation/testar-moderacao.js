@@ -1,6 +1,6 @@
 // Teste isolado da moderação (Camadas 1 e 2). Não acessa o banco.
 // Uso (dentro de mutuo-api/): node moderation/testar-moderacao.js
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+require('dotenv').config({ path: [require('path').join(__dirname, '..', '.env.local'), require('path').join(__dirname, '..', '.env')] });
 const { avaliarServico } = require('./moderationService');
 
 const casos = [

@@ -4,6 +4,8 @@ node_modules/
 # ── Configuração ──
 # O mutuo-api/.env É versionado de propósito: a equipe trabalha em computadores
 # públicos e precisa que o projeto funcione logo após o clone.
+# A GEMINI_API_KEY NÃO fica nele: o Google revoga chaves achadas em repositório
+# público. Ela vai em mutuo-api/.env.local (ignorado pela regra abaixo).
 *.env.local
 
 # ── API ──
