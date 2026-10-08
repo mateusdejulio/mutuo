@@ -57,6 +57,56 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS
   }
 });
+
+// Envio de e-mail transacional via Brevo (API HTTP — o Render gratuito
+// bloqueia SMTP). Lança erro se falhar, para a rota poder avisar o usuário.
+async function enviarEmailBrevo({ para, assunto, html }) {
+  const resposta = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': process.env.BREVO_API_KEY,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.NOME_REMETENTE || 'Mútuo',
+        email: process.env.EMAIL_REMETENTE
+      },
+      to: [{ email: para }],
+      subject: assunto,
+      htmlContent: html
+    })
+  });
+
+  if (!resposta.ok) {
+    const corpo = await resposta.text();
+    throw new Error(`Brevo respondeu ${resposta.status}: ${corpo}`);
+  }
+}
+
+function htmlEmailCodigo(codigo) {
+  const digitos = codigo.split('').map(d =>
+    `<td style="width:44px;height:54px;background:#f1f5f2;border-radius:10px;font-size:28px;font-weight:700;color:#3A5A40;text-align:center;font-family:Arial,sans-serif;">${d}</td>`
+  ).join('<td style="width:8px;"></td>');
+
+  return `
+  <div style="background:#f4f6f4;padding:32px 0;font-family:Arial,sans-serif;">
+    <table align="center" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;">
+      <tr><td style="background:#3A5A40;padding:24px;text-align:center;color:#ffffff;font-size:26px;font-weight:700;letter-spacing:1px;">Mútuo</td></tr>
+      <tr><td style="padding:32px 28px 8px;color:#333;font-size:16px;line-height:1.5;">
+        Olá! Recebemos um pedido para redefinir a senha da sua conta.<br>Use o código abaixo:
+      </td></tr>
+      <tr><td style="padding:16px 28px;">
+        <table align="center" cellpadding="0" cellspacing="0"><tr>${digitos}</tr></table>
+      </td></tr>
+      <tr><td style="padding:8px 28px 32px;color:#666;font-size:14px;line-height:1.5;">
+        O código vale por <b>15 minutos</b>. Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.
+      </td></tr>
+      <tr><td style="background:#f1f5f2;padding:16px;text-align:center;color:#888;font-size:12px;">Mútuo — conectando quem quer ajudar</td></tr>
+    </table>
+  </div>`;
+}
 require('dotenv').config();
 
 const app = express();
@@ -268,6 +318,104 @@ app.post('/loginOng', async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ sucesso: false, mensagem: 'Erro interno do servidor' });
+  }
+});
+
+// ── Recuperação de senha ──
+const MSG_GENERICA_ENVIO = 'Se o e-mail estiver cadastrado, você receberá um código em instantes.';
+const TIPOS_VALIDOS = ['usuario', 'ong'];
+
+// Passo 1: solicita o código.
+app.post('/esqueciSenha', async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim().toLowerCase();
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+
+  if (!email || !TIPOS_VALIDOS.includes(tipo)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Informe o e-mail e o tipo de conta.' });
+  }
+
+  try {
+    const conta = await db.buscarContaParaRecuperacao(email, tipo);
+
+    // Conta não existe: resposta genérica (não revela nada).
+    if (!conta) return res.json({ sucesso: true, mensagem: MSG_GENERICA_ENVIO });
+
+    // Cooldown de 60s: não gera nem envia de novo, mas responde igual.
+    const seg = await db.segundosDesdeUltimoCodigo(email, tipo);
+    if (seg !== null && seg < 60) return res.json({ sucesso: true, mensagem: MSG_GENERICA_ENVIO });
+
+    const codigo = await db.criarCodigoRecuperacao(email, tipo, conta.identificador);
+
+    try {
+      await enviarEmailBrevo({
+        para: email,
+        assunto: `${codigo} é o seu código de recuperação — Mútuo`,
+        html: htmlEmailCodigo(codigo)
+      });
+    } catch (errEnvio) {
+      console.error('Erro ao enviar e-mail (Brevo):', errEnvio.message);
+      return res.status(502).json({ sucesso: false, mensagem: 'Não foi possível enviar o e-mail agora. Tente novamente em instantes.' });
+    }
+
+    return res.json({ sucesso: true, mensagem: MSG_GENERICA_ENVIO });
+  } catch (err) {
+    console.error('Erro em /esqueciSenha:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
+// Passo 2: verifica o código (sem consumir) — permite avançar pra tela da nova senha.
+app.post('/verificarCodigo', async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim().toLowerCase();
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+  const codigo = String(body.codigo || '').trim();
+
+  if (!email || !TIPOS_VALIDOS.includes(tipo) || !/^\d{6}$/.test(codigo)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Código inválido.' });
+  }
+
+  try {
+    const r = await db.conferirCodigoRecuperacao(email, tipo, codigo);
+    if (!r.valido) {
+      return res.status(400).json({ sucesso: false, mensagem: r.mensagem, tentativasRestantes: r.tentativasRestantes });
+    }
+    return res.json({ sucesso: true });
+  } catch (err) {
+    console.error('Erro em /verificarCodigo:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
+// Passo 3: redefine a senha (confere o código de novo e consome).
+app.post('/redefinirSenha', async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim().toLowerCase();
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+  const codigo = String(body.codigo || '').trim();
+  const novaSenha = String(body.novaSenha || '');
+
+  if (!email || !TIPOS_VALIDOS.includes(tipo) || !/^\d{6}$/.test(codigo)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Dados inválidos.' });
+  }
+  if (novaSenha.length < 8) {
+    return res.status(400).json({ sucesso: false, mensagem: 'A senha deve ter no mínimo 8 caracteres.' });
+  }
+
+  try {
+    const r = await db.conferirCodigoRecuperacao(email, tipo, codigo);
+    if (!r.valido) {
+      return res.status(400).json({ sucesso: false, mensagem: r.mensagem, tentativasRestantes: r.tentativasRestantes });
+    }
+
+    const ok = await db.redefinirSenhaComCodigo(tipo, r.registro.identificador, r.registro.id, novaSenha);
+    if (!ok) return res.status(500).json({ sucesso: false, mensagem: 'Não foi possível atualizar a senha.' });
+
+    return res.json({ sucesso: true, mensagem: 'Senha redefinida com sucesso!' });
+  } catch (err) {
+    console.error('Erro em /redefinirSenha:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
   }
 });
 
@@ -1294,4 +1442,5 @@ app.use((err, req, res, next) => {
 
 
 const PORT = process.env.PORT || 3000;
+db.inicializarTabelas();
 server.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));

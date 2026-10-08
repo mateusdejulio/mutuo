@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 // .env.local (não versionado) guarda segredos como a GEMINI_API_KEY e tem prioridade.
 require('dotenv').config({ path: [path.resolve(__dirname, '.env.local'), path.resolve(__dirname, '.env')] });
@@ -2306,6 +2307,134 @@ async function atualizarModeracaoServico(tipo, id, novoStatus, admLogin) {
   }
 }
 
+// Cria tabelas novas que o código precisa, se ainda não existirem.
+// Roda uma vez quando a API sobe — dispensa migration manual no Render.
+async function inicializarTabelas() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS Mutuo_RecuperacaoSenha (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tipo ENUM('usuario','ong') NOT NULL,
+        identificador VARCHAR(20) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        codigo_hash VARCHAR(255) NOT NULL,
+        expira_em DATETIME NOT NULL,
+        tentativas INT NOT NULL DEFAULT 0,
+        usado TINYINT(1) NOT NULL DEFAULT 0,
+        criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_recuperacao_email_tipo (email, tipo)
+      )
+    `);
+    console.log('Tabela Mutuo_RecuperacaoSenha verificada/criada.');
+  } catch (err) {
+    console.error('Erro ao criar tabela Mutuo_RecuperacaoSenha:', err.message);
+  }
+}
+
+// ── Recuperação de senha ──
+
+const TABELA_POR_TIPO = {
+  usuario: { tabela: 'Mutuo_Usuario', colunaId: 'cpf' },
+  ong:     { tabela: 'Mutuo_ONG',     colunaId: 'cnpj' }
+};
+
+// Busca a conta pelo e-mail no tipo escolhido. Retorna { identificador } ou null.
+// Mesma condição de "ativo" do login (validarLoginUsuario / validarLoginOng).
+// LOWER(email): o cadastro salva o e-mail como foi digitado.
+async function buscarContaParaRecuperacao(email, tipo) {
+  const cfg = TABELA_POR_TIPO[tipo];
+  if (!cfg) return null;
+  try {
+    const [rows] = await pool.query(
+      `SELECT ${cfg.colunaId} AS identificador FROM ${cfg.tabela} WHERE LOWER(email) = ? AND ativo = 1 LIMIT 1`,
+      [email]
+    );
+    return rows.length > 0 ? { identificador: String(rows[0].identificador) } : null;
+  } catch (err) {
+    console.error('Erro ao buscar conta para recuperação:', err.message);
+    throw err;
+  }
+}
+
+// Segundos desde o último código criado para esse e-mail/tipo (null se nunca).
+// Se o último código foi invalidado por excesso de tentativas, também retorna
+// null: o reenvio fica liberado na hora, sem esperar o cooldown de 60s.
+async function segundosDesdeUltimoCodigo(email, tipo) {
+  const [rows] = await pool.query(
+    `SELECT TIMESTAMPDIFF(SECOND, criado_em, NOW()) AS seg, tentativas
+       FROM Mutuo_RecuperacaoSenha
+      WHERE email = ? AND tipo = ?
+      ORDER BY criado_em DESC, id DESC LIMIT 1`,
+    [email, tipo]
+  );
+  if (rows.length === 0 || rows[0].tentativas >= 5) return null;
+  return Number(rows[0].seg);
+}
+
+// Invalida códigos anteriores e cria um novo. Retorna o código em texto puro
+// (só para enviar por e-mail — nunca é salvo assim).
+async function criarCodigoRecuperacao(email, tipo, identificador) {
+  const codigo = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+  const codigoHash = await bcrypt.hash(codigo, 10);
+
+  await pool.query(
+    'UPDATE Mutuo_RecuperacaoSenha SET usado = 1 WHERE email = ? AND tipo = ? AND usado = 0',
+    [email, tipo]
+  );
+  await pool.query(
+    `INSERT INTO Mutuo_RecuperacaoSenha (tipo, identificador, email, codigo_hash, expira_em)
+     VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))`,
+    [tipo, identificador, email, codigoHash]
+  );
+  return codigo;
+}
+
+// Confere o código. Retorna:
+//  { valido: true, registro }  ou
+//  { valido: false, mensagem, tentativasRestantes? }
+async function conferirCodigoRecuperacao(email, tipo, codigo) {
+  const [rows] = await pool.query(
+    `SELECT id, identificador, codigo_hash, tentativas
+       FROM Mutuo_RecuperacaoSenha
+      WHERE email = ? AND tipo = ? AND usado = 0 AND expira_em > NOW()
+      ORDER BY criado_em DESC, id DESC LIMIT 1`,
+    [email, tipo]
+  );
+
+  if (rows.length === 0) {
+    return { valido: false, mensagem: 'Código inválido ou expirado. Solicite um novo.' };
+  }
+
+  const registro = rows[0];
+  const confere = await bcrypt.compare(String(codigo), registro.codigo_hash);
+
+  if (!confere) {
+    const novasTentativas = registro.tentativas + 1;
+    const esgotou = novasTentativas >= 5;
+    await pool.query(
+      'UPDATE Mutuo_RecuperacaoSenha SET tentativas = ?, usado = ? WHERE id = ?',
+      [novasTentativas, esgotou ? 1 : 0, registro.id]
+    );
+    return esgotou
+      ? { valido: false, mensagem: 'Muitas tentativas. Solicite um novo código.', tentativasRestantes: 0 }
+      : { valido: false, mensagem: 'Código incorreto.', tentativasRestantes: 5 - novasTentativas };
+  }
+
+  return { valido: true, registro };
+}
+
+// Troca a senha e consome o código.
+async function redefinirSenhaComCodigo(tipo, identificador, idRegistro, novaSenha) {
+  const cfg = TABELA_POR_TIPO[tipo];
+  const novoHash = await bcrypt.hash(novaSenha, 10);
+  const [result] = await pool.query(
+    `UPDATE ${cfg.tabela} SET senha = ? WHERE ${cfg.colunaId} = ?`,
+    [novoHash, identificador]
+  );
+  await pool.query('UPDATE Mutuo_RecuperacaoSenha SET usado = 1 WHERE id = ?', [idRegistro]);
+  return result.affectedRows > 0;
+}
+
 module.exports = {
   getUsuarios,
   getUsuarioPorCpf,
@@ -2418,4 +2547,10 @@ module.exports = {
   getServicosRecebidosOng,
   getServicosParaRevisao,
   atualizarModeracaoServico,
+  inicializarTabelas,
+  buscarContaParaRecuperacao,
+  segundosDesdeUltimoCodigo,
+  criarCodigoRecuperacao,
+  conferirCodigoRecuperacao,
+  redefinirSenhaComCodigo,
 };

@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mútuo | Recuperar senha</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="icon" href="imagens/mutuoLogo.png">
+
+  <style>
+    :root {
+      --green-main:  #588157;
+      --green-dark:  #3a5a40;
+      --green-light: #6b9e4a;
+      --cream:       #E1DCD0;
+      --cream-dark:  #cdc7ba;
+      --white:       #ffffff;
+      --erro:        #e57373;
+      --ease:        cubic-bezier(.4,0,.2,1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-image: url("imagens/fundo.png");
+      background-size: cover;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    .topo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      animation: fadeDown 0.5s ease both;
+    }
+
+    .topo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--cream);
+      padding: 8px;
+      object-fit: contain;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    .topo h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--cream);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      letter-spacing: 0.3px;
+    }
+
+    .card-form {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(88, 129, 87, 0.649);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(225,220,208,0.2);
+      border-radius: 28px;
+      padding: 32px 32px 36px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      animation: fadeUp 0.5s ease 0.05s both;
+      overflow: hidden;
+    }
+
+    /* ── Indicador de progresso ── */
+    .progresso {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 auto 28px;
+      max-width: 220px;
+    }
+
+    .progresso-linha,
+    .progresso-preenchida {
+      position: absolute;
+      top: 50%;
+      left: 14px;
+      height: 3px;
+      border-radius: 99px;
+      transform: translateY(-50%);
+    }
+
+    .progresso-linha {
+      right: 14px;
+      background: rgba(225,220,208,0.2);
+    }
+
+    .progresso-preenchida {
+      width: 0;
+      max-width: calc(100% - 28px);
+      background: var(--cream);
+      transition: width 0.45s var(--ease);
+    }
+
+    .passo {
+      position: relative;
+      z-index: 1;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(30, 60, 30, 0.7);
+      border: 2px solid rgba(225,220,208,0.3);
+      color: rgba(225,220,208,0.6);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.35s var(--ease), border-color 0.35s var(--ease), color 0.35s var(--ease), transform 0.35s var(--ease);
+    }
+
+    .passo.ativo {
+      background: var(--green-main);
+      border-color: var(--cream);
+      color: var(--cream);
+      transform: scale(1.12);
+    }
+
+    .passo.feito {
+      background: var(--cream);
+      border-color: var(--cream);
+      color: var(--green-dark);
+    }
+
+    /* ── Etapas ── */
+    .etapa { display: none; }
+    .etapa.visivel { display: block; }
+
+    .etapa.entrando-frente { animation: entrarFrente 0.35s var(--ease) both; }
+    .etapa.entrando-tras   { animation: entrarTras 0.35s var(--ease) both; }
+    .etapa.saindo-frente   { animation: sairFrente 0.18s var(--ease) both; }
+    .etapa.saindo-tras     { animation: sairTras 0.18s var(--ease) both; }
+
+    @keyframes entrarFrente { from { opacity: 0; transform: translateX(40px); }  to { opacity: 1; transform: translateX(0); } }
+    @keyframes entrarTras   { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes sairFrente   { to { opacity: 0; transform: translateX(-40px); } }
+    @keyframes sairTras     { to { opacity: 0; transform: translateX(40px); } }
+
+    .etapa h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--cream);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .subtitulo {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(225,220,208,0.75);
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .subtitulo b { color: var(--cream); word-break: break-all; }
+
+    .campo { margin-bottom: 20px; }
+
+    .campo label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 7px;
+      letter-spacing: 0.2px;
+    }
+
+    .campo label i {
+      font-size: 0.95rem;
+      color: rgba(225,220,208,0.6);
+    }
+
+    .campo input {
+      width: 100%;
+      background: rgba(225,220,208,0.92);
+      border: 2px solid transparent;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.92rem;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      color: #1a2e1b;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .campo input::placeholder { color: rgba(30,50,30,0.45); }
+
+    .campo input:focus {
+      border-color: var(--green-light);
+      background: var(--cream);
+      box-shadow: 0 0 0 3px rgba(88,129,87,0.2);
+    }
+
+    .senha-container { position: relative; width: 100%; }
+    .senha-container input { padding-right: 48px; }
+
+    .btn-olho {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(30, 50, 30, 0.55);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .btn-olho:hover { color: #3a5a40; }
+
+    .erro {
+      color: #ffb3b3;
+      font-size: 0.78rem;
+      margin-top: 6px;
+      font-weight: 600;
+      padding-left: 4px;
+      min-height: 0;
+    }
+
+    .divisor {
+      height: 1px;
+      background: rgba(225,220,208,0.15);
+      margin: 8px 0 24px;
+    }
+
+    .btn-confirmar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: var(--green-main);
+      color: var(--cream);
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 16px rgba(58,90,64,0.4);
+      letter-spacing: 0.3px;
+    }
+
+    .btn-confirmar:hover { background: var(--green-dark); box-shadow: 0 6px 22px rgba(58,90,64,0.5); }
+    .btn-confirmar:active { transform: scale(0.98); }
+    .btn-confirmar:disabled { opacity: 0.75; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(225,220,208,0.35);
+      border-top-color: var(--cream);
+      border-radius: 50%;
+      animation: girar 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .form-rodape {
+      text-align: center;
+      margin-top: 16px;
+      color: rgba(225,220,208,0.55);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .form-rodape a, .link-acao {
+      color: rgba(225,220,208,0.85);
+      text-decoration: none;
+      font-weight: 700;
+      transition: color 0.2s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.82rem;
+    }
+
+    .form-rodape a:hover, .link-acao:hover { color: var(--cream); text-decoration: underline; }
+
+    /* Toggle Usuário / ONG (igual ao login) */
+    .toggle-tipo {
+      display: flex;
+      background: rgba(30, 60, 30, 0.45);
+      border-radius: 18px;
+      padding: 5px;
+      margin-bottom: 22px;
+      position: relative;
+      border: 1px solid rgba(225,220,208,0.15);
+    }
+
+    .toggle-tipo::before {
+      content: '';
+      position: absolute;
+      top: 5px; left: 5px;
+      width: calc(50% - 5px);
+      height: calc(100% - 10px);
+      background: var(--green-main);
+      border-radius: 13px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 3px 12px rgba(58,90,64,0.4);
+    }
+
+    .toggle-tipo.ong-ativo::before { transform: translateX(100%); }
+
+    .toggle-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 11px 16px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: rgba(225,220,208,0.5);
+      cursor: pointer;
+      border-radius: 13px;
+      position: relative;
+      z-index: 1;
+      transition: color 0.25s;
+      letter-spacing: 0.2px;
+    }
+
+    .toggle-btn.ativo { color: var(--cream); }
+
+    /* ── Caixas do código ── */
+    .otp {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 4px 0 10px;
+      transition: opacity 0.25s var(--ease);
+    }
+
+    .otp.verificando { opacity: 0.5; pointer-events: none; }
+
+    .otp-box {
+      flex: 0 1 52px;
+      min-width: 0;
+      width: 52px;
+      aspect-ratio: 52 / 62;
+      height: auto;
+      background: rgba(225,220,208,0.92);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      text-align: center;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      outline: none;
+      caret-color: var(--green-main);
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease);
+    }
+
+    .otp-box:focus {
+      border-color: var(--green-light);
+      background: var(--cream);
+      box-shadow: 0 0 0 4px rgba(225,220,208,0.25), 0 0 14px rgba(107,158,74,0.55);
+    }
+
+    .otp-box.preenchida { background: var(--cream); }
+    .otp-box.pop { animation: pop 0.22s var(--ease); }
+
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .otp.erro-codigo .otp-box {
+      border-color: var(--erro);
+      background: #fbe9e9;
+      color: #b23b3b;
+    }
+
+    .otp.tremer { animation: tremer 0.4s var(--ease); }
+
+    @keyframes tremer {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-9px); }
+      30% { transform: translateX(8px); }
+      45% { transform: translateX(-6px); }
+      60% { transform: translateX(5px); }
+      75% { transform: translateX(-3px); }
+      90% { transform: translateX(2px); }
+    }
+
+    .otp-box.certa {
+      background: var(--green-main);
+      border-color: var(--cream);
+      color: var(--cream);
+      transform: scale(1.04);
+      transition: background 0.25s var(--ease), border-color 0.25s var(--ease), color 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+
+    .otp-status {
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .otp-status .msg-erro { color: #ffb3b3; }
+
+    .otp-status .ok {
+      color: var(--cream);
+      font-size: 1.4rem;
+      animation: pop 0.3s var(--ease);
+    }
+
+    .reenviar {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(225,220,208,0.7);
+      margin-bottom: 4px;
+    }
+
+    .reenviar .link-acao { font-size: 0.88rem; }
+
+    /* ── Força da senha ── */
+    .forca {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .forca span {
+      flex: 1;
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(225,220,208,0.2);
+      transition: background 0.3s var(--ease);
+    }
+
+    .forca[data-nivel="1"] span:nth-child(-n+1) { background: #e57373; }
+    .forca[data-nivel="2"] span:nth-child(-n+2) { background: #f0c05a; }
+    .forca[data-nivel="3"] span:nth-child(-n+3) { background: var(--cream); }
+
+    .forca-texto {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: rgba(225,220,208,0.6);
+      margin-top: 6px;
+      padding: 0 2px;
+    }
+
+    /* ── Animação de sucesso (mesma do login) ── */
+    .mutuo-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(30,50,30,0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .mutuo-overlay.show { display: flex; }
+
+    .mutuo-alert {
+      background: var(--green-dark);
+      border: 1px solid rgba(225,220,208,0.25);
+      border-radius: 28px;
+      padding: 40px 36px 32px;
+      text-align: center;
+      width: 320px;
+      max-width: calc(100% - 32px);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+      transform: scale(0.7) translateY(20px);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+    }
+
+    .mutuo-overlay.show .mutuo-alert { transform: scale(1) translateY(0); opacity: 1; }
+
+    .mutuo-check-wrap { width: 72px; height: 72px; margin: 0 auto 20px; position: relative; }
+
+    .mutuo-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(225,220,208,0.12);
+      border: 3px solid rgba(225,220,208,0.35);
+      position: absolute;
+    }
+
+    .mutuo-circle.pulse { animation: ringPulse 0.6s ease forwards; }
+
+    @keyframes ringPulse {
+      0%   { transform: scale(0.6); opacity: 0; }
+      60%  { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+
+    .mutuo-check { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+
+    .mutuo-check svg {
+      width: 36px; height: 36px;
+      stroke: var(--cream);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .check-path { stroke-dasharray: 50; stroke-dashoffset: 50; }
+    .check-path.draw { animation: drawCheck 0.45s ease 0.35s forwards; }
+    @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+    .mutuo-title { font-size: 1.25rem; font-weight: 700; color: var(--cream); margin: 0 0 6px; letter-spacing: 0.2px; }
+    .mutuo-sub { font-size: 0.88rem; font-weight: 600; color: rgba(225,220,208,0.65); margin: 0 0 24px; }
+
+    .mutuo-bar-wrap { background: rgba(225,220,208,0.15); border-radius: 99px; height: 4px; overflow: hidden; margin: 0 0 8px; }
+    .mutuo-bar { height: 100%; width: 0%; background: var(--cream); border-radius: 99px; }
+    .mutuo-bar.go { animation: fillBar 1.8s linear 0.2s forwards; }
+    @keyframes fillBar { to { width: 100%; } }
+
+    .mutuo-hint { font-size: 0.72rem; color: rgba(225,220,208,0.4); font-weight: 600; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card-form { padding: 26px 18px 30px; }
+      .otp { gap: 6px; }
+      .otp-box { font-size: 1.45rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topo">
+    <img src="imagens/logo.png" alt="Logo Mútuo" onerror="this.style.display='none'">
+    <h1>Mútuo</h1>
+  </div>
+
+  <div class="card-form">
+
+    <div class="progresso" aria-hidden="true">
+      <div class="progresso-linha"></div>
+      <div class="progresso-preenchida" id="progressoPreenchida"></div>
+      <div class="passo ativo" id="passo1">1</div>
+      <div class="passo" id="passo2">2</div>
+      <div class="passo" id="passo3">3</div>
+    </div>
+
+    <!-- Etapa 1 — E-mail -->
+    <section class="etapa visivel" id="etapa1">
+      <h2>Esqueceu sua senha?</h2>
+      <p class="subtitulo">Informe seu e-mail para receber um código.</p>
+
+      <div class="toggle-tipo" id="toggleTipo">
+        <button type="button" class="toggle-btn ativo" id="btnUsuario" onclick="selecionarTipo('usuario')">Usuário Comum</button>
+        <button type="button" class="toggle-btn" id="btnOng" onclick="selecionarTipo('ong')">ONG</button>
+      </div>
+
+      <div class="campo">
+        <label for="email"><i class="bi bi-envelope-fill"></i> <span id="labelEmail">E-mail</span></label>
+        <input type="email" id="email" placeholder="Seu e-mail" autocomplete="email">
+        <p class="erro" id="erroEmail"></p>
+      </div>
+
+      <div class="divisor"></div>
+
+      <button class="btn-confirmar" id="btnEnviar" type="button">
+        <i class="bi bi-send-fill"></i> Enviar código
+      </button>
+
+      <div class="form-rodape">
+        <a href="login.html"><i class="bi bi-arrow-left"></i> Voltar para o login</a>
+      </div>
+    </section>
+
+    <!-- Etapa 2 — Código -->
+    <section class="etapa" id="etapa2">
+      <h2>Digite o código</h2>
+      <p class="subtitulo">Enviamos um código de 6 dígitos para <b id="emailMascarado"></b></p>
+
+      <div class="otp" id="otp">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 2">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 3">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 4">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 5">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 6">
+      </div>
+
+      <div class="otp-status" id="otpStatus" aria-live="polite"></div>
+
+      <div class="reenviar" id="reenviar"></div>
+
+      <div class="form-rodape">
+        <button type="button" class="link-acao" id="btnTrocarEmail"><i class="bi bi-pencil-fill"></i> Trocar e-mail</button>
+      </div>
+    </section>
+
+    <!-- Etapa 3 — Nova senha -->
+    <section class="etapa" id="etapa3">
+      <h2>Crie uma nova senha</h2>
+      <p class="subtitulo">Escolha uma senha que você não usou antes.</p>
+
+      <div class="campo">
+        <label for="novaSenha"><i class="bi bi-lock-fill"></i> Nova senha</label>
+        <div class="senha-container">
+          <input type="password" id="novaSenha" placeholder="Nova senha" autocomplete="new-password">
+          <button type="button" class="btn-olho" data-alvo="novaSenha" aria-label="Mostrar senha">
+            <i class="bi bi-eye-slash"></i>
+          </button>
+        </div>
+        <div class="forca" id="forca" data-nivel="0"><span></span><span></span><span></span></div>
+        <div class="forca-texto"><span>Mínimo de 8 caracteres</span><span id="forcaTexto"></span></div>
+        <p class="erro" id="erroNovaSenha"></p>
+      </div>
+
+      <div class="campo">
+        <label for="confirmarSenha"><i class="bi bi-lock-fill"></i> Confirmar nova senha</label>
+        <div class="senha-container">
+          <input type="password" id="confirmarSenha" placeholder="Repita a nova senha" autocomplete="new-password">
+          <button type="button" class="btn-olho" data-alvo="confirmarSenha" aria-label="Mostrar senha">
+            <i class="bi bi-eye-slash"></i>
+          </button>
+        </div>
+        <p class="erro" id="erroConfirmar"></p>
+      </div>
+
+      <div class="divisor"></div>
+
+      <button class="btn-confirmar" id="btnRedefinir" type="button">
+        <i class="bi bi-check2-circle"></i> Redefinir senha
+      </button>
+
+      <div class="form-rodape">
+        <a href="login.html"><i class="bi bi-arrow-left"></i> Voltar para o login</a>
+      </div>
+    </section>
+  </div>
+
+  <div class="mutuo-overlay" id="mutuoOverlay">
+    <div class="mutuo-alert">
+      <div class="mutuo-check-wrap">
+        <div class="mutuo-circle" id="mutuoCircle"></div>
+        <div class="mutuo-check">
+          <svg viewBox="0 0 36 36">
+            <polyline class="check-path" id="mutuoCheckPath" points="7,19 15,27 29,11"/>
+          </svg>
+        </div>
+      </div>
+      <p class="mutuo-title">Senha redefinida!</p>
+      <p class="mutuo-sub">Faça login com sua nova senha</p>
+      <div class="mutuo-bar-wrap"><div class="mutuo-bar" id="mutuoBar"></div></div>
+      <p class="mutuo-hint">Redirecionando...</p>
+    </div>
+  </div>
+
+<script>
+  const baseUrl = 'https://mutuo-api.onrender.com';
+  const MSG_SERVIDOR_INICIANDO = 'Servidor iniciando, tente novamente em alguns segundos';
+
+  // Estado da página (o código fica só em memória, nunca no sessionStorage).
+  let email = '';
+  let tipo = 'usuario';
+  let codigo = '';
+  let etapaAtual = 1;
+  let verificando = false;
+  let timerReenvio = null;
+
+  const caixas = Array.from(document.querySelectorAll('.otp-box'));
+  const otp = document.getElementById('otp');
+  const otpStatus = document.getElementById('otpStatus');
+
+  const toast = Swal.mixin({
+    toast: true,
+    position: 'top',
+    showConfirmButton: false,
+    timer: 2500,
+    timerProgressBar: true
+  });
+
+  const esperar = (ms) => new Promise(r => setTimeout(r, ms));
+
+  // POST em JSON com 1 nova tentativa se vier HTML (cold start do Render) ou falha de rede.
+  // Retorna { status, data }. Lança Error com mensagem legível se não conseguir resposta JSON.
+  async function chamarApi(rota, body, tentativa = 1) {
+    try {
+      const resposta = await fetch(baseUrl + rota, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const contentType = resposta.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Resposta não-JSON (status ' + resposta.status + ')');
+      }
+      const data = await resposta.json();
+      return { status: resposta.status, data };
+    } catch (err) {
+      console.error('Erro ao chamar ' + rota + ' (tentativa ' + tentativa + '):', err);
+      if (tentativa < 2) {
+        await esperar(2000);
+        return chamarApi(rota, body, tentativa + 1);
+      }
+      throw new Error(MSG_SERVIDOR_INICIANDO);
+    }
+  }
+
+  function mostrarErro(mensagem) {
+    Swal.fire({ icon: 'error', title: mensagem || 'Algo deu errado. Tente novamente.', confirmButtonColor: '#588157' });
+  }
+
+  function carregando(botao, ativo, textoOriginal) {
+    botao.disabled = ativo;
+    botao.innerHTML = ativo ? '<span class="spinner"></span>' : textoOriginal;
+  }
+
+  // ── Troca de etapas ──
+  function irPara(etapa) {
+    if (etapa === etapaAtual) return;
+    const frente = etapa > etapaAtual;
+    const atual = document.getElementById('etapa' + etapaAtual);
+    const proxima = document.getElementById('etapa' + etapa);
+
+    atual.className = 'etapa visivel ' + (frente ? 'saindo-frente' : 'saindo-tras');
+    etapaAtual = etapa;
+    atualizarProgresso();
+
+    setTimeout(() => {
+      atual.className = 'etapa';
+      proxima.className = 'etapa visivel ' + (frente ? 'entrando-frente' : 'entrando-tras');
+      aoEntrarNaEtapa(etapa);
+    }, 180);
+  }
+
+  function atualizarProgresso() {
+    for (let i = 1; i <= 3; i++) {
+      const p = document.getElementById('passo' + i);
+      p.classList.toggle('ativo', i === etapaAtual);
+      p.classList.toggle('feito', i < etapaAtual);
+      p.innerHTML = i < etapaAtual ? '<i class="bi bi-check-lg"></i>' : String(i);
+    }
+    document.getElementById('progressoPreenchida').style.width =
+      'calc((100% - 28px) * ' + ((etapaAtual - 1) / 2) + ')';
+  }
+
+  function aoEntrarNaEtapa(etapa) {
+    if (etapa === 1) document.getElementById('email').focus();
+    if (etapa === 2) caixas[0].focus();
+    if (etapa === 3) document.getElementById('novaSenha').focus();
+  }
+
+  // ── Etapa 1 ──
+  function selecionarTipo(t) {
+    tipo = t === 'ong' ? 'ong' : 'usuario';
+    document.getElementById('btnUsuario').classList.toggle('ativo', tipo === 'usuario');
+    document.getElementById('btnOng').classList.toggle('ativo', tipo === 'ong');
+    document.getElementById('toggleTipo').classList.toggle('ong-ativo', tipo === 'ong');
+    document.getElementById('labelEmail').textContent = tipo === 'ong' ? 'E-mail da ONG' : 'E-mail';
+    document.getElementById('email').placeholder = tipo === 'ong' ? 'E-mail da ONG' : 'Seu e-mail';
+    document.getElementById('erroEmail').textContent = '';
+  }
+
+  selecionarTipo(new URLSearchParams(window.location.search).get('tipo'));
+
+  function emailValido(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  function mascararEmail(v) {
+    if (!v || !v.includes('@')) return v || '';
+    const [usuario, dominio] = v.split('@');
+    if (!usuario) return '****@' + dominio;
+    return usuario[0] + '****@' + dominio;
+  }
+
+  const btnEnviar = document.getElementById('btnEnviar');
+  const textoBtnEnviar = btnEnviar.innerHTML;
+
+  btnEnviar.addEventListener('click', async () => {
+    const valor = document.getElementById('email').value.trim().toLowerCase();
+    const erroEmail = document.getElementById('erroEmail');
+    erroEmail.textContent = '';
+
+    if (!valor) { erroEmail.textContent = 'Digite seu e-mail.'; return; }
+    if (!emailValido(valor)) { erroEmail.textContent = 'Digite um e-mail válido.'; return; }
+
+    carregando(btnEnviar, true);
+    try {
+      const { data } = await chamarApi('/esqueciSenha', { email: valor, tipo });
+      if (data.sucesso) {
+        email = valor;
+        document.getElementById('emailMascarado').textContent = mascararEmail(email);
+        limparCaixas();
+        otpStatus.innerHTML = '';
+        iniciarContador(60);
+        irPara(2);
+      } else {
+        mostrarErro(data.mensagem);
+      }
+    } catch (err) {
+      mostrarErro(err.message);
+    } finally {
+      carregando(btnEnviar, false, textoBtnEnviar);
+    }
+  });
+
+  // ── Etapa 2: caixas do código ──
+  function limparCaixas() {
+    caixas.forEach(c => {
+      c.value = '';
+      c.classList.remove('preenchida', 'pop', 'certa');
+      c.style.transitionDelay = '';
+    });
+    otp.classList.remove('erro-codigo', 'tremer', 'verificando');
+  }
+
+  function preencherCaixa(caixa, digito) {
+    caixa.value = digito;
+    caixa.classList.toggle('preenchida', !!digito);
+    if (digito) {
+      caixa.classList.remove('pop');
+      void caixa.offsetWidth; // reinicia a animação
+      caixa.classList.add('pop');
+    }
+  }
+
+  // Distribui vários dígitos a partir de um índice (colar / autofill).
+  function distribuir(digitos, inicio) {
+    const ini = digitos.length >= 6 ? 0 : inicio;
+    digitos.slice(0, 6 - ini).split('').forEach((d, i) => preencherCaixa(caixas[ini + i], d));
+    const proxima = Math.min(ini + digitos.length, 5);
+    caixas[proxima].focus();
+    conferirCompleto();
+  }
+
+  function limparErroCodigo() {
+    if (otp.classList.contains('erro-codigo')) {
+      otp.classList.remove('erro-codigo');
+      otpStatus.innerHTML = '';
+    }
+  }
+
+  caixas.forEach((caixa, i) => {
+    caixa.addEventListener('focus', () => caixa.select());
+
+    caixa.addEventListener('input', () => {
+      limparErroCodigo();
+      const digitos = caixa.value.replace(/\D/g, '');
+      if (digitos.length > 1) { distribuir(digitos, i); return; }
+      preencherCaixa(caixa, digitos);
+      if (digitos && i < 5) caixas[i + 1].focus();
+      conferirCompleto();
+    });
+
+    caixa.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !caixa.value && i > 0) {
+        e.preventDefault();
+        preencherCaixa(caixas[i - 1], '');
+        caixas[i - 1].focus();
+      } else if (e.key === 'ArrowLeft' && i > 0) {
+        e.preventDefault();
+        caixas[i - 1].focus();
+      } else if (e.key === 'ArrowRight' && i < 5) {
+        e.preventDefault();
+        caixas[i + 1].focus();
+      }
+    });
+
+    caixa.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const texto = (e.clipboardData || window.clipboardData).getData('text') || '';
+      const digitos = texto.replace(/\D/g, '');
+      if (!digitos) return;
+      limparErroCodigo();
+      distribuir(digitos, i);
+    });
+  });
+
+  function conferirCompleto() {
+    const valor = caixas.map(c => c.value).join('');
+    if (valor.length === 6 && /^\d{6}$/.test(valor) && !verificando) verificarCodigo(valor);
+  }
+
+  async function verificarCodigo(valor) {
+    verificando = true;
+    otp.classList.add('verificando');
+    otpStatus.innerHTML = '<span class="spinner"></span>';
+    caixas.forEach(c => c.blur());
+
+    try {
+      const { data } = await chamarApi('/verificarCodigo', { email, tipo, codigo: valor });
+      if (data.sucesso) {
+        codigo = valor;
+        codigoCerto();
+      } else {
+        codigoErrado(data);
+      }
+    } catch (err) {
+      otp.classList.remove('verificando');
+      otpStatus.innerHTML = '';
+      verificando = false;
+      mostrarErro(err.message);
+      caixas[5].focus();
+    }
+  }
+
+  function codigoCerto() {
+    otp.classList.remove('verificando');
+    otpStatus.innerHTML = '';
+    caixas.forEach((c, i) => {
+      c.style.transitionDelay = (i * 60) + 'ms';
+      c.classList.add('certa');
+    });
+    setTimeout(() => {
+      otpStatus.innerHTML = '<i class="bi bi-check-circle-fill ok"></i>';
+    }, 6 * 60 + 100);
+    setTimeout(() => {
+      verificando = false;
+      pararContador();
+      irPara(3);
+    }, 6 * 60 + 650);
+  }
+
+  function codigoErrado(data) {
+    otp.classList.remove('verificando');
+    otp.classList.add('erro-codigo');
+    otp.classList.remove('tremer');
+    void otp.offsetWidth;
+    otp.classList.add('tremer');
+
+    let msg = data.mensagem || 'Código incorreto.';
+    if (typeof data.tentativasRestantes === 'number' && data.tentativasRestantes > 0) {
+      msg += ' ' + data.tentativasRestantes + (data.tentativasRestantes === 1 ? ' tentativa restante.' : ' tentativas restantes.');
+    }
+
+    // Código invalidado (tentativas esgotadas ou expirado): reenvio liberado na hora.
+    if (data.tentativasRestantes === 0 || typeof data.tentativasRestantes !== 'number') {
+      liberarReenvio();
+    }
+
+    setTimeout(() => {
+      caixas.forEach(c => { c.value = ''; c.classList.remove('preenchida', 'pop'); });
+      otp.classList.remove('tremer');
+      otpStatus.innerHTML = '<span class="msg-erro"></span>';
+      otpStatus.firstChild.textContent = msg;
+      verificando = false;
+      caixas[0].focus();
+    }, 420);
+  }
+
+  // ── Reenviar ──
+  const reenviarEl = document.getElementById('reenviar');
+
+  function pararContador() {
+    if (timerReenvio) { clearInterval(timerReenvio); timerReenvio = null; }
+  }
+
+  function iniciarContador(segundos) {
+    pararContador();
+    let restante = segundos;
+    const render = () => {
+      const m = Math.floor(restante / 60);
+      const s = String(restante % 60).padStart(2, '0');
+      reenviarEl.textContent = 'Reenviar código em ' + m + ':' + s;
+    };
+    restante--;
+    render();
+    timerReenvio = setInterval(() => {
+      restante--;
+      if (restante <= 0) { liberarReenvio(); return; }
+      render();
+    }, 1000);
+  }
+
+  function liberarReenvio() {
+    pararContador();
+    reenviarEl.innerHTML = '<button type="button" class="link-acao" id="btnReenviar"><i class="bi bi-arrow-clockwise"></i> Reenviar código</button>';
+    document.getElementById('btnReenviar').addEventListener('click', reenviarCodigo);
+  }
+
+  async function reenviarCodigo() {
+    const btn = document.getElementById('btnReenviar');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;"></span>'; }
+    try {
+      const { data } = await chamarApi('/esqueciSenha', { email, tipo });
+      if (data.sucesso) {
+        limparCaixas();
+        otpStatus.innerHTML = '';
+        toast.fire({ icon: 'success', title: 'Código reenviado' });
+        iniciarContador(60);
+        caixas[0].focus();
+      } else {
+        mostrarErro(data.mensagem);
+        liberarReenvio();
+      }
+    } catch (err) {
+      mostrarErro(err.message);
+      liberarReenvio();
+    }
+  }
+
+  document.getElementById('btnTrocarEmail').addEventListener('click', () => {
+    pararContador();
+    codigo = '';
+    irPara(1);
+  });
+
+  // ── Etapa 3: nova senha ──
+  document.querySelectorAll('.btn-olho').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const campo = document.getElementById(this.dataset.alvo);
+      const mostrar = campo.type === 'password';
+      campo.type = mostrar ? 'text' : 'password';
+      this.innerHTML = mostrar ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+    });
+  });
+
+  const campoNova = document.getElementById('novaSenha');
+  const campoConfirmar = document.getElementById('confirmarSenha');
+
+  function nivelSenha(s) {
+    if (!s) return 0;
+    if (s.length < 8) return 1;
+    let variedade = 0;
+    if (/[a-z]/.test(s)) variedade++;
+    if (/[A-Z]/.test(s)) variedade++;
+    if (/\d/.test(s)) variedade++;
+    if (/[^A-Za-z0-9]/.test(s)) variedade++;
+    if (variedade >= 3 || (s.length >= 12 && variedade >= 2)) return 3;
+    if (variedade >= 2) return 2;
+    return 1;
+  }
+
+  campoNova.addEventListener('input', () => {
+    const nivel = nivelSenha(campoNova.value);
+    document.getElementById('forca').dataset.nivel = nivel;
+    document.getElementById('forcaTexto').textContent = ['', 'Fraca', 'Média', 'Forte'][nivel];
+    document.getElementById('erroNovaSenha').textContent = '';
+  });
+
+  campoConfirmar.addEventListener('input', () => {
+    document.getElementById('erroConfirmar').textContent = '';
+  });
+
+  const btnRedefinir = document.getElementById('btnRedefinir');
+  const textoBtnRedefinir = btnRedefinir.innerHTML;
+
+  btnRedefinir.addEventListener('click', async () => {
+    const novaSenha = campoNova.value;
+    const confirmar = campoConfirmar.value;
+    const erroNova = document.getElementById('erroNovaSenha');
+    const erroConf = document.getElementById('erroConfirmar');
+    erroNova.textContent = '';
+    erroConf.textContent = '';
+
+    let valido = true;
+    if (novaSenha.length < 8) { erroNova.textContent = 'A senha deve ter no mínimo 8 caracteres.'; valido = false; }
+    if (!confirmar) { erroConf.textContent = 'Confirme a nova senha.'; valido = false; }
+    else if (novaSenha !== confirmar) { erroConf.textContent = 'As senhas não coincidem.'; valido = false; }
+    if (!valido) return;
+
+    carregando(btnRedefinir, true);
+    try {
+      const { data } = await chamarApi('/redefinirSenha', { email, tipo, codigo, novaSenha });
+      if (data.sucesso) {
+        mostrarAlertMutuo();
+        setTimeout(() => window.location.replace('login.html'), 2000);
+        return;
+      }
+
+      const mensagem = data.mensagem || 'Não foi possível redefinir a senha.';
+      if (/c[óo]digo|tentativas/i.test(mensagem)) {
+        // Código expirou / foi invalidado no meio-tempo: volta pra etapa 2 com reenvio liberado.
+        await Swal.fire({ icon: 'warning', title: mensagem, confirmButtonColor: '#588157' });
+        codigo = '';
+        limparCaixas();
+        otpStatus.innerHTML = '';
+        liberarReenvio();
+        irPara(2);
+      } else if (/senha/i.test(mensagem)) {
+        erroNova.textContent = mensagem;
+      } else {
+        mostrarErro(mensagem);
+      }
+    } catch (err) {
+      mostrarErro(err.message);
+    } finally {
+      carregando(btnRedefinir, false, textoBtnRedefinir);
+    }
+  });
+
+  function mostrarAlertMutuo() {
+    const overlay = document.getElementById('mutuoOverlay');
+    const circle  = document.getElementById('mutuoCircle');
+    const path    = document.getElementById('mutuoCheckPath');
+    const bar     = document.getElementById('mutuoBar');
+
+    circle.classList.remove('pulse');
+    path.classList.remove('draw');
+    bar.classList.remove('go');
+    void circle.offsetWidth; // força reflow para reiniciar animações
+
+    overlay.classList.add('show');
+    setTimeout(() => {
+      circle.classList.add('pulse');
+      path.classList.add('draw');
+      bar.classList.add('go');
+    }, 80);
+  }
+
+  // Enter envia a etapa atual.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || Swal.isVisible()) return;
+    if (etapaAtual === 1) btnEnviar.click();
+    if (etapaAtual === 3) btnRedefinir.click();
+  });
+
+  atualizarProgresso();
+  document.getElementById('email').focus();
+</script>
+</body>
+</html>

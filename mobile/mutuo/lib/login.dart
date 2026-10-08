@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mutuo/cadastro.dart';
+import 'package:mutuo/esqueci_senha.dart';
 import 'package:mutuo/inicialUser.dart';
 import 'package:mutuo/inicialOng.dart';
 import 'package:mutuo/services/api_service.dart';
@@ -242,7 +243,12 @@ class _LoginState extends State<Login> {
                           const SizedBox(height: 15),
 
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const EsqueciSenha()),
+                              );
+                            },
                             child: const Text(
                               "Esqueci minha senha",
                               style: TextStyle(color: _verde),

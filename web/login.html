@@ -457,7 +457,7 @@
   <p class="erro" id="erroSenha"></p>
 
   <div class="link-esqueceu">
-    <a href="#">Esqueceu sua senha?</a>
+    <a href="#" id="linkEsqueciSenha" class="link-esqueci-senha">Esqueceu sua senha?</a>
   </div>
 </div>
 
@@ -624,6 +624,11 @@
   }
   const btnOlho = document.getElementById('btn-olho');
 const campoSenha = document.getElementById('senha');
+
+document.getElementById('linkEsqueciSenha').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.location.href = 'esqueciSenha.html?tipo=' + (tipoSelecionado === 'ong' ? 'ong' : 'usuario');
+});
 
 btnOlho.addEventListener('click', function () {
   if (campoSenha.type === 'password') {

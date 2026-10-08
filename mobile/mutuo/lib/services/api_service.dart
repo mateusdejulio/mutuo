@@ -83,6 +83,84 @@ class ApiService {
     }
   }
 
+  // ── Recuperação de senha ──
+
+  // POST que confere o content-type antes do jsonDecode. Se vier HTML (cold
+  // start do Render) ou falhar a rede, espera 2s e tenta mais 1 vez.
+  Future<Map<String, dynamic>> _postRecuperacao(
+    String rota,
+    Map<String, dynamic> body,
+  ) async {
+    final url = Uri.parse('$baseUrl$rota');
+    for (var tentativa = 1; tentativa <= 2; tentativa++) {
+      try {
+        final response = await http.post(
+          url,
+          headers: _headers,
+          body: jsonEncode(body),
+        );
+        final contentType = response.headers['content-type'] ?? '';
+        if (!contentType.contains('application/json')) {
+          throw FormatException(
+            'Resposta não-JSON (status ${response.statusCode})',
+          );
+        }
+        final dados = jsonDecode(response.body);
+        if (dados is! Map<String, dynamic>) {
+          throw const FormatException('JSON inesperado');
+        }
+        final resultado = <String, dynamic>{
+          'sucesso': dados['sucesso'] == true,
+          'mensagem': dados['mensagem']?.toString() ?? '',
+        };
+        if (dados['tentativasRestantes'] != null) {
+          resultado['tentativasRestantes'] = dados['tentativasRestantes'];
+        }
+        return resultado;
+      } catch (e) {
+        debugPrint('Erro em $rota (tentativa $tentativa): $e');
+        if (tentativa < 2) await Future.delayed(const Duration(seconds: 2));
+      }
+    }
+    return {
+      'sucesso': false,
+      'mensagem': 'Servidor iniciando, tente novamente em alguns segundos.',
+    };
+  }
+
+  Future<Map<String, dynamic>> solicitarCodigoRecuperacao(
+    String email,
+    String tipo,
+  ) {
+    return _postRecuperacao('/esqueciSenha', {'email': email, 'tipo': tipo});
+  }
+
+  Future<Map<String, dynamic>> verificarCodigoRecuperacao(
+    String email,
+    String tipo,
+    String codigo,
+  ) {
+    return _postRecuperacao('/verificarCodigo', {
+      'email': email,
+      'tipo': tipo,
+      'codigo': codigo,
+    });
+  }
+
+  Future<Map<String, dynamic>> redefinirSenha(
+    String email,
+    String tipo,
+    String codigo,
+    String novaSenha,
+  ) {
+    return _postRecuperacao('/redefinirSenha', {
+      'email': email,
+      'tipo': tipo,
+      'codigo': codigo,
+      'novaSenha': novaSenha,
+    });
+  }
+
   Future<Map<String, dynamic>> cadastrarUsuario(
     Map<String, dynamic> dadosDoUsuario,
   ) async {
