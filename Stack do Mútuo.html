@@ -1,0 +1,401 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Stack do Mútuo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Quicksand:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: hero com o diagrama de arquitetura (clientes → API → serviços), depois o catálogo filtrável por camada. */
+  :root {
+    --verde: #3a5a40;
+    --verde-medio: #588157;
+    --verde-claro: #a3b18a;
+    --creme: #e1dcd0;
+    --fundo: #f3f1ea;
+    --superficie: #fbfaf6;
+    --tinta: #1f2a20;
+    --tinta-suave: #56604f;
+    --linha: #d6d2c4;
+    --chip: #e9e6dc;
+
+    --display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+    --corpo: 'Quicksand', 'Trebuchet MS', system-ui, sans-serif;
+    --mono: 'Roboto Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+    --raio: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --verde: #a3c49a;
+      --verde-medio: #7fa477;
+      --verde-claro: #4f6b4b;
+      --creme: #2b3a2d;
+      --fundo: #131b15;
+      --superficie: #1a241c;
+      --tinta: #e6e2d6;
+      --tinta-suave: #a9b0a0;
+      --linha: #2f3d31;
+      --chip: #223024;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --verde: #a3c49a;
+    --verde-medio: #7fa477;
+    --verde-claro: #4f6b4b;
+    --creme: #2b3a2d;
+    --fundo: #131b15;
+    --superficie: #1a241c;
+    --tinta: #e6e2d6;
+    --tinta-suave: #a9b0a0;
+    --linha: #2f3d31;
+    --chip: #223024;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--fundo);
+    color: var(--tinta);
+    font-family: var(--corpo);
+    font-size: 15px;
+    line-height: 1.55;
+    padding: 0 20px;
+  }
+  .pagina { max-width: 1080px; margin: 0 auto; padding-block: 48px 72px; }
+
+  h1, h2 { font-family: var(--display); font-weight: 700; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  .rotulo {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--verde-medio);
+  }
+
+  /* ── Hero ── */
+  .hero { display: grid; gap: 14px; margin-bottom: 36px; }
+  .hero h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); line-height: 1; color: var(--verde); }
+  .hero h1 em { font-style: italic; font-weight: 600; }
+  .hero p { margin: 0; max-width: 62ch; color: var(--tinta-suave); font-size: 1.02rem; }
+  .numeros { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 6px; }
+  .numeros div { display: grid; }
+  .numeros b { font-family: var(--display); font-size: 2rem; line-height: 1; color: var(--verde); font-variant-numeric: tabular-nums; }
+  .numeros span { font-size: 0.8rem; color: var(--tinta-suave); font-weight: 600; }
+
+  /* ── Diagrama ── */
+  .diagrama-wrap { overflow-x: auto; margin-bottom: 56px; }
+  .diagrama {
+    min-width: 760px;
+    display: grid;
+    grid-template-columns: 1fr 56px 1.15fr 56px 1fr;
+    align-items: center;
+    background: var(--superficie);
+    border: 1px solid var(--linha);
+    border-radius: 22px;
+    padding: 28px;
+  }
+  .coluna { display: grid; gap: 10px; }
+  .coluna > .rotulo { margin-bottom: 2px; }
+  .no {
+    border: 1px solid var(--linha);
+    border-radius: var(--raio);
+    padding: 10px 14px;
+    background: var(--fundo);
+    display: grid; gap: 2px;
+  }
+  .no strong { font-size: 0.95rem; }
+  .no small { color: var(--tinta-suave); font-size: 0.78rem; font-weight: 500; }
+  .no code { font-family: var(--mono); font-size: 0.72rem; color: var(--verde-medio); }
+  .api {
+    background: var(--verde);
+    color: var(--fundo);
+    border-radius: 20px;
+    padding: 22px;
+    display: grid; gap: 12px;
+  }
+  .api .rotulo { color: inherit; opacity: .8; }
+  .api h2 { font-size: 1.9rem; line-height: 1; color: inherit; }
+  .api code { font-family: var(--mono); font-size: 0.76rem; opacity: .85; }
+  .api ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .api li {
+    font-size: 0.76rem; font-weight: 700;
+    border: 1px solid color-mix(in srgb, var(--fundo) 40%, transparent);
+    border-radius: 99px; padding: 3px 10px;
+  }
+  .seta { display: grid; place-items: center; color: var(--verde-medio); }
+  .seta svg { width: 44px; height: 24px; }
+  .seta svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .nota-diagrama { grid-column: 1 / -1; margin-top: 18px; font-size: 0.8rem; color: var(--tinta-suave); }
+  .nota-diagrama code { font-family: var(--mono); font-size: 0.75rem; }
+
+  /* ── Filtros ── */
+  .barra {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2;
+    background: color-mix(in srgb, var(--fundo) 92%, transparent);
+    backdrop-filter: blur(8px);
+    padding-block: 12px;
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--linha);
+    margin-bottom: 28px;
+  }
+  .filtros { display: flex; flex-wrap: wrap; gap: 6px; }
+  .filtros button {
+    font: inherit; font-size: 0.82rem; font-weight: 700;
+    color: var(--tinta-suave); background: var(--chip);
+    border: 1px solid transparent; border-radius: 99px;
+    padding: 6px 13px; cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .filtros button:hover { color: var(--tinta); }
+  .filtros button[aria-pressed="true"] { background: var(--verde); color: var(--fundo); }
+  .filtros button .qtd { font-family: var(--mono); font-weight: 400; font-size: 0.72rem; opacity: .75; margin-left: 4px; }
+  .busca {
+    font: inherit; font-size: 0.88rem; color: var(--tinta);
+    background: var(--superficie); border: 1px solid var(--linha); border-radius: 99px;
+    padding: 7px 14px; width: min(240px, 100%);
+  }
+  button:focus-visible, .busca:focus-visible { outline: 2px solid var(--verde-medio); outline-offset: 2px; }
+
+  /* ── Catálogo ── */
+  .camada { margin-bottom: 44px; }
+  .camada[hidden] { display: none; }
+  .camada-topo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 14px; }
+  .camada-topo h2 { font-size: 1.85rem; color: var(--verde); }
+  .camada-topo p { margin: 0; color: var(--tinta-suave); font-size: 0.88rem; flex: 1 1 280px; }
+  .itens {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    border-top: 1px solid var(--linha);
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 12px;
+    padding: 14px 16px 14px 0;
+    border-bottom: 1px solid var(--linha);
+  }
+  .item[hidden] { display: none; }
+  .item h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+  .item .versao { font-family: var(--mono); font-size: 0.74rem; color: var(--verde-medio); align-self: center; white-space: nowrap; }
+  .item p { grid-column: 1 / -1; margin: 0; font-size: 0.86rem; color: var(--tinta-suave); max-width: 60ch; }
+  .item .tags { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .tag {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    background: var(--chip); color: var(--tinta-suave);
+    border-radius: 6px; padding: 2px 7px;
+  }
+  .vazio { color: var(--tinta-suave); font-size: 0.95rem; }
+
+  footer { border-top: 1px solid var(--linha); padding-top: 18px; color: var(--tinta-suave); font-size: 0.8rem; }
+  footer code { font-family: var(--mono); font-size: 0.75rem; }
+
+  @media (max-width: 560px) {
+    .pagina { padding-block: 32px 56px; }
+    .itens { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<main class="pagina">
+  <header class="hero">
+    <span class="rotulo">Mútuo · Projeto Integrador</span>
+    <h1>Tudo que move<br>o <em>Mútuo</em></h1>
+    <p>Cada linguagem, biblioteca e serviço usado no site, no app, no painel administrativo e na API. Levantado direto do código: <code>package.json</code>, <code>pubspec.yaml</code>, CDNs das páginas e chamadas a serviços externos.</p>
+    <div class="numeros" id="numeros"></div>
+  </header>
+
+  <section class="diagrama-wrap" aria-label="Como as partes se conectam">
+    <div class="diagrama">
+      <div class="coluna">
+        <span class="rotulo">Quem usa</span>
+        <div class="no"><strong>Site</strong><small>HTML, CSS e JS + Bootstrap</small><code>web/</code></div>
+        <div class="no"><strong>App Android</strong><small>Flutter / Dart</small><code>mobile/mutuo</code></div>
+        <div class="no"><strong>Painel do administrador</strong><small>Electron + Chart.js</small><code>electron/</code></div>
+      </div>
+      <div class="seta" aria-hidden="true"><svg viewBox="0 0 44 24"><path d="M2 12h38M32 5l8 7-8 7"/></svg></div>
+      <div class="api">
+        <span class="rotulo">Back-end no Render</span>
+        <h2>mutuo-api</h2>
+        <code>mutuo-api.onrender.com</code>
+        <ul>
+          <li>Node.js</li><li>Express 5</li><li>Socket.IO</li><li>mysql2</li><li>bcryptjs</li><li>Multer</li><li>Puppeteer</li><li>firebase-admin</li>
+        </ul>
+      </div>
+      <div class="seta" aria-hidden="true"><svg viewBox="0 0 44 24"><path d="M2 12h38M32 5l8 7-8 7"/></svg></div>
+      <div class="coluna">
+        <span class="rotulo">Serviços</span>
+        <div class="no"><strong>MySQL</strong><small>Todos os dados da plataforma</small></div>
+        <div class="no"><strong>Google Gemini</strong><small>Moderação dos serviços com IA</small></div>
+        <div class="no"><strong>Firebase Cloud Messaging</strong><small>Notificações push no app</small></div>
+        <div class="no"><strong>Brevo</strong><small>E-mail de recuperação de senha</small></div>
+        <div class="no"><strong>Gmail (SMTP)</strong><small>Formulário de contato</small></div>
+      </div>
+      <p class="nota-diagrama">O painel Electron também abre conexão direto com o MySQL, pelo <code>mysql2</code>. Chat e notificações chegam em tempo real: mensagens pelo Socket.IO, avisos com o app fechado pelo FCM.</p>
+    </div>
+  </section>
+
+  <div class="barra">
+    <div class="filtros" id="filtros" role="group" aria-label="Filtrar por camada"></div>
+    <input class="busca" id="busca" type="search" placeholder="Buscar tecnologia…" aria-label="Buscar tecnologia">
+  </div>
+
+  <div id="catalogo"></div>
+  <p class="vazio" id="vazio" hidden>Nenhuma tecnologia com esse nome. Tente outra palavra ou limpe a busca.</p>
+
+  <footer>
+    Levantamento feito no repositório <code>mateusdejulio/mutuo</code> em outubro de 2026. As versões são as declaradas nos manifestos (<code>^</code> aceita atualizações menores).
+  </footer>
+</main>
+
+<script>
+  const CAMADAS = [
+    { id: 'api', nome: 'API', desc: 'O back-end em mutuo-api/. Atende o site, o app e o painel, e conversa com todos os serviços externos.' },
+    { id: 'servicos', nome: 'Serviços e infraestrutura', desc: 'Onde o Mútuo roda, guarda dados e terceiriza e-mail, push e IA.' },
+    { id: 'web', nome: 'Site', desc: 'As páginas em web/: HTML, CSS e JavaScript puros, com bibliotecas carregadas por CDN.' },
+    { id: 'app', nome: 'App Flutter', desc: 'O aplicativo em mobile/mutuo, hoje configurado para Android.' },
+    { id: 'electron', nome: 'Painel Electron', desc: 'O programa de desktop do administrador: dashboard, moderação, usuários, ONGs e premium.' },
+    { id: 'ferramentas', nome: 'Ferramentas da equipe', desc: 'O que a equipe usa para versionar, organizar e manter o código.' }
+  ];
+
+  const TECNOLOGIAS = [
+    // API
+    { c: 'api', n: 'Node.js', v: 'runtime', d: 'Executa a API. O fetch nativo faz as chamadas ao Gemini e ao Brevo, e o módulo crypto gera os códigos de recuperação com randomInt.', t: ['JavaScript'] },
+    { c: 'api', n: 'Express', v: '^5.2.1', d: 'Todas as rotas REST: login, cadastro, serviços, solicitações, certificados, premium, chat, contato e recuperação de senha.', t: ['npm'] },
+    { c: 'api', n: 'mysql2', v: '^3.22.5', d: 'Pool de conexões com promises. Usa fuso -03:00 para os horários do NOW() chegarem certos no front-end.', t: ['npm', 'banco'] },
+    { c: 'api', n: 'bcryptjs', v: '^3.0.3', d: 'Hash das senhas com custo 10 e dos códigos de recuperação. Senhas antigas em texto puro migram para hash no primeiro login.', t: ['npm', 'segurança'] },
+    { c: 'api', n: 'Socket.IO', v: '^4.8.3', d: 'Servidor do chat em tempo real. Eventos identificar, mensagem:enviar, mensagem:enviada e conversa:lida.', t: ['npm', 'tempo real'] },
+    { c: 'api', n: 'firebase-admin', v: '^14.3.0', d: 'Dispara notificações push pelo FCM para os aparelhos registrados e remove tokens inválidos.', t: ['npm', 'push'] },
+    { c: 'api', n: 'Multer', v: '^2.1.1', d: 'Recebe as fotos de perfil e de serviço enviadas como multipart/form-data.', t: ['npm', 'upload'] },
+    { c: 'api', n: 'Puppeteer', v: '^25.6.0', d: 'Abre um Chrome headless e transforma templates/certificado.html em PDF A4 paisagem (297 × 210 mm) com código de verificação.', t: ['npm', 'PDF'] },
+    { c: 'api', n: 'Nodemailer', v: '^9.0.5', d: 'Envia as mensagens do formulário de contato do site para o e-mail da equipe pelo Gmail.', t: ['npm', 'e-mail'] },
+    { c: 'api', n: 'dotenv', v: '^17.4.2', d: 'Lê o .env versionado e o .env.local, que guarda a chave do Gemini fora do repositório.', t: ['npm', 'config'] },
+    { c: 'api', n: 'cors', v: '^2.8.6', d: 'Libera o site e o app para chamarem a API de outro domínio.', t: ['npm'] },
+    { c: 'api', n: 'Moderação em camadas', v: 'código próprio', d: 'Camada 1 em rules.js barra spam sem custo (texto curto, caps lock, repetição). Camada 2 manda nome, descrição e imagem ao Gemini.', t: ['IA', 'moderation/'] },
+
+    // Serviços
+    { c: 'servicos', n: 'Render', v: 'Web Service', d: 'Hospeda a mutuo-api. No plano gratuito tem cold start (por isso o front tenta de novo) e bloqueia SMTP.', t: ['hospedagem'] },
+    { c: 'servicos', n: 'MySQL', v: 'banco', d: 'Tabelas Mutuo_Usuario, Mutuo_ONG, serviços, solicitações, conversas, mensagens, tokens de push e recuperação de senha.', t: ['banco de dados'] },
+    { c: 'servicos', n: 'Google Gemini API', v: 'gemini-3.6-flash', d: 'Classifica cada serviço como APROVADO, REVISAO ou BLOQUEADO. Se o modelo principal falhar, usa o gemini-3.1-flash-lite como reserva.', t: ['IA', 'HTTP'] },
+    { c: 'servicos', n: 'Firebase Cloud Messaging', v: 'FCM', d: 'Entrega push de mensagens e solicitações no celular, mesmo com o app fechado.', t: ['push', 'Google'] },
+    { c: 'servicos', n: 'Firebase', v: 'projeto', d: 'Projeto que gera o google-services.json do Android e a conta de serviço usada pelo firebase-admin.', t: ['Google'] },
+    { c: 'servicos', n: 'Brevo', v: 'API v3', d: 'Envia o e-mail com o código de 6 dígitos da recuperação de senha via HTTP, já que o Render bloqueia SMTP.', t: ['e-mail', 'HTTP'] },
+    { c: 'servicos', n: 'Gmail (SMTP)', v: 'Nodemailer', d: 'Caixa da equipe que recebe as mensagens do formulário de contato.', t: ['e-mail'] },
+    { c: 'servicos', n: 'Google Fonts', v: 'CDN', d: 'Serve a Quicksand, fonte da marca em todas as telas, e a Nunito numa página do site.', t: ['fontes'] },
+    { c: 'servicos', n: 'jsDelivr', v: 'CDN', d: 'Entrega Bootstrap, Bootstrap Icons e SweetAlert2 para as páginas do site.', t: ['CDN'] },
+
+    // Web
+    { c: 'web', n: 'HTML, CSS e JavaScript', v: 'vanilla', d: 'Cada página é um arquivo único com estilo e script próprios, sem framework nem build.', t: ['base'] },
+    { c: 'web', n: 'Bootstrap', v: '5.3.x', d: 'Grid e componentes das páginas internas, carregado por CDN (versões 5.3.2, 5.3.3 e 5.3.8).', t: ['CDN', 'CSS'] },
+    { c: 'web', n: 'Bootstrap Icons', v: '1.11.1', d: 'Ícones de toda a interface: envelope, cadeado, olho da senha, setas.', t: ['CDN', 'ícones'] },
+    { c: 'web', n: 'SweetAlert2', v: '11', d: 'Alertas de erro e toasts, como o "Código reenviado".', t: ['CDN'] },
+    { c: 'web', n: 'Socket.IO Client', v: '4.7.5', d: 'Cliente do chat no navegador, usado pelo chat-socket.js.', t: ['CDN', 'tempo real'] },
+    { c: 'web', n: 'Quicksand', v: 'Google Fonts', d: 'A fonte da marca Mútuo, presente em quase todas as páginas.', t: ['fonte'] },
+    { c: 'web', n: 'Fetch API', v: 'nativo', d: 'Chamadas à API, conferindo o content-type antes do .json() e com nova tentativa no cold start.', t: ['navegador'] },
+    { c: 'web', n: 'sessionStorage', v: 'nativo', d: 'Guarda a sessão de quem fez login e o e-mail repassado para "Esqueci minha senha".', t: ['navegador'] },
+
+    // App
+    { c: 'app', n: 'Flutter', v: 'Dart ^3.11', d: 'Framework do app, com Material Design. Telas com AnimatedSwitcher, AnimationController e HapticFeedback.', t: ['SDK'] },
+    { c: 'app', n: 'http', v: '^1.6.0', d: 'Todas as chamadas à API, centralizadas em services/api_service.dart.', t: ['pub'] },
+    { c: 'app', n: 'http_parser', v: 'transitivo', d: 'Define o MediaType das imagens enviadas por multipart.', t: ['pub'] },
+    { c: 'app', n: 'socket_io_client', v: '^3.1.6', d: 'Chat em tempo real no celular.', t: ['pub', 'tempo real'] },
+    { c: 'app', n: 'firebase_core', v: '^4.14.0', d: 'Inicializa o Firebase com o firebase_options.dart.', t: ['pub', 'Firebase'] },
+    { c: 'app', n: 'firebase_messaging', v: '^16.6.0', d: 'Gera o token do aparelho e recebe as notificações push.', t: ['pub', 'Firebase'] },
+    { c: 'app', n: 'flutter_local_notifications', v: '^22.3.0', d: 'Mostra a notificação na bandeja quando o push chega com o app aberto.', t: ['pub', 'push'] },
+    { c: 'app', n: 'shared_preferences', v: '^2.3.2', d: 'Mantém o login salvo entre aberturas do app (AuthService).', t: ['pub'] },
+    { c: 'app', n: 'image_picker', v: '^1.2.3', d: 'Escolhe foto da galeria ou câmera para perfil e serviços.', t: ['pub'] },
+    { c: 'app', n: 'url_launcher', v: '^6.3.1', d: 'Abre o PDF do certificado no navegador do celular.', t: ['pub'] },
+    { c: 'app', n: 'google_fonts', v: '^6.2.1', d: 'Quicksand nas telas e Roboto Mono nos números do cartão.', t: ['pub', 'fonte'] },
+    { c: 'app', n: 'mask_text_input_formatter', v: '^2.9.0', d: 'Máscaras de número do cartão, validade, CVV e CPF no checkout premium.', t: ['pub'] },
+    { c: 'app', n: 'flutter_svg', v: '^2.0.10', d: 'Renderiza a bandeira Hipercard, a única em SVG.', t: ['pub'] },
+    { c: 'app', n: 'flutter_localizations', v: 'SDK', d: 'Deixa os textos dos componentes do Material em pt-BR.', t: ['SDK'] },
+    { c: 'app', n: 'cupertino_icons', v: '^1.0.8', d: 'Pacote de ícones no estilo iOS.', t: ['pub'] },
+    { c: 'app', n: 'flutter_launcher_icons', v: '^0.14.4', d: 'Gera o ícone do app para Android e iOS a partir do mutuoLogo.png.', t: ['dev'] },
+    { c: 'app', n: 'flutter_lints', v: '^6.0.0', d: 'Regras de análise estática do dart analyze.', t: ['dev'] },
+
+    // Electron
+    { c: 'electron', n: 'Electron', v: '^28.3.3', d: 'Empacota o painel do administrador como programa de desktop (main.js, preload.js e as views).', t: ['npm', 'desktop'] },
+    { c: 'electron', n: 'Chart.js', v: '^4.5.1', d: 'Gráfico do dashboard inicial com usuários, ONGs, serviços realizados e horas voluntárias.', t: ['npm', 'gráficos'] },
+    { c: 'electron', n: 'SweetAlert2', v: '^11.26.3', d: 'Confirmações e avisos do painel, instalado localmente pelo npm.', t: ['npm'] },
+    { c: 'electron', n: 'Bootstrap + Popper', v: 'local', d: 'Layout e componentes do painel, servidos de src/public sem depender de CDN.', t: ['CSS'] },
+    { c: 'electron', n: 'mysql2', v: '^3.15.3', d: 'Conexão direta com o banco para as telas de gestão e moderação.', t: ['npm', 'banco'] },
+
+    // Ferramentas
+    { c: 'ferramentas', n: 'Git', v: 'versionamento', d: 'Mais de 200 commits da equipe no histórico.', t: ['CLI'] },
+    { c: 'ferramentas', n: 'GitHub', v: 'repositório', d: 'Hospeda o código em mateusdejulio/mutuo. O deploy no Render sai do push.', t: ['nuvem'] },
+    { c: 'ferramentas', n: 'npm', v: 'gerenciador', d: 'Dependências da API, do painel Electron e da raiz do projeto.', t: ['CLI'] },
+    { c: 'ferramentas', n: 'pub', v: 'gerenciador', d: 'Dependências do app Flutter, travadas no pubspec.lock.', t: ['CLI'] }
+  ];
+
+  let filtro = 'todas';
+  let termo = '';
+
+  const catalogo = document.getElementById('catalogo');
+  const filtros = document.getElementById('filtros');
+
+  function escapar(s) {
+    return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  // Números do topo
+  const servicosExternos = TECNOLOGIAS.filter(t => t.c === 'servicos').length;
+  document.getElementById('numeros').innerHTML = [
+    [TECNOLOGIAS.length, 'tecnologias'],
+    [CAMADAS.length, 'camadas'],
+    [3, 'plataformas: web, Android e desktop'],
+    [servicosExternos, 'serviços externos']
+  ].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
+
+  // Botões de filtro
+  const botoes = [{ id: 'todas', nome: 'Todas', qtd: TECNOLOGIAS.length }]
+    .concat(CAMADAS.map(c => ({ id: c.id, nome: c.nome, qtd: TECNOLOGIAS.filter(t => t.c === c.id).length })));
+  filtros.innerHTML = botoes.map(b =>
+    `<button type="button" id="filtro-${b.id}" data-id="${b.id}" aria-pressed="${b.id === filtro}">${escapar(b.nome)}<span class="qtd">${b.qtd}</span></button>`
+  ).join('');
+  filtros.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    filtro = b.dataset.id;
+    filtros.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    aplicar();
+  });
+
+  // Catálogo
+  catalogo.innerHTML = CAMADAS.map(c => `
+    <section class="camada" data-camada="${c.id}">
+      <div class="camada-topo">
+        <h2>${escapar(c.nome)}</h2>
+        <p>${escapar(c.desc)}</p>
+      </div>
+      <div class="itens">
+        ${TECNOLOGIAS.filter(t => t.c === c.id).map(t => `
+          <article class="item" data-busca="${escapar((t.n + ' ' + t.d + ' ' + t.t.join(' ')).toLowerCase())}">
+            <h3>${escapar(t.n)}</h3>
+            <span class="versao">${escapar(t.v)}</span>
+            <p>${escapar(t.d)}</p>
+            <div class="tags">${t.t.map(x => `<span class="tag">${escapar(x)}</span>`).join('')}</div>
+          </article>`).join('')}
+      </div>
+    </section>`).join('');
+
+  document.getElementById('busca').addEventListener('input', e => {
+    termo = e.target.value.trim().toLowerCase();
+    aplicar();
+  });
+
+  function aplicar() {
+    let visiveis = 0;
+    catalogo.querySelectorAll('.camada').forEach(sec => {
+      const camadaOk = filtro === 'todas' || sec.dataset.camada === filtro;
+      let naCamada = 0;
+      sec.querySelectorAll('.item').forEach(it => {
+        const ok = camadaOk && (!termo || it.dataset.busca.includes(termo));
+        it.hidden = !ok;
+        if (ok) naCamada++;
+      });
+      sec.hidden = naCamada === 0;
+      visiveis += naCamada;
+    });
+    document.getElementById('vazio').hidden = visiveis > 0;
+  }
+</script>
+
+</body></html>
