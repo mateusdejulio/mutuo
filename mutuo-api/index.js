@@ -86,6 +86,8 @@ async function enviarEmailBrevo({ para, assunto, html }) {
 }
 
 function htmlEmailCodigo(codigo) {
+  const logoUrl = (process.env.API_URL_PUBLICA || 'https://mutuo-api.onrender.com') + '/email/logo.png';
+
   const digitos = codigo.split('').map(d =>
     `<td style="width:44px;height:54px;background:#f1f5f2;border-radius:10px;font-size:28px;font-weight:700;color:#3A5A40;text-align:center;font-family:Arial,sans-serif;">${d}</td>`
   ).join('<td style="width:8px;"></td>');
@@ -93,7 +95,10 @@ function htmlEmailCodigo(codigo) {
   return `
   <div style="background:#f4f6f4;padding:32px 0;font-family:Arial,sans-serif;">
     <table align="center" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;">
-      <tr><td style="background:#3A5A40;padding:24px;text-align:center;color:#ffffff;font-size:26px;font-weight:700;letter-spacing:1px;">Mútuo</td></tr>
+      <tr><td style="background:#ffffff;padding:24px;text-align:center;">
+        <img src="${logoUrl}" alt="Mútuo" width="140" style="display:block;margin:0 auto;width:140px;max-width:60%;height:auto;border:0;color:#3A5A40;font-size:26px;font-weight:700;font-family:Arial,sans-serif;">
+      </td></tr>
+      <tr><td style="background:#3A5A40;height:4px;line-height:4px;font-size:0;">&nbsp;</td></tr>
       <tr><td style="padding:32px 28px 8px;color:#333;font-size:16px;line-height:1.5;">
         Olá! Recebemos um pedido para redefinir a senha da sua conta.<br>Use o código abaixo:
       </td></tr>
@@ -142,6 +147,7 @@ app.get('/uploads/servicos/:nome', async (req, res, next) => {
 });
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/email', express.static(path.join(__dirname, 'public', 'email')));
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
