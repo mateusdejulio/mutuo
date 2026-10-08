@@ -6,7 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:mutuo/services/api_service.dart';
 
 class EsqueciSenha extends StatefulWidget {
-  const EsqueciSenha({super.key});
+  const EsqueciSenha({super.key, this.emailInicial});
+
+  // E-mail já digitado no login, para não precisar digitar de novo.
+  final String? emailInicial;
 
   @override
   State<EsqueciSenha> createState() => _EsqueciSenhaState();
@@ -61,6 +64,10 @@ class _EsqueciSenhaState extends State<EsqueciSenha>
   @override
   void initState() {
     super.initState();
+    final emailInicial = widget.emailInicial;
+    if (emailInicial != null && emailInicial.isNotEmpty) {
+      _emailController.text = emailInicial;
+    }
     _cursorController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 530),

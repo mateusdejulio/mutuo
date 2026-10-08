@@ -246,7 +246,11 @@ class _LoginState extends State<Login> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const EsqueciSenha()),
+                                MaterialPageRoute(
+                                  builder: (_) => EsqueciSenha(
+                                    emailInicial: emailController.text.trim(),
+                                  ),
+                                ),
                               );
                             },
                             child: const Text(

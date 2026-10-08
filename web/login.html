@@ -627,6 +627,10 @@ const campoSenha = document.getElementById('senha');
 
 document.getElementById('linkEsqueciSenha').addEventListener('click', (e) => {
   e.preventDefault();
+  // Repassa o e-mail já digitado para não precisar digitar de novo.
+  const emailDigitado = document.getElementById('login').value.trim();
+  if (emailDigitado) sessionStorage.setItem('emailRecuperacao', emailDigitado);
+  else sessionStorage.removeItem('emailRecuperacao');
   window.location.href = 'esqueciSenha.html?tipo=' + (tipoSelecionado === 'ong' ? 'ong' : 'usuario');
 });
 

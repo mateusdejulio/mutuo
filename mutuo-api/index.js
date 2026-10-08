@@ -103,7 +103,7 @@ function htmlEmailCodigo(codigo) {
       <tr><td style="padding:8px 28px 32px;color:#666;font-size:14px;line-height:1.5;">
         O código vale por <b>15 minutos</b>. Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.
       </td></tr>
-      <tr><td style="background:#f1f5f2;padding:16px;text-align:center;color:#888;font-size:12px;">Mútuo — conectando quem quer ajudar</td></tr>
+      <tr><td style="background:#f1f5f2;padding:16px;text-align:center;color:#888;font-size:12px;">Mútuo — Transforme o Mundo através da Troca</td></tr>
     </table>
   </div>`;
 }

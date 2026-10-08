@@ -1164,6 +1164,15 @@
   });
 
   atualizarProgresso();
+
+  // E-mail digitado no login (se houver) já vem preenchido.
+  try {
+    const emailDoLogin = sessionStorage.getItem('emailRecuperacao');
+    sessionStorage.removeItem('emailRecuperacao');
+    if (emailDoLogin) document.getElementById('email').value = emailDoLogin;
+  } catch (err) {
+    console.error('Não foi possível ler o e-mail do login:', err);
+  }
   document.getElementById('email').focus();
 </script>
 </body>
