@@ -24,6 +24,9 @@ const API_URL = 'https://mutuo-api.onrender.com';
 //variáveis
 let win;
 let inicio;
+// Token do admin devolvido pelo /login. Fica só na memória do processo
+// principal: as páginas não têm acesso a ele.
+let tokenAdm = null;
 
 // janela login
 const createWindow = () => {
@@ -85,12 +88,28 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
         method,
         headers: { 'Content-Type': 'application/json' }
     };
+    if (tokenAdm) options.headers.Authorization = `Bearer ${tokenAdm}`;
     if (body) options.body = JSON.stringify(body);
     const response = await fetch(`${API_URL}${endpoint}`, options);
+    // Token expirado ou inválido: volta para a tela de login.
+    if (response.status === 401 && endpoint !== '/login') {
+        voltarParaLogin();
+    }
     return await response.json();
 }
 
-ipcMain.handle('validar-login', (e, login, senha) => apiFetch('/login', 'POST', { login, senha }));
+function voltarParaLogin() {
+  tokenAdm = null;
+  if (win && !win.isDestroyed()) return;
+  createWindow();
+  if (inicio && !inicio.isDestroyed()) inicio.close();
+}
+
+ipcMain.handle('validar-login', async (e, login, senha) => {
+  const resposta = await apiFetch('/login', 'POST', { login, senha });
+  tokenAdm = resposta.sucesso ? resposta.token : null;
+  return !!resposta.sucesso;
+});
 
 ipcMain.handle('buscar-usuarios', () => apiFetch('/usuarios'));
 
@@ -128,11 +147,11 @@ ipcMain.handle('alterar-ong', (e, d) => apiFetch(`/ongs/${encodeURIComponent(d.c
 
 ipcMain.handle('buscar-servicos', () => apiFetch('/servicos'));
 
-ipcMain.handle('alterar-servico', (e, d) => apiFetch(`/servicos/${encodeURIComponent(d.cod)}`, 'PUT', d));
+ipcMain.handle('alterar-servico', (e, d) => apiFetch(`/adm/servicos/${encodeURIComponent(d.cod)}`, 'PUT', d));
 
 ipcMain.handle('buscar-solicitacoes', () => apiFetch('/solicitacoes'));
 
-ipcMain.handle('alterar-solicitacao', (e, d) => apiFetch(`/solicitacoes/${d.cod}`, 'PUT', d));
+ipcMain.handle('alterar-solicitacao', (e, d) => apiFetch(`/adm/solicitacoes/${encodeURIComponent(d.cod)}`, 'PUT', d));
 
 ipcMain.handle('cadastrar-usuario', (e, usuario) => apiFetch('/usuarios', 'POST', usuario));
 
@@ -146,11 +165,15 @@ ipcMain.handle('total-atrasadas', () => apiFetch('/stats/atrasadas'));
 
 ipcMain.handle('total-receita', () => apiFetch('/stats/receita'));
 
-ipcMain.handle('alterar-login-adm', (e, loginAntigo, novoLogin) =>
-    apiFetch('/adm/login', 'PUT', { loginAntigo, novoLogin }));
+// A API pega o login do admin pelo token; o login que vem da página é ignorado.
+ipcMain.handle('alterar-login-adm', async (e, loginAntigo, novoLogin) => {
+    const resposta = await apiFetch('/adm/login', 'PUT', { novoLogin });
+    if (resposta.token) tokenAdm = resposta.token;
+    return resposta;
+});
 
 ipcMain.handle('alterar-senha-adm', (e, login, senhaAtual, novaSenha) =>
-    apiFetch('/adm/senha', 'PUT', { login, senhaAtual, novaSenha }));
+    apiFetch('/adm/senha', 'PUT', { senhaAtual, novaSenha }));
 
 ipcMain.handle('cadastrar-adm', (e, novoLogin, novaSenha) =>
     apiFetch('/adm/cadastrar', 'POST', { novoLogin, novaSenha }));
@@ -158,15 +181,15 @@ ipcMain.handle('cadastrar-adm', (e, novoLogin, novaSenha) =>
 ipcMain.handle('buscar-servicos-revisao', () => apiFetch('/moderacao/servicos'));
 
 ipcMain.handle('moderar-servico', (e, tipo, id, acao, admLogin) =>
-    apiFetch(`/moderacao/servicos/${encodeURIComponent(tipo)}/${encodeURIComponent(id)}`, 'PUT', { acao, admLogin }));
+    apiFetch(`/moderacao/servicos/${encodeURIComponent(tipo)}/${encodeURIComponent(id)}`, 'PUT', { acao }));
 
 ipcMain.handle('buscar-contas-premium', () => apiFetch('/premium/contas'));
 
 ipcMain.handle('remover-premium-usuario', (e, cpf) =>
-  apiFetch(`/usuarios/${encodeURIComponent(cpf)}/premium`, 'PUT', { premium: 0 }));
+  apiFetch(`/adm/usuarios/${encodeURIComponent(cpf)}/premium`, 'PUT'));
 
 ipcMain.handle('remover-premium-ong', (e, cnpj) =>
-  apiFetch(`/ongs/${encodeURIComponent(cnpj)}/premium`, 'PUT', { premium: 0 }));
+  apiFetch(`/adm/ongs/${encodeURIComponent(cnpj)}/premium`, 'PUT'));
 
 // abertura de janelas
 ipcMain.on('abrir-janela-inicio', () => {
@@ -177,6 +200,7 @@ ipcMain.on('abrir-janela-inicio', () => {
 });
 
 ipcMain.on('abrir-janela-login', () => {
+  tokenAdm = null;
   createWindow();
   if (inicio) {
     inicio.close();

@@ -10,6 +10,7 @@ const { getMessaging } = require('firebase-admin/messaging');
 const db = require('./db');
 const { avaliarServico } = require('./moderation/moderationService');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 // Push é acessório: se a credencial não estiver presente (ex: ambiente de
 // desenvolvimento sem o arquivo), o chat via socket continua funcionando normalmente.
@@ -299,10 +300,58 @@ setInterval(() => {
 
 
 
+// ── Token do administrador (painel Electron) ──
+// Token HMAC com o crypto nativo: base64url(payload).base64url(assinatura).
+// Sem ADMIN_TOKEN_SECRET no .env, usa um segredo aleatório, e os tokens
+// deixam de valer sempre que a API reinicia (o admin só precisa logar de novo).
+const SEGREDO_TOKEN_ADM = process.env.ADMIN_TOKEN_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.ADMIN_TOKEN_SECRET) {
+  console.warn('ADMIN_TOKEN_SECRET não definido: tokens de admin valem só até a API reiniciar.');
+}
+const VALIDADE_TOKEN_ADM_MS = 12 * 60 * 60 * 1000; // 12 horas
+
+function assinarTokenAdm(payload) {
+  return crypto.createHmac('sha256', SEGREDO_TOKEN_ADM).update(payload).digest('base64url');
+}
+
+function gerarTokenAdm(login) {
+  const payload = Buffer.from(JSON.stringify({ tipo: 'adm', login, exp: Date.now() + VALIDADE_TOKEN_ADM_MS })).toString('base64url');
+  return `${payload}.${assinarTokenAdm(payload)}`;
+}
+
+function lerTokenAdm(token) {
+  const [payload, assinatura] = String(token || '').split('.');
+  if (!payload || !assinatura) return null;
+
+  const esperada = Buffer.from(assinarTokenAdm(payload));
+  const recebida = Buffer.from(assinatura);
+  if (esperada.length !== recebida.length || !crypto.timingSafeEqual(esperada, recebida)) return null;
+
+  try {
+    const dados = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    if (dados.tipo !== 'adm' || !dados.login || dados.exp < Date.now()) return null;
+    return dados;
+  } catch {
+    return null;
+  }
+}
+
+// Middleware das rotas do painel: exige "Authorization: Bearer <token>".
+function autenticarAdm(req, res, next) {
+  const [esquema, token] = (req.headers.authorization || '').split(' ');
+  const dados = esquema === 'Bearer' ? lerTokenAdm(token) : null;
+  if (!dados) return res.status(401).json({ erro: 'Sessão de administrador inválida ou expirada.' });
+  req.adm = { login: dados.login };
+  next();
+}
+
 // ── Rotas de Autenticação ──
 app.post('/login', async (req, res) => {
   const { login, senha } = req.body;
-  res.json(await db.validarLogin(login, senha));
+  if (!login || !senha || !(await db.validarLogin(login, senha))) {
+    return res.json({ sucesso: false });
+  }
+  res.json({ sucesso: true, token: gerarTokenAdm(login) });
 });
 
 app.post('/loginUsuario', async (req, res) => {
@@ -426,7 +475,7 @@ app.post('/redefinirSenha', async (req, res) => {
 });
 
 // ── Rotas de Usuários ──
-app.get('/usuarios', async (req, res) => res.json(await db.getUsuarios()));
+app.get('/usuarios', autenticarAdm, async (req, res) => res.json(await db.getUsuarios()));
 app.post('/usuarios', async (req, res) => {
   try {
     const id = await db.cadastrarUsuario(req.body);
@@ -442,7 +491,7 @@ app.get('/usuarios/:cpf', async (req, res) => {
   res.json(usuario);
 });
 
-app.put('/usuarios/:cpf', async (req, res) => {
+app.put('/usuarios/:cpf', autenticarAdm, async (req, res) => {
   const { ativo, pontos, horas } = req.body;
   res.json(await db.alterUsuario(req.params.cpf, ativo, pontos, horas));
 });
@@ -460,7 +509,7 @@ app.put('/usuarios/:cpf/perfil', async (req, res) => {
 });
 
 // ── Rotas de ONGs e Serviços ──
-app.get('/ongs', async (req, res) => res.json(await db.getONGs()));
+app.get('/ongs', autenticarAdm, async (req, res) => res.json(await db.getONGs()));
 app.post('/ongs', async (req, res) => {
   try {
     const id = await db.cadastrarOng(req.body);
@@ -493,7 +542,7 @@ app.get('/ongs/:cnpj/voluntarios-realizados', async (req, res) => {
   }
 });
 
-app.put('/ongs/:cnpj', async (req, res) => {
+app.put('/ongs/:cnpj', autenticarAdm, async (req, res) => {
   const { ativo, responsavel, foco } = req.body;
   res.json(await db.alterONG(req.params.cnpj, ativo, responsavel, foco));
 });
@@ -509,7 +558,7 @@ app.put('/ongs/:cnpj/perfil', async (req, res) => {
   res.json(resultado);
 });
 
-app.get('/servicos', async (req, res) => res.json(await db.getServicos()));
+app.get('/servicos', autenticarAdm, async (req, res) => res.json(await db.getServicos()));
 
 
 // ── Cadastro de Serviço da ONG ──
@@ -709,7 +758,7 @@ app.patch('/servicos/ong/:id/status', async (req, res) => {
 });
 
 // ── Rotas de Solicitações ──
-app.get('/solicitacoes', async (req, res) => res.json(await db.getSolicitacoes()));
+app.get('/solicitacoes', autenticarAdm, async (req, res) => res.json(await db.getSolicitacoes()));
 app.put('/solicitacoes/:cod', async (req, res) => {
   const { statusS, statusE, pontos } = req.body;
   const resultado = await db.alterSolicitacao(req.params.cod, statusS, statusE, pontos);
@@ -734,31 +783,70 @@ app.put('/solicitacoes/:cod', async (req, res) => {
 });
 
 // ── Rotas Premium ──
-app.get('/premium', async (req, res) => res.json(await db.getPremium()));
-app.get('/premium/contas', async (req, res) => {
+app.get('/premium', autenticarAdm, async (req, res) => res.json(await db.getPremium()));
+app.get('/premium/contas', autenticarAdm, async (req, res) => {
   const contas = await db.getContasPremium();
   if (contas.error) return res.status(500).json({ erro: contas.error });
   res.json(contas);
 });
-app.get('/stats/premium-total', async (req, res) => res.json(await db.countPremiumTotal()));
-app.get('/stats/atrasadas', async (req, res) => res.json(await db.countAtrasadas()));
-app.get('/stats/receita', async (req, res) => res.json(await db.countReceita()));
+app.get('/stats/premium-total', autenticarAdm, async (req, res) => res.json(await db.countPremiumTotal()));
+app.get('/stats/atrasadas', autenticarAdm, async (req, res) => res.json(await db.countAtrasadas()));
+app.get('/stats/receita', autenticarAdm, async (req, res) => res.json(await db.countReceita()));
 
 // ── Rotas de Administrador ──
-app.put('/adm/login', async (req, res) => { const { loginAntigo, novoLogin } = req.body; res.json(await db.alterarLoginAdm(loginAntigo, novoLogin)); });
-app.put('/adm/senha', async (req, res) => { const { login, senhaAtual, novaSenha } = req.body; res.json(await db.alterarSenhaAdm(login, senhaAtual, novaSenha)); });
-app.post('/adm/cadastrar', async (req, res) => { const { novoLogin, novaSenha } = req.body; res.json(await db.cadastrarAdm(novoLogin, novaSenha)); });
+// O login do admin vem sempre do token, nunca do body.
+app.put('/adm/login', autenticarAdm, async (req, res) => {
+  const { novoLogin } = req.body;
+  if (!novoLogin) return res.status(400).json({ erro: 'Informe o novo login.' });
+  const resultado = await db.alterarLoginAdm(req.adm.login, novoLogin);
+  // O token antigo carrega o login antigo, então devolve um novo.
+  if (resultado.success) resultado.token = gerarTokenAdm(novoLogin);
+  res.json(resultado);
+});
+app.put('/adm/senha', autenticarAdm, async (req, res) => {
+  const { senhaAtual, novaSenha } = req.body;
+  if (!senhaAtual || !novaSenha) return res.status(400).json({ erro: 'Informe a senha atual e a nova.' });
+  res.json(await db.alterarSenhaAdm(req.adm.login, senhaAtual, novaSenha));
+});
+app.post('/adm/cadastrar', autenticarAdm, async (req, res) => {
+  const { novoLogin, novaSenha } = req.body;
+  if (!novoLogin || !novaSenha) return res.status(400).json({ erro: 'Informe login e senha.' });
+  res.json(await db.cadastrarAdm(novoLogin, novaSenha));
+});
+
+// Ações do painel que têm rota parecida usada pelo site/app. Ficam em /adm
+// para exigir o token sem quebrar o site e o app.
+app.put('/adm/servicos/:cod', autenticarAdm, async (req, res) => {
+  const { ativo, horas, foco, nota } = req.body;
+  res.json(await db.alterServico(req.params.cod, ativo, horas, foco, nota));
+});
+app.put('/adm/solicitacoes/:cod', autenticarAdm, async (req, res) => {
+  const { statusS, statusE, pontos } = req.body;
+  res.json(await db.alterSolicitacao(req.params.cod, statusS, statusE, pontos));
+});
+app.put('/adm/usuarios/:cpf/premium', autenticarAdm, async (req, res) => {
+  const resultado = await db.atualizarPremiumUsuario(req.params.cpf, 0);
+  if (resultado.error) return res.status(500).json({ sucesso: false, erro: resultado.error });
+  if (!resultado.success) return res.status(404).json({ sucesso: false, erro: 'Usuário não encontrado.' });
+  res.json({ sucesso: true, premium: 0 });
+});
+app.put('/adm/ongs/:cnpj/premium', autenticarAdm, async (req, res) => {
+  const resultado = await db.atualizarPremiumOng(req.params.cnpj, 0);
+  if (resultado.error) return res.status(500).json({ sucesso: false, erro: resultado.error });
+  if (!resultado.success) return res.status(404).json({ sucesso: false, erro: 'ONG não encontrada.' });
+  res.json({ sucesso: true, premium: 0 });
+});
 
 // ── Moderação — fila de revisão ──
-app.get('/moderacao/servicos', async (req, res) => {
+app.get('/moderacao/servicos', autenticarAdm, async (req, res) => {
   const servicos = await db.getServicosParaRevisao();
   if (servicos.error) return res.status(500).json({ erro: servicos.error });
   res.json(servicos);
 });
 
-app.put('/moderacao/servicos/:tipo/:id', async (req, res) => {
+app.put('/moderacao/servicos/:tipo/:id', autenticarAdm, async (req, res) => {
   const { tipo, id } = req.params;
-  const { acao, admLogin } = req.body || {};
+  const { acao } = req.body || {};
 
   if (!['usuario', 'ong'].includes(tipo)) {
     return res.status(400).json({ erro: 'Tipo inválido.' });
@@ -769,13 +857,13 @@ app.put('/moderacao/servicos/:tipo/:id', async (req, res) => {
 
   // A IA nunca bane usuário: a decisão do admin afeta só o serviço.
   const novoStatus = acao === 'APROVAR' ? 'APROVADO' : 'BLOQUEADO';
-  const resultado = await db.atualizarModeracaoServico(tipo, id, novoStatus, admLogin || 'desconhecido');
+  const resultado = await db.atualizarModeracaoServico(tipo, id, novoStatus, req.adm.login);
   if (resultado.error) return res.status(500).json({ erro: resultado.error });
   res.json({ sucesso: true });
 });
 
 // ── Rotas de Estatísticas ──
-app.get('/stats/:tipo', async (req, res) => {
+app.get('/stats/:tipo', autenticarAdm, async (req, res) => {
   const tipo = req.params.tipo;
   const mapeamento = {
     'usuarios': db.countUsuarios, 'ongs': db.countONGs, 'servicos': db.countServicos,

@@ -20,7 +20,7 @@ Os arquivos são citados pelo nome da função ou da rota, e não pelo número d
 - **Cuidado:** migrar rota por rota e testar cada tela. É a mudança mais trabalhosa da lista, mas é a mais importante.
 
 ### 1.2 Senha do administrador com bcrypt
-- [ ] **Problema:** o `validarLogin` (em `db.js`) compara a senha do admin em texto puro: `WHERE login = ? AND senha = ?`. Quem tiver acesso ao banco vê as senhas.
+- [x] **Problema:** o `validarLogin` (em `db.js`) compara a senha do admin em texto puro: `WHERE login = ? AND senha = ?`. Quem tiver acesso ao banco vê as senhas.
 - **Como:** buscar o admin só pelo `login` e comparar com o `verificarSenha`, que já existe e migra senhas antigas para hash sozinho, como acontece com usuários e ONGs. Conferir também o `cadastrarAdm` e o `alterarSenhaAdm`, para que gravem com `bcrypt.hash(senha, 10)`.
 
 ### 1.3 Rotas que expõem dados de todos
@@ -28,7 +28,7 @@ Os arquivos são citados pelo nome da função ou da rota, e não pelo número d
 - **Como:** depois do item 1.1, deixar essas rotas só para o admin. Revisar cada `app.get` e se perguntar: "quem pode ver isso?".
 
 ### 1.4 Painel Electron sem acesso direto ao banco
-- [ ] **Problema:** o Electron importa o `db.js` e conecta direto no MySQL. A senha do banco vai junto com o programa instalado, e o banco precisa ficar aberto para qualquer IP.
+- [x] **Problema:** o Electron importa o `db.js` e conecta direto no MySQL. A senha do banco vai junto com o programa instalado, e o banco precisa ficar aberto para qualquer IP.
 - **Como:** criar rotas de admin na API (protegidas pelo login de admin com token) e fazer o painel chamar a API com `fetch`, como o site já faz.
 
 ### 1.5 Limite de tentativas

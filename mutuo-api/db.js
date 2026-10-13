@@ -30,10 +30,11 @@ function normalizarFoco(foco) {
 async function validarLogin(login, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM Mutuo_Adm WHERE login = ? AND senha = ?',
-      [login, senha]
+      'SELECT login, senha FROM Mutuo_Adm WHERE login = ?',
+      [login]
     );
-    return rows.length > 0; // Retorna true ou false
+    if (rows.length === 0) return false;
+    return await verificarSenha(senha, rows[0].senha, 'Mutuo_Adm', 'login', login);
   } catch (error) {
     console.error('Erro ao validar administrador:', error);
     return false; // Retorna false se o banco der erro
@@ -665,14 +666,17 @@ async function alterarLoginAdm(loginAntigo, novoLogin) {
 async function alterarSenhaAdm(login, senhaAtual, novaSenha) {
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM Mutuo_Adm WHERE login = ? AND senha = ?',
-      [login, senhaAtual]
+      'SELECT login, senha FROM Mutuo_Adm WHERE login = ?',
+      [login]
     );
-    if (rows.length === 0) return { error: 'Senha atual incorreta' };
+    const senhaValida = rows.length > 0 &&
+      await verificarSenha(senhaAtual, rows[0].senha, 'Mutuo_Adm', 'login', login);
+    if (!senhaValida) return { error: 'Senha atual incorreta' };
 
+    const novoHash = await bcrypt.hash(novaSenha, 10);
     const [result] = await pool.query(
       'UPDATE Mutuo_Adm SET senha = ? WHERE login = ?',
-      [novaSenha, login]
+      [novoHash, login]
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {
@@ -683,9 +687,10 @@ async function alterarSenhaAdm(login, senhaAtual, novaSenha) {
 
 async function cadastrarAdm(novoLogin, novaSenha) {
   try {
+    const senhaHash = await bcrypt.hash(novaSenha, 10);
     const [result] = await pool.query(
       'INSERT INTO Mutuo_Adm (login, senha) VALUES (?, ?)',
-      [novoLogin, novaSenha]
+      [novoLogin, senhaHash]
     );
     return { success: result.affectedRows > 0 };
   } catch (err) {
