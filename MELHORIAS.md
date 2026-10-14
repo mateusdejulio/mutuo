@@ -24,8 +24,49 @@ Os arquivos são citados pelo nome da função ou da rota, e não pelo número d
 - **Como:** buscar o admin só pelo `login` e comparar com o `verificarSenha`, que já existe e migra senhas antigas para hash sozinho, como acontece com usuários e ONGs. Conferir também o `cadastrarAdm` e o `alterarSenhaAdm`, para que gravem com `bcrypt.hash(senha, 10)`.
 
 ### 1.3 Rotas que expõem dados de todos
-- [ ] **Problema:** o `GET /usuarios` devolve CPF, nome e e-mail de **todos** os usuários para qualquer pessoa. Existem outras listagens no mesmo estilo (`/ongs`, solicitações etc.).
+- [~] **Problema:** o `GET /usuarios` devolve CPF, nome e e-mail de **todos** os usuários para qualquer pessoa. Existem outras listagens no mesmo estilo (`/ongs`, solicitações etc.).
 - **Como:** depois do item 1.1, deixar essas rotas só para o admin. Revisar cada `app.get` e se perguntar: "quem pode ver isso?".
+- **Situação (out/2026):** listagens gerais já só para admin. O restante depende do 1.1; ver tabela abaixo.
+
+**Levantamento dos `app.get` sem `autenticarAdm`** (out/2026). "Dono" = só a própria conta, depois do token do item 1.1. Telas Flutter ficam em `mobile/mutuo/lib/`.
+
+| Rota | Campos sensíveis | Quem consome | Deveria ser (público / dono / admin) |
+|---|---|---|---|
+| `GET /usuarios/:cpf` | `SELECT *` sem senha: CPF, e-mail, telefone, endereço, bairro, CEP, cidade/estado, data de nascimento, pontos, premium | web: `homeMutuo`, `perfilMutuo`, `planosMutuo`, `assinarPremium`; Flutter: `perfil.dart`, `planosUsuario.dart` | dono |
+| `GET /usuarios/:cpf/estatisticas` | horas e trabalhos concluídos (nada pessoal) | web: `homeMutuo`, `perfilMutuo` | dono |
+| `GET /usuarios/:cpf/dashboard` | pontos, plano | Flutter: `inicialUser.dart` | dono |
+| `GET /usuarios/:cpf/movimentacao` | pontos recebidos/gastos no mês | web: `perfilMutuo` | dono |
+| `GET /ongs/:cnpj` | `SELECT *` sem senha: e-mail, nome do responsável, telefone, endereço, bairro, pontos, premium (+ serviços ativos) | web: `perfilOngMutuo` (usuário vendo a ONG), `homeOngMutuo`, `perfilOngGMutuo`, `planosOng`, `assinarPremiumOng`, `funcoes.js`; Flutter: `inicialOng`, `perfilOng`, `planosOng`, `servicosOng` | público **reduzido** (nome, descrição, foco, cidade, foto, serviços) / dono completo |
+| `GET /ongs/:cnpj/voluntarios-realizados` | só contagem | web: `homeOngMutuo`, `perfilOngGMutuo` | público (obs.: a rota está registrada duas vezes no `index.js`) |
+| `GET /ongs/:cnpj/movimentacao` | pontos do mês | web: `perfilOngGMutuo` | dono |
+| `GET /servicos/usuario/:cpf` | serviços do usuário com `moderacao_status` (inclui os em revisão) | web: `perfilMutuo`; Flutter: `perfil.dart` | dono |
+| `GET /servicos/:id` | `idUsuario` = **CPF** do criador | web: `editarServicoMutuo` | dono (edição) |
+| `GET /servicos/ong/:cnpj` | `moderacao_status` (inclui os em revisão) | web: `homeOngMutuo`, `perfilOngGMutuo`, `editarServicoOng`; Flutter: `inicialOng`, `perfilOng`, `servicosOng` | dono |
+| `GET /servicos/ong/detalhe/:id` | CNPJ (dado de PJ) | web: `editarServicoOng` | dono (edição) |
+| `GET /servicos-usuario` | `idUsuario` = **CPF** de todos os criadores, nome, cidade/estado, `fotoUsuario` | web: `serviçosMutuo`; Flutter: `servicos.dart` | público, **sem CPF** (trocar por id opaco) |
+| `GET /servicos-destaque?cpf=` | idem (`idUsuario` = CPF) | web: `homeMutuo`; Flutter: `inicialUser.dart` | público, sem CPF |
+| `GET /servicos-perto/:cidade?cpf=` | idem (`idUsuario` = CPF) | web: `homeMutuo` | público, sem CPF |
+| `GET /servicos-ong` | CNPJ, nome, cidade/estado da ONG | web: `OngsMutuo`; Flutter: `ongs.dart` | público |
+| `GET /perfil/foto/:cpf` e `/perfil/foto/ong/:cnpj` | nome do arquivo começa com o CPF/CNPJ (`<cpf>-<timestamp>.jpg`) | web: `funcoes.js`, `perfilOngGMutuo`, `cadastroLocOng`; Flutter: `perfil`, `avatar_perfil`, `chat`, `inicialOng`, `perfilOng`, `planosOng`, `certificadosOng` | público, mas o nome do arquivo não deveria conter o documento |
+| `GET /uploads/fotos/:nome` e `/uploads/servicos/:nome` | a imagem em si; o nome do arquivo contém CPF/CNPJ e aparece em todas as listagens públicas | todas as telas que mostram foto | público, com nome de arquivo sem documento |
+| `GET /solicitacoes/prestador/:cpf` | CPF e nome de quem solicitou | web: `notificacoesMutuo`, `perfilMutuo`; Flutter: `notificacoes`, `perfil` | dono |
+| `GET /solicitacoes/usuario/:cpf` | CPF e nome do prestador | web: `notificacoesMutuo`, `perfilMutuo`; Flutter: `perfil` | dono |
+| `GET /solicitacoes/confirmar/:cpf` | nome do prestador | web: `perfilMutuo`; Flutter: `perfil` | dono |
+| `GET /solicitacoes/naolidas/:cpf` | só contagem | web: `funcoes.js`; Flutter: `inicialUser`, `solicitacao_sessao_service` | dono |
+| `GET /solicitacoes-ong/prestador/:cnpj` | CPF e nome de quem solicitou | web: `notificacoesOng`; Flutter: `inicialOng`, `notificacoes`, `perfilOng` | dono (ONG) |
+| `GET /solicitacoes-ong/naolidas/:cnpj` | só contagem | web: `funcoes.js`; Flutter: `solicitacao_sessao_service` | dono (ONG) |
+| `GET /solicitacoes-ong/usuario/:cpf` | participações do usuário em ONGs | web: `notificacoesMutuo`, `perfilMutuo` | dono |
+| `GET /solicitacoes-ong/confirmar/:cnpj` | nome do voluntário | web: `perfilOngGMutuo` | dono (ONG) |
+| `GET /solicitacoes-ong/recebidos/:cnpj` | nome do voluntário, nota | web: `perfilOngGMutuo` | dono (ONG) |
+| `GET /certificados/:cpf` | histórico de voluntariado do usuário | web: `certificadosMutuo`; Flutter: `certificadosUsuario` | dono |
+| `GET /certificados/:cpf/:codSolicitacao/pdf` | nome completo do usuário no PDF | web: `certificadosMutuo`; Flutter: `certificadosUsuario` | dono |
+| `GET /certificados/ong/:cnpj` | nome dos voluntários **e `codigoVerificacao`** de cada certificado | web: `certificadosOng`; Flutter: `certificadosOng` | dono (ONG) |
+| `GET /verificar/:codigo` | nome do voluntário, serviço, ONG, horas | web: `verificarCertificado` | público (é a finalidade; o código é UUID) |
+| `GET /conversas/:tipo/:id` | lista de conversas com prévia da última mensagem | web: `chat-socket.js`, `chatMutuo`, `chatOng`, `notificacoesMutuo`, `notificacoesOng`; Flutter: `chat`, `main`, `chat_sessao_service` | dono |
+| `GET /conversas/:conversaId/mensagens` | **conteúdo completo das mensagens**; o id da conversa é sequencial | web: `chatMutuo`, `chatOng`; Flutter: `conversaChat` | dono (só participantes) — o mais urgente da lista |
+| `GET /health` | nada | auto-ping da própria API | público |
+
+Pontos que chamam atenção, para quando o 1.1 for feito: as mensagens do chat (qualquer pessoa lê qualquer conversa trocando o número na URL), o `GET /usuarios/:cpf` completo, o CPF dos criadores nas listagens públicas de serviços e o CPF/CNPJ embutido no nome dos arquivos de foto.
 
 ### 1.4 Painel Electron sem acesso direto ao banco
 - [x] **Problema:** o Electron importa o `db.js` e conecta direto no MySQL. A senha do banco vai junto com o programa instalado, e o banco precisa ficar aberto para qualquer IP.
