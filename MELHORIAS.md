@@ -126,7 +126,7 @@ Pontos que chamam atenção, para quando o 1.1 for feito: as mensagens do chat (
 - [x] Ao cadastrar, mandar um código de 6 dígitos pelo Brevo e só ativar a conta depois de confirmar. Dá para reaproveitar quase tudo da recuperação de senha: a tabela de códigos com hash, o `enviarEmailBrevo`, o `htmlEmailCodigo` e a tela com as 6 caixas.
 
 ### 3.2 Camada 3 da moderação
-- [ ] O `moderation/policy.js` já lista as categorias próprias do Mútuo (`FRAUDE`, `DROGAS`, `ARMAS`, `PIRATARIA`, `SPAM`, `FORA_DO_ESCOPO`...), mas o `moderationService.js` ainda não usa. Implementar como um segundo prompt ao Gemini, com a política do Mútuo, e incluir esses casos no `testar-moderacao.js` (o caso 5, de atestado falso, já está lá esperando).
+- [x] O `moderation/policy.js` já lista as categorias próprias do Mútuo (`FRAUDE`, `DROGAS`, `ARMAS`, `PIRATARIA`, `SPAM`, `FORA_DO_ESCOPO`...), mas o `moderationService.js` ainda não usa. Implementar como um segundo prompt ao Gemini, com a política do Mútuo, e incluir esses casos no `testar-moderacao.js` (o caso 5, de atestado falso, já está lá esperando).
 
 ### 3.3 QR code no certificado
 - [x] Colocar no PDF um QR code que abre o `verificarCertificado.html` com o código de verificação já preenchido. Dá para gerar a imagem por uma API pública de QR code, ou com o pacote `qrcode` se puder adicionar dependência.

@@ -1,7 +1,8 @@
-// Orquestra a moderação: Camada 1 (rules.js) + Camada 2 (Gemini API).
-// Camada 3 ainda não existe — ver policy.js.
+// Orquestra a moderação: Camada 1 (rules.js) + Camada 2 (Gemini, segurança geral)
+// + Camada 3 (Gemini, política do Mútuo — ver policy.js).
 
 const { validarRegrasLocais } = require('./rules');
+const { CATEGORIAS_CAMADA3, PROMPT_POLITICA_MUTUO } = require('./policy');
 
 // Modelo principal + reserva (usado quando o principal está sobrecarregado,
 // sem cota ou indisponível). gemini-2.5-flash saiu de linha para chaves novas.
@@ -57,10 +58,10 @@ async function comTimeout(promiseFn, ms) {
   }
 }
 
-function validarRespostaGemini(objeto) {
+function validarRespostaGemini(objeto, categoriasValidas = CATEGORIAS_VALIDAS) {
   if (!objeto || typeof objeto !== 'object') return false;
   if (!STATUS_VALIDOS.includes(objeto.status)) return false;
-  if (objeto.categoria !== null && !CATEGORIAS_VALIDAS.includes(objeto.categoria)) return false;
+  if (objeto.categoria !== null && !categoriasValidas.includes(objeto.categoria)) return false;
   if (typeof objeto.confianca !== 'number' || objeto.confianca < 0 || objeto.confianca > 1) return false;
   return true;
 }
@@ -69,7 +70,7 @@ function validarRespostaGemini(objeto) {
  * Uma chamada a um modelo específico. Nunca lança erro — retorna
  * { erro: true, causa, httpStatus? } ou { erro: false, ...resposta }.
  */
-async function chamarModelo(modelo, parts) {
+async function chamarModelo(modelo, parts, categoriasValidas) {
   try {
     const resposta = await comTimeout((signal) => fetch(urlDoModelo(modelo), {
       method: 'POST',
@@ -109,7 +110,7 @@ async function chamarModelo(modelo, parts) {
       console.error(`Gemini (${modelo}) retornou texto que não é JSON.`);
       return { erro: true, causa: 'resposta não é JSON' };
     }
-    if (!validarRespostaGemini(objeto)) {
+    if (!validarRespostaGemini(objeto, categoriasValidas)) {
       console.error(`Gemini (${modelo}) retornou JSON fora do formato esperado.`);
       return { erro: true, causa: 'JSON fora do formato' };
     }
@@ -128,13 +129,13 @@ async function chamarModelo(modelo, parts) {
  * tenta o modelo reserva. Nunca lança erro pro chamador — retorna { erro: true, causa }
  * pra quem chamou decidir o fallback (ver avaliarServico).
  */
-async function chamarGemini({ texto, imagemBuffer, imagemMime }) {
+async function chamarGemini({ texto, imagemBuffer, imagemMime, prompt = PROMPT_SISTEMA, categoriasValidas = CATEGORIAS_VALIDAS }) {
   if (!process.env.GEMINI_API_KEY) {
     console.error('GEMINI_API_KEY não configurada no ambiente.');
     return { erro: true, causa: 'GEMINI_API_KEY não configurada' };
   }
 
-  const parts = [{ text: `${PROMPT_SISTEMA}\n\nServiço a analisar:\n${texto}` }];
+  const parts = [{ text: `${prompt}\n\nServiço a analisar:\n${texto}` }];
   if (imagemBuffer) {
     parts.push({
       inlineData: {
@@ -146,10 +147,10 @@ async function chamarGemini({ texto, imagemBuffer, imagemMime }) {
 
   const causas = [];
   for (const modelo of GEMINI_MODELOS) {
-    let r = await chamarModelo(modelo, parts);
+    let r = await chamarModelo(modelo, parts, categoriasValidas);
     if (r.erro && r.httpStatus === 503) {
       await new Promise(res => setTimeout(res, ESPERA_RETRY_MS));
-      r = await chamarModelo(modelo, parts);
+      r = await chamarModelo(modelo, parts, categoriasValidas);
     }
     if (!r.erro) return { ...r, modelo };
 
@@ -222,7 +223,43 @@ async function avaliarServico({ nome, descricao, foco, imagemBuffer, imagemMime 
           : null)
   };
   registrarLog('gemini', r, resultado.modelo);
-  return r;
+  if (r.status !== 'APROVADO') return r;
+
+  // Camada 3 — política do Mútuo (só para o que a Camada 2 aprovou).
+  const politica = await chamarGemini({
+    texto,
+    imagemBuffer,
+    imagemMime,
+    prompt: PROMPT_POLITICA_MUTUO,
+    categoriasValidas: CATEGORIAS_CAMADA3
+  });
+
+  if (politica.erro) {
+    const r3 = {
+      status: 'REVISAO',
+      categoria: null,
+      confianca: null,
+      motivo: `Verificação da política do Mútuo indisponível no momento do cadastro (${politica.causa}).`,
+      mensagemUsuario: 'Seu serviço foi enviado para análise antes da publicação.'
+    };
+    registrarLog('fallback-politica-indisponivel', r3);
+    return r3;
+  }
+
+  const r3 = {
+    status: politica.status,
+    categoria: politica.categoria,
+    confianca: politica.confianca,
+    motivo: politica.motivo,
+    mensagemUsuario: politica.mensagemUsuario
+      || (politica.status === 'BLOQUEADO'
+        ? 'Este serviço não atende às diretrizes de publicação do Mútuo.'
+        : politica.status === 'REVISAO'
+          ? 'Seu serviço foi enviado para análise antes da publicação.'
+          : null)
+  };
+  registrarLog('gemini-politica', r3, politica.modelo);
+  return r3;
 }
 
 module.exports = { avaliarServico };
