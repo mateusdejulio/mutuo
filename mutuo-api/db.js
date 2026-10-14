@@ -366,7 +366,7 @@ async function mediaNotas() {
 }
 
 async function alterServico(cod, ativo, horas, foco, nota) {
-  const sql = 'UPDATE Mutuo_Servico SET ativo = ?, qtdHoras = ?, foco = ?, avaliacao = ? WHERE cod = ?';
+  const sql = 'UPDATE Mutuo_Servico SET ativo = ?, qtdHoras = ?, foco = ?, nota = ? WHERE cod = ?';
 
   try {
     const [result] = await pool.query(sql, [ativo, horas, normalizarFoco(foco), nota, cod]);
