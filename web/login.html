@@ -605,6 +605,31 @@
               : 'usuárioComum/homeMutuo.html');
           }, 2000);
 
+        } else if (resultado.emailNaoVerificado) {
+          const tipoConta = tipoSelecionado === 'ong' ? 'ong' : 'usuario';
+          Swal.fire({
+            icon: 'info',
+            title: 'Confirme seu e-mail',
+            text: 'Sua conta ainda não foi confirmada. Vamos enviar um código para o seu e-mail.',
+            confirmButtonText: 'Confirmar agora',
+            confirmButtonColor: '#3a5a40',
+            showCancelButton: true,
+            cancelButtonText: 'Agora não'
+          }).then(async (escolha) => {
+            if (!escolha.isConfirmed) return;
+            try {
+              await fetch(baseUrl + '/reenviarConfirmacao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, tipo: tipoConta })
+              });
+            } catch (e) {
+              // A página de confirmação tem o botão "Reenviar código".
+              console.error('Erro ao pedir reenvio do código:', e);
+            }
+            sessionStorage.setItem('emailConfirmacao', email.toLowerCase());
+            window.location.href = 'confirmarEmail.html?tipo=' + tipoConta;
+          });
         } else {
           Swal.fire({
             icon: 'error',

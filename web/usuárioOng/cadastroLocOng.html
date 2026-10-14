@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="../imagens/mutuoLogo.png">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
       --green-main: #588157;
@@ -618,13 +619,20 @@
         }
 
         sessionStorage.removeItem('cadastroMutuo');
+        sessionStorage.setItem('emailConfirmacao', String(dados.email || '').trim().toLowerCase());
 
- 
-  mostrarAlertMutuo();
+        await Swal.fire({
+          icon: 'success',
+          title: 'Cadastro realizado!',
+          text: resultado.emailEnviado === false
+            ? 'Sua conta foi criada, mas não conseguimos enviar o código agora. Na próxima tela, toque em "Reenviar código".'
+            : 'Enviamos um código de 6 dígitos para o seu e-mail. Confirme para ativar sua conta.',
+          confirmButtonText: 'Confirmar e-mail',
+          confirmButtonColor: '#3a5a40',
+          heightAuto: false
+        });
 
-  setTimeout(() => {
-    window.location.href = '../login.html';
-  }, 2000);
+        window.location.href = '../confirmarEmail.html?tipo=ong';
       } catch (e) {
         console.error('ERRO COMPLETO:', e);
         alert(e.message || 'Não foi possível conectar à API.');

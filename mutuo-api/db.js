@@ -46,7 +46,7 @@ async function validarLogin(login, senha) {
 async function validarLoginUsuario(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cpf, nome, email, telefone, cidade, estado, pontos, horasVoluntarias, cadastro, senha FROM Mutuo_Usuario WHERE email = ? AND ativo = 1',
+      'SELECT cpf, nome, email, telefone, cidade, estado, pontos, horasVoluntarias, cadastro, email_verificado, senha FROM Mutuo_Usuario WHERE email = ? AND ativo = 1',
       [email]
     );
 
@@ -61,7 +61,16 @@ async function validarLoginUsuario(email, senha) {
       return { sucesso: false, mensagem: 'Email ou senha incorretos, ou conta inativa.' };
     }
 
+    if (Number(usuario.email_verificado) === 0) {
+      return {
+        sucesso: false,
+        emailNaoVerificado: true,
+        mensagem: 'Confirme seu e-mail para entrar. Enviamos um código para a sua caixa de entrada.'
+      };
+    }
+
     delete usuario.senha; // nunca devolve a senha/hash pro front-end
+    delete usuario.email_verificado;
     return { sucesso: true, usuario };
 
   } catch (error) {
@@ -73,7 +82,7 @@ async function validarLoginUsuario(email, senha) {
 async function validarLoginOng(email, senha) {
   try {
     const [rows] = await pool.query(
-      'SELECT cnpj, nomeOng, nomeResponsavel, email, telefone, cidade, estado, foco, premium, cadastro, senha FROM Mutuo_ONG WHERE email = ? AND ativo = 1',
+      'SELECT cnpj, nomeOng, nomeResponsavel, email, telefone, cidade, estado, foco, premium, cadastro, email_verificado, senha FROM Mutuo_ONG WHERE email = ? AND ativo = 1',
       [email]
     );
 
@@ -88,7 +97,16 @@ async function validarLoginOng(email, senha) {
       return { sucesso: false, mensagem: 'Email ou senha incorretos, ou conta inativa.' };
     }
 
+    if (Number(ong.email_verificado) === 0) {
+      return {
+        sucesso: false,
+        emailNaoVerificado: true,
+        mensagem: 'Confirme seu e-mail para entrar. Enviamos um código para a sua caixa de entrada.'
+      };
+    }
+
     delete ong.senha; // nunca devolve a senha/hash pro front-end
+    delete ong.email_verificado;
     return { sucesso: true, usuario: ong };
   } catch (error) {
     console.error('Erro ao validar ONG:', error);
@@ -377,8 +395,8 @@ async function alterSolicitacao(cod, statusS, statusE, pontos) {
 async function cadastrarUsuario(usuario) {
   const sql = `
     INSERT INTO Mutuo_Usuario
-    (cpf, nome, email, senha, telefone, cidade, bairro, cep, dataNasc, pontos, horasVoluntarias, estado, endereco, cadastro)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 20, 0, ?, ?, ?)
+    (cpf, nome, email, senha, telefone, cidade, bairro, cep, dataNasc, pontos, horasVoluntarias, estado, endereco, cadastro, email_verificado)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 20, 0, ?, ?, ?, 0)
   `;
 
   const senhaHash = await bcrypt.hash(usuario.senha, 10);
@@ -410,8 +428,8 @@ async function cadastrarUsuario(usuario) {
 async function cadastrarOng(ong) {
   const sql = `
     INSERT INTO Mutuo_ONG
-    (nomeOng, cnpj, email, nomeResponsavel, telefone, cidade, bairro, endereco, estado, senha, foco, descricao, foto_perfil, cadastro, pontos)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,0)
+    (nomeOng, cnpj, email, nomeResponsavel, telefone, cidade, bairro, endereco, estado, senha, foco, descricao, foto_perfil, cadastro, pontos, email_verificado)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,0,0)
   `;
 
   const senhaHash = await bcrypt.hash(ong.senha, 10);
@@ -2312,6 +2330,19 @@ async function atualizarModeracaoServico(tipo, id, novoStatus, admLogin) {
   }
 }
 
+// MySQL não tem "ADD COLUMN IF NOT EXISTS": confere no INFORMATION_SCHEMA antes.
+async function adicionarColunaSeFaltar(tabela, coluna, definicao) {
+  const [rows] = await pool.query(
+    `SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+    [tabela, coluna]
+  );
+  if (rows.length === 0) {
+    await pool.query(`ALTER TABLE ${tabela} ADD COLUMN ${coluna} ${definicao}`);
+    console.log(`Coluna ${tabela}.${coluna} criada.`);
+  }
+}
+
 // Cria tabelas novas que o código precisa, se ainda não existirem.
 // Roda uma vez quando a API sobe — dispensa migration manual no Render.
 async function inicializarTabelas() {
@@ -2334,6 +2365,41 @@ async function inicializarTabelas() {
   } catch (err) {
     console.error('Erro ao criar tabela Mutuo_RecuperacaoSenha:', err.message);
   }
+
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS Mutuo_ConfirmacaoEmail (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tipo ENUM('usuario','ong') NOT NULL,
+        identificador VARCHAR(20) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        codigo_hash VARCHAR(255) NOT NULL,
+        expira_em DATETIME NOT NULL,
+        tentativas INT NOT NULL DEFAULT 0,
+        usado TINYINT(1) NOT NULL DEFAULT 0,
+        criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_confirmacao_email_tipo (email, tipo)
+      )
+    `);
+    console.log('Tabela Mutuo_ConfirmacaoEmail verificada/criada.');
+  } catch (err) {
+    console.error('Erro ao criar tabela Mutuo_ConfirmacaoEmail:', err.message);
+  }
+
+  // DEFAULT 1: todas as contas que já existem ficam verificadas.
+  // Os cadastros novos gravam 0 explicitamente (cadastrarUsuario / cadastrarOng).
+  for (const [tabela, coluna, definicao] of [
+    ['Mutuo_Usuario', 'email_verificado', 'TINYINT(1) NOT NULL DEFAULT 1'],
+    ['Mutuo_ONG',     'email_verificado', 'TINYINT(1) NOT NULL DEFAULT 1'],
+    ['Mutuo_Usuario', 'excluido_em',      'DATETIME NULL'], // usado na exclusão de conta (LGPD)
+    ['Mutuo_ONG',     'excluido_em',      'DATETIME NULL']  // usado na exclusão de conta (LGPD)
+  ]) {
+    try {
+      await adicionarColunaSeFaltar(tabela, coluna, definicao);
+    } catch (err) {
+      console.error(`Erro ao criar coluna ${tabela}.${coluna}:`, err.message);
+    }
+  }
 }
 
 // ── Recuperação de senha ──
@@ -2342,6 +2408,15 @@ const TABELA_POR_TIPO = {
   usuario: { tabela: 'Mutuo_Usuario', colunaId: 'cpf' },
   ong:     { tabela: 'Mutuo_ONG',     colunaId: 'cnpj' }
 };
+
+// Tabelas que guardam códigos de 6 dígitos (mesmo formato).
+const TABELA_RECUPERACAO = 'Mutuo_RecuperacaoSenha';
+const TABELA_CONFIRMACAO = 'Mutuo_ConfirmacaoEmail';
+const TABELAS_CODIGO = [TABELA_RECUPERACAO, TABELA_CONFIRMACAO];
+function tabelaCodigo(tabela) {
+  if (!TABELAS_CODIGO.includes(tabela)) throw new Error(`Tabela de código inválida: ${tabela}`);
+  return tabela;
+}
 
 // Busca a conta pelo e-mail no tipo escolhido. Retorna { identificador } ou null.
 // Mesma condição de "ativo" do login (validarLoginUsuario / validarLoginOng).
@@ -2364,10 +2439,10 @@ async function buscarContaParaRecuperacao(email, tipo) {
 // Segundos desde o último código criado para esse e-mail/tipo (null se nunca).
 // Se o último código foi invalidado por excesso de tentativas, também retorna
 // null: o reenvio fica liberado na hora, sem esperar o cooldown de 60s.
-async function segundosDesdeUltimoCodigo(email, tipo) {
+async function segundosDesdeUltimoCodigo(email, tipo, tabela = TABELA_RECUPERACAO) {
   const [rows] = await pool.query(
     `SELECT TIMESTAMPDIFF(SECOND, criado_em, NOW()) AS seg, tentativas
-       FROM Mutuo_RecuperacaoSenha
+       FROM ${tabelaCodigo(tabela)}
       WHERE email = ? AND tipo = ?
       ORDER BY criado_em DESC, id DESC LIMIT 1`,
     [email, tipo]
@@ -2378,16 +2453,16 @@ async function segundosDesdeUltimoCodigo(email, tipo) {
 
 // Invalida códigos anteriores e cria um novo. Retorna o código em texto puro
 // (só para enviar por e-mail — nunca é salvo assim).
-async function criarCodigoRecuperacao(email, tipo, identificador) {
+async function criarCodigoRecuperacao(email, tipo, identificador, tabela = TABELA_RECUPERACAO) {
   const codigo = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
   const codigoHash = await bcrypt.hash(codigo, 10);
 
   await pool.query(
-    'UPDATE Mutuo_RecuperacaoSenha SET usado = 1 WHERE email = ? AND tipo = ? AND usado = 0',
+    `UPDATE ${tabelaCodigo(tabela)} SET usado = 1 WHERE email = ? AND tipo = ? AND usado = 0`,
     [email, tipo]
   );
   await pool.query(
-    `INSERT INTO Mutuo_RecuperacaoSenha (tipo, identificador, email, codigo_hash, expira_em)
+    `INSERT INTO ${tabelaCodigo(tabela)} (tipo, identificador, email, codigo_hash, expira_em)
      VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))`,
     [tipo, identificador, email, codigoHash]
   );
@@ -2397,10 +2472,10 @@ async function criarCodigoRecuperacao(email, tipo, identificador) {
 // Confere o código. Retorna:
 //  { valido: true, registro }  ou
 //  { valido: false, mensagem, tentativasRestantes? }
-async function conferirCodigoRecuperacao(email, tipo, codigo) {
+async function conferirCodigoRecuperacao(email, tipo, codigo, tabela = TABELA_RECUPERACAO) {
   const [rows] = await pool.query(
     `SELECT id, identificador, codigo_hash, tentativas
-       FROM Mutuo_RecuperacaoSenha
+       FROM ${tabelaCodigo(tabela)}
       WHERE email = ? AND tipo = ? AND usado = 0 AND expira_em > NOW()
       ORDER BY criado_em DESC, id DESC LIMIT 1`,
     [email, tipo]
@@ -2417,7 +2492,7 @@ async function conferirCodigoRecuperacao(email, tipo, codigo) {
     const novasTentativas = registro.tentativas + 1;
     const esgotou = novasTentativas >= 5;
     await pool.query(
-      'UPDATE Mutuo_RecuperacaoSenha SET tentativas = ?, usado = ? WHERE id = ?',
+      `UPDATE ${tabelaCodigo(tabela)} SET tentativas = ?, usado = ? WHERE id = ?`,
       [novasTentativas, esgotou ? 1 : 0, registro.id]
     );
     return esgotou
@@ -2433,11 +2508,88 @@ async function redefinirSenhaComCodigo(tipo, identificador, idRegistro, novaSenh
   const cfg = TABELA_POR_TIPO[tipo];
   const novoHash = await bcrypt.hash(novaSenha, 10);
   const [result] = await pool.query(
-    `UPDATE ${cfg.tabela} SET senha = ? WHERE ${cfg.colunaId} = ?`,
+    // O código chegou no e-mail, então o e-mail fica confirmado também.
+    `UPDATE ${cfg.tabela} SET senha = ?, email_verificado = 1 WHERE ${cfg.colunaId} = ?`,
     [novoHash, identificador]
   );
   await pool.query('UPDATE Mutuo_RecuperacaoSenha SET usado = 1 WHERE id = ?', [idRegistro]);
   return result.affectedRows > 0;
+}
+
+// ── Confirmação de e-mail ──
+
+// Conta ativa pelo e-mail. Retorna { identificador, verificado } ou null.
+async function buscarContaParaConfirmacao(email, tipo) {
+  const cfg = TABELA_POR_TIPO[tipo];
+  if (!cfg) return null;
+  const [rows] = await pool.query(
+    `SELECT ${cfg.colunaId} AS identificador, email_verificado
+       FROM ${cfg.tabela} WHERE LOWER(email) = ? AND ativo = 1 LIMIT 1`,
+    [email]
+  );
+  if (rows.length === 0) return null;
+  return { identificador: String(rows[0].identificador), verificado: Number(rows[0].email_verificado) === 1 };
+}
+
+// Marca o e-mail como confirmado e consome o código.
+async function marcarEmailVerificado(tipo, identificador, idRegistro) {
+  const cfg = TABELA_POR_TIPO[tipo];
+  const [result] = await pool.query(
+    `UPDATE ${cfg.tabela} SET email_verificado = 1 WHERE ${cfg.colunaId} = ?`,
+    [identificador]
+  );
+  await pool.query(`UPDATE ${TABELA_CONFIRMACAO} SET usado = 1 WHERE id = ?`, [idRegistro]);
+  return result.affectedRows > 0;
+}
+
+// ── LGPD: exclusão por anonimização ──
+// Apaga dados pessoais e desativa a conta, mantendo CPF/CNPJ como chave
+// (solicitações, conversas e certificados dependem dele).
+async function anonimizarConta(tipo, id) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const senhaInutil = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+    // Só letras e números: o CNPJ pode estar gravado com máscara (". / -").
+    const emailRemovido = `removido+${tipo}-${String(id).replace(/[^0-9A-Za-z]/g, '')}@mutuo.invalid`;
+
+    if (tipo === 'usuario') {
+      await conn.query(
+        `UPDATE Mutuo_Usuario SET
+           nome = 'Usuário removido', email = ?, senha = ?,
+           telefone = '', cidade = '', bairro = '', cep = '', endereco = '',
+           dataNasc = NULL,
+           foto_perfil = NULL, foto_perfil_dados = NULL, foto_perfil_tipo = NULL,
+           ativo = 0, excluido_em = NOW()
+         WHERE cpf = ?`,
+        [emailRemovido, senhaInutil, id]
+      );
+      await conn.query('UPDATE Mutuo_Servico SET ativo = 0 WHERE idUsuario = ?', [id]);
+    } else {
+      await conn.query(
+        `UPDATE Mutuo_ONG SET
+           nomeResponsavel = 'Responsável removido', email = ?, senha = ?,
+           telefone = '', bairro = '', endereco = '', descricao = '',
+           foto_perfil = NULL, foto_perfil_dados = NULL, foto_perfil_tipo = NULL,
+           ativo = 0, excluido_em = NOW()
+         WHERE cnpj = ?`,
+        [emailRemovido, senhaInutil, id]
+      );
+      await conn.query('UPDATE Mutuo_ServicoOng SET ativo = 0 WHERE cnpj = ?', [id]);
+    }
+
+    // Para de mandar push para os aparelhos dessa conta.
+    await conn.query('DELETE FROM Mutuo_DispositivoToken WHERE tipo = ? AND identificador = ?', [tipo, id]);
+
+    await conn.commit();
+    return true;
+  } catch (err) {
+    await conn.rollback();
+    console.error('Erro ao anonimizar conta:', err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 module.exports = {
@@ -2528,8 +2680,6 @@ module.exports = {
   confirmarSolicitacao,
   avaliarSolicitacao,
   avaliarSolicitacaoOng,
-  contarVoluntariosOng,
-  isOngPremium,
   marcarSolicitacaoLida,
   contarNaoLidas,
   buscarOuCriarConversa,
@@ -2558,4 +2708,8 @@ module.exports = {
   criarCodigoRecuperacao,
   conferirCodigoRecuperacao,
   redefinirSenhaComCodigo,
+  buscarContaParaConfirmacao,
+  marcarEmailVerificado,
+  TABELA_CONFIRMACAO,
+  anonimizarConta,
 };

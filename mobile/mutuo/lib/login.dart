@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mutuo/cadastro.dart';
+import 'package:mutuo/confirmar_email.dart';
 import 'package:mutuo/esqueci_senha.dart';
 import 'package:mutuo/inicialUser.dart';
 import 'package:mutuo/inicialOng.dart';
@@ -36,6 +37,10 @@ class _LoginState extends State<Login> {
 
     // Tenta como usuário primeiro
     final resUsuario = await api.fazerLoginUsuario(email, senha);
+    if (resUsuario['emailNaoVerificado'] == true) {
+      await _irParaConfirmacao(email, 'usuario');
+      return;
+    }
 
         if (resUsuario['sucesso'] == true) {
       final dadosUsuario = resUsuario['usuario'] ?? {};
@@ -54,6 +59,10 @@ class _LoginState extends State<Login> {
 
     // Se não for usuário, tenta como ONG
     final resOng = await api.fazerLoginOng(email, senha);
+    if (resOng['emailNaoVerificado'] == true) {
+      await _irParaConfirmacao(email, 'ong');
+      return;
+    }
 
         if (resOng['sucesso'] == true) {
       final dadosOng = resOng['usuario'] ?? {};
@@ -71,6 +80,19 @@ class _LoginState extends State<Login> {
     // Nenhum deu certo
     setState(() => _carregando = false);
     _mostrarErro(resUsuario['mensagem'] ?? 'Email ou senha incorretos.');
+  }
+
+  Future<void> _irParaConfirmacao(String email, String tipo) async {
+    await ApiService().reenviarConfirmacao(email, tipo);
+    if (!mounted) return;
+    setState(() => _carregando = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Confirme seu e-mail para entrar. Enviamos um código.')),
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ConfirmarEmail(email: email.trim().toLowerCase(), tipo: tipo)),
+    );
   }
 
   void _mostrarErro(String mensagem) {

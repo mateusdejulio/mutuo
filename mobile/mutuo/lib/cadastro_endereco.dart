@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:mutuo/confirmar_email.dart';
 import 'package:mutuo/services/api_service.dart';
-import 'inicialUser.dart';
-import 'inicialOng.dart';
 import 'utils/input_formatters.dart';
 
 class CadastroEndereco extends StatefulWidget {
@@ -168,24 +167,24 @@ class _CadastroEnderecoState extends State<CadastroEndereco> {
     if (resultado['sucesso'] == true) {
       if (!mounted) return;
 
-            if (_isOng) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (_) => InicialOng(
-              nome: widget.nomeOng,
-              cnpj: widget.cnpj.replaceAll(RegExp(r'[^0-9]'), ''),
-            ),
+      final emailCadastro = widget.email.trim().toLowerCase();
+      if (resultado['emailEnviado'] == false) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Conta criada, mas não conseguimos enviar o código agora. Toque em "Reenviar código".'),
           ),
-          (route) => false,
-        );
-      } else {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => InicialUsuario(nome: widget.nome, cpf: '',)),
-          (route) => false,
         );
       }
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ConfirmarEmail(
+            email: emailCadastro,
+            tipo: _isOng ? 'ong' : 'usuario',
+          ),
+        ),
+        (route) => false,
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

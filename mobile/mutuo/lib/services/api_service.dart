@@ -161,6 +161,55 @@ class ApiService {
     });
   }
 
+  // ── Confirmação de e-mail ──
+
+  Future<Map<String, dynamic>> confirmarEmail(
+    String email,
+    String tipo,
+    String codigo,
+  ) {
+    return _postRecuperacao('/confirmarEmail', {
+      'email': email.trim().toLowerCase(),
+      'tipo': tipo,
+      'codigo': codigo,
+    });
+  }
+
+  Future<Map<String, dynamic>> reenviarConfirmacao(String email, String tipo) {
+    return _postRecuperacao('/reenviarConfirmacao', {
+      'email': email.trim().toLowerCase(),
+      'tipo': tipo,
+    });
+  }
+
+  // ── LGPD ──
+  Future<Map<String, dynamic>> enviarMeusDadosPorEmail(
+    String email,
+    String tipo,
+    String senha,
+  ) {
+    return _postRecuperacao('/minhaConta/dados', {
+      'email': email.trim(),
+      'tipo': tipo,
+      'senha': senha,
+      'enviarPorEmail': true,
+    });
+  }
+
+  Future<Map<String, dynamic>> excluirMinhaConta(
+    String email,
+    String tipo,
+    String senha,
+    String confirmacao,
+  ) {
+    return _postRecuperacao('/minhaConta/excluir', {
+      'email': email.trim(),
+      'tipo': tipo,
+      'senha': senha,
+      'confirmacao': confirmacao,
+    });
+  }
+
   Future<Map<String, dynamic>> cadastrarUsuario(
     Map<String, dynamic> dadosDoUsuario,
   ) async {

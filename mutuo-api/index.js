@@ -9,7 +9,6 @@ const { initializeApp: initializeFirebaseApp, cert } = require('firebase-admin/a
 const { getMessaging } = require('firebase-admin/messaging');
 const db = require('./db');
 const { avaliarServico } = require('./moderation/moderationService');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 // Push é acessório: se a credencial não estiver presente (ex: ambiente de
@@ -51,17 +50,17 @@ async function enviarPush(tipo, id, { titulo, corpo, dados }) {
   }
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
 // Envio de e-mail transacional via Brevo (API HTTP — o Render gratuito
 // bloqueia SMTP). Lança erro se falhar, para a rota poder avisar o usuário.
-async function enviarEmailBrevo({ para, assunto, html }) {
+// Escapa texto vindo do cliente antes de colocar dentro de HTML
+// (e-mails, template do certificado).
+function escaparHtml(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+async function enviarEmailBrevo({ para, assunto, html, responderPara, anexos }) {
   const resposta = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
@@ -76,7 +75,12 @@ async function enviarEmailBrevo({ para, assunto, html }) {
       },
       to: [{ email: para }],
       subject: assunto,
-      htmlContent: html
+      htmlContent: html,
+      ...(responderPara ? { replyTo: { email: responderPara } } : {}),
+      // anexos: [{ nome: 'arquivo.json', conteudoBase64: '...' }]
+      ...(Array.isArray(anexos) && anexos.length > 0
+        ? { attachment: anexos.map(a => ({ name: a.nome, content: a.conteudoBase64 })) }
+        : {})
     })
   });
 
@@ -86,7 +90,16 @@ async function enviarEmailBrevo({ para, assunto, html }) {
   }
 }
 
-function htmlEmailCodigo(codigo) {
+function htmlEmailCodigo(codigo, finalidade = 'recuperacao') {
+  const textos = finalidade === 'confirmacao'
+    ? {
+        intro: 'Boas-vindas ao Mútuo! Para ativar sua conta, confirme seu e-mail com o código abaixo:',
+        rodape: 'O código vale por <b>15 minutos</b>. Se você não criou uma conta no Mútuo, pode ignorar este e-mail.'
+      }
+    : {
+        intro: 'Olá! Recebemos um pedido para redefinir a senha da sua conta.<br>Use o código abaixo:',
+        rodape: 'O código vale por <b>15 minutos</b>. Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.'
+      };
   const logoUrl = (process.env.API_URL_PUBLICA || 'https://mutuo-api.onrender.com') + '/email/logo.png';
 
   const digitos = codigo.split('').map(d =>
@@ -101,21 +114,70 @@ function htmlEmailCodigo(codigo) {
       </td></tr>
       <tr><td style="background:#3A5A40;height:4px;line-height:4px;font-size:0;">&nbsp;</td></tr>
       <tr><td style="padding:32px 28px 8px;color:#333;font-size:16px;line-height:1.5;">
-        Olá! Recebemos um pedido para redefinir a senha da sua conta.<br>Use o código abaixo:
+        ${textos.intro}
       </td></tr>
       <tr><td style="padding:16px 28px;">
         <table align="center" cellpadding="0" cellspacing="0"><tr>${digitos}</tr></table>
       </td></tr>
       <tr><td style="padding:8px 28px 32px;color:#666;font-size:14px;line-height:1.5;">
-        O código vale por <b>15 minutos</b>. Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.
+        ${textos.rodape}
       </td></tr>
       <tr><td style="background:#f1f5f2;padding:16px;text-align:center;color:#888;font-size:12px;">Mútuo — Transforme o Mundo através da Troca</td></tr>
     </table>
   </div>`;
 }
+
+// ── Limite de tentativas por IP (sem dependência) ──
+// Guarda em memória: reinício da API zera as contagens, o que é aceitável.
+// Os limites são generosos porque em laboratório várias pessoas saem pelo mesmo IP.
+function criarLimitador({ max, janelaMs }) {
+  const registros = new Map(); // ip → { contagem, inicio }
+
+  // Limpa entradas vencidas para o Map não crescer sem limite.
+  setInterval(() => {
+    const agora = Date.now();
+    for (const [chave, r] of registros) {
+      if (agora - r.inicio > janelaMs) registros.delete(chave);
+    }
+  }, janelaMs).unref();
+
+  return (req, res, next) => {
+    const chave = req.ip || 'desconhecido';
+    const agora = Date.now();
+    let r = registros.get(chave);
+    if (!r || agora - r.inicio > janelaMs) {
+      r = { contagem: 0, inicio: agora };
+      registros.set(chave, r);
+    }
+    r.contagem++;
+
+    if (r.contagem > max) {
+      const segundos = Math.ceil((r.inicio + janelaMs - agora) / 1000);
+      const minutos = Math.max(1, Math.ceil(segundos / 60));
+      res.set('Retry-After', String(segundos));
+      return res.status(429).json({
+        sucesso: false,
+        mensagem: `Muitas tentativas. Tente novamente em ${minutos} minuto(s).`,
+        erro: `Muitas tentativas. Tente novamente em ${minutos} minuto(s).`
+      });
+    }
+    next();
+  };
+}
+
+const QUINZE_MIN = 15 * 60 * 1000;
+// O app Flutter tenta /loginUsuario e depois /loginOng: cada login conta 2.
+const limiteLogin = criarLimitador({ max: 30, janelaMs: QUINZE_MIN });
+// Rotas que disparam e-mail pelo Brevo (custo e risco de spam).
+const limiteEnvioEmail = criarLimitador({ max: 10, janelaMs: QUINZE_MIN });
+// Rotas que conferem códigos de 6 dígitos.
+const limiteCodigo = criarLimitador({ max: 30, janelaMs: QUINZE_MIN });
+
 require('dotenv').config();
 
 const app = express();
+// Render fica atrás de proxy: sem isso, req.ip seria sempre o IP do proxy.
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -248,7 +310,12 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const tipos = ['image/jpeg', 'image/png', 'image/webp'];
     if (tipos.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.'));
+    else {
+      const erro = new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.');
+      erro.status = 400;
+      erro.expor = true; // mensagem segura para mostrar ao usuário
+      cb(erro);
+    }
   }
 });
 
@@ -277,7 +344,12 @@ const uploadServico = multer({
   fileFilter: (req, file, cb) => {
     const tipos = ['image/jpeg', 'image/png', 'image/webp'];
     if (tipos.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.'));
+    else {
+      const erro = new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.');
+      erro.status = 400;
+      erro.expor = true; // mensagem segura para mostrar ao usuário
+      cb(erro);
+    }
   }
 });
 
@@ -346,7 +418,7 @@ function autenticarAdm(req, res, next) {
 }
 
 // ── Rotas de Autenticação ──
-app.post('/login', async (req, res) => {
+app.post('/login', limiteLogin, async (req, res) => {
   const { login, senha } = req.body;
   if (!login || !senha || !(await db.validarLogin(login, senha))) {
     return res.json({ sucesso: false });
@@ -354,7 +426,7 @@ app.post('/login', async (req, res) => {
   res.json({ sucesso: true, token: gerarTokenAdm(login) });
 });
 
-app.post('/loginUsuario', async (req, res) => {
+app.post('/loginUsuario', limiteLogin, async (req, res) => {
   const { email, senha } = req.body;
   if (!email || !senha) return res.status(400).json({ sucesso: false, mensagem: 'Email e senha são obrigatórios' });
   try {
@@ -365,7 +437,7 @@ app.post('/loginUsuario', async (req, res) => {
   }
 });
 
-app.post('/loginOng', async (req, res) => {
+app.post('/loginOng', limiteLogin, async (req, res) => {
   const { email, senha } = req.body;
   if (!email || !senha) return res.status(400).json({ sucesso: false, mensagem: 'Email e senha são obrigatórios' });
   try {
@@ -380,8 +452,18 @@ app.post('/loginOng', async (req, res) => {
 const MSG_GENERICA_ENVIO = 'Se o e-mail estiver cadastrado, você receberá um código em instantes.';
 const TIPOS_VALIDOS = ['usuario', 'ong'];
 
+// Cria um código de confirmação de e-mail e manda pelo Brevo. Lança erro se o envio falhar.
+async function enviarCodigoConfirmacao(email, tipo, identificador) {
+  const codigo = await db.criarCodigoRecuperacao(email, tipo, identificador, db.TABELA_CONFIRMACAO);
+  await enviarEmailBrevo({
+    para: email,
+    assunto: `${codigo} é o seu código de confirmação — Mútuo`,
+    html: htmlEmailCodigo(codigo, 'confirmacao')
+  });
+}
+
 // Passo 1: solicita o código.
-app.post('/esqueciSenha', async (req, res) => {
+app.post('/esqueciSenha', limiteEnvioEmail, async (req, res) => {
   const body = req.body || {};
   const email = String(body.email || '').trim().toLowerCase();
   const tipo = String(body.tipo || '').trim().toLowerCase();
@@ -421,7 +503,7 @@ app.post('/esqueciSenha', async (req, res) => {
 });
 
 // Passo 2: verifica o código (sem consumir) — permite avançar pra tela da nova senha.
-app.post('/verificarCodigo', async (req, res) => {
+app.post('/verificarCodigo', limiteCodigo, async (req, res) => {
   const body = req.body || {};
   const email = String(body.email || '').trim().toLowerCase();
   const tipo = String(body.tipo || '').trim().toLowerCase();
@@ -444,7 +526,7 @@ app.post('/verificarCodigo', async (req, res) => {
 });
 
 // Passo 3: redefine a senha (confere o código de novo e consome).
-app.post('/redefinirSenha', async (req, res) => {
+app.post('/redefinirSenha', limiteCodigo, async (req, res) => {
   const body = req.body || {};
   const email = String(body.email || '').trim().toLowerCase();
   const tipo = String(body.tipo || '').trim().toLowerCase();
@@ -474,13 +556,198 @@ app.post('/redefinirSenha', async (req, res) => {
   }
 });
 
+// ── Confirmação de e-mail ──
+const MSG_GENERICA_REENVIO = 'Se houver um cadastro pendente com esse e-mail, enviamos um novo código.';
+
+app.post('/confirmarEmail', limiteCodigo, async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim().toLowerCase();
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+  const codigo = String(body.codigo || '').trim();
+
+  if (!email || !TIPOS_VALIDOS.includes(tipo) || !/^\d{6}$/.test(codigo)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Código inválido.' });
+  }
+
+  try {
+    const r = await db.conferirCodigoRecuperacao(email, tipo, codigo, db.TABELA_CONFIRMACAO);
+    if (!r.valido) {
+      return res.status(400).json({ sucesso: false, mensagem: r.mensagem, tentativasRestantes: r.tentativasRestantes });
+    }
+    const ok = await db.marcarEmailVerificado(tipo, r.registro.identificador, r.registro.id);
+    if (!ok) return res.status(500).json({ sucesso: false, mensagem: 'Não foi possível confirmar o e-mail.' });
+    return res.json({ sucesso: true, mensagem: 'E-mail confirmado! Agora é só entrar.' });
+  } catch (err) {
+    console.error('Erro em /confirmarEmail:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
+app.post('/reenviarConfirmacao', limiteEnvioEmail, async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim().toLowerCase();
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+
+  if (!email || !TIPOS_VALIDOS.includes(tipo)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Informe o e-mail e o tipo de conta.' });
+  }
+
+  try {
+    const conta = await db.buscarContaParaConfirmacao(email, tipo);
+    // Conta não existe ou já confirmada: resposta genérica (não revela nada).
+    if (!conta || conta.verificado) return res.json({ sucesso: true, mensagem: MSG_GENERICA_REENVIO });
+
+    const seg = await db.segundosDesdeUltimoCodigo(email, tipo, db.TABELA_CONFIRMACAO);
+    if (seg !== null && seg < 60) return res.json({ sucesso: true, mensagem: MSG_GENERICA_REENVIO });
+
+    try {
+      await enviarCodigoConfirmacao(email, tipo, conta.identificador);
+    } catch (errEnvio) {
+      console.error('Erro ao enviar código de confirmação (Brevo):', errEnvio.message);
+      return res.status(502).json({ sucesso: false, mensagem: 'Não foi possível enviar o e-mail agora. Tente novamente em instantes.' });
+    }
+    return res.json({ sucesso: true, mensagem: MSG_GENERICA_REENVIO });
+  } catch (err) {
+    console.error('Erro em /reenviarConfirmacao:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
+// ── LGPD: baixar dados e excluir conta ──
+// Sem token de usuário (item 1.1), a conta é identificada por e-mail + senha.
+async function identificarContaPorSenha(body) {
+  const email = String(body.email || '').trim();
+  const senha = String(body.senha || '');
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+
+  if (!email || !senha || !TIPOS_VALIDOS.includes(tipo)) {
+    return { status: 400, mensagem: 'Informe e-mail, senha e tipo de conta.' };
+  }
+  const r = tipo === 'ong'
+    ? await db.validarLoginOng(email, senha)
+    : await db.validarLoginUsuario(email, senha);
+  if (!r || !r.sucesso || !r.usuario) {
+    return { status: 401, mensagem: 'Senha incorreta.' };
+  }
+  const id = tipo === 'ong' ? String(r.usuario.cnpj) : String(r.usuario.cpf);
+  return { tipo, id, email: r.usuario.email };
+}
+
+// Junta os dados da conta. Cada parte em seu próprio try: se uma falhar,
+// o resto ainda é exportado (e a parte que falhou vai como null).
+async function montarExportacao(tipo, id) {
+  const parte = async (nome, fn) => {
+    try {
+      const valor = await fn();
+      // As funções do db.js devolvem { error } em vez de lançar.
+      if (valor && !Array.isArray(valor) && valor.error) throw new Error(valor.error);
+      return valor;
+    } catch (err) {
+      console.error(`Exportação LGPD: falha em "${nome}":`, err.message);
+      return null;
+    }
+  };
+
+  const base = { exportadoEm: new Date().toISOString(), plataforma: 'Mútuo', tipoConta: tipo };
+
+  if (tipo === 'usuario') {
+    return {
+      ...base,
+      perfil: await parte('perfil', () => db.getUsuarioPorCpf(id)),
+      servicosOferecidos: await parte('servicosOferecidos', () => db.getServicosUsuario(id)),
+      solicitacoesFeitas: await parte('solicitacoesFeitas', () => db.getSolicitacoesUsuario(id)),
+      solicitacoesRecebidas: await parte('solicitacoesRecebidas', () => db.getSolicitacoesPrestador(id)),
+      participacoesEmOngs: await parte('participacoesEmOngs', () => db.getSolicitacoesOngUsuario(id)),
+      certificados: await parte('certificados', () => db.buscarCertificadosPorUsuario(id)),
+      conversas: await parte('conversas', () => db.getConversasDaConta('usuario', id))
+    };
+  }
+  return {
+    ...base,
+    perfil: await parte('perfil', () => db.getOngPorCnpj(id)),
+    servicos: await parte('servicos', () => db.getServicosOng(id)),
+    solicitacoesRecebidas: await parte('solicitacoesRecebidas', () => db.getSolicitacoesOng(id)),
+    certificadosEmitidos: await parte('certificadosEmitidos', () => db.buscarCertificadosPorOng(id)),
+    conversas: await parte('conversas', () => db.getConversasDaConta('ong', id))
+  };
+}
+
+app.post('/minhaConta/dados', limiteLogin, async (req, res) => {
+  try {
+    const conta = await identificarContaPorSenha(req.body || {});
+    if (conta.status) return res.status(conta.status).json({ sucesso: false, mensagem: conta.mensagem });
+
+    const dados = await montarExportacao(conta.tipo, conta.id);
+
+    if (req.body.enviarPorEmail) {
+      const json = JSON.stringify(dados, null, 2);
+      try {
+        await enviarEmailBrevo({
+          para: conta.email, // e-mail do banco, nunca o do body
+          assunto: 'Seus dados no Mútuo',
+          html: '<p>Olá! Em anexo estão os dados da sua conta no Mútuo, em formato JSON, como você pediu.</p>',
+          anexos: [{ nome: 'meus-dados-mutuo.json', conteudoBase64: Buffer.from(json, 'utf8').toString('base64') }]
+        });
+      } catch (errEnvio) {
+        console.error('Exportação LGPD: falha ao enviar e-mail:', errEnvio.message);
+        return res.status(502).json({ sucesso: false, mensagem: 'Não foi possível enviar o e-mail agora. Tente novamente em instantes.' });
+      }
+      return res.json({ sucesso: true, mensagem: 'Enviamos seus dados para o e-mail da sua conta.' });
+    }
+
+    return res.json({ sucesso: true, dados });
+  } catch (err) {
+    console.error('Erro em /minhaConta/dados:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
+app.post('/minhaConta/excluir', limiteLogin, async (req, res) => {
+  try {
+    if (String((req.body || {}).confirmacao || '').trim().toUpperCase() !== 'EXCLUIR') {
+      return res.status(400).json({ sucesso: false, mensagem: 'Digite EXCLUIR para confirmar.' });
+    }
+    const conta = await identificarContaPorSenha(req.body || {});
+    if (conta.status) return res.status(conta.status).json({ sucesso: false, mensagem: conta.mensagem });
+
+    await db.anonimizarConta(conta.tipo, conta.id);
+    return res.json({ sucesso: true, mensagem: 'Sua conta foi excluída.' });
+  } catch (err) {
+    console.error('Erro em /minhaConta/excluir:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Não foi possível excluir a conta agora. Tente novamente.' });
+  }
+});
+
 // ── Rotas de Usuários ──
+// Resposta de erro de cadastro sem expor a mensagem do banco.
+function responderErroCadastro(e, res, documento) {
+  if (e && e.code === 'ER_DUP_ENTRY') {
+    const msg = `Já existe uma conta com esse ${documento} ou e-mail.`;
+    return res.status(409).json({ sucesso: false, erro: msg, mensagem: msg });
+  }
+  console.error('Erro no cadastro:', e);
+  const msg = 'Não foi possível concluir o cadastro. Tente novamente.';
+  return res.status(500).json({ sucesso: false, erro: msg, mensagem: msg });
+}
+
 app.get('/usuarios', autenticarAdm, async (req, res) => res.json(await db.getUsuarios()));
-app.post('/usuarios', async (req, res) => {
+app.post('/usuarios', limiteEnvioEmail, async (req, res) => {
   try {
     const id = await db.cadastrarUsuario(req.body);
-    res.json({ sucesso: true, id });
-  } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
+    const email = String(req.body.email || '').trim().toLowerCase();
+
+    // Falha no e-mail não desfaz o cadastro: a pessoa pode pedir reenvio na tela de confirmação.
+    let emailEnviado = true;
+    try {
+      await enviarCodigoConfirmacao(email, 'usuario', String(req.body.cpf));
+    } catch (errEnvio) {
+      emailEnviado = false;
+      console.error('Cadastro de usuário: falha ao enviar código de confirmação:', errEnvio.message);
+    }
+    res.json({ sucesso: true, id, confirmacaoPendente: true, emailEnviado });
+  } catch (e) {
+    responderErroCadastro(e, res, 'CPF');
+  }
 });
 
 // Busca os dados completos de UM usuário específico (usado na tela de perfil)
@@ -510,11 +777,22 @@ app.put('/usuarios/:cpf/perfil', async (req, res) => {
 
 // ── Rotas de ONGs e Serviços ──
 app.get('/ongs', autenticarAdm, async (req, res) => res.json(await db.getONGs()));
-app.post('/ongs', async (req, res) => {
+app.post('/ongs', limiteEnvioEmail, async (req, res) => {
   try {
     const id = await db.cadastrarOng(req.body);
-    res.json({ sucesso: true, id });
-  } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
+    const email = String(req.body.email || '').trim().toLowerCase();
+
+    let emailEnviado = true;
+    try {
+      await enviarCodigoConfirmacao(email, 'ong', String(req.body.cnpj));
+    } catch (errEnvio) {
+      emailEnviado = false;
+      console.error('Cadastro de ONG: falha ao enviar código de confirmação:', errEnvio.message);
+    }
+    res.json({ sucesso: true, id, confirmacaoPendente: true, emailEnviado });
+  } catch (e) {
+    responderErroCadastro(e, res, 'CNPJ');
+  }
 });
 
 // Busca os dados completos de UMA ong específica (usado na tela de perfil)
@@ -1041,6 +1319,7 @@ app.get('/certificados/:cpf', async (req, res) => {
 });
 
 const puppeteer = require('puppeteer');
+const QRCode = require('qrcode');
 //const fs = require('fs');
 
 app.get('/certificados/:cpf/:codSolicitacao/pdf', async (req, res) => {
@@ -1055,13 +1334,30 @@ app.get('/certificados/:cpf/:codSolicitacao/pdf', async (req, res) => {
 
     const dataFormatada = new Date(dados.dataConclusao || dados.dataSolicitacao).toLocaleDateString('pt-BR');
 
+    // QR code que abre a página de verificação já com o código preenchido.
+    // SITE_URL_PUBLICA = endereço onde a pasta web/ está publicada (sem barra no fim).
+    let qrCodeHtml = '';
+    const siteUrl = (process.env.SITE_URL_PUBLICA || '').replace(/\/+$/, '');
+    if (siteUrl && dados.codigoVerificacao) {
+      const urlVerificacao = `${siteUrl}/verificarCertificado.html?codigo=${encodeURIComponent(dados.codigoVerificacao)}`;
+      const qrDataUrl = await QRCode.toDataURL(urlVerificacao, {
+        margin: 1,
+        width: 240,
+        color: { dark: '#3A5A40', light: '#FFFFFF' }
+      });
+      qrCodeHtml = `<img class="qr-verificacao" src="${qrDataUrl}" alt="QR code de verificação">`;
+    } else {
+      console.warn('SITE_URL_PUBLICA não definida: certificado gerado sem QR code.');
+    }
+
     html = html
-      .replaceAll('{{nomeUsuario}}', dados.nomeUsuario)
-      .replaceAll('{{nomeServico}}', dados.nomeServico)
-      .replaceAll('{{nomeOng}}', dados.nomeOng)
-      .replaceAll('{{horas}}', dados.horas)
-      .replaceAll('{{dataConclusao}}', dataFormatada)
-      .replaceAll('{{codigoVerificacao}}', dados.codigoVerificacao);
+      .replaceAll('{{nomeUsuario}}', escaparHtml(dados.nomeUsuario))
+      .replaceAll('{{nomeServico}}', escaparHtml(dados.nomeServico))
+      .replaceAll('{{nomeOng}}', escaparHtml(dados.nomeOng))
+      .replaceAll('{{horas}}', escaparHtml(dados.horas))
+      .replaceAll('{{dataConclusao}}', escaparHtml(dataFormatada))
+      .replaceAll('{{codigoVerificacao}}', escaparHtml(dados.codigoVerificacao))
+      .replaceAll('{{qrCode}}', qrCodeHtml);
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -1184,31 +1480,38 @@ app.get('/ongs/:cnpj/movimentacao', async (req, res) => {
 });
 
 // ── Rota de Contato ──
-app.post('/contato', async (req, res) => {
-  const { nome, email, mensagem } = req.body;
+app.post('/contato', limiteEnvioEmail, async (req, res) => {
+  const body = req.body || {};
+  const nome = String(body.nome || '').trim();
+  const email = String(body.email || '').trim();
+  const mensagem = String(body.mensagem || '').trim();
 
   if (!nome || !email || !mensagem) {
     return res.status(400).json({ sucesso: false, erro: 'Preencha todos os campos.' });
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ sucesso: false, erro: 'Informe um e-mail válido.' });
+  }
+  if (nome.length > 120 || mensagem.length > 5000) {
+    return res.status(400).json({ sucesso: false, erro: 'Mensagem grande demais.' });
+  }
 
   try {
-    await transporter.sendMail({
-      from: `"Site Mútuo" <${process.env.EMAIL_USER}>`,
-      to: 'mutuo.pi@gmail.com',
-      replyTo: email,
-      subject: 'Nova mensagem - Contato Mútuo',
+    await enviarEmailBrevo({
+      para: process.env.EMAIL_CONTATO || 'equipe.mutuo@gmail.com',
+      assunto: 'Nova mensagem - Contato Mútuo',
+      responderPara: email,
       html: `
         <h3>Nova mensagem pelo formulário de contato</h3>
-        <p><strong>Nome:</strong> ${nome}</p>
-        <p><strong>E-mail:</strong> ${email}</p>
+        <p><strong>Nome:</strong> ${escaparHtml(nome)}</p>
+        <p><strong>E-mail:</strong> ${escaparHtml(email)}</p>
         <p><strong>Mensagem:</strong></p>
-        <p>${mensagem.replace(/\n/g, '<br>')}</p>
+        <p>${escaparHtml(mensagem).replace(/\n/g, '<br>')}</p>
       `
     });
-
     res.json({ sucesso: true });
   } catch (erro) {
-    console.error('Erro ao enviar e-mail:', erro.message);
+    console.error('Erro ao enviar e-mail de contato (Brevo):', erro.message);
     res.status(500).json({ sucesso: false, erro: 'Não foi possível enviar o e-mail.' });
   }
 });
@@ -1526,15 +1829,33 @@ app.post('/notificacoes/token', async (req, res) => {
   }
 });
 
-// Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
-// campo com nome errado) sempre responda em JSON, nunca em HTML.
-// Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.
+// Garante que qualquer erro sempre responda em JSON, nunca em HTML,
+// e sem mandar detalhes internos (banco, stack) para o cliente.
+// Precisa ficar DEPOIS de todas as rotas.
 app.use((err, req, res, next) => {
-  console.error('Erro capturado pelo middleware global:', err.message);
-  res.status(400).json({ erro: err.message || 'Erro ao processar a requisição.' });
+  console.error('Erro capturado pelo middleware global:', err);
+
+  if (err instanceof multer.MulterError) {
+    const msg = err.code === 'LIMIT_FILE_SIZE'
+      ? 'A imagem deve ter no máximo 3 MB.'
+      : 'Não foi possível processar o arquivo enviado.';
+    return res.status(400).json({ sucesso: false, erro: msg, mensagem: msg });
+  }
+  if (err.expor) {
+    return res.status(err.status || 400).json({ sucesso: false, erro: err.message, mensagem: err.message });
+  }
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ sucesso: false, erro: 'Conteúdo grande demais.', mensagem: 'Conteúdo grande demais.' });
+  }
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ sucesso: false, erro: 'Requisição inválida.', mensagem: 'Requisição inválida.' });
+  }
+  res.status(500).json({ sucesso: false, erro: 'Erro ao processar a requisição.', mensagem: 'Erro ao processar a requisição.' });
 });
 
 
 const PORT = process.env.PORT || 3000;
-db.inicializarTabelas();
-server.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
+// Sobe só depois de criar tabelas/colunas: o login já lê email_verificado.
+db.inicializarTabelas()
+  .catch(err => console.error('Erro ao inicializar tabelas:', err))
+  .finally(() => server.listen(PORT, () => console.log(`API rodando na porta ${PORT}`)));
