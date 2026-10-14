@@ -350,6 +350,8 @@ class _PerfilOngState extends State<PerfilOng> {
                             _cardAtividades(),
                             const SizedBox(height: 18),
                             _cardSolicitacoes(),
+                            const SizedBox(height: 18),
+                            _cardPrivacidade(),
                             const SizedBox(height: 32),
                           ],
                         ),
@@ -1030,6 +1032,271 @@ class _PerfilOngState extends State<PerfilOng> {
               Icons.delete_outline_rounded,
               color: Colors.redAccent,
               size: 20,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── PRIVACIDADE E DADOS (LGPD) ──────────────────────────
+  // Ainda não há token de usuário (item 1.1): a API confere e-mail + senha.
+  bool _processandoLgpd = false;
+
+  String? _emailDaContaLgpd() {
+    final email = _ong?['email']?.toString().trim() ?? '';
+    return email.isNotEmpty ? email : null;
+  }
+
+  void _snackLgpd(String mensagem, {bool erro = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: erro ? Colors.redAccent : _verde,
+      ),
+    );
+  }
+
+  String _mensagemLgpd(Map<String, dynamic> res, String padrao) {
+    final msg = res['mensagem']?.toString() ?? '';
+    return msg.isNotEmpty ? msg : padrao;
+  }
+
+  InputDecoration _decoracaoLgpd(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: GoogleFonts.quicksand(color: _cinzaTexto),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: _verde, width: 2),
+      ),
+    );
+  }
+
+  Future<void> _receberDadosPorEmail() async {
+    final email = _emailDaContaLgpd();
+    if (email == null) {
+      _snackLgpd('Não foi possível identificar o e-mail da conta. Atualize o perfil e tente de novo.', erro: true);
+      return;
+    }
+
+    var senha = '';
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialog) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            'Receber meus dados',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.w800, color: _verde),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Confirme sua senha. Vamos enviar uma cópia dos seus dados (arquivo JSON) para o e-mail da sua conta.',
+                style: GoogleFonts.quicksand(fontSize: 13),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                obscureText: true,
+                autofocus: true,
+                onChanged: (v) => setDialog(() => senha = v),
+                decoration: _decoracaoLgpd('Senha'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Cancelar', style: GoogleFonts.quicksand(color: _cinzaTexto)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: _verde),
+              onPressed: senha.isEmpty ? null : () => Navigator.pop(ctx, true),
+              child: Text('Enviar', style: GoogleFonts.quicksand(color: _branco, fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmou != true || senha.isEmpty) return;
+
+    setState(() => _processandoLgpd = true);
+    final res = await ApiService().enviarMeusDadosPorEmail(email, 'ong', senha);
+    if (!mounted) return;
+    setState(() => _processandoLgpd = false);
+
+    final ok = res['sucesso'] == true;
+    _snackLgpd(
+      _mensagemLgpd(res, ok ? 'Enviamos seus dados para o e-mail da sua conta.' : 'Não foi possível enviar seus dados.'),
+      erro: !ok,
+    );
+  }
+
+  Future<void> _excluirConta() async {
+    final email = _emailDaContaLgpd();
+    if (email == null) {
+      _snackLgpd('Não foi possível identificar o e-mail da conta. Atualize o perfil e tente de novo.', erro: true);
+      return;
+    }
+
+    var senha = '';
+    var confirmacao = '';
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialog) {
+          final liberado = senha.isNotEmpty && confirmacao.trim().toUpperCase() == 'EXCLUIR';
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text(
+              'Excluir minha conta',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.w800, color: Colors.red.shade700),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Os dados do responsável e os contatos da ONG serão apagados e os serviços sairão do ar. Certificados já emitidos continuam válidos (com o nome e o CNPJ da ONG). Não dá para desfazer nem criar outra conta com o mesmo CNPJ.',
+                    style: GoogleFonts.quicksand(fontSize: 13, height: 1.5),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    obscureText: true,
+                    onChanged: (v) => setDialog(() => senha = v),
+                    decoration: _decoracaoLgpd('Senha'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    textCapitalization: TextCapitalization.characters,
+                    onChanged: (v) => setDialog(() => confirmacao = v),
+                    decoration: _decoracaoLgpd('Digite EXCLUIR'),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text('Cancelar', style: GoogleFonts.quicksand(color: _cinzaTexto)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade700),
+                onPressed: liberado ? () => Navigator.pop(ctx, true) : null,
+                child: Text('Excluir', style: GoogleFonts.quicksand(color: _branco, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (confirmou != true) return;
+
+    setState(() => _processandoLgpd = true);
+    final res = await ApiService().excluirMinhaConta(email, 'ong', senha, confirmacao.trim());
+    if (!mounted) return;
+    setState(() => _processandoLgpd = false);
+
+    if (res['sucesso'] != true) {
+      _snackLgpd(_mensagemLgpd(res, 'Não foi possível excluir a conta.'), erro: true);
+      return;
+    }
+
+    await AuthService.logout();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sua conta foi excluída.')),
+    );
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const Login()),
+      (route) => false,
+    );
+  }
+
+  Widget _cardPrivacidade() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _branco,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFE0DDD8)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.shield_outlined, size: 18, color: _verde),
+              const SizedBox(width: 6),
+              Text(
+                'Privacidade e dados',
+                style: GoogleFonts.quicksand(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: _verde,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Você pode baixar uma cópia dos seus dados ou excluir sua conta a qualquer momento.',
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF9AAB96),
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (_processandoLgpd)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: LinearProgressIndicator(color: _verde),
+            ),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _processandoLgpd ? null : _receberDadosPorEmail,
+              icon: const Icon(Icons.mail_outline, size: 18, color: _verde),
+              label: Text(
+                'Receber meus dados por e-mail',
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, color: _verde),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: _verde.withOpacity(0.4)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: _processandoLgpd ? null : _excluirConta,
+              icon: Icon(Icons.delete_outline, size: 18, color: Colors.red.shade700),
+              label: Text(
+                'Excluir minha conta',
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.w700, color: Colors.red.shade700),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
             ),
           ),
         ],

@@ -135,7 +135,12 @@ Pontos que chamam atenção, para quando o 1.1 for feito: as mensagens do chat (
 - [ ] Usar o Brevo para avisar por e-mail quando uma solicitação for aceita ou recusada, quando receber uma avaliação ou quando o certificado ficar pronto. Complementa o push para quem não está com o app instalado.
 
 ### 3.5 LGPD: excluir conta e baixar dados
-- [ ] Botão "Excluir minha conta" (com confirmação por senha) e "Baixar meus dados" (JSON com perfil, serviços e solicitações). Costuma contar ponto em banca de projeto.
+- [x] Botão "Excluir minha conta" (com confirmação por senha) e "Baixar meus dados" (JSON com perfil, serviços e solicitações). Costuma contar ponto em banca de projeto.
+- **Decisões (out/2026):**
+  - **Identificação por senha.** Como ainda não existe token de usuário (item 1.1), `POST /minhaConta/dados` e `POST /minhaConta/excluir` exigem `email + senha + tipo`, conferidos com o mesmo `validarLoginUsuario`/`validarLoginOng` do login. Nunca se confia em CPF/CNPJ vindo do cliente aqui.
+  - **Excluir = anonimizar.** Os dados pessoais são apagados ou trocados, a conta fica `ativo = 0` com `excluido_em`, e o **CPF/CNPJ continua** como chave, porque solicitações, conversas e certificados já emitidos dependem dele (base legal: cumprimento de obrigação e legítimo interesse). Consequência: certificados verificados depois mostram "Usuário removido" como voluntário, e não é possível recadastrar o mesmo CPF.
+  - **ONG:** apaga dados do responsável e contatos, mas **mantém** `nomeOng` e `cnpj` (dados de pessoa jurídica, aparecem nos certificados de outros voluntários).
+  - **Baixar dados no app:** o Flutter não tem pacote para salvar arquivo, então a API manda o JSON **como anexo para o e-mail da conta** (pelo Brevo). No web, o download é direto.
 
 ### 3.6 Push no iPhone
 - [ ] O app só tem o `google-services.json` do Android. Para o FCM funcionar no iOS, falta registrar o app iOS no Firebase, adicionar o `GoogleService-Info.plist` e configurar a chave APNs.

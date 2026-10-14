@@ -613,6 +613,111 @@ app.post('/reenviarConfirmacao', limiteEnvioEmail, async (req, res) => {
   }
 });
 
+// ── LGPD: baixar dados e excluir conta ──
+// Sem token de usuário (item 1.1), a conta é identificada por e-mail + senha.
+async function identificarContaPorSenha(body) {
+  const email = String(body.email || '').trim();
+  const senha = String(body.senha || '');
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+
+  if (!email || !senha || !TIPOS_VALIDOS.includes(tipo)) {
+    return { status: 400, mensagem: 'Informe e-mail, senha e tipo de conta.' };
+  }
+  const r = tipo === 'ong'
+    ? await db.validarLoginOng(email, senha)
+    : await db.validarLoginUsuario(email, senha);
+  if (!r || !r.sucesso || !r.usuario) {
+    return { status: 401, mensagem: 'Senha incorreta.' };
+  }
+  const id = tipo === 'ong' ? String(r.usuario.cnpj) : String(r.usuario.cpf);
+  return { tipo, id, email: r.usuario.email };
+}
+
+// Junta os dados da conta. Cada parte em seu próprio try: se uma falhar,
+// o resto ainda é exportado (e a parte que falhou vai como null).
+async function montarExportacao(tipo, id) {
+  const parte = async (nome, fn) => {
+    try {
+      const valor = await fn();
+      // As funções do db.js devolvem { error } em vez de lançar.
+      if (valor && !Array.isArray(valor) && valor.error) throw new Error(valor.error);
+      return valor;
+    } catch (err) {
+      console.error(`Exportação LGPD: falha em "${nome}":`, err.message);
+      return null;
+    }
+  };
+
+  const base = { exportadoEm: new Date().toISOString(), plataforma: 'Mútuo', tipoConta: tipo };
+
+  if (tipo === 'usuario') {
+    return {
+      ...base,
+      perfil: await parte('perfil', () => db.getUsuarioPorCpf(id)),
+      servicosOferecidos: await parte('servicosOferecidos', () => db.getServicosUsuario(id)),
+      solicitacoesFeitas: await parte('solicitacoesFeitas', () => db.getSolicitacoesUsuario(id)),
+      solicitacoesRecebidas: await parte('solicitacoesRecebidas', () => db.getSolicitacoesPrestador(id)),
+      participacoesEmOngs: await parte('participacoesEmOngs', () => db.getSolicitacoesOngUsuario(id)),
+      certificados: await parte('certificados', () => db.buscarCertificadosPorUsuario(id)),
+      conversas: await parte('conversas', () => db.getConversasDaConta('usuario', id))
+    };
+  }
+  return {
+    ...base,
+    perfil: await parte('perfil', () => db.getOngPorCnpj(id)),
+    servicos: await parte('servicos', () => db.getServicosOng(id)),
+    solicitacoesRecebidas: await parte('solicitacoesRecebidas', () => db.getSolicitacoesOng(id)),
+    certificadosEmitidos: await parte('certificadosEmitidos', () => db.buscarCertificadosPorOng(id)),
+    conversas: await parte('conversas', () => db.getConversasDaConta('ong', id))
+  };
+}
+
+app.post('/minhaConta/dados', limiteLogin, async (req, res) => {
+  try {
+    const conta = await identificarContaPorSenha(req.body || {});
+    if (conta.status) return res.status(conta.status).json({ sucesso: false, mensagem: conta.mensagem });
+
+    const dados = await montarExportacao(conta.tipo, conta.id);
+
+    if (req.body.enviarPorEmail) {
+      const json = JSON.stringify(dados, null, 2);
+      try {
+        await enviarEmailBrevo({
+          para: conta.email, // e-mail do banco, nunca o do body
+          assunto: 'Seus dados no Mútuo',
+          html: '<p>Olá! Em anexo estão os dados da sua conta no Mútuo, em formato JSON, como você pediu.</p>',
+          anexos: [{ nome: 'meus-dados-mutuo.json', conteudoBase64: Buffer.from(json, 'utf8').toString('base64') }]
+        });
+      } catch (errEnvio) {
+        console.error('Exportação LGPD: falha ao enviar e-mail:', errEnvio.message);
+        return res.status(502).json({ sucesso: false, mensagem: 'Não foi possível enviar o e-mail agora. Tente novamente em instantes.' });
+      }
+      return res.json({ sucesso: true, mensagem: 'Enviamos seus dados para o e-mail da sua conta.' });
+    }
+
+    return res.json({ sucesso: true, dados });
+  } catch (err) {
+    console.error('Erro em /minhaConta/dados:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
+app.post('/minhaConta/excluir', limiteLogin, async (req, res) => {
+  try {
+    if (String((req.body || {}).confirmacao || '').trim().toUpperCase() !== 'EXCLUIR') {
+      return res.status(400).json({ sucesso: false, mensagem: 'Digite EXCLUIR para confirmar.' });
+    }
+    const conta = await identificarContaPorSenha(req.body || {});
+    if (conta.status) return res.status(conta.status).json({ sucesso: false, mensagem: conta.mensagem });
+
+    await db.anonimizarConta(conta.tipo, conta.id);
+    return res.json({ sucesso: true, mensagem: 'Sua conta foi excluída.' });
+  } catch (err) {
+    console.error('Erro em /minhaConta/excluir:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Não foi possível excluir a conta agora. Tente novamente.' });
+  }
+});
+
 // ── Rotas de Usuários ──
 // Resposta de erro de cadastro sem expor a mensagem do banco.
 function responderErroCadastro(e, res, documento) {

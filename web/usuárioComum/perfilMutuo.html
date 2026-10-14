@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="../imagens/mutuoLogo.png">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
       --verde-principal: #588157;
@@ -712,6 +713,24 @@
       <div class="lista-historico" id="confirmar" style="display:none;"></div>
     </div>
 
+    <!-- PRIVACIDADE E DADOS -->
+    <div class="bloco">
+      <div class="cabecalho-bloco">
+        <div>
+          <h3><i class="bi bi-shield-lock"></i> Privacidade e dados</h3>
+          <p>Você pode baixar uma cópia dos seus dados ou excluir sua conta a qualquer momento.</p>
+        </div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px;">
+        <button type="button" class="btn-salvar" id="btnBaixarDados" onclick="baixarMeusDados()">
+          <i class="bi bi-download"></i> Baixar meus dados
+        </button>
+        <button type="button" class="btn-cancelar" id="btnExcluirConta" onclick="excluirMinhaConta()" style="color:#c62828; border-color:#e57373;">
+          <i class="bi bi-trash"></i> Excluir minha conta
+        </button>
+      </div>
+    </div>
+
   </div>
   <div class="mensagem-salva" id="mensagemSalva">
     <i class="bi bi-check-circle-fill"></i>
@@ -1371,6 +1390,139 @@ async function atualizarBadgeLimiteServicos(totalAtual) {
       }
     }
     
+    // ── PRIVACIDADE E DADOS (LGPD) ──
+    // Ainda não há token de usuário (item 1.1): a API confere e-mail + senha.
+    const TIPO_CONTA_LGPD = 'usuario';
+
+    function emailDaContaLgpd() {
+      try {
+        const conta = JSON.parse(sessionStorage.getItem('usuarioLogado') || '{}');
+        return String(conta.email || '').trim();
+      } catch (erro) {
+        console.error('Erro ao ler a sessão:', erro);
+        return '';
+      }
+    }
+
+    async function postLgpd(rota, body) {
+      const resposta = await fetch(`${API_BASE}${rota}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      // Cold start do Render devolve HTML.
+      const contentType = resposta.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Não foi possível conectar ao servidor. Tente novamente em alguns segundos.');
+      }
+      return resposta.json();
+    }
+
+    function erroLgpd(titulo) {
+      Swal.fire({ icon: 'error', title: titulo, confirmButtonColor: '#3a5a40' });
+    }
+
+    async function baixarMeusDados() {
+      const email = emailDaContaLgpd();
+      if (!email) { erroLgpd('Não foi possível identificar sua conta. Entre novamente.'); return; }
+
+      const { value: senha, isConfirmed } = await Swal.fire({
+        title: 'Baixar meus dados',
+        text: 'Confirme sua senha para baixar uma cópia dos seus dados.',
+        input: 'password',
+        inputPlaceholder: 'Sua senha',
+        inputAttributes: { autocomplete: 'current-password' },
+        inputValidator: (valor) => (!valor ? 'Digite sua senha.' : undefined),
+        showCancelButton: true,
+        confirmButtonText: 'Baixar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3a5a40'
+      });
+      if (!isConfirmed || !senha) return;
+
+      Swal.fire({ title: 'Preparando seus dados...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      try {
+        const resultado = await postLgpd('/minhaConta/dados', { email, tipo: TIPO_CONTA_LGPD, senha });
+        if (!resultado.sucesso) {
+          erroLgpd(resultado.mensagem || 'Não foi possível baixar seus dados.');
+          return;
+        }
+
+        const blob = new Blob([JSON.stringify(resultado.dados, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'meus-dados-mutuo.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        Swal.fire({ icon: 'success', title: 'Download iniciado', text: 'O arquivo meus-dados-mutuo.json foi salvo no seu computador.', confirmButtonColor: '#3a5a40' });
+      } catch (erro) {
+        console.error('Erro ao baixar dados:', erro);
+        erroLgpd(erro.message || 'Não foi possível baixar seus dados.');
+      }
+    }
+
+    async function excluirMinhaConta() {
+      const email = emailDaContaLgpd();
+      if (!email) { erroLgpd('Não foi possível identificar sua conta. Entre novamente.'); return; }
+
+      const aviso = await Swal.fire({
+        icon: 'warning',
+        title: 'Excluir sua conta?',
+        html: `<ul style="text-align:left; margin:0; padding-left:20px; line-height:1.6;">
+                 <li>Seus dados pessoais serão apagados.</li>
+                 <li>Seus serviços sairão do ar.</li>
+                 <li>Certificados já emitidos continuam válidos, mas sem o seu nome.</li>
+                 <li>Não dá para desfazer nem criar outra conta com o mesmo CPF.</li>
+               </ul>`,
+        showCancelButton: true,
+        focusCancel: true,
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#c62828'
+      });
+      if (!aviso.isConfirmed) return;
+
+      const { value: dados, isConfirmed } = await Swal.fire({
+        title: 'Confirme a exclusão',
+        html: `<input id="lgpdSenha" type="password" class="swal2-input" placeholder="Sua senha" autocomplete="current-password">
+               <input id="lgpdConfirmacao" type="text" class="swal2-input" placeholder="Digite EXCLUIR" autocomplete="off">`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Excluir minha conta',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#c62828',
+        preConfirm: () => {
+          const senha = document.getElementById('lgpdSenha').value;
+          const confirmacao = document.getElementById('lgpdConfirmacao').value.trim();
+          if (!senha) { Swal.showValidationMessage('Digite sua senha.'); return false; }
+          if (confirmacao.toUpperCase() !== 'EXCLUIR') { Swal.showValidationMessage('Digite EXCLUIR para confirmar.'); return false; }
+          return { senha, confirmacao };
+        }
+      });
+      if (!isConfirmed || !dados) return;
+
+      Swal.fire({ title: 'Excluindo sua conta...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      try {
+        const resultado = await postLgpd('/minhaConta/excluir', {
+          email, tipo: TIPO_CONTA_LGPD, senha: dados.senha, confirmacao: dados.confirmacao
+        });
+        if (!resultado.sucesso) {
+          erroLgpd(resultado.mensagem || 'Não foi possível excluir a conta.');
+          return;
+        }
+        sessionStorage.clear();
+        await Swal.fire({ icon: 'success', title: 'Sua conta foi excluída.', confirmButtonColor: '#3a5a40', allowOutsideClick: false });
+        window.location.replace('../login.html');
+      } catch (erro) {
+        console.error('Erro ao excluir conta:', erro);
+        erroLgpd(erro.message || 'Não foi possível excluir a conta.');
+      }
+    }
+
     window.addEventListener('load', () => {
       carregarFoto();
       atualizarBadgeNotificacoes();

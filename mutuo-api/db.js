@@ -2542,6 +2542,56 @@ async function marcarEmailVerificado(tipo, identificador, idRegistro) {
   return result.affectedRows > 0;
 }
 
+// ── LGPD: exclusão por anonimização ──
+// Apaga dados pessoais e desativa a conta, mantendo CPF/CNPJ como chave
+// (solicitações, conversas e certificados dependem dele).
+async function anonimizarConta(tipo, id) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const senhaInutil = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+    // Só letras e números: o CNPJ pode estar gravado com máscara (". / -").
+    const emailRemovido = `removido+${tipo}-${String(id).replace(/[^0-9A-Za-z]/g, '')}@mutuo.invalid`;
+
+    if (tipo === 'usuario') {
+      await conn.query(
+        `UPDATE Mutuo_Usuario SET
+           nome = 'Usuário removido', email = ?, senha = ?,
+           telefone = '', cidade = '', bairro = '', cep = '', endereco = '',
+           dataNasc = NULL,
+           foto_perfil = NULL, foto_perfil_dados = NULL, foto_perfil_tipo = NULL,
+           ativo = 0, excluido_em = NOW()
+         WHERE cpf = ?`,
+        [emailRemovido, senhaInutil, id]
+      );
+      await conn.query('UPDATE Mutuo_Servico SET ativo = 0 WHERE idUsuario = ?', [id]);
+    } else {
+      await conn.query(
+        `UPDATE Mutuo_ONG SET
+           nomeResponsavel = 'Responsável removido', email = ?, senha = ?,
+           telefone = '', bairro = '', endereco = '', descricao = '',
+           foto_perfil = NULL, foto_perfil_dados = NULL, foto_perfil_tipo = NULL,
+           ativo = 0, excluido_em = NOW()
+         WHERE cnpj = ?`,
+        [emailRemovido, senhaInutil, id]
+      );
+      await conn.query('UPDATE Mutuo_ServicoOng SET ativo = 0 WHERE cnpj = ?', [id]);
+    }
+
+    // Para de mandar push para os aparelhos dessa conta.
+    await conn.query('DELETE FROM Mutuo_DispositivoToken WHERE tipo = ? AND identificador = ?', [tipo, id]);
+
+    await conn.commit();
+    return true;
+  } catch (err) {
+    await conn.rollback();
+    console.error('Erro ao anonimizar conta:', err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
 module.exports = {
   getUsuarios,
   getUsuarioPorCpf,
@@ -2661,4 +2711,5 @@ module.exports = {
   buscarContaParaConfirmacao,
   marcarEmailVerificado,
   TABELA_CONFIRMACAO,
+  anonimizarConta,
 };
