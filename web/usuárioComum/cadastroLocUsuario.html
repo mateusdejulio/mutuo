@@ -440,17 +440,20 @@ document.getElementById('finalizar').addEventListener('click', async () => {
     }
 
     sessionStorage.removeItem('cadastroMutuo');
+    sessionStorage.setItem('emailConfirmacao', String(dados.email || '').trim().toLowerCase());
 
     await Swal.fire({
       icon: 'success',
       title: 'Cadastro realizado!',
-      text: 'Sua conta foi criada com sucesso.',
-      confirmButtonText: 'Entrar',
+      text: resultado.emailEnviado === false
+        ? 'Sua conta foi criada, mas não conseguimos enviar o código agora. Na próxima tela, toque em "Reenviar código".'
+        : 'Enviamos um código de 6 dígitos para o seu e-mail. Confirme para ativar sua conta.',
+      confirmButtonText: 'Confirmar e-mail',
       confirmButtonColor: '#3a5a40',
       heightAuto: false
     });
 
-    window.location.href = '../login.html';
+    window.location.href = '../confirmarEmail.html?tipo=usuario';
 
   } catch (e) {
     console.error('ERRO COMPLETO:', e);

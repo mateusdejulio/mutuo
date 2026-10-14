@@ -109,7 +109,7 @@ Pontos que chamam atenção, para quando o 1.1 for feito: as mensagens do chat (
 - **Como:** escolher um padrão. A sugestão é fazer o boot rodar as migrations pendentes e registrar as que já rodaram numa tabela `Mutuo_Migracao`.
 
 ### 2.5 Pequenas limpezas
-- [ ] O `module.exports` do `db.js` repete `contarVoluntariosOng` e `isOngPremium`. Basta apagar as duplicatas.
+- [x] O `module.exports` do `db.js` repete `contarVoluntariosOng` e `isOngPremium`. Basta apagar as duplicatas. (Obs.: a *função* `contarVoluntariosOng` também está declarada duas vezes no `db.js`; a segunda sobrescreve a primeira.)
 - [ ] O site carrega três versões do Bootstrap (5.3.2, 5.3.3 e 5.3.8). Padronizar numa só.
 - [ ] As pastas `web/usuárioComum` e `web/usuárioOng` têm acento no nome, o que pode quebrar URLs em alguns servidores. Renomear para `usuarioComum`/`usuarioOng` e atualizar os links.
 - [ ] As imagens estão duplicadas em `web/imagens` e `web/usuárioComum/imagens`. Deixar uma pasta só.
@@ -123,7 +123,7 @@ Pontos que chamam atenção, para quando o 1.1 for feito: as mensagens do chat (
 ## 3. Funcionalidades novas
 
 ### 3.1 Confirmação de e-mail no cadastro
-- [ ] Ao cadastrar, mandar um código de 6 dígitos pelo Brevo e só ativar a conta depois de confirmar. Dá para reaproveitar quase tudo da recuperação de senha: a tabela de códigos com hash, o `enviarEmailBrevo`, o `htmlEmailCodigo` e a tela com as 6 caixas.
+- [x] Ao cadastrar, mandar um código de 6 dígitos pelo Brevo e só ativar a conta depois de confirmar. Dá para reaproveitar quase tudo da recuperação de senha: a tabela de códigos com hash, o `enviarEmailBrevo`, o `htmlEmailCodigo` e a tela com as 6 caixas.
 
 ### 3.2 Camada 3 da moderação
 - [ ] O `moderation/policy.js` já lista as categorias próprias do Mútuo (`FRAUDE`, `DROGAS`, `ARMAS`, `PIRATARIA`, `SPAM`, `FORA_DO_ESCOPO`...), mas o `moderationService.js` ainda não usa. Implementar como um segundo prompt ao Gemini, com a política do Mútuo, e incluir esses casos no `testar-moderacao.js` (o caso 5, de atestado falso, já está lá esperando).

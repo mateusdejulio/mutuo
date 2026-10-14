@@ -161,6 +161,27 @@ class ApiService {
     });
   }
 
+  // ── Confirmação de e-mail ──
+
+  Future<Map<String, dynamic>> confirmarEmail(
+    String email,
+    String tipo,
+    String codigo,
+  ) {
+    return _postRecuperacao('/confirmarEmail', {
+      'email': email.trim().toLowerCase(),
+      'tipo': tipo,
+      'codigo': codigo,
+    });
+  }
+
+  Future<Map<String, dynamic>> reenviarConfirmacao(String email, String tipo) {
+    return _postRecuperacao('/reenviarConfirmacao', {
+      'email': email.trim().toLowerCase(),
+      'tipo': tipo,
+    });
+  }
+
   Future<Map<String, dynamic>> cadastrarUsuario(
     Map<String, dynamic> dadosDoUsuario,
   ) async {

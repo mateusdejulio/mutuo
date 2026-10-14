@@ -90,7 +90,16 @@ async function enviarEmailBrevo({ para, assunto, html, responderPara, anexos }) 
   }
 }
 
-function htmlEmailCodigo(codigo) {
+function htmlEmailCodigo(codigo, finalidade = 'recuperacao') {
+  const textos = finalidade === 'confirmacao'
+    ? {
+        intro: 'Boas-vindas ao Mútuo! Para ativar sua conta, confirme seu e-mail com o código abaixo:',
+        rodape: 'O código vale por <b>15 minutos</b>. Se você não criou uma conta no Mútuo, pode ignorar este e-mail.'
+      }
+    : {
+        intro: 'Olá! Recebemos um pedido para redefinir a senha da sua conta.<br>Use o código abaixo:',
+        rodape: 'O código vale por <b>15 minutos</b>. Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.'
+      };
   const logoUrl = (process.env.API_URL_PUBLICA || 'https://mutuo-api.onrender.com') + '/email/logo.png';
 
   const digitos = codigo.split('').map(d =>
@@ -105,13 +114,13 @@ function htmlEmailCodigo(codigo) {
       </td></tr>
       <tr><td style="background:#3A5A40;height:4px;line-height:4px;font-size:0;">&nbsp;</td></tr>
       <tr><td style="padding:32px 28px 8px;color:#333;font-size:16px;line-height:1.5;">
-        Olá! Recebemos um pedido para redefinir a senha da sua conta.<br>Use o código abaixo:
+        ${textos.intro}
       </td></tr>
       <tr><td style="padding:16px 28px;">
         <table align="center" cellpadding="0" cellspacing="0"><tr>${digitos}</tr></table>
       </td></tr>
       <tr><td style="padding:8px 28px 32px;color:#666;font-size:14px;line-height:1.5;">
-        O código vale por <b>15 minutos</b>. Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.
+        ${textos.rodape}
       </td></tr>
       <tr><td style="background:#f1f5f2;padding:16px;text-align:center;color:#888;font-size:12px;">Mútuo — Transforme o Mundo através da Troca</td></tr>
     </table>
@@ -443,6 +452,16 @@ app.post('/loginOng', limiteLogin, async (req, res) => {
 const MSG_GENERICA_ENVIO = 'Se o e-mail estiver cadastrado, você receberá um código em instantes.';
 const TIPOS_VALIDOS = ['usuario', 'ong'];
 
+// Cria um código de confirmação de e-mail e manda pelo Brevo. Lança erro se o envio falhar.
+async function enviarCodigoConfirmacao(email, tipo, identificador) {
+  const codigo = await db.criarCodigoRecuperacao(email, tipo, identificador, db.TABELA_CONFIRMACAO);
+  await enviarEmailBrevo({
+    para: email,
+    assunto: `${codigo} é o seu código de confirmação — Mútuo`,
+    html: htmlEmailCodigo(codigo, 'confirmacao')
+  });
+}
+
 // Passo 1: solicita o código.
 app.post('/esqueciSenha', limiteEnvioEmail, async (req, res) => {
   const body = req.body || {};
@@ -537,6 +556,63 @@ app.post('/redefinirSenha', limiteCodigo, async (req, res) => {
   }
 });
 
+// ── Confirmação de e-mail ──
+const MSG_GENERICA_REENVIO = 'Se houver um cadastro pendente com esse e-mail, enviamos um novo código.';
+
+app.post('/confirmarEmail', limiteCodigo, async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim().toLowerCase();
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+  const codigo = String(body.codigo || '').trim();
+
+  if (!email || !TIPOS_VALIDOS.includes(tipo) || !/^\d{6}$/.test(codigo)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Código inválido.' });
+  }
+
+  try {
+    const r = await db.conferirCodigoRecuperacao(email, tipo, codigo, db.TABELA_CONFIRMACAO);
+    if (!r.valido) {
+      return res.status(400).json({ sucesso: false, mensagem: r.mensagem, tentativasRestantes: r.tentativasRestantes });
+    }
+    const ok = await db.marcarEmailVerificado(tipo, r.registro.identificador, r.registro.id);
+    if (!ok) return res.status(500).json({ sucesso: false, mensagem: 'Não foi possível confirmar o e-mail.' });
+    return res.json({ sucesso: true, mensagem: 'E-mail confirmado! Agora é só entrar.' });
+  } catch (err) {
+    console.error('Erro em /confirmarEmail:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
+app.post('/reenviarConfirmacao', limiteEnvioEmail, async (req, res) => {
+  const body = req.body || {};
+  const email = String(body.email || '').trim().toLowerCase();
+  const tipo = String(body.tipo || '').trim().toLowerCase();
+
+  if (!email || !TIPOS_VALIDOS.includes(tipo)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Informe o e-mail e o tipo de conta.' });
+  }
+
+  try {
+    const conta = await db.buscarContaParaConfirmacao(email, tipo);
+    // Conta não existe ou já confirmada: resposta genérica (não revela nada).
+    if (!conta || conta.verificado) return res.json({ sucesso: true, mensagem: MSG_GENERICA_REENVIO });
+
+    const seg = await db.segundosDesdeUltimoCodigo(email, tipo, db.TABELA_CONFIRMACAO);
+    if (seg !== null && seg < 60) return res.json({ sucesso: true, mensagem: MSG_GENERICA_REENVIO });
+
+    try {
+      await enviarCodigoConfirmacao(email, tipo, conta.identificador);
+    } catch (errEnvio) {
+      console.error('Erro ao enviar código de confirmação (Brevo):', errEnvio.message);
+      return res.status(502).json({ sucesso: false, mensagem: 'Não foi possível enviar o e-mail agora. Tente novamente em instantes.' });
+    }
+    return res.json({ sucesso: true, mensagem: MSG_GENERICA_REENVIO });
+  } catch (err) {
+    console.error('Erro em /reenviarConfirmacao:', err);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro interno. Tente novamente.' });
+  }
+});
+
 // ── Rotas de Usuários ──
 // Resposta de erro de cadastro sem expor a mensagem do banco.
 function responderErroCadastro(e, res, documento) {
@@ -550,11 +626,23 @@ function responderErroCadastro(e, res, documento) {
 }
 
 app.get('/usuarios', autenticarAdm, async (req, res) => res.json(await db.getUsuarios()));
-app.post('/usuarios', async (req, res) => {
+app.post('/usuarios', limiteEnvioEmail, async (req, res) => {
   try {
     const id = await db.cadastrarUsuario(req.body);
-    res.json({ sucesso: true, id });
-  } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
+    const email = String(req.body.email || '').trim().toLowerCase();
+
+    // Falha no e-mail não desfaz o cadastro: a pessoa pode pedir reenvio na tela de confirmação.
+    let emailEnviado = true;
+    try {
+      await enviarCodigoConfirmacao(email, 'usuario', String(req.body.cpf));
+    } catch (errEnvio) {
+      emailEnviado = false;
+      console.error('Cadastro de usuário: falha ao enviar código de confirmação:', errEnvio.message);
+    }
+    res.json({ sucesso: true, id, confirmacaoPendente: true, emailEnviado });
+  } catch (e) {
+    responderErroCadastro(e, res, 'CPF');
+  }
 });
 
 // Busca os dados completos de UM usuário específico (usado na tela de perfil)
@@ -584,11 +672,22 @@ app.put('/usuarios/:cpf/perfil', async (req, res) => {
 
 // ── Rotas de ONGs e Serviços ──
 app.get('/ongs', autenticarAdm, async (req, res) => res.json(await db.getONGs()));
-app.post('/ongs', async (req, res) => {
+app.post('/ongs', limiteEnvioEmail, async (req, res) => {
   try {
     const id = await db.cadastrarOng(req.body);
-    res.json({ sucesso: true, id });
-  } catch (e) { res.status(500).json({ sucesso: false, erro: e.message }); }
+    const email = String(req.body.email || '').trim().toLowerCase();
+
+    let emailEnviado = true;
+    try {
+      await enviarCodigoConfirmacao(email, 'ong', String(req.body.cnpj));
+    } catch (errEnvio) {
+      emailEnviado = false;
+      console.error('Cadastro de ONG: falha ao enviar código de confirmação:', errEnvio.message);
+    }
+    res.json({ sucesso: true, id, confirmacaoPendente: true, emailEnviado });
+  } catch (e) {
+    responderErroCadastro(e, res, 'CNPJ');
+  }
 });
 
 // Busca os dados completos de UMA ong específica (usado na tela de perfil)
@@ -1633,5 +1732,7 @@ app.use((err, req, res, next) => {
 
 
 const PORT = process.env.PORT || 3000;
-db.inicializarTabelas();
-server.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
+// Sobe só depois de criar tabelas/colunas: o login já lê email_verificado.
+db.inicializarTabelas()
+  .catch(err => console.error('Erro ao inicializar tabelas:', err))
+  .finally(() => server.listen(PORT, () => console.log(`API rodando na porta ${PORT}`)));
