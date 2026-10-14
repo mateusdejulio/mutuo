@@ -32,15 +32,15 @@ Os arquivos são citados pelo nome da função ou da rota, e não pelo número d
 - **Como:** criar rotas de admin na API (protegidas pelo login de admin com token) e fazer o painel chamar a API com `fetch`, como o site já faz.
 
 ### 1.5 Limite de tentativas
-- [ ] **Problema:** `/login`, `/loginUsuario`, `/loginOng`, `/esqueciSenha` e `/verificarCodigo` aceitam tentativas sem limite por IP. Isso permite chutar senhas ou disparar muitos e-mails do Brevo.
+- [x] **Problema:** `/login`, `/loginUsuario`, `/loginOng`, `/esqueciSenha` e `/verificarCodigo` aceitam tentativas sem limite por IP. Isso permite chutar senhas ou disparar muitos e-mails do Brevo.
 - **Como:** um `Map` em memória com `ip → { contagem, inicio }`, por exemplo 10 tentativas a cada 15 minutos, respondendo `429` com mensagem em JSON. Se puder usar dependência, o `express-rate-limit` resolve. No Render, ligar `app.set('trust proxy', 1)` para pegar o IP real.
 
 ### 1.6 Escapar HTML no e-mail de contato
-- [ ] **Problema:** na rota `/contato`, o `nome`, o `email` e a `mensagem` entram direto no HTML do e-mail. Alguém pode mandar HTML ou links disfarçados para a caixa da equipe.
+- [x] **Problema:** na rota `/contato`, o `nome`, o `email` e a `mensagem` entram direto no HTML do e-mail. Alguém pode mandar HTML ou links disfarçados para a caixa da equipe.
 - **Como:** criar uma função `escaparHtml` (trocar `& < > " '` por entidades) e aplicar nos três campos antes de montar o `html`.
 
 ### 1.7 Não vazar erro interno
-- [ ] **Problema:** o middleware de erro global no fim do `index.js` responde `err.message` para o cliente, o que pode mostrar detalhes do banco ou do código.
+- [x] **Problema:** o middleware de erro global no fim do `index.js` responde `err.message` para o cliente, o que pode mostrar detalhes do banco ou do código.
 - **Como:** manter o `console.error` com o erro completo e responder uma mensagem genérica. Exceções conhecidas, como o erro de tamanho do Multer, podem continuar com mensagem específica.
 
 ### 1.8 CORS restrito

@@ -405,8 +405,17 @@ window.addEventListener('load', () => {
         body: JSON.stringify(dados)
       });
 
+      const contentType = resposta.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        throw new Error("Resposta não-JSON (status " + resposta.status + ")");
+      }
       const resultado = await resposta.json();
-      if (!resposta.ok || !resultado.sucesso) throw new Error(resultado.erro || "Falha no envio");
+      if (!resposta.ok || !resultado.sucesso) {
+        // Mensagem vinda da API (validação, limite de tentativas): pode ir para a tela.
+        const erroApi = new Error(resultado.erro || resultado.mensagem || "Falha no envio");
+        erroApi.daApi = true;
+        throw erroApi;
+      }
 
       mostrarMensagemSalva("Mensagem enviada com sucesso!");
       formContato.reset();
@@ -415,7 +424,10 @@ window.addEventListener('load', () => {
         if (campoNome) campoNome.value = usuario.nome || usuario.nome_usuario || "";
       }
     } catch (erro) {
-      formMsg.textContent = "Não foi possível enviar sua mensagem agora. Tente novamente em instantes.";
+      console.error("Erro ao enviar mensagem de contato:", erro);
+      formMsg.textContent = erro.daApi
+        ? erro.message
+        : "Não foi possível enviar sua mensagem agora. Tente novamente em instantes.";
       formMsg.className = "form-msg erro";
     } finally {
       btnEnviar.disabled = false;

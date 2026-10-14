@@ -9,7 +9,6 @@ const { initializeApp: initializeFirebaseApp, cert } = require('firebase-admin/a
 const { getMessaging } = require('firebase-admin/messaging');
 const db = require('./db');
 const { avaliarServico } = require('./moderation/moderationService');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 // Push é acessório: se a credencial não estiver presente (ex: ambiente de
@@ -51,17 +50,17 @@ async function enviarPush(tipo, id, { titulo, corpo, dados }) {
   }
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
 // Envio de e-mail transacional via Brevo (API HTTP — o Render gratuito
 // bloqueia SMTP). Lança erro se falhar, para a rota poder avisar o usuário.
-async function enviarEmailBrevo({ para, assunto, html }) {
+// Escapa texto vindo do cliente antes de colocar dentro de HTML
+// (e-mails, template do certificado).
+function escaparHtml(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+async function enviarEmailBrevo({ para, assunto, html, responderPara, anexos }) {
   const resposta = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
@@ -76,7 +75,12 @@ async function enviarEmailBrevo({ para, assunto, html }) {
       },
       to: [{ email: para }],
       subject: assunto,
-      htmlContent: html
+      htmlContent: html,
+      ...(responderPara ? { replyTo: { email: responderPara } } : {}),
+      // anexos: [{ nome: 'arquivo.json', conteudoBase64: '...' }]
+      ...(Array.isArray(anexos) && anexos.length > 0
+        ? { attachment: anexos.map(a => ({ name: a.nome, content: a.conteudoBase64 })) }
+        : {})
     })
   });
 
@@ -113,9 +117,58 @@ function htmlEmailCodigo(codigo) {
     </table>
   </div>`;
 }
+
+// ── Limite de tentativas por IP (sem dependência) ──
+// Guarda em memória: reinício da API zera as contagens, o que é aceitável.
+// Os limites são generosos porque em laboratório várias pessoas saem pelo mesmo IP.
+function criarLimitador({ max, janelaMs }) {
+  const registros = new Map(); // ip → { contagem, inicio }
+
+  // Limpa entradas vencidas para o Map não crescer sem limite.
+  setInterval(() => {
+    const agora = Date.now();
+    for (const [chave, r] of registros) {
+      if (agora - r.inicio > janelaMs) registros.delete(chave);
+    }
+  }, janelaMs).unref();
+
+  return (req, res, next) => {
+    const chave = req.ip || 'desconhecido';
+    const agora = Date.now();
+    let r = registros.get(chave);
+    if (!r || agora - r.inicio > janelaMs) {
+      r = { contagem: 0, inicio: agora };
+      registros.set(chave, r);
+    }
+    r.contagem++;
+
+    if (r.contagem > max) {
+      const segundos = Math.ceil((r.inicio + janelaMs - agora) / 1000);
+      const minutos = Math.max(1, Math.ceil(segundos / 60));
+      res.set('Retry-After', String(segundos));
+      return res.status(429).json({
+        sucesso: false,
+        mensagem: `Muitas tentativas. Tente novamente em ${minutos} minuto(s).`,
+        erro: `Muitas tentativas. Tente novamente em ${minutos} minuto(s).`
+      });
+    }
+    next();
+  };
+}
+
+const QUINZE_MIN = 15 * 60 * 1000;
+// O app Flutter tenta /loginUsuario e depois /loginOng: cada login conta 2.
+const limiteLogin = criarLimitador({ max: 30, janelaMs: QUINZE_MIN });
+// Rotas que disparam e-mail pelo Brevo (custo e risco de spam).
+const limiteEnvioEmail = criarLimitador({ max: 10, janelaMs: QUINZE_MIN });
+// Rotas que conferem códigos de 6 dígitos.
+const limiteCodigo = criarLimitador({ max: 30, janelaMs: QUINZE_MIN });
+
 require('dotenv').config();
 
 const app = express();
+// Render fica atrás de proxy: sem isso, req.ip seria sempre o IP do proxy.
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -248,7 +301,12 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const tipos = ['image/jpeg', 'image/png', 'image/webp'];
     if (tipos.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.'));
+    else {
+      const erro = new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.');
+      erro.status = 400;
+      erro.expor = true; // mensagem segura para mostrar ao usuário
+      cb(erro);
+    }
   }
 });
 
@@ -277,7 +335,12 @@ const uploadServico = multer({
   fileFilter: (req, file, cb) => {
     const tipos = ['image/jpeg', 'image/png', 'image/webp'];
     if (tipos.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.'));
+    else {
+      const erro = new Error('Apenas imagens JPG, PNG ou WEBP são aceitas.');
+      erro.status = 400;
+      erro.expor = true; // mensagem segura para mostrar ao usuário
+      cb(erro);
+    }
   }
 });
 
@@ -346,7 +409,7 @@ function autenticarAdm(req, res, next) {
 }
 
 // ── Rotas de Autenticação ──
-app.post('/login', async (req, res) => {
+app.post('/login', limiteLogin, async (req, res) => {
   const { login, senha } = req.body;
   if (!login || !senha || !(await db.validarLogin(login, senha))) {
     return res.json({ sucesso: false });
@@ -354,7 +417,7 @@ app.post('/login', async (req, res) => {
   res.json({ sucesso: true, token: gerarTokenAdm(login) });
 });
 
-app.post('/loginUsuario', async (req, res) => {
+app.post('/loginUsuario', limiteLogin, async (req, res) => {
   const { email, senha } = req.body;
   if (!email || !senha) return res.status(400).json({ sucesso: false, mensagem: 'Email e senha são obrigatórios' });
   try {
@@ -365,7 +428,7 @@ app.post('/loginUsuario', async (req, res) => {
   }
 });
 
-app.post('/loginOng', async (req, res) => {
+app.post('/loginOng', limiteLogin, async (req, res) => {
   const { email, senha } = req.body;
   if (!email || !senha) return res.status(400).json({ sucesso: false, mensagem: 'Email e senha são obrigatórios' });
   try {
@@ -381,7 +444,7 @@ const MSG_GENERICA_ENVIO = 'Se o e-mail estiver cadastrado, você receberá um c
 const TIPOS_VALIDOS = ['usuario', 'ong'];
 
 // Passo 1: solicita o código.
-app.post('/esqueciSenha', async (req, res) => {
+app.post('/esqueciSenha', limiteEnvioEmail, async (req, res) => {
   const body = req.body || {};
   const email = String(body.email || '').trim().toLowerCase();
   const tipo = String(body.tipo || '').trim().toLowerCase();
@@ -421,7 +484,7 @@ app.post('/esqueciSenha', async (req, res) => {
 });
 
 // Passo 2: verifica o código (sem consumir) — permite avançar pra tela da nova senha.
-app.post('/verificarCodigo', async (req, res) => {
+app.post('/verificarCodigo', limiteCodigo, async (req, res) => {
   const body = req.body || {};
   const email = String(body.email || '').trim().toLowerCase();
   const tipo = String(body.tipo || '').trim().toLowerCase();
@@ -444,7 +507,7 @@ app.post('/verificarCodigo', async (req, res) => {
 });
 
 // Passo 3: redefine a senha (confere o código de novo e consome).
-app.post('/redefinirSenha', async (req, res) => {
+app.post('/redefinirSenha', limiteCodigo, async (req, res) => {
   const body = req.body || {};
   const email = String(body.email || '').trim().toLowerCase();
   const tipo = String(body.tipo || '').trim().toLowerCase();
@@ -475,6 +538,17 @@ app.post('/redefinirSenha', async (req, res) => {
 });
 
 // ── Rotas de Usuários ──
+// Resposta de erro de cadastro sem expor a mensagem do banco.
+function responderErroCadastro(e, res, documento) {
+  if (e && e.code === 'ER_DUP_ENTRY') {
+    const msg = `Já existe uma conta com esse ${documento} ou e-mail.`;
+    return res.status(409).json({ sucesso: false, erro: msg, mensagem: msg });
+  }
+  console.error('Erro no cadastro:', e);
+  const msg = 'Não foi possível concluir o cadastro. Tente novamente.';
+  return res.status(500).json({ sucesso: false, erro: msg, mensagem: msg });
+}
+
 app.get('/usuarios', autenticarAdm, async (req, res) => res.json(await db.getUsuarios()));
 app.post('/usuarios', async (req, res) => {
   try {
@@ -1056,12 +1130,12 @@ app.get('/certificados/:cpf/:codSolicitacao/pdf', async (req, res) => {
     const dataFormatada = new Date(dados.dataConclusao || dados.dataSolicitacao).toLocaleDateString('pt-BR');
 
     html = html
-      .replaceAll('{{nomeUsuario}}', dados.nomeUsuario)
-      .replaceAll('{{nomeServico}}', dados.nomeServico)
-      .replaceAll('{{nomeOng}}', dados.nomeOng)
-      .replaceAll('{{horas}}', dados.horas)
-      .replaceAll('{{dataConclusao}}', dataFormatada)
-      .replaceAll('{{codigoVerificacao}}', dados.codigoVerificacao);
+      .replaceAll('{{nomeUsuario}}', escaparHtml(dados.nomeUsuario))
+      .replaceAll('{{nomeServico}}', escaparHtml(dados.nomeServico))
+      .replaceAll('{{nomeOng}}', escaparHtml(dados.nomeOng))
+      .replaceAll('{{horas}}', escaparHtml(dados.horas))
+      .replaceAll('{{dataConclusao}}', escaparHtml(dataFormatada))
+      .replaceAll('{{codigoVerificacao}}', escaparHtml(dados.codigoVerificacao));
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -1184,31 +1258,38 @@ app.get('/ongs/:cnpj/movimentacao', async (req, res) => {
 });
 
 // ── Rota de Contato ──
-app.post('/contato', async (req, res) => {
-  const { nome, email, mensagem } = req.body;
+app.post('/contato', limiteEnvioEmail, async (req, res) => {
+  const body = req.body || {};
+  const nome = String(body.nome || '').trim();
+  const email = String(body.email || '').trim();
+  const mensagem = String(body.mensagem || '').trim();
 
   if (!nome || !email || !mensagem) {
     return res.status(400).json({ sucesso: false, erro: 'Preencha todos os campos.' });
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ sucesso: false, erro: 'Informe um e-mail válido.' });
+  }
+  if (nome.length > 120 || mensagem.length > 5000) {
+    return res.status(400).json({ sucesso: false, erro: 'Mensagem grande demais.' });
+  }
 
   try {
-    await transporter.sendMail({
-      from: `"Site Mútuo" <${process.env.EMAIL_USER}>`,
-      to: 'mutuo.pi@gmail.com',
-      replyTo: email,
-      subject: 'Nova mensagem - Contato Mútuo',
+    await enviarEmailBrevo({
+      para: process.env.EMAIL_CONTATO || 'equipe.mutuo@gmail.com',
+      assunto: 'Nova mensagem - Contato Mútuo',
+      responderPara: email,
       html: `
         <h3>Nova mensagem pelo formulário de contato</h3>
-        <p><strong>Nome:</strong> ${nome}</p>
-        <p><strong>E-mail:</strong> ${email}</p>
+        <p><strong>Nome:</strong> ${escaparHtml(nome)}</p>
+        <p><strong>E-mail:</strong> ${escaparHtml(email)}</p>
         <p><strong>Mensagem:</strong></p>
-        <p>${mensagem.replace(/\n/g, '<br>')}</p>
+        <p>${escaparHtml(mensagem).replace(/\n/g, '<br>')}</p>
       `
     });
-
     res.json({ sucesso: true });
   } catch (erro) {
-    console.error('Erro ao enviar e-mail:', erro.message);
+    console.error('Erro ao enviar e-mail de contato (Brevo):', erro.message);
     res.status(500).json({ sucesso: false, erro: 'Não foi possível enviar o e-mail.' });
   }
 });
@@ -1526,12 +1607,28 @@ app.post('/notificacoes/token', async (req, res) => {
   }
 });
 
-// Garante que qualquer erro (ex: multer rejeitando arquivo, tamanho excedido,
-// campo com nome errado) sempre responda em JSON, nunca em HTML.
-// Precisa ficar DEPOIS de todas as rotas, senão erros lançados nelas não são capturados.
+// Garante que qualquer erro sempre responda em JSON, nunca em HTML,
+// e sem mandar detalhes internos (banco, stack) para o cliente.
+// Precisa ficar DEPOIS de todas as rotas.
 app.use((err, req, res, next) => {
-  console.error('Erro capturado pelo middleware global:', err.message);
-  res.status(400).json({ erro: err.message || 'Erro ao processar a requisição.' });
+  console.error('Erro capturado pelo middleware global:', err);
+
+  if (err instanceof multer.MulterError) {
+    const msg = err.code === 'LIMIT_FILE_SIZE'
+      ? 'A imagem deve ter no máximo 3 MB.'
+      : 'Não foi possível processar o arquivo enviado.';
+    return res.status(400).json({ sucesso: false, erro: msg, mensagem: msg });
+  }
+  if (err.expor) {
+    return res.status(err.status || 400).json({ sucesso: false, erro: err.message, mensagem: err.message });
+  }
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ sucesso: false, erro: 'Conteúdo grande demais.', mensagem: 'Conteúdo grande demais.' });
+  }
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ sucesso: false, erro: 'Requisição inválida.', mensagem: 'Requisição inválida.' });
+  }
+  res.status(500).json({ sucesso: false, erro: 'Erro ao processar a requisição.', mensagem: 'Erro ao processar a requisição.' });
 });
 
 
