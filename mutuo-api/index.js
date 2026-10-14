@@ -1319,6 +1319,7 @@ app.get('/certificados/:cpf', async (req, res) => {
 });
 
 const puppeteer = require('puppeteer');
+const QRCode = require('qrcode');
 //const fs = require('fs');
 
 app.get('/certificados/:cpf/:codSolicitacao/pdf', async (req, res) => {
@@ -1333,13 +1334,30 @@ app.get('/certificados/:cpf/:codSolicitacao/pdf', async (req, res) => {
 
     const dataFormatada = new Date(dados.dataConclusao || dados.dataSolicitacao).toLocaleDateString('pt-BR');
 
+    // QR code que abre a página de verificação já com o código preenchido.
+    // SITE_URL_PUBLICA = endereço onde a pasta web/ está publicada (sem barra no fim).
+    let qrCodeHtml = '';
+    const siteUrl = (process.env.SITE_URL_PUBLICA || '').replace(/\/+$/, '');
+    if (siteUrl && dados.codigoVerificacao) {
+      const urlVerificacao = `${siteUrl}/verificarCertificado.html?codigo=${encodeURIComponent(dados.codigoVerificacao)}`;
+      const qrDataUrl = await QRCode.toDataURL(urlVerificacao, {
+        margin: 1,
+        width: 240,
+        color: { dark: '#3A5A40', light: '#FFFFFF' }
+      });
+      qrCodeHtml = `<img class="qr-verificacao" src="${qrDataUrl}" alt="QR code de verificação">`;
+    } else {
+      console.warn('SITE_URL_PUBLICA não definida: certificado gerado sem QR code.');
+    }
+
     html = html
       .replaceAll('{{nomeUsuario}}', escaparHtml(dados.nomeUsuario))
       .replaceAll('{{nomeServico}}', escaparHtml(dados.nomeServico))
       .replaceAll('{{nomeOng}}', escaparHtml(dados.nomeOng))
       .replaceAll('{{horas}}', escaparHtml(dados.horas))
       .replaceAll('{{dataConclusao}}', escaparHtml(dataFormatada))
-      .replaceAll('{{codigoVerificacao}}', escaparHtml(dados.codigoVerificacao));
+      .replaceAll('{{codigoVerificacao}}', escaparHtml(dados.codigoVerificacao))
+      .replaceAll('{{qrCode}}', qrCodeHtml);
 
     const browser = await puppeteer.launch({
       headless: true,

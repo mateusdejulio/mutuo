@@ -132,6 +132,14 @@
     text-transform: uppercase;
     font-weight: 600;
   }
+
+  .qr-verificacao {
+    position: absolute;
+    right: 14mm;
+    bottom: 12mm;
+    width: 24mm;
+    height: 24mm;
+  }
 </style>
 </head>
 <body>
@@ -173,8 +181,9 @@
         </div>
       </div>
 
+      {{qrCode}}
       <p class="marca-dagua">
-        Código de verificação: {{codigoVerificacao}} · mutuo.com.br/verificar
+        Código de verificação: {{codigoVerificacao}} · escaneie o QR code para verificar
       </p>
     </div>
   </div>

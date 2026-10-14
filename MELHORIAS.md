@@ -129,7 +129,7 @@ Pontos que chamam atenção, para quando o 1.1 for feito: as mensagens do chat (
 - [ ] O `moderation/policy.js` já lista as categorias próprias do Mútuo (`FRAUDE`, `DROGAS`, `ARMAS`, `PIRATARIA`, `SPAM`, `FORA_DO_ESCOPO`...), mas o `moderationService.js` ainda não usa. Implementar como um segundo prompt ao Gemini, com a política do Mútuo, e incluir esses casos no `testar-moderacao.js` (o caso 5, de atestado falso, já está lá esperando).
 
 ### 3.3 QR code no certificado
-- [ ] Colocar no PDF um QR code que abre o `verificarCertificado.html` com o código de verificação já preenchido. Dá para gerar a imagem por uma API pública de QR code, ou com o pacote `qrcode` se puder adicionar dependência.
+- [x] Colocar no PDF um QR code que abre o `verificarCertificado.html` com o código de verificação já preenchido. Dá para gerar a imagem por uma API pública de QR code, ou com o pacote `qrcode` se puder adicionar dependência.
 
 ### 3.4 E-mails de eventos importantes
 - [ ] Usar o Brevo para avisar por e-mail quando uma solicitação for aceita ou recusada, quando receber uma avaliação ou quando o certificado ficar pronto. Complementa o push para quem não está com o app instalado.

@@ -268,9 +268,21 @@
     const btn = document.getElementById('btnVerificar');
     const resultado = document.getElementById('resultado');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const codigo = document.getElementById('inputCodigo').value.trim();
+    // Escapa valores vindos da API antes de colocar no innerHTML.
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+
+    function mostrarErroConexao() {
+      resultado.innerHTML = `
+        <div class="cartao-resultado invalido">
+          <div class="titulo-resultado invalido"><i class="bi bi-exclamation-triangle-fill"></i> Erro ao verificar</div>
+          <p class="texto-invalido">Não foi possível conectar ao servidor. Tente novamente.</p>
+        </div>
+      `;
+    }
+
+    async function verificar(codigo) {
       if (!codigo) return;
 
       btn.disabled = true;
@@ -279,6 +291,14 @@
 
       try {
         const resposta = await fetch(`https://mutuo-api.onrender.com/verificar/${encodeURIComponent(codigo)}`);
+
+        // Cold start do Render devolve HTML em vez de JSON.
+        const contentType = resposta.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          console.error('Resposta não-JSON ao verificar certificado (status ' + resposta.status + ')');
+          mostrarErroConexao();
+          return;
+        }
         const dados = await resposta.json();
 
         if (!dados.valido) {
@@ -295,25 +315,33 @@
         resultado.innerHTML = `
           <div class="cartao-resultado valido">
             <div class="titulo-resultado valido"><i class="bi bi-check-circle-fill"></i> Certificado válido</div>
-            <div class="linha-dado"><span>Voluntário</span><span>${dados.nomeUsuario}</span></div>
-            <div class="linha-dado"><span>Serviço</span><span>${dados.nomeServico}</span></div>
-            <div class="linha-dado"><span>ONG</span><span>${dados.nomeOng}</span></div>
-            <div class="linha-dado"><span>Carga horária</span><span>${dados.horas}h</span></div>
-            <div class="linha-dado"><span>Concluído em</span><span>${data}</span></div>
+            <div class="linha-dado"><span>Voluntário</span><span>${esc(dados.nomeUsuario)}</span></div>
+            <div class="linha-dado"><span>Serviço</span><span>${esc(dados.nomeServico)}</span></div>
+            <div class="linha-dado"><span>ONG</span><span>${esc(dados.nomeOng)}</span></div>
+            <div class="linha-dado"><span>Carga horária</span><span>${esc(dados.horas)}h</span></div>
+            <div class="linha-dado"><span>Concluído em</span><span>${esc(data)}</span></div>
           </div>
         `;
       } catch (err) {
-        resultado.innerHTML = `
-          <div class="cartao-resultado invalido">
-            <div class="titulo-resultado invalido"><i class="bi bi-exclamation-triangle-fill"></i> Erro ao verificar</div>
-            <p class="texto-invalido">Não foi possível conectar ao servidor. Tente novamente.</p>
-          </div>
-        `;
+        console.error('Erro ao verificar certificado:', err);
+        mostrarErroConexao();
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-search"></i> Verificar';
       }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      verificar(document.getElementById('inputCodigo').value.trim());
     });
+
+    // Vindo do QR code: preenche e verifica sozinho.
+    const codigoDaUrl = new URLSearchParams(window.location.search).get('codigo');
+    if (codigoDaUrl) {
+      document.getElementById('inputCodigo').value = codigoDaUrl;
+      verificar(codigoDaUrl.trim());
+    }
   </script>
 </body>
 </html>
